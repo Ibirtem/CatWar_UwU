@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.39.3-08.25
+// @version      v1.40.0-08.25
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2025, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -20,7 +20,7 @@
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.39.3";
+const current_uwu_version = "1.40.0";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -33,6 +33,7 @@ const uwuDefaultSettings = {
   manualWeatherPanel: false,
   skyInHeader: false,
   auroraPos: "1",
+  weatherZIndex: "0",
 
   backgroundRepeat: false,
   backgroundUser: false,
@@ -53,6 +54,10 @@ const uwuDefaultSettings = {
   namesForNotification: "",
 
   redesignCostumsSettings: false,
+
+  showDefectsEnabled: false,
+  defectsStyle: "default",
+  defectsQuality: "high",
 
   notificationPM: false,
   notificationPMSound: "notificationSound1",
@@ -163,6 +168,7 @@ const uwuDefaultSettings = {
   GMbetaTest: false,
   personalCostumes: false,
   showCostumesButtons: false,
+  blockItemDrop: false,
 };
 
 // ====================================================================================================================
@@ -418,6 +424,29 @@ const uwusettings =
             />
             <label for="sky-in-the-sky">Небо в небе.</label>
           </div>
+
+          <hr id="uwu-hr" class="uwu-hr" />
+          <p>
+            Z-index Погоды. Позволяет настроить, будут ли эффекты отображаться
+            поверх или позади игровых элементов.
+          </p>
+          <div id="weatherZIndexPanel">
+            <input
+              type="range"
+              min="-1"
+              max="1"
+              value="0"
+              class="uwu-range-slider"
+              id="weather-z-index"
+              list="weatherZIndexStep"
+              data-setting="weatherZIndex"
+            />
+            <datalist id="weatherZIndexStep">
+              <option value="-1">За блоками</option>
+              <option value="0">Стандарт</option>
+              <option value="1">Перед блоками</option>
+            </datalist>
+          </div>
         </div>
 
         <div id="theme-panel">
@@ -545,6 +574,41 @@ const uwusettings =
             "
               >[?]</label
             >
+          </div>
+
+          <hr id="uwu-hr" class="uwu-hr" />
+          <h2>Дефекты</h2>
+
+          <div>
+            <p>Добавляет котам иконки их дефектов (раны, грязь и т.д.).</p>
+            <input
+              type="checkbox"
+              id="show-defects-enabled"
+              data-setting="showDefectsEnabled"
+            />
+            <label for="show-defects-enabled">Показывать иконки дефектов</label>
+          </div>
+
+          <div>
+            <p>Выберите стиль отображения иконок дефектов.</p>
+            <label>Стиль иконок:</label>
+            <div class="custom-select" id="defectsStyle">
+              <div class="select-selected">Стандартный</div>
+              <div class="select-items">
+                <!-- Опции будут добавлены сюда -->
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p>Выберите качество иконок дефектов.</p>
+            <label>Качество иконок:</label>
+            <div class="custom-select" id="defectsQuality">
+              <div class="select-selected">Высокое/Новое</div>
+              <div class="select-items">
+                <!-- Опции будут добавлены сюда -->
+              </div>
+            </div>
           </div>
 
           <hr id="uwu-hr" class="uwu-hr" />
@@ -2061,7 +2125,20 @@ const uwusettings =
               Сброс позиции часов
             </button>
           </div>
-
+          <hr id="uwu-hr" class="uwu-hr" />
+          <h2>Рот (инвентарь)</h2>
+          <div>
+            <p>
+              Добавляет чекбокс для блокировки опускания предметов, сохраняя
+              возможность его использовать.
+            </p>
+            <input
+              type="checkbox"
+              id="block-item-drop"
+              data-setting="blockItemDrop"
+            />
+            <label for="block-item-drop">Блокировка опускания предмета</label>
+          </div>
           <hr id="uwu-hr" class="uwu-hr" />
           <h2>Охота</h2>
 
@@ -2865,49 +2942,25 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        v${current_uwu_version} - Делаем вид, что живые. Чёта даже добавил.🌿
+        v${current_uwu_version} - Добавлены иконки для дефектов и чуть более
+        крутое блокирование предметов во рту!
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
-        <p>
-          — Добавлены Сохранение сообщений, Библиотека личных костюмов, Счётчик
-          символов в чате и отдельный Импорт/Экспорт цветов параметров и
-          навыков!
-        </p>
+        <p>— Пу-пу-пу... Добавлена настройка отображения погоды за или перед элементами игровой.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
-        <p>— 🌸</p>
+        <p>— Погодные эффекты теперь не привязаны к FPS и работают стабильно всегда и везде. 
+        Давно надо было это сделать... Надеюсь никто не испугается слишком быстрых частиц.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
-        <p>— Возможно починен баг с NaN переходами в профиле.</p>
-        <p>
-          — Немного улучшена информативность поздравления об достижении цели.
-        </p>
-        <p>— Крутые форматирования кода для удобства себя любимого.</p>
-        <p>— Лужи теперь не влияют на цветные клетки Минного поля.</p>
-        <p>
-          — Повышена отказоустойчивость сохранений, если вы вдруг каким-то
-          образом всё же умудрились их сломать.
-        </p>
-        <p>— Добавлен ещё один API для проверки Онлайн времени в часах.</p>
-        <p>
-          — Теперь локальное время должно конвертироваться в Московское, когда
-          стоит такая галочка.
-        </p>
-        <p>— Джойстик для Охоты стал потенциально чуть производительней.</p>
-        <p>— Клик по Экспорт полям автоматически выделяет всё внутри.</p>
-        <p>—— Fix 1.39.1</p>
-        <p>—— Подправлен сброс временных зон при обновлении часов.</p>
-        <p>—— Нумерация ячеек и Минное поле теперь не конфликтуют по стилям.</p>
-        <p>—— Расширенные настройки в Игровой теперь не перекрываются Полем.</p>
-        <p>——— Fix 1.39.2</p>
-        <p>
-          ——— Улучшена отказоустойчивость применения стилей Редизайна игровой.
-        </p>
-        <p>———— Fix 1.39.3</p>
-        <p>———— Минное поле теперь не перекрашивает весь контент клетки (Например котов).</p>
+        <p>— Часы теперь инициализируются хоть с какими-то числами.</p>
+        <p>— Цвет команды теперь применяется и работает во всех трёх боевых режимах.</p>
+        <p>— Фикс null значения селектора активности.</p>
+        <p>— Слово "часы" больше не пропадают в калькуляторе при дробных значениях времени.</p>
+        <p>— Оказывается я недореализовал сохранение ЛС как надо, и мне никто не сказал об этом, жесть.</p>
         <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: 03.08.25</p>
+        <p>Дата выпуска: 22.09.25</p>
       </div>
     </div>
   `;
@@ -3227,6 +3280,10 @@ const css_uwu_main = `
   width: 120px;
 }
 
+#weatherZIndexPanel {
+  width: 320px;
+}
+
 .notification-table {
     border-collapse: collapse;
 }
@@ -3452,7 +3509,8 @@ const css_uwu_main = `
 #auroraStep,
 #volumeStep,
 #ThicknessStep,
-.uwu-range-step {
+.uwu-range-step,
+#weatherZIndexStep {
   margin-top: 10px;
   display: flex;
   justify-content: space-between;
@@ -5082,11 +5140,12 @@ if (targetSettings.test(window.location.href)) {
     "uwu_templates",
     "uwu_highlightResources",
     "uwu_saved_ls",
+    "uwu_activity",
   ];
 
   function resetAllSaves() {
     const confirmReset = confirm(
-      "Точно сбросить все UwU Настройки? Это удалить даже ваши карты Минных полей, темы и многое другое!"
+      "Точно сбросить ВСЕ UwU Настройки? Это удалить абсолютно всё по UwU скрипту/моду, даже ваши карты Минных полей, темы и многое другое!"
     );
     if (confirmReset) {
       settingsKeys.forEach((key) => {
@@ -5207,6 +5266,17 @@ if (targetSettings.test(window.location.href)) {
   ];
 
   createCustomSelect("cleaningLogStyle", cleaningLogStyles);
+  // ==============================================================================
+  const defectsStyles = [{ id: "default", name: "Стандартный" }];
+
+  createCustomSelect("defectsStyle", defectsStyles);
+  // ==============================================================================
+  const defectsQualities = [
+    { id: "low", name: "Низкое/Старое (100x150)" },
+    { id: "high", name: "Высокое/Новое (200x300)" },
+  ];
+
+  createCustomSelect("defectsQuality", defectsQualities);
   // ==============================================================================
   const climbingPanelInputsStyles = [
     { id: "keyboard", name: "Клавиатура" },
@@ -6585,6 +6655,116 @@ if (targetCW3.test(window.location.href)) {
   }
 
   // ====================================================================================================================
+  //  . . . ДЕФЕКТИКИ И СТИЛИ . . .
+  // ====================================================================================================================
+
+  function applyDefectsStyle() {
+    if (!settings.showDefectsEnabled) return;
+
+    const qualityFolder =
+      settings.defectsQuality === "high" ? "assets_200_300" : "assets_100_150";
+    const baseUrl = `https://raw.githubusercontent.com/Ibirtem/CatWar//refs/heads/Update-to-1.40.0/images/${qualityFolder}`;
+
+    const defectsCss = /* CSS */ `
+        /*грязь_1*/
+        #tr_field [style*='dirt/base/1/1'], #tr_field [style*='dirt/base/2/1']
+        {content: url(${baseUrl}/dirt_1.png)
+        !important;}
+        /*грязь_2*/
+        #tr_field [style*='dirt/base/1/2'], #tr_field [style*='dirt/base/2/2']
+        {content: url(${baseUrl}/dirt_2.png)
+        !important;}
+        /*грязь_3*/
+        #tr_field [style*='dirt/base/1/3'], #tr_field [style*='dirt/base/2/3']
+        {content: url(${baseUrl}/dirt_3.png)
+        !important;}
+        /*грязь_4*/
+        #tr_field [style*='dirt/base/1/4'], #tr_field [style*='dirt/base/2/4']
+        {content: url(${baseUrl}/dirt_4.png)
+        !important;}
+
+        /*ушибы_1*/
+        #tr_field [style*='trauma/1']
+        {content: url(${baseUrl}/trauma_1.png)
+        !important;}
+        /*ушибы_2*/
+        #tr_field [style*='trauma/2']
+        {content: url(${baseUrl}/trauma_2.png)
+        !important;}
+        /*ушибы_3*/
+        #tr_field [style*='trauma/3']
+        {content: url(${baseUrl}/trauma_3.png)
+        !important;}
+        /*ушибы_4*/
+        #tr_field [style*='trauma/4']
+        {content: url(${baseUrl}/trauma_4.png)
+        !important;}
+
+        /*отравление_1*/
+        #tr_field [style*='poisoning/1']
+        {content: url(${baseUrl}/poisoning_1.png)
+        !important;}
+        /*отравление_2*/
+        #tr_field [style*='poisoning/2']
+        {content: url(${baseUrl}/poisoning_2.png)
+        !important;}
+        /*отравление_3*/
+        #tr_field [style*='poisoning/3']
+        {content: url(${baseUrl}/poisoning_3.png)
+        !important;}
+        /*отравление_4*/
+        #tr_field [style*='poisoning/4']
+        {content: url(${baseUrl}/poisoning_4.png)
+        !important;}
+
+        /*переломы_1*/
+        #tr_field [style*='drown/1']
+        {content: url(${baseUrl}/drown_1.png)
+        !important;}
+        /*переломы_2*/
+        #tr_field [style*='drown/2']
+        {content: url(${baseUrl}/drown_2.png)
+        !important;}
+        /*переломы_3*/
+        #tr_field [style*='drown/3']
+        {content: url(${baseUrl}/drown_3.png)
+        !important;}
+        /*переломы_4*/
+        #tr_field [style*='drown/4']
+        {content: url(${baseUrl}/drown_4.png)
+        !important;}
+
+        /*раны_1*/
+        #tr_field [style*='wound/1']
+        {content: url(${baseUrl}/wound_1.png)
+        !important;}
+        /*раны_2*/
+        #tr_field [style*='wound/2']
+        {content: url(${baseUrl}/wound_2.png)
+        !important;}
+        /*раны_3*/
+        #tr_field [style*='wound/3']
+        {content: url(${baseUrl}/wound_3.png)
+        !important;}
+        /*раны_4*/
+        #tr_field [style*='wound/4']
+        {content: url(${baseUrl}/wound_4.png)
+        !important;}
+
+        /*кашель*/
+        #tr_field [style*='disease/1']
+        {content: url(${baseUrl}/disease.png)
+        !important;}
+    `;
+
+    const styleElement = document.createElement("style");
+    styleElement.id = "uwu-defects-style";
+    styleElement.textContent = defectsCss;
+    document.head.appendChild(styleElement);
+  }
+
+  applyDefectsStyle();
+  // ====================================================================================================================
   //  . . . РАСШИРЕННЫЕ НАСТРОЙКИ . . .
   // ====================================================================================================================
   const extendedSettingsButtonElement = document.createElement("div");
@@ -6872,6 +7052,91 @@ if (targetCW3.test(window.location.href)) {
   }
 
   // ====================================================================================================================
+  //  . . . ИНВЕНТАРЬ . . .
+  // ====================================================================================================================
+  if (settings.blockItemDrop) {
+    function getLockedItems() {
+      return JSON.parse(localStorage.getItem("uwu_lockedItems") || "[]");
+    }
+
+    function setLockedItems(lockedItems) {
+      localStorage.setItem("uwu_lockedItems", JSON.stringify(lockedItems));
+    }
+
+    function checkIfIdIsLocked(itemId) {
+      return getLockedItems().includes(itemId);
+    }
+
+    function changePutButtonState() {
+      const putButton = document.getElementById("put");
+      if (!putButton) return;
+      const item = document.getElementsByClassName("active_thing")[0];
+      const lockedItems = getLockedItems();
+
+      if (item && lockedItems.includes(item.id)) {
+        putButton.style.pointerEvents = "none";
+        putButton.style.opacity = "0.5";
+        putButton.style.userSelect = "none";
+      } else {
+        putButton.style.pointerEvents = "auto";
+        putButton.style.opacity = "1";
+        putButton.style.userSelect = "auto";
+      }
+    }
+
+    function createLockCheckbox() {
+      const item = document.getElementsByClassName("active_thing")[0];
+      if (!item || !item.id) return;
+
+      let input = document.getElementById("lock-put-button");
+      let label = document.getElementById("lock-put-label");
+
+      if (!input) {
+        input = document.createElement("input");
+        input.type = "checkbox";
+        input.id = "lock-put-button";
+        input.style.marginRight = "5px";
+        input.style.marginBottom = "10px";
+        input.style.cursor = "pointer";
+        document.getElementById("thdey").appendChild(input);
+
+        label = document.createElement("label");
+        label.id = "lock-put-label";
+        label.style.marginLeft = "10px";
+        label.style.fontSize = "14px";
+        document.getElementById("thdey").appendChild(label);
+
+        input.addEventListener("change", () => {
+          const itemId = document.getElementsByClassName("active_thing")[0].id;
+          let lockedItems = getLockedItems();
+          const idx = lockedItems.indexOf(itemId);
+
+          if (input.checked && idx === -1) {
+            lockedItems.push(itemId);
+          } else if (!input.checked && idx !== -1) {
+            lockedItems.splice(idx, 1);
+          }
+          setLockedItems(lockedItems);
+          changePutButtonState();
+        });
+      }
+
+      input.checked = checkIfIdIsLocked(item.id);
+      label.innerText = `Блокировка опускания предмета с ID ${item.id}`;
+    }
+
+    setupMutationObserver(
+      "#thdey",
+      () => {
+        createLockCheckbox();
+        changePutButtonState();
+      },
+      { attributes: true, attributeFilter: ["style"] }
+    );
+
+    createLockCheckbox();
+  }
+  // ====================================================================================================================
   //  . . . УВЕДОМЛЕНИЕ ОБ ОБНОВЛЕНИИ . . .
   // ====================================================================================================================
   function showUpdateNotification(oldVersion) {
@@ -6942,7 +7207,7 @@ if (targetCW3.test(window.location.href)) {
   if (settings.showClock) {
     const style = document.createElement("style");
     style.textContent =
-      // css
+      /* CSS */
       `
         #uwu-clock {
           border-radius: 10px;
@@ -7063,6 +7328,11 @@ if (targetCW3.test(window.location.href)) {
     const dateElement = document.createElement("span");
     dateElement.className = "date";
     clockElement.appendChild(dateElement);
+
+    timeElement.textContent = "00:00:00";
+    dateElement.textContent = "00.00.00";
+    iconElement.textContent = "?";
+    iconElement.title = "Загрузка...";
 
     if (settings.clockPosition === "fly") {
       container.appendChild(clockElement);
@@ -11364,7 +11634,7 @@ if (targetCW3.test(window.location.href)) {
 
       cages.forEach((cage) => {
         const catName = cage.querySelector(".cat_tooltip a")?.textContent;
-        const arrow = cage.querySelector(".arrow.arrow-paws");
+        const arrow = cage.querySelector(".arrow.arrow-paws, .arrow.arrow-claws, .arrow arrow-teeth");
 
         if (catName && arrow) {
           const arrowId = arrow.id;
@@ -12044,6 +12314,7 @@ if (targetCW3.test(window.location.href)) {
   const weatherContainer = document.getElementById("uwu-main-container");
   const weatherCanvas = document.createElement("canvas");
   weatherCanvas.classList.add("weatherCanvas");
+  weatherCanvas.style.zIndex = settings.weatherZIndex;
   weatherContainer.appendChild(weatherCanvas);
   const weatherCtx = weatherCanvas.getContext("2d");
 
@@ -12324,29 +12595,37 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . АНИМАЦИЯ ПОГОДЫ / ЧАСТИЦ . . .
   // ====================================================================================================================
+  let lastTime = 0;
+  
   function animateWeather() {
+    const currentTime = performance.now();
+    const deltaTime = (currentTime - lastTime) / 1000;
+    lastTime = currentTime;
+
+    const baseSpeedMultiplier = 140;
+
     weatherCtx.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
 
     if (raindrops.length > 0) {
       for (const raindrop of raindrops) {
-        raindrop.y += raindrop.ySpeed;
-        raindrop.x += raindrop.xSpeed;
+        raindrop.y += raindrop.ySpeed * baseSpeedMultiplier * deltaTime;
+        raindrop.x += raindrop.xSpeed * baseSpeedMultiplier * deltaTime;
         drawRaindrop(raindrop);
       }
     }
 
     if (snowflakes.length > 0) {
       for (const snowflake of snowflakes) {
-        snowflake.y += snowflake.ySpeed;
-        snowflake.x += snowflake.xSpeed;
+        snowflake.y += snowflake.ySpeed * baseSpeedMultiplier * deltaTime;
+        snowflake.x += snowflake.xSpeed * baseSpeedMultiplier * deltaTime;
         drawSnowflake(snowflake.x, snowflake.y, snowflake.size);
       }
     }
 
     if (pixelSnowflakes.length > 0) {
       for (const pixelSnowflake of pixelSnowflakes) {
-        pixelSnowflake.y += pixelSnowflake.ySpeed;
-        pixelSnowflake.x += pixelSnowflake.xSpeed;
+        pixelSnowflake.y += pixelSnowflake.ySpeed * baseSpeedMultiplier * deltaTime;
+        pixelSnowflake.x += pixelSnowflake.xSpeed * baseSpeedMultiplier * deltaTime;
         drawPixelSnowflake(
           pixelSnowflake.x,
           pixelSnowflake.y,
@@ -12358,14 +12637,15 @@ if (targetCW3.test(window.location.href)) {
 
     if (pixelRaindrops.length > 0) {
       for (const pixelRaindrop of pixelRaindrops) {
-        pixelRaindrop.y += pixelRaindrop.ySpeed;
-        pixelRaindrop.x += pixelRaindrop.xSpeed;
+        pixelRaindrop.y += pixelRaindrop.ySpeed * baseSpeedMultiplier * deltaTime;
+        pixelRaindrop.x += pixelRaindrop.xSpeed * baseSpeedMultiplier * deltaTime;
         drawPixelRaindrop(pixelRaindrop);
       }
     }
 
     requestAnimationFrame(animateWeather);
   }
+
   if (settings.weatherEnabled || settings.manualWeatherPanel) {
     animateWeather();
   }
@@ -13701,9 +13981,12 @@ function setupActivityCalc() {
     activitySettings[catId].goal > progress.stage ||
     activitySettings[catId].noGrats
   ) {
-    document.querySelector(
+    const goalOption = document.querySelector(
       `#activity-list > [value="${activitySettings[catId].goal}"]`
-    ).selected = true;
+    );
+    if (goalOption) {
+      goalOption.selected = true;
+    }
   } else if (activitySettings[catId].goal) {
     showCongratulations();
   }
@@ -13783,11 +14066,11 @@ function setupActivityCalc() {
 
   function declensionOfNumber(number, titles) {
     const cases = [2, 0, 1, 1, 1, 2];
-    const absNumber = Math.abs(number);
+    const intNumber = Math.floor(Math.abs(number));
     return titles[
-      absNumber % 100 > 4 && absNumber % 100 < 20
+      intNumber % 100 > 4 && intNumber % 100 < 20
         ? 2
-        : cases[absNumber % 10 < 5 ? absNumber % 10 : 5]
+        : cases[intNumber % 10 < 5 ? intNumber % 10 : 5]
     ];
   }
 
@@ -14389,6 +14672,54 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
   // console.log("UwU | Модуль сохранения ЛС активен.");
 
   /**
+   * Отображает сохраненное сообщение в контейнере.
+   * @param {string} lsId - ID сообщения для отображения.
+   */
+  function displaySavedMessage(lsId) {
+    const container = document.getElementById("uwu-saved-ls-container");
+    if (!container) return;
+
+    const savedLs = JSON.parse(localStorage.getItem("uwu_saved_ls")) || {};
+    const ls = savedLs[lsId];
+
+    if (!ls) {
+      container.innerHTML =
+        "<h3>Ошибка: Сохранённое сообщение не найдено.</h3><p><a href='#' id='uwu-back-to-saved-list'>Назад к списку</a></p>";
+      document
+        .getElementById("uwu-back-to-saved-list")
+        .addEventListener("click", showSavedMessagesInterface);
+      return;
+    }
+
+    const typeLabel = ls.type === 0 ? "Отправитель" : "Получатель";
+    const catLink = `<a href="/cat${ls.catId}" id="msg_login">${ls.catName}</a>`;
+
+    const messageHTML = `
+      <p><a href="#" id="uwu-back-to-saved-list">← Назад к сохранённым</a></p>
+      <table id="msg_table" border="1">
+        <tbody>
+          <tr>
+            <td colspan="2"><span id="msg_subject">${ls.subject}</span></td>
+          </tr>
+          <tr>
+            <td valign="top" id="msg_info">
+              ${typeLabel}: ${catLink}<br>
+              ${ls.date}<br>
+              <i>(сохранённая оффлайн-копия)</i>
+            </td>
+            <td><div class="parsed">${ls.text}</div></td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+
+    container.innerHTML = messageHTML;
+    document
+      .getElementById("uwu-back-to-saved-list")
+      .addEventListener("click", showSavedMessagesInterface);
+  }
+
+  /**
    * Удаляет сохраненное ЛС из localStorage по его ID.
    * @param {number} lsId - ID личного сообщения для удаления.
    * @param {boolean} silent - Если true, не показывать alert.
@@ -14624,6 +14955,10 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
     let inboxHTML = "";
     let outboxHTML = "";
 
+    keys.sort(
+      (a, b) => new Date(savedLs[b].savedate) - new Date(savedLs[a].savedate)
+    );
+
     keys.forEach((key) => {
       const ls = savedLs[key];
       const rowHTML =
@@ -14631,7 +14966,7 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
         `
           <tr class="msg_read">
             <td>
-              <a href="/ls?id=${key}" class="msg_open" data-id="${key}"
+              <a href="#" class="uwu-saved-msg-open" data-id="${key}"
                 >${ls.subject}</a
               >
             </td>
@@ -14698,9 +15033,16 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
           )
         ) {
           deleteSavedLS(lsId, true);
-          e.target.closest("tr").remove();
           renderSavedMessagesList(container);
         }
+      });
+    });
+
+    container.querySelectorAll(".uwu-saved-msg-open").forEach((link) => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const lsId = e.target.dataset.id;
+        displaySavedMessage(lsId);
       });
     });
   }
