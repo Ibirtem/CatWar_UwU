@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.40.0-08.25
+// @version      v1.40.1-08.25
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2025, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -20,7 +20,7 @@
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.40.0";
+const current_uwu_version = "1.40.1";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -2959,6 +2959,8 @@ const newsPanel =
         <p>— Фикс null значения селектора активности.</p>
         <p>— Слово "часы" больше не пропадают в калькуляторе при дробных значениях времени.</p>
         <p>— Оказывается я недореализовал сохранение ЛС как надо, и мне никто не сказал об этом, жесть.</p>
+        <p>—— Fix 1.40.1</p>
+        <p>—— Я забыл поменять ссылку на изображения иконок.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: 22.09.25</p>
       </div>
@@ -6663,7 +6665,7 @@ if (targetCW3.test(window.location.href)) {
 
     const qualityFolder =
       settings.defectsQuality === "high" ? "assets_200_300" : "assets_100_150";
-    const baseUrl = `https://raw.githubusercontent.com/Ibirtem/CatWar//refs/heads/Update-to-1.40.0/images/${qualityFolder}`;
+    const baseUrl = `https://raw.githubusercontent.com/Ibirtem/CatWar/refs/heads/main/images/${qualityFolder}`;
 
     const defectsCss = /* CSS */ `
         /*грязь_1*/
