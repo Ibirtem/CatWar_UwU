@@ -2941,18 +2941,17 @@ const newsPanel =
   /* HTML */
   `
     <div id="news-panel">
-      <button id="news-button">
-        v${current_uwu_version} - 
-      </button>
+      <button id="news-button">v${current_uwu_version} -</button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
-        <p>— </p>
+        <p>—</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
-        <p>— </p>
+        <p>—</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
-        <p>— </p>
+        <p>— Надеюсь исправлен расчёт значений Чистоты.</p>
+        <p>— И вроде чуть уточнён сон.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: .10.25</p>
       </div>
@@ -6469,7 +6468,7 @@ if (targetCW3Kns.test(window.location.href)) {
   function applyTheme() {
     const newStyle = document.createElement("style");
     newStyle.innerHTML =
-      // css
+      /* CSS */
       `
       body {
         background: ${theme?.backgroundColor || ""};
@@ -6550,7 +6549,7 @@ if (targetCW3.test(window.location.href)) {
   function applyTheme() {
     const newStyle = document.createElement("style");
     newStyle.innerHTML =
-      // css
+      /* CSS */
       `
       body {
         background: ${theme?.backgroundColor || ""};
@@ -8171,8 +8170,26 @@ if (targetCW3.test(window.location.href)) {
       {
         id: "dream",
         name: "Бодрость",
-        timePerPixel: 20,
-        formula: null,
+        formula: (redPixels) => {
+          if (redPixels <= 0) return 0;
+
+          const percentageLoss = Math.round(redPixels / 1.5);
+          let totalTime = 0;
+
+          for (let i = 1; i <= percentageLoss; i++) {
+            if (i <= 2) {
+              // Первые два процента добавляют по 20 секунд
+              totalTime += 20;
+            } else if (i % 2 !== 0) {
+              // Нечётные проценты (3-й, 5-й и т.д.) добавляют 40 секунд
+              totalTime += 40;
+            } else {
+              // Чётные проценты (4-й, 6-й и т.д.) добавляют 20 секунд
+              totalTime += 20;
+            }
+          }
+          return totalTime;
+        },
       },
       {
         id: "hunger",
@@ -8191,7 +8208,8 @@ if (targetCW3.test(window.location.href)) {
         name: "Чистота",
         timePerPixel: null,
         formula: (redPixels) => {
-          return ((redPixels - 1) / 1.5) * 100 + 100;
+          if (redPixels <= 0) return 0;
+          return (200 / 3) * redPixels;
         },
       },
     ];
@@ -8240,7 +8258,7 @@ if (targetCW3.test(window.location.href)) {
         if (totalTimeSeconds !== undefined) {
           const hours = Math.floor(totalTimeSeconds / 3600);
           const minutes = Math.floor((totalTimeSeconds % 3600) / 60);
-          const seconds = totalTimeSeconds % 60;
+          const seconds = Math.ceil(totalTimeSeconds % 60);
 
           if (hours > 0) {
             timeInfo = ` (> ${hours} ч ${minutes} мин)`;
@@ -11628,7 +11646,9 @@ if (targetCW3.test(window.location.href)) {
 
       cages.forEach((cage) => {
         const catName = cage.querySelector(".cat_tooltip a")?.textContent;
-        const arrow = cage.querySelector(".arrow.arrow-paws, .arrow.arrow-claws, .arrow arrow-teeth");
+        const arrow = cage.querySelector(
+          ".arrow.arrow-paws, .arrow.arrow-claws, .arrow arrow-teeth"
+        );
 
         if (catName && arrow) {
           const arrowId = arrow.id;
@@ -12590,7 +12610,7 @@ if (targetCW3.test(window.location.href)) {
   //   . . . АНИМАЦИЯ ПОГОДЫ / ЧАСТИЦ . . .
   // ====================================================================================================================
   let lastTime = 0;
-  
+
   function animateWeather() {
     const currentTime = performance.now();
     const deltaTime = (currentTime - lastTime) / 1000;
@@ -12618,8 +12638,10 @@ if (targetCW3.test(window.location.href)) {
 
     if (pixelSnowflakes.length > 0) {
       for (const pixelSnowflake of pixelSnowflakes) {
-        pixelSnowflake.y += pixelSnowflake.ySpeed * baseSpeedMultiplier * deltaTime;
-        pixelSnowflake.x += pixelSnowflake.xSpeed * baseSpeedMultiplier * deltaTime;
+        pixelSnowflake.y +=
+          pixelSnowflake.ySpeed * baseSpeedMultiplier * deltaTime;
+        pixelSnowflake.x +=
+          pixelSnowflake.xSpeed * baseSpeedMultiplier * deltaTime;
         drawPixelSnowflake(
           pixelSnowflake.x,
           pixelSnowflake.y,
@@ -12631,8 +12653,10 @@ if (targetCW3.test(window.location.href)) {
 
     if (pixelRaindrops.length > 0) {
       for (const pixelRaindrop of pixelRaindrops) {
-        pixelRaindrop.y += pixelRaindrop.ySpeed * baseSpeedMultiplier * deltaTime;
-        pixelRaindrop.x += pixelRaindrop.xSpeed * baseSpeedMultiplier * deltaTime;
+        pixelRaindrop.y +=
+          pixelRaindrop.ySpeed * baseSpeedMultiplier * deltaTime;
+        pixelRaindrop.x +=
+          pixelRaindrop.xSpeed * baseSpeedMultiplier * deltaTime;
         drawPixelRaindrop(pixelRaindrop);
       }
     }
