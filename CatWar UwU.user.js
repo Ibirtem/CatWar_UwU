@@ -2950,8 +2950,8 @@ const newsPanel =
         <p>—</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
-        <p>— Надеюсь исправлен расчёт значений Чистоты.</p>
-        <p>— И вроде чуть уточнён сон.</p>
+        <p>— Надеюсь исправлен расчёт значений Чистоты и Бодрости (Сна).</p>
+        <p>— Добавлены статусы "На удалении" и "Заблокирован'о" на валидацию в Лог Чистильщика.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: .10.25</p>
       </div>
@@ -10758,8 +10758,14 @@ if (targetCW3.test(window.location.href)) {
     if (catTooltip) {
       const statusSpan = catTooltip.querySelector(".online");
       if (statusSpan) {
-        const statusText = statusSpan.textContent.trim();
-        return statusText === "[ Спит ]";
+        const statusText = statusSpan.textContent.replace(/[\[\]]/g, "").trim();
+        const validStatuses = [
+          "Спит",
+          "На удалении",
+          "Заблокирована",
+          "Заблокирован",
+        ];
+        return validStatuses.includes(statusText);
       }
     }
     return false;
