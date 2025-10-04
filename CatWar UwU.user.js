@@ -11357,7 +11357,7 @@ if (targetCW3.test(window.location.href)) {
                       hour: "2-digit",
                       minute: "2-digit",
                     });
-                    lastSession.summary.push({
+                    lastSession.summary.unshift({
                       itemId: itemId,
                       time: catchTime,
                     });
