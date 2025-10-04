@@ -126,6 +126,9 @@ const uwuDefaultSettings = {
   cleaningLogShowID: false,
   cleaningLogHeight: "120",
 
+  catchingLog: false,
+  catchingLogHeight: "120",
+
   myNameNotificationSound: "notificationSound2",
   notificationMyNameVolume: "5",
 
@@ -2434,6 +2437,54 @@ const uwusettings =
           </div>
 
           <hr id="uwu-hr" class="uwu-hr" />
+          <h2>BETA 🚧 Лог ловли 🚧 BETA</h2>
+
+          <div>
+            <p>
+              Аналогично Логу чистильщика, но для отслеживания результатов
+              ныряния и ловли в ущелье. Группирует последовательные попытки в
+              один блок.
+            </p>
+            <input
+              type="checkbox"
+              id="catching-Log"
+              data-setting="catchingLog"
+            />
+            <label for="catching-Log">Включить лог ловли</label>
+          </div>
+
+          <details>
+            <summary
+              style="cursor: pointer; font-size: 16px; font-weight: bold;"
+            >
+              Как работает?
+            </summary>
+            <hr id="uwu-hr" class="uwu-hr" />
+            <p>
+              — Лог создаёт отдельные карточки для каждого типа действия
+              (Ныряние, Осмотр).
+            </p>
+            <p>
+              — Карточка считается активной 2 часа с момента последней попытки.
+            </p>
+            <p>
+              — Если вы вернётесь к тому же действию спустя 2 часа, создастся
+              новая карточка, а не дополнится старая.
+            </p>
+            <hr id="uwu-hr" class="uwu-hr" />
+          </details>
+
+          <div>
+            <input
+              type="text"
+              id="catching-Log-Height"
+              placeholder=". . ."
+              data-setting="catchingLogHeight"
+            />
+            <label>px; - Начальная высота Лога</label>
+          </div>
+
+          <hr id="uwu-hr" class="uwu-hr" />
           <h2>Быстрые ссылки</h2>
 
           <p>Быстрые ссылки в Игровой.</p>
@@ -2941,17 +2992,23 @@ const newsPanel =
   /* HTML */
   `
     <div id="news-panel">
-      <button id="news-button">v${current_uwu_version} -</button>
+      <button id="news-button">
+        v${current_uwu_version} - Логи ловли, ура! (Меня заставили).
+      </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>—</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
-        <p>—</p>
+        <p>— Возможность скрывать и раскрывать логи.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
         <p>— Надеюсь исправлен расчёт значений Чистоты и Бодрости (Сна).</p>
-        <p>— Добавлены статусы "На удалении" и "Заблокирован'о" на валидацию в Лог Чистильщика.</p>
+        <p>
+          — Добавлены статусы "На удалении" и "Заблокирован'о" на валидацию в
+          Лог Чистильщика.
+        </p>
+        <p>— Чуть повышено КД перед повторной проверкой онлайн времени.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: .10.25</p>
       </div>
@@ -3289,6 +3346,10 @@ const css_uwu_main = `
 #notification-volume,
 #step-slider {
   width: 150px;
+}
+
+details {
+  margin-top: 5px;
 }
 
 #layout-preview button {
@@ -7344,7 +7405,7 @@ if (targetCW3.test(window.location.href)) {
     let internetTime = null;
     let timerInterval = null;
     let lastSyncTimestamp = 0;
-    const SYNC_COOLDOWN_MS = 1 * 60 * 1000;
+    const SYNC_COOLDOWN_MS = 2 * 60 * 1000;
 
     function updateClock(timeSource = new Date()) {
       const hours = String(timeSource.getHours()).padStart(2, "0");
@@ -10598,473 +10659,513 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . ЛОГ ЧИСТИЛЬЩИКОВ . . .
   // ====================================================================================================================function cleaningLogUpdate(mutationsList) {
-  const relevantActions = [
-    { regex: /Потёрлись носом о нос с/, type: "check" },
-    { regex: /Потёрлись щекой о щёку/, type: "check" },
-    { regex: /Помурлыкал(а)? вместе с/, type: "check" },
-    { regex: /Обнюхал(а)? /, type: "check" },
-    { regex: /Поднял(а)? /, type: "pickup" },
-    { regex: /Опустил(а)? на землю /, type: "putdown" },
-  ];
+  if (settings.cleaningLog) {
+    let logStates = JSON.parse(localStorage.getItem("uwu_logStates")) || {
+      cleaning: false,
+      catching: false,
+    };
 
-  let cleaningLogBuffer = "";
-  let catNamesAndIds = [];
-
-  function cleaningLogUpdate() {
-    const historyBlock = document.querySelector("#history");
-    const ist = historyBlock.querySelector("#ist");
-    const locationSpan = historyBlock.querySelector("#location");
-    const currentLocation = locationSpan.textContent.trim();
-
-    if (currentLocation === "[ Загружается… ]") {
-      return;
+    function saveLogStates() {
+      localStorage.setItem("uwu_logStates", JSON.stringify(logStates));
     }
 
-    let cleaningLogBlock = historyBlock.querySelector("#uwu-cleaningLog");
-    if (!cleaningLogBlock) {
-      createCleaningLogBlock(historyBlock);
-      cleaningLogBlock = historyBlock.querySelector("#uwu-cleaningLog");
-    }
+    const relevantActions = [
+      { regex: /Потёрлись носом о нос с/, type: "check" },
+      { regex: /Потёрлись щекой о щёку/, type: "check" },
+      { regex: /Помурлыкал(а)? вместе с/, type: "check" },
+      { regex: /Обнюхал(а)? /, type: "check" },
+      { regex: /Поднял(а)? /, type: "pickup" },
+      { regex: /Опустил(а)? на землю /, type: "putdown" },
+    ];
 
-    const istOuterHtml = ist.outerHTML;
-    const actions = istOuterHtml
-      .split(".")
-      .map((action) => action.trim())
-      .filter((action) => action);
-    const lastAction = actions[actions.length - 2];
+    let cleaningLogBuffer = "";
+    let catNamesAndIds = [];
 
-    const cleaningLogContent = cleaningLogBlock.querySelector(
-      "#uwu-cleaningLog-content"
-    );
+    function cleaningLogUpdate() {
+      const historyBlock = document.querySelector("#history");
+      const ist = historyBlock.querySelector("#ist");
+      const locationSpan = historyBlock.querySelector("#location");
+      const currentLocation = locationSpan.textContent.trim();
 
-    if (lastAction) {
-      if (settings.cleaningLogStyle === "smart") {
-        processSmartAction(lastAction, currentLocation, cleaningLogContent);
-      } else {
-        processStandardAction(lastAction, currentLocation, cleaningLogContent);
+      if (currentLocation === "[ Загружается… ]") {
+        return;
       }
 
-      let storageKey;
-      switch (settings.cleaningLogStyle) {
-        case "smart":
-          storageKey = "uwu_cleaningLogSmart";
-          break;
-        default:
-          storageKey = "uwu_cleaningLogStandard";
-          break;
+      let cleaningLogBlock = historyBlock.querySelector("#uwu-cleaningLog");
+      if (!cleaningLogBlock) {
+        createCleaningLogBlock(historyBlock);
+        cleaningLogBlock = historyBlock.querySelector("#uwu-cleaningLog");
       }
 
-      localStorage.setItem(
-        storageKey,
-        JSON.stringify({
-          log: cleaningLogBuffer,
-          catNamesAndIds,
-          counters: {
-            pickup: parseInt(
-              document.getElementById("uwu-cleaningLog-counter-pickup")
-                .textContent
-            ),
-            putdown: parseInt(
-              document.getElementById("uwu-cleaningLog-counter-putdown")
-                .textContent
-            ),
-          },
-        })
-      );
-      cleaningLogContent.innerHTML = addCatLinksToLog(
-        cleaningLogBuffer,
-        catNamesAndIds
-      );
-    }
-  }
+      const istOuterHtml = ist.outerHTML;
+      const actions = istOuterHtml
+        .split(".")
+        .map((action) => action.trim())
+        .filter((action) => action);
+      const lastAction = actions[actions.length - 2];
 
-  function createCleaningLogBlock(historyBlock) {
-    const cleaningLogTemplate = `
+      const cleaningLogContent = cleaningLogBlock.querySelector(
+        "#uwu-cleaningLog-content"
+      );
+
+      if (lastAction) {
+        if (settings.cleaningLogStyle === "smart") {
+          processSmartAction(lastAction, currentLocation, cleaningLogContent);
+        } else {
+          processStandardAction(
+            lastAction,
+            currentLocation,
+            cleaningLogContent
+          );
+        }
+
+        let storageKey;
+        switch (settings.cleaningLogStyle) {
+          case "smart":
+            storageKey = "uwu_cleaningLogSmart";
+            break;
+          default:
+            storageKey = "uwu_cleaningLogStandard";
+            break;
+        }
+
+        localStorage.setItem(
+          storageKey,
+          JSON.stringify({
+            log: cleaningLogBuffer,
+            catNamesAndIds,
+            counters: {
+              pickup: parseInt(
+                document.getElementById("uwu-cleaningLog-counter-pickup")
+                  .textContent
+              ),
+              putdown: parseInt(
+                document.getElementById("uwu-cleaningLog-counter-putdown")
+                  .textContent
+              ),
+            },
+          })
+        );
+        cleaningLogContent.innerHTML = addCatLinksToLog(
+          cleaningLogBuffer,
+          catNamesAndIds
+        );
+      }
+    }
+
+    function createCleaningLogBlock(historyBlock) {
+      const cleaningLogTemplate = `
       <div id="uwu-cleaningLog">
         <h2><a href="#" id="uwu-cleaningLog-toggle" class="toggle">Лог чистильщика</a></h2>
-        <div id="uwu-cleaningLog-content"></div>
-        <div id="uwu-cleaningLog-counters">
-          <span>Успешно поднятых: <span id="uwu-cleaningLog-counter-pickup">0</span></span>
-          <span>Опущенных: <span id="uwu-cleaningLog-counter-putdown">0</span></span>
+        <div id="uwu-cleaningLog-content-wrapper">
+            <div id="uwu-cleaningLog-content"></div>
+            <div id="uwu-cleaningLog-counters">
+              <span>Успешно поднятых: <span id="uwu-cleaningLog-counter-pickup">0</span></span>
+              <span>Опущенных: <span id="uwu-cleaningLog-counter-putdown">0</span></span>
+            </div>
+            <a href="#" id="uwu-cleaningLog-clear">Очистить лог</a>
         </div>
-        <a href="#" id="uwu-cleaningLog-clear">Очистить лог</a>
       </div>
     `;
 
-    historyBlock.insertAdjacentHTML("beforeend", cleaningLogTemplate);
+      historyBlock.insertAdjacentHTML("beforeend", cleaningLogTemplate);
 
-    const hr = document.createElement("hr");
-    historyBlock.insertBefore(
-      hr,
-      historyBlock.querySelector("#uwu-cleaningLog")
-    );
-
-    const cleaningLogContent = historyBlock.querySelector(
-      "#uwu-cleaningLog-content"
-    );
-    const savedLog = localStorage.getItem("uwu_cleaningLogSmart");
-    if (savedLog) {
-      const savedData = JSON.parse(savedLog);
-      cleaningLogBuffer = savedData.log;
-      catNamesAndIds = savedData.catNamesAndIds;
-      if (savedData.counters) {
-        document.getElementById("uwu-cleaningLog-counter-pickup").textContent =
-          savedData.counters.pickup;
-        document.getElementById("uwu-cleaningLog-counter-putdown").textContent =
-          savedData.counters.putdown;
-      }
-      cleaningLogContent.innerHTML = addCatLinksToLog(
-        cleaningLogBuffer,
-        catNamesAndIds
+      const hr = document.createElement("hr");
+      historyBlock.insertBefore(
+        hr,
+        historyBlock.querySelector("#uwu-cleaningLog")
       );
-    }
 
-    const clearButton = historyBlock.querySelector("#uwu-cleaningLog-clear");
-    clearButton.addEventListener("click", () => {
-      cleaningLogBuffer = "";
-      catNamesAndIds = [];
-      document.getElementById("uwu-cleaningLog-counter-pickup").textContent =
-        "0";
-      document.getElementById("uwu-cleaningLog-counter-putdown").textContent =
-        "0";
-      cleaningLogContent.innerHTML = "";
-      localStorage.removeItem("uwu_cleaningLogSmart");
-    });
-  }
-
-  function addCatLinksToLog(log, catNamesAndIds) {
-    let logWithLinks = log;
-    catNamesAndIds.forEach(({ name, id }) => {
-      const regex = new RegExp(`\\[${name}( ${id})?\\]`, "g");
-      logWithLinks = logWithLinks.replace(
-        regex,
-        `[<a href="/cat${id}" target="_blank">${name}</a>${
-          settings.cleaningLogShowID ? ` ${id}` : ""
-        }]`
+      const cleaningLogContent = historyBlock.querySelector(
+        "#uwu-cleaningLog-content"
       );
-    });
-    return logWithLinks;
-  }
-
-  function extractCatId(action) {
-    const match = action.match(/<a href="\/cat(\d+)">/);
-    return match ? match[1] : null;
-  }
-
-  function checkCatStatus(catId) {
-    const catTooltip = document
-      .querySelector(`#cages > tbody .cat_tooltip a[href="/cat${catId}"]`)
-      .closest(".cat_tooltip");
-    if (catTooltip) {
-      const statusSpan = catTooltip.querySelector(".online");
-      if (statusSpan) {
-        const statusText = statusSpan.textContent.replace(/[\[\]]/g, "").trim();
-        const validStatuses = [
-          "Спит",
-          "На удалении",
-          "Заблокирована",
-          "Заблокирован",
-        ];
-        return validStatuses.includes(statusText);
-      }
-    }
-    return false;
-  }
-
-  function processStandardAction(action, location, cleaningLogContent) {
-    for (const relevantAction of relevantActions) {
-      if (relevantAction.regex.test(action)) {
-        const catNameMatch = action.match(/<a href="\/cat\d+">([^<]+)<\/a>/);
-        if (!catNameMatch) {
-          console.error("Не удалось извлечь имя кота из действия:", action);
-          return;
-        }
-        const catName = catNameMatch[1];
-        const catId = extractCatId(action);
-        const actionText = action.replace(
-          /<a href="\/cat\d+">([^<]+)<\/a>/,
-          `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
-        );
-        if (relevantAction.type === "action") {
-          cleaningLogBuffer += `${actionText} на локации "${location}". `;
-        } else {
-          const status = checkCatStatus(catId) ? "" : "Кот не спит. ";
-          cleaningLogBuffer += `Проверен [${catName}${
-            settings.cleaningLogShowID ? ` ${catId}` : ""
-          }] на локации "${location}". ${status}`;
-        }
-        if (!catNamesAndIds.some((cat) => cat.id === catId)) {
-          catNamesAndIds.push({ name: catName, id: catId });
+      const savedLog = localStorage.getItem("uwu_cleaningLogSmart");
+      if (savedLog) {
+        const savedData = JSON.parse(savedLog);
+        cleaningLogBuffer = savedData.log;
+        catNamesAndIds = savedData.catNamesAndIds;
+        if (savedData.counters) {
+          document.getElementById(
+            "uwu-cleaningLog-counter-pickup"
+          ).textContent = savedData.counters.pickup;
+          document.getElementById(
+            "uwu-cleaningLog-counter-putdown"
+          ).textContent = savedData.counters.putdown;
         }
         cleaningLogContent.innerHTML = addCatLinksToLog(
           cleaningLogBuffer,
           catNamesAndIds
         );
-        return;
       }
+
+      const clearButton = historyBlock.querySelector("#uwu-cleaningLog-clear");
+      clearButton.addEventListener("click", () => {
+        cleaningLogBuffer = "";
+        catNamesAndIds = [];
+        document.getElementById("uwu-cleaningLog-counter-pickup").textContent =
+          "0";
+        document.getElementById("uwu-cleaningLog-counter-putdown").textContent =
+          "0";
+        cleaningLogContent.innerHTML = "";
+        localStorage.removeItem("uwu_cleaningLogSmart");
+      });
+
+      const toggleButton = historyBlock.querySelector(
+        "#uwu-cleaningLog-toggle"
+      );
+      const contentWrapper = historyBlock.querySelector(
+        "#uwu-cleaningLog-content-wrapper"
+      );
+
+      if (logStates.cleaning) {
+        contentWrapper.style.display = "none";
+      }
+
+      toggleButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        logStates.cleaning = !logStates.cleaning;
+        contentWrapper.style.display = logStates.cleaning ? "none" : "block";
+        saveLogStates();
+      });
     }
-  }
 
-  function processSmartAction(action, location, cleaningLogContent) {
-    let matched = false;
+    function addCatLinksToLog(log, catNamesAndIds) {
+      let logWithLinks = log;
+      catNamesAndIds.forEach(({ name, id }) => {
+        const regex = new RegExp(`\\[${name}( ${id})?\\]`, "g");
+        logWithLinks = logWithLinks.replace(
+          regex,
+          `[<a href="/cat${id}" target="_blank">${name}</a>${
+            settings.cleaningLogShowID ? ` ${id}` : ""
+          }]`
+        );
+      });
+      return logWithLinks;
+    }
 
-    for (const relevantAction of relevantActions) {
-      if (relevantAction.regex.test(action)) {
-        matched = true;
-        const catNameMatch = action.match(/<a href="\/cat\d+">([^<]+)<\/a>/);
-        if (!catNameMatch) {
-          console.error("Не удалось извлечь имя кота из действия:", action);
+    function extractCatId(action) {
+      const match = action.match(/<a href="\/cat(\d+)">/);
+      return match ? match[1] : null;
+    }
+
+    function checkCatStatus(catId) {
+      const catTooltip = document
+        .querySelector(`#cages > tbody .cat_tooltip a[href="/cat${catId}"]`)
+        .closest(".cat_tooltip");
+      if (catTooltip) {
+        const statusSpan = catTooltip.querySelector(".online");
+        if (statusSpan) {
+          const statusText = statusSpan.textContent
+            .replace(/[\[\]]/g, "")
+            .trim();
+          const validStatuses = [
+            "Спит",
+            "На удалении",
+            "Заблокирована",
+            "Заблокирован",
+          ];
+          return validStatuses.includes(statusText);
+        }
+      }
+      return false;
+    }
+
+    function processStandardAction(action, location, cleaningLogContent) {
+      for (const relevantAction of relevantActions) {
+        if (relevantAction.regex.test(action)) {
+          const catNameMatch = action.match(/<a href="\/cat\d+">([^<]+)<\/a>/);
+          if (!catNameMatch) {
+            console.error("Не удалось извлечь имя кота из действия:", action);
+            return;
+          }
+          const catName = catNameMatch[1];
+          const catId = extractCatId(action);
+          const actionText = action.replace(
+            /<a href="\/cat\d+">([^<]+)<\/a>/,
+            `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
+          );
+          if (relevantAction.type === "action") {
+            cleaningLogBuffer += `${actionText} на локации "${location}". `;
+          } else {
+            const status = checkCatStatus(catId) ? "" : "Кот не спит. ";
+            cleaningLogBuffer += `Проверен [${catName}${
+              settings.cleaningLogShowID ? ` ${catId}` : ""
+            }] на локации "${location}". ${status}`;
+          }
+          if (!catNamesAndIds.some((cat) => cat.id === catId)) {
+            catNamesAndIds.push({ name: catName, id: catId });
+          }
+          cleaningLogContent.innerHTML = addCatLinksToLog(
+            cleaningLogBuffer,
+            catNamesAndIds
+          );
           return;
         }
-        const catName = catNameMatch[1];
-        const catId = extractCatId(action);
+      }
+    }
+
+    function processSmartAction(action, location, cleaningLogContent) {
+      let matched = false;
+
+      for (const relevantAction of relevantActions) {
+        if (relevantAction.regex.test(action)) {
+          matched = true;
+          const catNameMatch = action.match(/<a href="\/cat\d+">([^<]+)<\/a>/);
+          if (!catNameMatch) {
+            console.error("Не удалось извлечь имя кота из действия:", action);
+            return;
+          }
+          const catName = catNameMatch[1];
+          const catId = extractCatId(action);
+          const logLines = cleaningLogBuffer
+            .split(".")
+            .map((line) => line.trim())
+            .filter((line) => line);
+
+          switch (relevantAction.type) {
+            case "check":
+              processCheckAction(logLines, catName, catId, location);
+              break;
+
+            case "putdown":
+              processPutdownAction(logLines, catName, catId, location);
+              break;
+
+            case "pickup":
+              processPickupAction(logLines, catName, catId, location);
+              break;
+          }
+
+          cleaningLogBuffer =
+            logLines.join(". ") + (logLines.length > 0 ? "." : "");
+          if (!catNamesAndIds.some((cat) => cat.id === catId)) {
+            catNamesAndIds.push({ name: catName, id: catId });
+          }
+          cleaningLogContent.innerHTML = addCatLinksToLog(
+            cleaningLogBuffer,
+            catNamesAndIds
+          );
+          return;
+        }
+      }
+
+      if (!matched) {
         const logLines = cleaningLogBuffer
           .split(".")
           .map((line) => line.trim())
           .filter((line) => line);
-
-        switch (relevantAction.type) {
-          case "check":
-            processCheckAction(logLines, catName, catId, location);
-            break;
-
-          case "putdown":
-            processPutdownAction(logLines, catName, catId, location);
-            break;
-
-          case "pickup":
-            processPickupAction(logLines, catName, catId, location);
-            break;
-        }
-
+        processUnmatchedAction(logLines, cleaningLogContent, action);
         cleaningLogBuffer =
           logLines.join(". ") + (logLines.length > 0 ? "." : "");
-        if (!catNamesAndIds.some((cat) => cat.id === catId)) {
-          catNamesAndIds.push({ name: catName, id: catId });
-        }
         cleaningLogContent.innerHTML = addCatLinksToLog(
           cleaningLogBuffer,
           catNamesAndIds
         );
-        return;
       }
+
+      return null;
     }
 
-    if (!matched) {
-      const logLines = cleaningLogBuffer
-        .split(".")
-        .map((line) => line.trim())
-        .filter((line) => line);
-      processUnmatchedAction(logLines, cleaningLogContent, action);
-      cleaningLogBuffer =
-        logLines.join(". ") + (logLines.length > 0 ? "." : "");
-      cleaningLogContent.innerHTML = addCatLinksToLog(
-        cleaningLogBuffer,
-        catNamesAndIds
-      );
-    }
+    function processCheckAction(logLines, catName, catId, location) {
+      const lastLogIndex = logLines.length - 1;
+      const isCatSleeping = checkCatStatus(catId);
 
-    return null;
-  }
-
-  function processCheckAction(logLines, catName, catId, location) {
-    const lastLogIndex = logLines.length - 1;
-    const isCatSleeping = checkCatStatus(catId);
-
-    if (
-      lastLogIndex >= 0 &&
-      (logLines[lastLogIndex].includes("Проверен [") ||
-        logLines[lastLogIndex].includes("Кот не спит") ||
-        logLines[lastLogIndex].includes("Вы забыли проверить кота"))
-    ) {
-      logLines.splice(lastLogIndex, 1);
-    }
-
-    if (isCatSleeping) {
-      logLines.push(
-        `Проверен [${catName}${
-          settings.cleaningLogShowID ? ` ${catId}` : ""
-        }] на локации "${location}"`
-      );
-    } else {
-      logLines.push(
-        `Кот не спит [${catName}${
-          settings.cleaningLogShowID ? ` ${catId}` : ""
-        }]`
-      );
-    }
-    if (!catNamesAndIds.some((cat) => cat.id === catId)) {
-      catNamesAndIds.push({ name: catName, id: catId });
-    }
-  }
-
-  function processPutdownAction(logLines, catName, catId, location) {
-    const catPattern = new RegExp(
-      `\\[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}\\]`
-    );
-
-    // 1. Ищем последнее и предпоследнее предложения.
-    const lastSentenceIndex = logLines.length - 1;
-    const penultimateSentenceIndex = lastSentenceIndex - 1;
-
-    // 2. Проверяем последнее предложение на наличие "Опущен" без текущего имени кота.
-    const lastSentence = logLines[lastSentenceIndex];
-
-    if (
-      lastSentence.includes(`на локации "${location}"`) &&
-      lastSentence.includes("Опущен")
-    ) {
-      const catNamesMatch = lastSentence.match(/\[([^\]]+)\]/);
-      if (catNamesMatch) {
-        const catNames = catNamesMatch[1].split(",").map((name) => name.trim());
-        const currentCatNameWithId = `${catName}${
-          settings.cleaningLogShowID ? ` ${catId}` : ""
-        }`;
-        if (catNames.includes(currentCatNameWithId)) {
-          return;
-        }
-      }
-    }
-
-    // 3. Если есть, добавляем имя текущего кота к этому предложению.
-    if (
-      lastSentence.includes(`на локации "${location}"`) &&
-      lastSentence.includes("Опущен") &&
-      !catPattern.test(lastSentence)
-    ) {
-      logLines[lastSentenceIndex] = lastSentence.replace(
-        /]/,
-        `, ${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
-      );
-    } else {
-      // 4. Если нет, добавляем новое предложение с "Опущен".
-      logLines.push(
-        `Опущен [${catName}${
-          settings.cleaningLogShowID ? ` ${catId}` : ""
-        }] на локации "${location}"`
-      );
-    }
-    if (!catNamesAndIds.some((cat) => cat.id === catId)) {
-      catNamesAndIds.push({ name: catName, id: catId });
-    }
-
-    const putdownCounter = document.getElementById(
-      "uwu-cleaningLog-counter-putdown"
-    );
-    putdownCounter.textContent = parseInt(putdownCounter.textContent) + 1;
-  }
-
-  function processPickupAction(logLines, catName, catId, location) {
-    const catPattern = new RegExp(
-      `\\[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}\\]`
-    );
-
-    // 1. Ищем последнее и предпоследнее предложения.
-    const lastSentenceIndex = logLines.length - 1;
-    const penultimateSentenceIndex = lastSentenceIndex - 1;
-
-    // 2. Проверяем последнее предложение на "Проверен и поднят" с именем кота.
-    const lastSentence = logLines[lastSentenceIndex];
-    if (
-      lastSentence.includes(`на локации "${location}"`) &&
-      lastSentence.includes("Проверен и поднят") &&
-      catPattern.test(lastSentence)
-    ) {
-      return;
-    }
-
-    // 3. Проверяем последнее предложение на "Проверен" с именем кота.
-    let lastSentenceChecked = false;
-    if (
-      logLines[lastSentenceIndex].includes("Проверен") &&
-      logLines[lastSentenceIndex].includes(
-        `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
-      ) &&
-      logLines[lastSentenceIndex].includes(`на локации "${location}"`)
-    ) {
-      lastSentenceChecked = true;
-    }
-
-    // 4. Если последнее предложение - "Проверен", проверяем предпоследнее на "Проверен и поднят".
-    if (lastSentenceChecked) {
       if (
-        penultimateSentenceIndex >= 0 &&
-        logLines[penultimateSentenceIndex].includes("Проверен и поднят") &&
-        logLines[penultimateSentenceIndex].includes(
-          `на локации "${location}"`
-        ) &&
-        !logLines[penultimateSentenceIndex].includes(
-          `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
-        )
+        lastLogIndex >= 0 &&
+        (logLines[lastLogIndex].includes("Проверен [") ||
+          logLines[lastLogIndex].includes("Кот не спит") ||
+          logLines[lastLogIndex].includes("Вы забыли проверить кота"))
       ) {
-        const currentCatMatch = logLines[lastSentenceIndex].match(/\[(.*?)\]/);
-        if (currentCatMatch) {
-          // Добавляем имя текущего кота к предпоследнему предложению.
-          const existingCatsMatch =
-            logLines[penultimateSentenceIndex].match(/\[(.*?)\]/);
-          if (existingCatsMatch) {
-            const existingCats = existingCatsMatch[1];
-            const newCatString = existingCats.trim()
-              ? `${existingCats}, ${catName}${
-                  settings.cleaningLogShowID ? ` ${catId}` : ""
-                }`
-              : `${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}`;
-            logLines[penultimateSentenceIndex] = logLines[
-              penultimateSentenceIndex
-            ].replace(/\[(.*?)\]/, `[${newCatString}]`);
-          }
+        logLines.splice(lastLogIndex, 1);
+      }
 
-          // Удаляем последнее предложение.
-          logLines.splice(lastSentenceIndex, 1);
-        }
+      if (isCatSleeping) {
+        logLines.push(
+          `Проверен [${catName}${
+            settings.cleaningLogShowID ? ` ${catId}` : ""
+          }] на локации "${location}"`
+        );
       } else {
-        // 5. Создаем новое предложение "Проверен и поднят".
-        logLines[lastSentenceIndex] = logLines[lastSentenceIndex].replace(
-          "Проверен",
-          "Проверен и поднят"
+        logLines.push(
+          `Кот не спит [${catName}${
+            settings.cleaningLogShowID ? ` ${catId}` : ""
+          }]`
         );
       }
-    } else {
-      // 6. Если "Проверен" с именем кота нет.
-      if (logLines[lastSentenceIndex].includes("Кот не спит")) {
-        logLines[lastSentenceIndex] = "Вы забыли проверить кота";
-      } else if (
-        !logLines[lastSentenceIndex].includes("Вы забыли проверить кота")
-      ) {
-        logLines.push("Вы забыли проверить кота");
+      if (!catNamesAndIds.some((cat) => cat.id === catId)) {
+        catNamesAndIds.push({ name: catName, id: catId });
       }
     }
-    if (!catNamesAndIds.some((cat) => cat.id === catId)) {
-      catNamesAndIds.push({ name: catName, id: catId });
-    }
 
-    const pickupCounter = document.getElementById(
-      "uwu-cleaningLog-counter-pickup"
-    );
-    pickupCounter.textContent = parseInt(pickupCounter.textContent) + 1;
-  }
-
-  function processUnmatchedAction(logLines, cleaningLogContent, action) {
-    const lastLogIndex = logLines.length - 1;
-
-    const isCancelAction = /Отменил(а)? /.test(action);
-
-    if (
-      lastLogIndex >= 0 &&
-      logLines[lastLogIndex].includes("Проверен [") &&
-      !isCancelAction
-    ) {
-      logLines.splice(lastLogIndex, 1);
-      cleaningLogBuffer =
-        logLines.join(". ") + (logLines.length > 0 ? "." : "");
-      cleaningLogContent.innerHTML = addCatLinksToLog(
-        cleaningLogBuffer,
-        catNamesAndIds
+    function processPutdownAction(logLines, catName, catId, location) {
+      const catPattern = new RegExp(
+        `\\[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}\\]`
       );
-    }
-  }
 
-  if (settings.cleaningLog) {
+      // 1. Ищем последнее и предпоследнее предложения.
+      const lastSentenceIndex = logLines.length - 1;
+      const penultimateSentenceIndex = lastSentenceIndex - 1;
+
+      // 2. Проверяем последнее предложение на наличие "Опущен" без текущего имени кота.
+      const lastSentence = logLines[lastSentenceIndex];
+
+      if (
+        lastSentence.includes(`на локации "${location}"`) &&
+        lastSentence.includes("Опущен")
+      ) {
+        const catNamesMatch = lastSentence.match(/\[([^\]]+)\]/);
+        if (catNamesMatch) {
+          const catNames = catNamesMatch[1]
+            .split(",")
+            .map((name) => name.trim());
+          const currentCatNameWithId = `${catName}${
+            settings.cleaningLogShowID ? ` ${catId}` : ""
+          }`;
+          if (catNames.includes(currentCatNameWithId)) {
+            return;
+          }
+        }
+      }
+
+      // 3. Если есть, добавляем имя текущего кота к этому предложению.
+      if (
+        lastSentence.includes(`на локации "${location}"`) &&
+        lastSentence.includes("Опущен") &&
+        !catPattern.test(lastSentence)
+      ) {
+        logLines[lastSentenceIndex] = lastSentence.replace(
+          /]/,
+          `, ${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
+        );
+      } else {
+        // 4. Если нет, добавляем новое предложение с "Опущен".
+        logLines.push(
+          `Опущен [${catName}${
+            settings.cleaningLogShowID ? ` ${catId}` : ""
+          }] на локации "${location}"`
+        );
+      }
+      if (!catNamesAndIds.some((cat) => cat.id === catId)) {
+        catNamesAndIds.push({ name: catName, id: catId });
+      }
+
+      const putdownCounter = document.getElementById(
+        "uwu-cleaningLog-counter-putdown"
+      );
+      putdownCounter.textContent = parseInt(putdownCounter.textContent) + 1;
+    }
+
+    function processPickupAction(logLines, catName, catId, location) {
+      const catPattern = new RegExp(
+        `\\[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}\\]`
+      );
+
+      // 1. Ищем последнее и предпоследнее предложения.
+      const lastSentenceIndex = logLines.length - 1;
+      const penultimateSentenceIndex = lastSentenceIndex - 1;
+
+      // 2. Проверяем последнее предложение на "Проверен и поднят" с именем кота.
+      const lastSentence = logLines[lastSentenceIndex];
+      if (
+        lastSentence.includes(`на локации "${location}"`) &&
+        lastSentence.includes("Проверен и поднят") &&
+        catPattern.test(lastSentence)
+      ) {
+        return;
+      }
+
+      // 3. Проверяем последнее предложение на "Проверен" с именем кота.
+      let lastSentenceChecked = false;
+      if (
+        logLines[lastSentenceIndex].includes("Проверен") &&
+        logLines[lastSentenceIndex].includes(
+          `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
+        ) &&
+        logLines[lastSentenceIndex].includes(`на локации "${location}"`)
+      ) {
+        lastSentenceChecked = true;
+      }
+
+      // 4. Если последнее предложение - "Проверен", проверяем предпоследнее на "Проверен и поднят".
+      if (lastSentenceChecked) {
+        if (
+          penultimateSentenceIndex >= 0 &&
+          logLines[penultimateSentenceIndex].includes("Проверен и поднят") &&
+          logLines[penultimateSentenceIndex].includes(
+            `на локации "${location}"`
+          ) &&
+          !logLines[penultimateSentenceIndex].includes(
+            `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
+          )
+        ) {
+          const currentCatMatch =
+            logLines[lastSentenceIndex].match(/\[(.*?)\]/);
+          if (currentCatMatch) {
+            // Добавляем имя текущего кота к предпоследнему предложению.
+            const existingCatsMatch =
+              logLines[penultimateSentenceIndex].match(/\[(.*?)\]/);
+            if (existingCatsMatch) {
+              const existingCats = existingCatsMatch[1];
+              const newCatString = existingCats.trim()
+                ? `${existingCats}, ${catName}${
+                    settings.cleaningLogShowID ? ` ${catId}` : ""
+                  }`
+                : `${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}`;
+              logLines[penultimateSentenceIndex] = logLines[
+                penultimateSentenceIndex
+              ].replace(/\[(.*?)\]/, `[${newCatString}]`);
+            }
+
+            // Удаляем последнее предложение.
+            logLines.splice(lastSentenceIndex, 1);
+          }
+        } else {
+          // 5. Создаем новое предложение "Проверен и поднят".
+          logLines[lastSentenceIndex] = logLines[lastSentenceIndex].replace(
+            "Проверен",
+            "Проверен и поднят"
+          );
+        }
+      } else {
+        // 6. Если "Проверен" с именем кота нет.
+        if (logLines[lastSentenceIndex].includes("Кот не спит")) {
+          logLines[lastSentenceIndex] = "Вы забыли проверить кота";
+        } else if (
+          !logLines[lastSentenceIndex].includes("Вы забыли проверить кота")
+        ) {
+          logLines.push("Вы забыли проверить кота");
+        }
+      }
+      if (!catNamesAndIds.some((cat) => cat.id === catId)) {
+        catNamesAndIds.push({ name: catName, id: catId });
+      }
+
+      const pickupCounter = document.getElementById(
+        "uwu-cleaningLog-counter-pickup"
+      );
+      pickupCounter.textContent = parseInt(pickupCounter.textContent) + 1;
+    }
+
+    function processUnmatchedAction(logLines, cleaningLogContent, action) {
+      const lastLogIndex = logLines.length - 1;
+
+      const isCancelAction = /Отменил(а)? /.test(action);
+
+      if (
+        lastLogIndex >= 0 &&
+        logLines[lastLogIndex].includes("Проверен [") &&
+        !isCancelAction
+      ) {
+        logLines.splice(lastLogIndex, 1);
+        cleaningLogBuffer =
+          logLines.join(". ") + (logLines.length > 0 ? "." : "");
+        cleaningLogContent.innerHTML = addCatLinksToLog(
+          cleaningLogBuffer,
+          catNamesAndIds
+        );
+      }
+    }
+
     setupMutationObserver("#history_block", cleaningLogUpdate, {
       childList: true,
       subtree: true,
@@ -11079,6 +11180,335 @@ if (targetCW3.test(window.location.href)) {
           }
           `;
     document.head.appendChild(cleaningLogStyle);
+  }
+  // ====================================================================================================================
+  //   . . . ЛОГ ЛОВЛИ . . .
+  // ====================================================================================================================
+  if (settings.catchingLog) {
+    let logStates = JSON.parse(localStorage.getItem("uwu_logStates")) || {
+      cleaning: false,
+      catching: false,
+    };
+    function saveLogStates() {
+      localStorage.setItem("uwu_logStates", JSON.stringify(logStates));
+    }
+
+    let isWaitingForItem = false;
+    let mouthSnapshot = new Set();
+    let pendingActivity = null;
+
+    const activityTypes = {
+      diving: {
+        triggers: ["Нырнул.", "Нырнула."],
+        type: "diving",
+        title: "Ныряние",
+        verb: { male: "Выловил", female: "Выловила" },
+        style: {
+          backgroundColor: "rgba(173, 216, 230, 0.1)",
+          border: "1px solid rgba(173, 216, 230, 0.4)",
+        },
+      },
+      crevice: {
+        triggers: ["Осмотрел расщелину.", "Осмотрела расщелину."],
+        type: "crevice",
+        title: "Осмотр",
+        verb: { male: "Нашёл", female: "Нашла" },
+        style: {
+          backgroundColor: "rgba(144, 238, 144, 0.1)",
+          border: "1px solid rgba(144, 238, 144, 0.4)",
+        },
+      },
+      hollow: {
+        triggers: ["Осмотрел дупло.", "Осмотрела дупло."],
+        type: "hollow",
+        title: "Осмотр",
+        verb: { male: "Нашёл", female: "Нашла" },
+        style: {
+          backgroundColor: "rgba(144, 238, 144, 0.1)",
+          border: "1px solid rgba(144, 238, 144, 0.4)",
+        },
+      },
+    };
+
+    const itemNamesById = {
+      20: "Паутина",
+      21: "Целебная водоросль",
+      75: "Мох",
+      76: "Водный мох",
+      110: "Мед",
+      417: "Камень 2х местный",
+      418: "Камень 3х местный",
+      565: "Крепкая ветка",
+      566: "Вьюнок",
+      1034: "Маленький камушек",
+      2072: "Гнездо",
+      2073: "Гнездо",
+      2074: "Яйцо",
+      2075: "Черное перо",
+      2076: "Коричневое перо",
+      2077: "Голубое перо",
+      3956: "Рак",
+      3958: "Рак",
+      3960: "Рак",
+      3971: "Речной угорь",
+      3973: "Речной угорь",
+      3993: "Плотная водоросль",
+      3994: "Ракушка (+20)",
+      3995: "Ракушка (+30)",
+      3997: "Ракушка (сон)",
+      3998: "Ракушка (+15)",
+      3999: "Ракушка (+28)",
+      4008: "Комок",
+      4009: "Комок",
+    };
+
+    function getActivityType(actionText) {
+      for (const key in activityTypes) {
+        if (activityTypes[key].triggers.includes(actionText)) {
+          return activityTypes[key];
+        }
+      }
+      return null;
+    }
+
+    function renderCatchingLog(logData) {
+      const contentDiv = document.getElementById("uwu-catchingLog-content");
+      if (!contentDiv) return;
+      contentDiv.innerHTML = "";
+
+      logData.forEach((session) => {
+        const activityConfig = activityTypes[session.type];
+        if (!activityConfig) return;
+
+        const card = document.createElement("div");
+        card.className = "uwu-catching-session";
+        card.style.backgroundColor = activityConfig.style.backgroundColor;
+        card.style.border = activityConfig.style.border;
+        card.style.borderRadius = "5px";
+        card.style.padding = "5px";
+        card.style.marginBottom = "5px";
+
+        const startTime = new Date(session.startTime).toLocaleTimeString(
+          "ru-RU",
+          { hour: "2-digit", minute: "2-digit" }
+        );
+        const lastTime = new Date(session.lastActionTime).toLocaleTimeString(
+          "ru-RU",
+          { hour: "2-digit", minute: "2-digit" }
+        );
+
+        const verb =
+          session.actionVerb === activityConfig.triggers[1]
+            ? activityConfig.verb.female
+            : activityConfig.verb.male;
+        const emptyMessageVerb = verb.toLowerCase();
+
+        let summaryHtml = "";
+        if (session.summary.length > 0) {
+          summaryHtml = "<ul style='margin: 0; padding-left: 20px;'>";
+          session.summary.forEach((catchInfo) => {
+            const itemName = itemNamesById[catchInfo.itemId];
+            const itemDisplayName = itemName ? `${itemName} ` : "";
+            summaryHtml += `<li>${itemDisplayName}ID ${catchInfo.itemId} в ${catchInfo.time}</li>`;
+          });
+          summaryHtml += "</ul>";
+        } else {
+          summaryHtml = `<p style='margin: 2px 0; font-style: italic;'>Пока что ничего не ${emptyMessageVerb} :(</p>`;
+        }
+
+        card.innerHTML = `
+        <p style="margin: 2px 0;"><strong>${activityConfig.title}. Время с ${startTime} до ${lastTime}.</strong></p>
+        <p style="margin: 2px 0;"><strong>Всего попыток:</strong> ${session.totalDives}</p>
+        ${summaryHtml}
+      `;
+        contentDiv.prepend(card);
+      });
+    }
+
+    function handleMouthChange(mutationsList) {
+      if (!isWaitingForItem) return;
+
+      for (const mutation of mutationsList) {
+        if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
+          for (const node of mutation.addedNodes) {
+            if (node.nodeType === 1 && node.id && !mouthSnapshot.has(node.id)) {
+              const img = node.querySelector("img");
+              if (img && img.src) {
+                const itemIdMatch = img.src.match(/things\/(\d+)\.png/);
+                if (itemIdMatch) {
+                  const itemId = itemIdMatch[1];
+                  const logData =
+                    JSON.parse(localStorage.getItem("uwu_catchingLogData")) ||
+                    [];
+                  const lastSession = logData[logData.length - 1];
+
+                  if (lastSession) {
+                    const catchTime = new Date().toLocaleTimeString("ru-RU", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    });
+                    lastSession.summary.push({
+                      itemId: itemId,
+                      time: catchTime,
+                    });
+                    localStorage.setItem(
+                      "uwu_catchingLogData",
+                      JSON.stringify(logData)
+                    );
+                    renderCatchingLog(logData);
+                  }
+                  isWaitingForItem = false;
+                  return;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    function catchingLogUpdate() {
+      const ist = document.getElementById("ist");
+      if (!ist) return;
+
+      const actions = ist.innerText
+        .split(".")
+        .map((s) => s.trim() + ".")
+        .filter((s) => s.length > 2);
+      if (actions.length === 0) return;
+
+      const lastAction = actions[actions.length - 1];
+
+      if (pendingActivity) {
+        const isCanceled = lastAction.includes("Отменил");
+
+        if (!isCanceled) {
+          const logData =
+            JSON.parse(localStorage.getItem("uwu_catchingLogData")) || [];
+          let lastSession =
+            logData.length > 0 ? logData[logData.length - 1] : null;
+          const currentTime = Date.now();
+          const twoHours = 2 * 60 * 60 * 1000;
+
+          const isContinuingSession =
+            lastSession &&
+            lastSession.type === pendingActivity.type &&
+            currentTime - lastSession.lastActionTime < twoHours;
+
+          if (isContinuingSession) {
+            lastSession.totalDives++;
+            lastSession.lastActionTime = currentTime;
+          } else {
+            const newSession = {
+              type: pendingActivity.type,
+              startTime: currentTime,
+              lastActionTime: currentTime,
+              actionVerb: pendingActivity.actionVerb,
+              totalDives: 1,
+              summary: [],
+            };
+            logData.push(newSession);
+          }
+          localStorage.setItem("uwu_catchingLogData", JSON.stringify(logData));
+          renderCatchingLog(logData);
+        }
+
+        pendingActivity = null;
+        isWaitingForItem = false;
+      }
+
+      const currentActivity = getActivityType(lastAction);
+      if (currentActivity) {
+        pendingActivity = {
+          type: currentActivity.type,
+          actionVerb: lastAction,
+        };
+        isWaitingForItem = true;
+        mouthSnapshot.clear();
+        const itemsInMouth = document.querySelectorAll("#itemList > div");
+        itemsInMouth.forEach((item) => {
+          if (item.id) {
+            mouthSnapshot.add(item.id);
+          }
+        });
+      }
+    }
+
+    function createCatchingLogBlock() {
+      const historyContainer = document.getElementById("history");
+      if (!historyContainer || document.getElementById("uwu-catchingLog"))
+        return;
+
+      const logContainerHTML =
+        /* HTML */
+        `
+          <div id="uwu-catchingLog">
+            <h2>
+              <a href="#" id="uwu-catchingLog-toggle" class="toggle"
+                >Лог ловли</a
+              >
+            </h2>
+            <div id="uwu-catchingLog-content-wrapper">
+              <div id="uwu-catchingLog-content"></div>
+              <a href="#" id="uwu-catchingLog-clear">Очистить лог</a>
+            </div>
+          </div>
+        `;
+
+      const hr = document.createElement("hr");
+      historyContainer.appendChild(hr);
+      historyContainer.insertAdjacentHTML("beforeend", logContainerHTML);
+
+      const contentDiv = document.getElementById("uwu-catchingLog-content");
+      contentDiv.style.height = settings.catchingLogHeight
+        ? `${settings.catchingLogHeight}px`
+        : "120px";
+      contentDiv.style.overflowY = "auto";
+      contentDiv.style.resize = "vertical";
+
+      const clearButton = document.getElementById("uwu-catchingLog-clear");
+      clearButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (confirm("Вы уверены, что хотите очистить лог ловли?")) {
+          localStorage.removeItem("uwu_catchingLogData");
+          renderCatchingLog([]);
+        }
+      });
+
+      const toggleButton = document.getElementById("uwu-catchingLog-toggle");
+      const contentWrapper = document.getElementById(
+        "uwu-catchingLog-content-wrapper"
+      );
+
+      if (logStates.catching) {
+        contentWrapper.style.display = "none";
+      }
+
+      toggleButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        logStates.catching = !logStates.catching;
+        contentWrapper.style.display = logStates.catching ? "none" : "block";
+        saveLogStates();
+      });
+
+      const logData =
+        JSON.parse(localStorage.getItem("uwu_catchingLogData")) || [];
+      renderCatchingLog(logData);
+    }
+
+    setupSingleCallback("#history", createCatchingLogBlock);
+
+    const mouthObserver = new MutationObserver(handleMouthChange);
+    setupSingleCallback("#itemList", () => {
+      mouthObserver.observe(document.getElementById("itemList"), {
+        childList: true,
+      });
+    });
+
+    setupMutationObserver("#history_block", catchingLogUpdate, {
+      childList: true,
+      subtree: true,
+    });
   }
   // ====================================================================================================================
   //   . . . ЗВУКОВЫЕ УВЕДОМЛЕНИЯ . . .
