@@ -3009,6 +3009,7 @@ const newsPanel =
           Лог Чистильщика.
         </p>
         <p>— Чуть повышено КД перед повторной проверкой онлайн времени.</p>
+        <p>— Потенциально починил дублирование запросов на проверки онлайн времени.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: .10.25</p>
       </div>
@@ -7406,6 +7407,7 @@ if (targetCW3.test(window.location.href)) {
     let timerInterval = null;
     let lastSyncTimestamp = 0;
     const SYNC_COOLDOWN_MS = 2 * 60 * 1000;
+    let isFetchingTime = false;
 
     function updateClock(timeSource = new Date()) {
       const hours = String(timeSource.getHours()).padStart(2, "0");
@@ -7507,38 +7509,42 @@ if (targetCW3.test(window.location.href)) {
         },
       ];
 
-      for (const provider of timeProviders) {
-        try {
-          const url = provider.buildUrl(settings.clockMoscowTime);
-          const response = await fetch(url);
-          if (!response.ok) {
-            throw new Error(`Response not OK: ${response.status}`);
+      try {
+        for (const provider of timeProviders) {
+          try {
+            const url = provider.buildUrl(settings.clockMoscowTime);
+            const response = await fetch(url);
+            if (!response.ok) {
+              throw new Error(`Response not OK: ${response.status}`);
+            }
+            internetTime = await provider.parseResponse(response);
+            useInternetTime = true;
+            lastSyncTimestamp = Date.now();
+            console.log(`Время успешно получено от ${provider.name}.`);
+            break;
+          } catch (error) {
+            console.warn(
+              `Не удалось получить время от ${provider.name}, пробую следующий источник.`,
+              error
+            );
+            useInternetTime = false;
           }
-          internetTime = await provider.parseResponse(response);
-          useInternetTime = true;
-          lastSyncTimestamp = Date.now();
-          console.log(`Время успешно получено от ${provider.name}.`);
-          break;
-        } catch (error) {
+        }
+
+        if (useInternetTime) {
+          updateClockWithInternetTime();
+        } else {
           console.warn(
-            `Не удалось получить время от ${provider.name}, пробую следующий источник.`,
-            error
+            "Не удалось получить время от всех онлайн-источников, используется локальное время."
           );
           useInternetTime = false;
+          updateClockWithLocalTime();
         }
-      }
 
-      if (useInternetTime) {
-        updateClockWithInternetTime();
-      } else {
-        console.warn(
-          "Не удалось получить время от всех онлайн-источников, используется локальное время."
-        );
-        useInternetTime = false;
-        updateClockWithLocalTime();
+        startTimer();
+      } finally {
+        isFetchingTime = false;
       }
-
-      startTimer();
     }
 
     function updateClockWithInternetTime() {
