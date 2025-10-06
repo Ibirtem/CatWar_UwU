@@ -11250,6 +11250,7 @@ if (targetCW3.test(window.location.href)) {
       3956: "Рак",
       3958: "Рак",
       3960: "Рак",
+      3962: "Краснобрюхая жерлянка",
       3965: "Карась",
       3966: "Рыба",
       3967: "Рыба",
@@ -11264,12 +11265,19 @@ if (targetCW3.test(window.location.href)) {
       3997: "Ракушка (сон)",
       3998: "Ракушка (+15)",
       3999: "Ракушка (+28)",
+      4001: "Коралл",
+      4002: "Коралл",
+      4004: "Водоросоль",
+      4005: "Водоросоль",
+      4006: "Водоросоль",
       4008: "Комок",
       4009: "Комок",
       8021: "Тонколапый паук",
       8022: "Светлый паук",
       8023: "Бурый паук",
       8024: "Тёмный паук",
+      8042: "Мышь",
+      8043: "Упитанная мышь",
     };
 
     function getActivityType(actionText) {
@@ -11388,50 +11396,71 @@ if (targetCW3.test(window.location.href)) {
       if (actions.length === 0) return;
 
       const lastAction = actions[actions.length - 1];
+      const isNewStartAction = getActivityType(lastAction);
 
       if (pendingActivity) {
-        const isCanceled = lastAction.includes("Отменил");
+        const cancelWordsRegex = /Отменил|Отменила/;
+        const stopWordsRegex = /Пошла|Поднял|Подняла/;
 
-        if (!isCanceled) {
-          const logData =
-            JSON.parse(localStorage.getItem("uwu_catchingLogData")) || [];
-          let lastSession =
-            logData.length > 0 ? logData[logData.length - 1] : null;
-          const currentTime = Date.now();
-          const twoHours = 2 * 60 * 60 * 1000;
+        if (isNewStartAction || stopWordsRegex.test(lastAction)) {
+          pendingActivity = null;
+          isWaitingForItem = false;
+        } else if (cancelWordsRegex.test(lastAction)) {
+          pendingActivity = null;
+          isWaitingForItem = false;
+          return;
+        } else {
+          if (!pendingActivity.hasBeenCounted) {
+            const logData =
+              JSON.parse(localStorage.getItem("uwu_catchingLogData")) || [];
+            let lastSession =
+              logData.length > 0 ? logData[logData.length - 1] : null;
 
-          const isContinuingSession =
-            lastSession &&
-            lastSession.type === pendingActivity.type &&
-            currentTime - lastSession.lastActionTime < twoHours;
-
-          if (isContinuingSession) {
-            lastSession.totalDives++;
-            lastSession.lastActionTime = currentTime;
-          } else {
-            const newSession = {
-              type: pendingActivity.type,
-              startTime: currentTime,
-              lastActionTime: currentTime,
-              actionVerb: pendingActivity.actionVerb,
-              totalDives: 1,
-              summary: [],
-            };
-            logData.push(newSession);
+            if (lastSession && lastSession.type === pendingActivity.type) {
+              lastSession.totalDives++;
+              lastSession.lastActionTime = Date.now();
+              pendingActivity.hasBeenCounted = true;
+              localStorage.setItem(
+                "uwu_catchingLogData",
+                JSON.stringify(logData)
+              );
+              renderCatchingLog(logData);
+            }
           }
+        }
+      }
+
+      if (isNewStartAction) {
+        const logData =
+          JSON.parse(localStorage.getItem("uwu_catchingLogData")) || [];
+        let lastSession =
+          logData.length > 0 ? logData[logData.length - 1] : null;
+        const currentTime = Date.now();
+        const twoHours = 2 * 60 * 60 * 1000;
+
+        const isContinuingSession =
+          lastSession &&
+          lastSession.type === isNewStartAction.type &&
+          currentTime - lastSession.lastActionTime < twoHours;
+
+        if (!isContinuingSession) {
+          const newSession = {
+            type: isNewStartAction.type,
+            startTime: currentTime,
+            lastActionTime: currentTime,
+            actionVerb: lastAction,
+            totalDives: 0,
+            summary: [],
+          };
+          logData.push(newSession);
           localStorage.setItem("uwu_catchingLogData", JSON.stringify(logData));
           renderCatchingLog(logData);
         }
 
-        pendingActivity = null;
-        isWaitingForItem = false;
-      }
-
-      const currentActivity = getActivityType(lastAction);
-      if (currentActivity) {
         pendingActivity = {
-          type: currentActivity.type,
+          type: isNewStartAction.type,
           actionVerb: lastAction,
+          hasBeenCounted: false,
         };
         isWaitingForItem = true;
         mouthSnapshot.clear();
