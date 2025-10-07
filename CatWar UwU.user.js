@@ -193,6 +193,10 @@ const uwuDefaultSettings = {
   clockFontSize: "14",
   clockPosition: "fly",
 
+  intervalTimerEnabled: false,
+  intervalTimerSound: "notificationSound1",
+  intervalTimerVolume: 5,
+
   describeHuntingSmell: false,
   huntingVirtualJoystick: false,
   sizeHuntingVirtualJoystick: "150",
@@ -2215,6 +2219,45 @@ const uwusettings =
             </button>
           </div>
           <hr id="uwu-hr" class="uwu-hr" />
+          <h2>Таймер-напоминалка</h2>
+          <div>
+            <p>
+              Включает перетаскиваемое окно с таймером, который будет циклично
+              воспроизводить звуковой сигнал через заданный интервал времени.
+            </p>
+            <input
+              type="checkbox"
+              id="interval-timer-enabled"
+              data-setting="intervalTimerEnabled"
+            />
+            <label for="interval-timer-enabled"
+              >Включить таймер-напоминалку</label
+            >
+          </div>
+          <div id="intervalTimerContainer">
+            <div class="custom-select" id="intervalTimerSound">
+              <div class="select-selected">Выберите звук</div>
+              <div class="select-items"></div>
+            </div>
+            <div id="notification-volume">
+              <p>Громкость</p>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value="5"
+                class="uwu-range-slider"
+                id="intervalTimerVolume"
+                list="volumeStep"
+                data-setting="intervalTimerVolume"
+              />
+              <datalist id="volumeStep">
+                <option value="1">10%</option>
+                <option value="10">100%</option>
+              </datalist>
+            </div>
+          </div>
+          <hr id="uwu-hr" class="uwu-hr" />
           <h2>Рот (инвентарь)</h2>
           <div>
             <p>
@@ -3145,7 +3188,8 @@ const newsPanel =
     <div id="news-panel">
       <button id="news-button">
         v${current_uwu_version} - Логи ловли, ура! (Меня заставили). Общие
-        сохранения между разными доменами!
+        сохранения между разными доменами и таймер-напоминалка, например для
+        осмотров!
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
@@ -3153,6 +3197,12 @@ const newsPanel =
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
         <p>— Возможность скрывать и раскрывать логи.</p>
+        <p>
+          — Стрелочка Минного поля показывает теперь скорее "состояние" окна,
+          чем "что сделается при клике". Нужно для уравнивания со стилем
+          Таймера-напоминалки, и просто выглядит "вроде" логичней для таких
+          штук.
+        </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
         <p>— Надеюсь исправлен расчёт значений Чистоты и Бодрости (Сна).</p>
@@ -5570,6 +5620,7 @@ if (targetSettings.test(window.location.href)) {
   createCustomSelect("notificationInMouthSound", notificationSounds);
   createCustomSelect("notificationInFightModeSound", notificationSounds);
   createCustomSelect("notificationBlockSound", notificationSounds);
+  createCustomSelect("intervalTimerSound", notificationSounds);
   // ==============================================================================
   const howShowOtherCatsList = [
     { name: "Не отображать", id: "1" },
@@ -5758,6 +5809,11 @@ if (targetSettings.test(window.location.href)) {
     "notificationBlockContainer",
     "notificationBlockSound",
     "notificationBlockVolume"
+  );
+  addSoundTestButton(
+    "intervalTimerContainer",
+    "intervalTimerSound",
+    "intervalTimerVolume"
   );
   // ====================================================================================================================
   //  . . . СБРОС ПОЗИЦИИ ЧАСИКОВ . . .
@@ -7547,6 +7603,338 @@ if (targetCW3.test(window.location.href)) {
       toggleFireflies();
     });
   }
+
+  // ====================================================================================================================
+  //   . . . ТАЙМЕР-НАПОМИНАЛКА . . .
+  // ====================================================================================================================
+  if (settings.intervalTimerEnabled) {
+    const intervalTimerPanelHTML =
+      /* HTML */
+      `
+        <div id="uwu-interval-timer-main-panel">
+          <div id="uwu-interval-timer-button">
+            <div class="left-content">
+              <h2 class="timer-title">Таймер</h2>
+              <span id="timer-header-countdown" style="display: none;"
+                >00:00</span
+              >
+            </div>
+            <div class="right-content">
+              <span id="uwu-interval-timer-toggle">▼</span>
+            </div>
+          </div>
+          <div id="uwu-interval-timer-container">
+            <div id="uwu-interval-timer-content">
+              <div class="timer-inputs">
+                <input
+                  type="number"
+                  id="timer-minutes-input"
+                  min="0"
+                  placeholder="Мин"
+                />
+                <span>:</span>
+                <input
+                  type="number"
+                  id="timer-seconds-input"
+                  min="0"
+                  max="59"
+                  placeholder="Сек"
+                />
+              </div>
+              <button
+                id="timer-start-stop-btn"
+                class="uwu-button install-button"
+              >
+                Старт
+              </button>
+              <div id="timer-countdown-display">00:00</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+    const globalContainer = document.getElementById("uwu-global-container");
+    globalContainer.insertAdjacentHTML("beforeend", intervalTimerPanelHTML);
+
+    const timerStyles = document.createElement("style");
+    timerStyles.innerHTML = /* CSS */ `
+      #uwu-interval-timer-main-panel {
+        z-index: 11;
+        pointer-events: auto;
+        width: 180px;
+        position: absolute;
+        top: 100px;
+        left: 100px;
+        background-color: ${theme?.climbingPanelBackground || "#ffffff08"};
+        border: 1px solid #ffffff1a;
+        backdrop-filter: blur(20px);
+        border-radius: 10px;
+        color: ${theme?.textColor || "#d5d5d5"};
+      }
+
+      #uwu-interval-timer-button {
+        height: 31px;
+        cursor: grab;
+        background-color: #00000026;
+        border-radius: 10px;
+        border: 1px solid #ffffff1a;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+      }
+
+      #uwu-interval-timer-button .left-content {
+        pointer-events: none;
+        width: 85%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #uwu-interval-timer-button .right-content {
+        pointer-events: none;
+        width: 15%;
+        text-align: right;
+      }
+
+      #uwu-interval-timer-button h2 {
+        display: flex;
+        margin-top: 2px;
+        margin-bottom: 2px;
+        justify-content: center;
+        pointer-events: none;
+      }
+
+      #uwu-interval-timer-toggle {
+        cursor: pointer;
+        font-size: 18px;
+        margin-right: 8px;
+      }
+
+      #uwu-interval-timer-container {
+        display: block;
+        padding: 5px;
+      }
+
+      #uwu-interval-timer-container.collapsed {
+        display: none;
+      }
+
+      #uwu-interval-timer-content {
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .timer-inputs {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .timer-inputs input {
+        width: 50px;
+        text-align: center;
+      }
+      #timer-countdown-display,
+      #timer-header-countdown {
+        font-size: 1.5em;
+        font-weight: bold;
+      }
+    `;
+
+    document.head.appendChild(timerStyles);
+
+    const timerPanel = document.getElementById("uwu-interval-timer-main-panel");
+    const header = document.getElementById("uwu-interval-timer-button");
+    const container = document.getElementById("uwu-interval-timer-container");
+    const toggleBtn = document.getElementById("uwu-interval-timer-toggle");
+    const minutesInput = document.getElementById("timer-minutes-input");
+    const secondsInput = document.getElementById("timer-seconds-input");
+    const startStopBtn = document.getElementById("timer-start-stop-btn");
+    const countdownDisplay = document.getElementById("timer-countdown-display");
+    const headerCountdown = document.getElementById("timer-header-countdown");
+    const timerTitle = document.querySelector("h2.timer-title");
+
+    let timerId = null;
+    let totalSeconds = 0;
+    let remainingSeconds = 0;
+    let isRunning = false;
+
+    let isDragging = false;
+    let wasDragging = false;
+    let offsetX, offsetY;
+
+    header.addEventListener("mousedown", (e) => {
+      isDragging = true;
+      wasDragging = false;
+      offsetX = e.clientX - timerPanel.offsetLeft;
+      offsetY = e.clientY - timerPanel.offsetTop;
+      header.style.cursor = "grabbing";
+    });
+    document.addEventListener("mousemove", (e) => {
+      if (isDragging) {
+        wasDragging = true;
+        timerPanel.style.left = `${e.clientX - offsetX}px`;
+        timerPanel.style.top = `${e.clientY - offsetY}px`;
+      }
+    });
+    document.addEventListener("mouseup", () => {
+      if (isDragging) {
+        isDragging = false;
+        header.style.cursor = "grab";
+        saveTimerState();
+      }
+    });
+
+    function togglePanel() {
+      container.classList.toggle("collapsed");
+
+      const isCollapsed = container.classList.contains("collapsed");
+      toggleBtn.textContent = isCollapsed ? "▶" : "▼";
+
+      timerTitle.style.display = isCollapsed && isRunning ? "none" : "inline";
+      headerCountdown.style.display =
+        isCollapsed && isRunning ? "inline" : "none";
+
+      saveTimerState();
+    }
+
+    header.addEventListener("click", () => {
+      if (!wasDragging) {
+        togglePanel();
+      }
+    });
+
+    function startTimer() {
+      const minutes = parseInt(minutesInput.value) || 0;
+      const seconds = parseInt(secondsInput.value) || 0;
+      totalSeconds = minutes * 60 + seconds;
+
+      if (totalSeconds <= 0) {
+        alert("Пожалуйста, введите корректное время.");
+        return;
+      }
+
+      isRunning = true;
+      startStopBtn.textContent = "Стоп";
+      startStopBtn.classList.remove("install-button");
+      startStopBtn.classList.add("remove-button");
+
+      remainingSeconds = totalSeconds;
+      updateDisplay();
+      playSound();
+
+      timerId = setInterval(() => {
+        remainingSeconds--;
+        if (remainingSeconds < 0) {
+          remainingSeconds = totalSeconds;
+          playSound();
+        }
+        updateDisplay();
+      }, 1000);
+
+      if (container.classList.contains("collapsed")) {
+        timerTitle.style.display = "none";
+        headerCountdown.style.display = "inline";
+      }
+      saveTimerState();
+    }
+
+    function stopTimer() {
+      isRunning = false;
+      startStopBtn.textContent = "Старт";
+      startStopBtn.classList.remove("remove-button");
+      startStopBtn.classList.add("install-button");
+
+      clearInterval(timerId);
+      timerId = null;
+      remainingSeconds = 0;
+      updateDisplay();
+
+      timerTitle.style.display = "inline";
+      headerCountdown.style.display = "none";
+    }
+
+    function updateDisplay() {
+      const mins = Math.floor(remainingSeconds / 60);
+      const secs = remainingSeconds % 60;
+      const timeString = `${String(mins).padStart(2, "0")}:${String(
+        secs
+      ).padStart(2, "0")}`;
+      countdownDisplay.textContent = timeString;
+      headerCountdown.textContent = timeString;
+    }
+
+    function playSound() {
+      soundManager.playSound(
+        settings.intervalTimerSound,
+        settings.intervalTimerVolume
+      );
+    }
+
+    startStopBtn.addEventListener("click", () => {
+      if (isRunning) {
+        stopTimer();
+      } else {
+        startTimer();
+      }
+    });
+
+    function saveTimerState() {
+      const state = {
+        x: timerPanel.offsetLeft,
+        y: timerPanel.offsetTop,
+        collapsed: container.classList.contains("collapsed"),
+        minutes: minutesInput.value,
+        seconds: secondsInput.value,
+      };
+      uwuStorage.setItem("uwu_intervalTimerState", state);
+    }
+
+    function checkAndResetPosition() {
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      const panelWidth = timerPanel.offsetWidth;
+      const panelHeight = timerPanel.offsetHeight;
+
+      let currentX = timerPanel.offsetLeft;
+      let currentY = timerPanel.offsetTop;
+
+      if (
+        currentX + panelWidth > windowWidth ||
+        currentY + panelHeight > windowHeight ||
+        currentX < 0 ||
+        currentY < 0
+      ) {
+        timerPanel.style.left = `100px`;
+        timerPanel.style.top = `100px`;
+        saveTimerState();
+      }
+    }
+
+    function loadTimerState() {
+      const state = uwuStorage.getItem("uwu_intervalTimerState");
+      if (state) {
+        timerPanel.style.left = `${state.x}px`;
+        timerPanel.style.top = `${state.y}px`;
+        if (state.collapsed) {
+          container.classList.add("collapsed");
+          toggleBtn.textContent = "▶";
+        }
+        minutesInput.value = state.minutes || "";
+        secondsInput.value = state.seconds || "";
+      }
+      updateDisplay();
+      checkAndResetPosition();
+    }
+
+    minutesInput.addEventListener("change", saveTimerState);
+    secondsInput.addEventListener("change", saveTimerState);
+
+    loadTimerState();
+  }
   // ====================================================================================================================
   //   . . . ЧАСЫ . . .
   // ====================================================================================================================
@@ -8911,7 +9299,7 @@ if (targetCW3.test(window.location.href)) {
               <h2>Минное поле</h2>
             </div>
             <div class="right-content">
-              <span id="uwu-arrow">▼</span>
+              <span id="uwu-arrow">▶</span>
             </div>
           </div>
           <div id="uwu-climbingPanelContainer">
@@ -9337,9 +9725,9 @@ if (targetCW3.test(window.location.href)) {
         saveClimbingPanelStatus();
 
         if (climbingPanelContainer.classList.contains("open")) {
-          arrow.textContent = "▲";
-        } else {
           arrow.textContent = "▼";
+        } else {
+          arrow.textContent = "▶";
         }
       }
       wasDragging = false;
