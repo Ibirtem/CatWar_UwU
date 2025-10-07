@@ -7777,13 +7777,31 @@ if (targetCW3.test(window.location.href)) {
       offsetY = e.clientY - timerPanel.offsetTop;
       header.style.cursor = "grabbing";
     });
+
     document.addEventListener("mousemove", (e) => {
       if (isDragging) {
         wasDragging = true;
-        timerPanel.style.left = `${e.clientX - offsetX}px`;
-        timerPanel.style.top = `${e.clientY - offsetY}px`;
+
+        let newX = e.clientX - offsetX;
+        let newY = e.clientY - offsetY;
+
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const panelWidth = timerPanel.offsetWidth;
+        const panelHeight = timerPanel.offsetHeight;
+
+        if (newX < 0) newX = 0;
+        if (newX + panelWidth > windowWidth) newX = windowWidth - panelWidth;
+
+        if (newY < 0) newY = 0;
+        if (newY + panelHeight > windowHeight)
+          newY = windowHeight - panelHeight;
+
+        timerPanel.style.left = `${newX}px`;
+        timerPanel.style.top = `${newY}px`;
       }
     });
+
     document.addEventListener("mouseup", () => {
       if (isDragging) {
         isDragging = false;
