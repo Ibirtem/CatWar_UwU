@@ -7705,6 +7705,10 @@ if (targetCW3.test(window.location.href)) {
         pointer-events: none;
       }
 
+      #timer-start-stop-btn {
+        width: -webkit-fill-available;
+      }
+
       #uwu-interval-timer-toggle {
         cursor: pointer;
         font-size: 18px;
@@ -9136,6 +9140,7 @@ if (targetCW3.test(window.location.href)) {
 
     function loadClimbingPanelStatus() {
       const savedStatus = uwuStorage.getItem("uwu_climbingPanelStatus");
+      const arrow = document.getElementById("uwu-arrow");
 
       if (savedStatus) {
         const status = savedStatus;
@@ -9144,6 +9149,13 @@ if (targetCW3.test(window.location.href)) {
         currentY = status.y;
 
         climbingPanelContainer.classList.toggle("open", status.isOpen);
+
+        if (status.isOpen) {
+          arrow.textContent = "▼";
+        } else {
+          arrow.textContent = "▶";
+        }
+
         transferCheckbox.checked = status.isChecked;
 
         tabManager.currentTabIndex = status.currentTabIndex;
@@ -9161,6 +9173,7 @@ if (targetCW3.test(window.location.href)) {
         }
       } else {
         tabManager.render();
+        arrow.textContent = "▶";
       }
 
       checkAndResetPanelPosition();
