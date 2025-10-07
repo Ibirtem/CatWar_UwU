@@ -3008,8 +3008,15 @@ const newsPanel =
           — Добавлены статусы "На удалении" и "Заблокирован'о" на валидацию в
           Лог Чистильщика.
         </p>
-        <p>— Чуть повышено КД перед повторной проверкой онлайн времени.</p>
-        <p>— Потенциально починил дублирование запросов на проверки онлайн времени.</p>
+        <p>— Повышено КД перед повторной проверкой онлайн времени.</p>
+        <p>
+          — Потенциально починил дублирование запросов на проверки онлайн
+          времени.
+        </p>
+        <p>
+          — Потенциально починилось то, что коты в Логе чистильщика перестают
+          быть кликабельными при объединении в одни квадратные скобки.
+        </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: .10.25</p>
       </div>
@@ -7406,7 +7413,7 @@ if (targetCW3.test(window.location.href)) {
     let internetTime = null;
     let timerInterval = null;
     let lastSyncTimestamp = 0;
-    const SYNC_COOLDOWN_MS = 2 * 60 * 1000;
+    const SYNC_COOLDOWN_MS = 3 * 60 * 1000;
     let isFetchingTime = false;
 
     function updateClock(timeSource = new Date()) {
@@ -7645,13 +7652,16 @@ if (targetCW3.test(window.location.href)) {
     }
 
     function handleFocusOrVisibilityChange() {
-      if (document.hidden) {
+      if (document.hidden || isFetchingTime) {
         return;
       }
 
       const now = Date.now();
       if (now - lastSyncTimestamp > SYNC_COOLDOWN_MS) {
-        fetchInternetTime();
+        isFetchingTime = true;
+        fetchInternetTime().finally(() => {
+          isFetchingTime = false;
+        });
       }
     }
 
@@ -10837,14 +10847,24 @@ if (targetCW3.test(window.location.href)) {
 
     function addCatLinksToLog(log, catNamesAndIds) {
       let logWithLinks = log;
-      catNamesAndIds.forEach(({ name, id }) => {
-        const regex = new RegExp(`\\[${name}( ${id})?\\]`, "g");
-        logWithLinks = logWithLinks.replace(
-          regex,
-          `[<a href="/cat${id}" target="_blank">${name}</a>${
-            settings.cleaningLogShowID ? ` ${id}` : ""
-          }]`
-        );
+      const nameToIdMap = new Map(
+        catNamesAndIds.map((cat) => [cat.name, cat.id])
+      );
+
+      logWithLinks = logWithLinks.replace(/\[([^\]]+)\]/g, (match, content) => {
+        const names = content.split(", ");
+        const linkedNames = names.map((nameWithId) => {
+          const name = nameWithId.split(" ")[0];
+          const id = nameToIdMap.get(name);
+          if (id) {
+            return nameWithId.replace(
+              name,
+              `<a href="/cat${id}" target="_blank">${name}</a>`
+            );
+          }
+          return nameWithId;
+        });
+        return `[${linkedNames.join(", ")}]`;
       });
       return logWithLinks;
     }
