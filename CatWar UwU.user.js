@@ -2570,6 +2570,47 @@ const uwusettings =
             <label>px; - Начальная высота Лога</label>
           </div>
 
+          <div>
+            <p>
+              Здесь вы можете добавить свои собственные названия для предметов
+              по их ID. Каждая запись должна быть на новой строке в формате
+              "ID=Название". Например: <code>3966=Рыбка</code>. Этот список
+              имеет приоритет над встроенным.
+            </p>
+            <textarea
+              id="catching-log-custom-items"
+              rows="10"
+              style="width: 100%"
+              placeholder="3966=Рыба&#10;3967=Рыба побольше"
+            ></textarea>
+            <button
+              id="save-custom-items-btn"
+              class="uwu-button install-button"
+            >
+              Сохранить
+            </button>
+          </div>
+          <div>
+            <p>Импорт/Экспорт вашего списка названий предметов.</p>
+            <input
+              type="text"
+              id="custom-items-export-field"
+              placeholder="Экспорт"
+              readonly
+            />
+            <input
+              type="text"
+              id="custom-items-import-field"
+              placeholder="Импорт"
+            />
+            <button
+              id="custom-items-import-btn"
+              class="uwu-button install-button"
+            >
+              Вставить
+            </button>
+          </div>
+
           <hr id="uwu-hr" class="uwu-hr" />
           <h2>Быстрые ссылки</h2>
 
@@ -5304,6 +5345,7 @@ if (targetSettings.test(window.location.href)) {
     "uwu_fastStyles",
     "uwu_fastStyles_hideCatTooltip",
     "uwu_fightTeamsCats",
+    "uwu_catchingLog_customItems",
   ];
 
   function resetAllSaves() {
@@ -5428,6 +5470,87 @@ if (targetSettings.test(window.location.href)) {
         saveSettings();
       });
     });
+
+  // ====================================================================================================================
+  //  . . . НАСТРОЙКИ ЛОГА ЛОВЛИ - СВОИ НАЗВАНИЯ ПРЕДМЕТОВ . . .
+  // ====================================================================================================================
+  function setupCatchingLogCustomItems() {
+    const textarea = document.getElementById("catching-log-custom-items");
+    const saveBtn = document.getElementById("save-custom-items-btn");
+    const exportField = document.getElementById("custom-items-export-field");
+    const importField = document.getElementById("custom-items-import-field");
+    const importBtn = document.getElementById("custom-items-import-btn");
+
+    if (!textarea || !saveBtn || !exportField || !importField || !importBtn)
+      return;
+
+    function parseTextareaToObject(text) {
+      const lines = text.split("\n");
+      const obj = {};
+      lines.forEach((line) => {
+        if (line.includes("=")) {
+          const parts = line.split("=");
+          const id = parts[0].trim();
+          const name = parts.slice(1).join("=").trim();
+          if (id && name) {
+            obj[id] = name;
+          }
+        }
+      });
+      return obj;
+    }
+
+    function objectToTextarea(obj) {
+      return Object.entries(obj)
+        .map(([id, name]) => `${id}=${name}`)
+        .join("\n");
+    }
+
+    function loadAndDisplay() {
+      const customItems =
+        uwuStorage.getItem("uwu_catchingLog_customItems") || {};
+      textarea.value = objectToTextarea(customItems);
+      exportField.value = JSON.stringify(customItems);
+    }
+
+    saveBtn.addEventListener("click", () => {
+      const customItemsObject = parseTextareaToObject(textarea.value);
+      uwuStorage.setItem("uwu_catchingLog_customItems", customItemsObject);
+      alert("Список названий сохранён!");
+      loadAndDisplay();
+    });
+
+    importBtn.addEventListener("click", () => {
+      const jsonString = importField.value;
+      if (!jsonString.trim()) {
+        alert("Поле для импорта пустое.");
+        return;
+      }
+      try {
+        const importedItems = JSON.parse(jsonString);
+        if (typeof importedItems !== "object" || importedItems === null) {
+          throw new Error("Неверный формат данных.");
+        }
+        uwuStorage.setItem("uwu_catchingLog_customItems", importedItems);
+        alert("Список названий успешно импортирован!");
+        importField.value = "";
+        loadAndDisplay();
+      } catch (error) {
+        alert(
+          "Ошибка! Не удалось импортировать список. Проверьте корректность вставленных данных."
+        );
+        console.error("UwU | Ошибка импорта названий предметов:", error);
+      }
+    });
+
+    exportField.addEventListener("click", function () {
+      this.select();
+    });
+
+    loadAndDisplay();
+  }
+
+  setupCatchingLogCustomItems();
   // ====================================================================================================================
   //  . . . СОЗДАНИЕ ВЫПАДАЮЩИХ СПИСКОВ ПРИ ПОМОЩИ ФУНКЦИИ createCustomSelect . . .
   // ====================================================================================================================
@@ -11460,6 +11583,25 @@ if (targetCW3.test(window.location.href)) {
       8043: "Упитанная мышь",
     };
 
+    let customItemNames = null;
+
+    function getItemNameById(itemId) {
+      if (customItemNames === null) {
+        customItemNames =
+          uwuStorage.getItem("uwu_catchingLog_customItems") || {};
+      }
+
+      if (customItemNames.hasOwnProperty(itemId)) {
+        return customItemNames[itemId];
+      }
+
+      if (itemNamesById.hasOwnProperty(itemId)) {
+        return itemNamesById[itemId];
+      }
+
+      return null;
+    }
+
     function getActivityType(actionText) {
       for (const key in activityTypes) {
         if (activityTypes[key].triggers.includes(actionText)) {
@@ -11505,7 +11647,7 @@ if (targetCW3.test(window.location.href)) {
         if (session.summary.length > 0) {
           summaryHtml = "<ul style='margin: 0; padding-left: 20px;'>";
           session.summary.forEach((catchInfo) => {
-            const itemName = itemNamesById[catchInfo.itemId];
+            const itemName = getItemNameById(catchInfo.itemId);
             const itemDisplayName = itemName ? `${itemName} ` : "";
             summaryHtml += `<li>${itemDisplayName}ID ${catchInfo.itemId} в ${catchInfo.time}</li>`;
           });
