@@ -3194,8 +3194,11 @@ const newsPanel =
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>— Я усталь.</p>
-        <p>— Добавлена возможность удалять из Лога чистильщика последнего опущенного кота. 
-        Полезно, когда он проснулся во рту и попросился погулять.</p>
+        <p>
+          — Добавлена возможность удалять из Лога чистильщика последнего
+          опущенного кота. Полезно, когда он проснулся во рту и попросился
+          погулять.
+        </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
         <p>— Возможность скрывать и раскрывать логи.</p>
@@ -12094,6 +12097,42 @@ if (targetCW3.test(window.location.href)) {
     let mouthSnapshot = new Set();
     let pendingActivity = null;
 
+    let catchingState = {
+      isWaiting: false, // Находимся ли мы в процессе ожидания результата?
+      actionType: null, // Тип действия (diving, crevice)
+      actionVerb: null, // Глагол действия (Нырнул, Осмотрела)
+      foundItem: null, // Информация о найденном, но не подтвержденном предмете
+      historyGaveClear: false, // Дала ли история "зеленый свет"?
+    };
+
+    function resetCatchingState() {
+      catchingState.isWaiting = false;
+      catchingState.actionType = null;
+      catchingState.actionVerb = null;
+      catchingState.foundItem = null;
+      catchingState.historyGaveClear = false;
+      isWaitingForItem = false;
+    }
+
+    function logFoundItem(itemId) {
+      const logData = uwuStorage.getItem("uwu_catchingLogData") || [];
+      const lastSession =
+        logData.length > 0 ? logData[logData.length - 1] : null;
+
+      if (lastSession && lastSession.type === catchingState.actionType) {
+        const catchTime = new Date().toLocaleTimeString("ru-RU", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        lastSession.summary.unshift({
+          itemId: itemId,
+          time: catchTime,
+        });
+        uwuStorage.setItem("uwu_catchingLogData", logData);
+        renderCatchingLog(logData);
+      }
+    }
+
     const activityTypes = {
       diving: {
         triggers: ["Нырнул.", "Нырнула."],
@@ -12260,7 +12299,7 @@ if (targetCW3.test(window.location.href)) {
     }
 
     function handleMouthChange(mutationsList) {
-      if (!isWaitingForItem) return;
+      if (!catchingState.isWaiting) return;
 
       for (const mutation of mutationsList) {
         if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
@@ -12271,23 +12310,13 @@ if (targetCW3.test(window.location.href)) {
                 const itemIdMatch = img.src.match(/things\/(\d+)\.png/);
                 if (itemIdMatch) {
                   const itemId = itemIdMatch[1];
-                  const logData =
-                    uwuStorage.getItem("uwu_catchingLogData") || [];
-                  const lastSession = logData[logData.length - 1];
 
-                  if (lastSession) {
-                    const catchTime = new Date().toLocaleTimeString("ru-RU", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    });
-                    lastSession.summary.unshift({
-                      itemId: itemId,
-                      time: catchTime,
-                    });
-                    uwuStorage.setItem("uwu_catchingLogData", logData);
-                    renderCatchingLog(logData);
+                  if (catchingState.historyGaveClear) {
+                    logFoundItem(itemId);
+                    resetCatchingState();
+                  } else {
+                    catchingState.foundItem = itemId;
                   }
-                  isWaitingForItem = false;
                   return;
                 }
               }
@@ -12310,31 +12339,45 @@ if (targetCW3.test(window.location.href)) {
       const lastAction = actions[actions.length - 1];
       const isNewStartAction = getActivityType(lastAction);
 
-      if (pendingActivity) {
-        const cancelWordsRegex = /Отменил|Отменила/;
-        const stopWordsRegex = /Пошла|Поднял|Подняла/;
+      // Если мы в состоянии ожидания, анализируем новую запись в истории
+      if (catchingState.isWaiting) {
+        const stopWordsRegex = /Отменил|Отменила|Пошла|Поднял|Подняла/;
 
+        // Если это новое действие или стоп-слово, завершаем предыдущую попытку
         if (isNewStartAction || stopWordsRegex.test(lastAction)) {
-          pendingActivity = null;
-          isWaitingForItem = false;
-        } else if (cancelWordsRegex.test(lastAction)) {
-          pendingActivity = null;
-          isWaitingForItem = false;
-          return;
-        } else {
-          if (!pendingActivity.hasBeenCounted) {
+          // Если это не отмена, значит попытка была, просто она пустая
+          if (!/Отменил|Отменила/.test(lastAction)) {
             const logData = uwuStorage.getItem("uwu_catchingLogData") || [];
             let lastSession =
               logData.length > 0 ? logData[logData.length - 1] : null;
-
-            if (lastSession && lastSession.type === pendingActivity.type) {
+            if (lastSession && lastSession.type === catchingState.actionType) {
               lastSession.totalDives++;
               lastSession.lastActionTime = Date.now();
-              pendingActivity.hasBeenCounted = true;
               uwuStorage.setItem("uwu_catchingLogData", logData);
               renderCatchingLog(logData);
             }
           }
+          // Сбрасываем состояние, так как попытка завершена (успешно или нет)
+          resetCatchingState();
+        } else {
+          // Если это не стоп-слово, значит это "зеленый свет"
+          catchingState.historyGaveClear = true;
+          const logData = uwuStorage.getItem("uwu_catchingLogData") || [];
+          let lastSession =
+            logData.length > 0 ? logData[logData.length - 1] : null;
+          if (lastSession && lastSession.type === catchingState.actionType) {
+            lastSession.totalDives++;
+            lastSession.lastActionTime = Date.now();
+            uwuStorage.setItem("uwu_catchingLogData", logData);
+            renderCatchingLog(logData);
+          }
+
+          // Если предмет уже был найден (появился раньше истории), логируем его
+          if (catchingState.foundItem) {
+            logFoundItem(catchingState.foundItem);
+            resetCatchingState();
+          }
+          // Если предмета еще нет, просто оставляем флаг historyGaveClear=true и ждем его появления
         }
       }
 
@@ -12364,12 +12407,13 @@ if (targetCW3.test(window.location.href)) {
           renderCatchingLog(logData);
         }
 
-        pendingActivity = {
-          type: isNewStartAction.type,
-          actionVerb: lastAction,
-          hasBeenCounted: false,
-        };
-        isWaitingForItem = true;
+        // Взводим систему в состояние ожидания
+        resetCatchingState();
+        catchingState.isWaiting = true;
+        catchingState.actionType = isNewStartAction.type;
+        catchingState.actionVerb = lastAction;
+
+        // Делаем снимок рта
         mouthSnapshot.clear();
         const itemsInMouth = document.querySelectorAll("#itemList > div");
         itemsInMouth.forEach((item) => {
