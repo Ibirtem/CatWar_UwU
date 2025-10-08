@@ -3194,6 +3194,8 @@ const newsPanel =
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>— Я усталь.</p>
+        <p>— Добавлена возможность удалять из Лога чистильщика последнего опущенного кота. 
+        Полезно, когда он проснулся во рту и попросился погулять.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
         <p>— Возможность скрывать и раскрывать логи.</p>
@@ -11380,6 +11382,8 @@ if (targetCW3.test(window.location.href)) {
       catching: false,
     };
 
+    let lastDroppedCatInfo = null;
+
     function saveLogStates() {
       uwuStorage.setItem("uwu_logStates", logStates);
     }
@@ -11466,19 +11470,45 @@ if (targetCW3.test(window.location.href)) {
     }
 
     function createCleaningLogBlock(historyBlock) {
-      const cleaningLogTemplate = `
-      <div id="uwu-cleaningLog">
-        <h2><a href="#" id="uwu-cleaningLog-toggle" class="toggle">Лог чистильщика</a></h2>
-        <div id="uwu-cleaningLog-content-wrapper">
-            <div id="uwu-cleaningLog-content"></div>
-            <div id="uwu-cleaningLog-counters">
-              <span>Успешно поднятых: <span id="uwu-cleaningLog-counter-pickup">0</span></span>
-              <span>Опущенных: <span id="uwu-cleaningLog-counter-putdown">0</span></span>
+      const cleaningLogTemplate =
+        /* HTML */
+        `
+          <div id="uwu-cleaningLog">
+            <h2>
+              <a href="#" id="uwu-cleaningLog-toggle" class="toggle"
+                >Лог чистильщика</a
+              >
+            </h2>
+            <div id="uwu-cleaningLog-content-wrapper">
+              <div id="uwu-cleaningLog-content"></div>
+              <div id="uwu-cleaningLog-counters">
+                <span
+                  >Успешно поднятых:
+                  <span id="uwu-cleaningLog-counter-pickup">0</span></span
+                >
+                <span
+                  >Опущенных:
+                  <span id="uwu-cleaningLog-counter-putdown">0</span></span
+                >
+              </div>
+              <div id="uwu-cleaningLog-actions">
+                <a href="#" id="uwu-cleaningLog-clear">Очистить лог</a>
+                <a
+                  href="#"
+                  id="uwu-cleaningLog-delete-last"
+                  class="disabled"
+                  title="Удалить последнего опущенного персонажа"
+                >
+                  <img
+                    src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/wastebasket.png"
+                    alt="Удалить"
+                    style="width: 18px; height: 18px; vertical-align: middle;"
+                  />
+                </a>
+              </div>
             </div>
-            <a href="#" id="uwu-cleaningLog-clear">Очистить лог</a>
-        </div>
-      </div>
-    `;
+          </div>
+        `;
 
       historyBlock.insertAdjacentHTML("beforeend", cleaningLogTemplate);
 
@@ -11491,7 +11521,9 @@ if (targetCW3.test(window.location.href)) {
       const cleaningLogContent = historyBlock.querySelector(
         "#uwu-cleaningLog-content"
       );
+
       const savedLog = uwuStorage.getItem("uwu_cleaningLogSmart");
+
       if (savedLog) {
         const savedData = savedLog;
         cleaningLogBuffer = savedData.log;
@@ -11520,6 +11552,20 @@ if (targetCW3.test(window.location.href)) {
           "0";
         cleaningLogContent.innerHTML = "";
         uwuStorage.removeItem("uwu_cleaningLogSmart");
+        lastDroppedCatInfo = null;
+        document
+          .getElementById("uwu-cleaningLog-delete-last")
+          ?.classList.add("disabled");
+      });
+
+      const deleteLastButton = historyBlock.querySelector(
+        "#uwu-cleaningLog-delete-last"
+      );
+      deleteLastButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (!deleteLastButton.classList.contains("disabled")) {
+          deleteLastDroppedEntry();
+        }
       });
 
       const toggleButton = historyBlock.querySelector(
@@ -11688,6 +11734,108 @@ if (targetCW3.test(window.location.href)) {
       return null;
     }
 
+    function deleteLastDroppedEntry() {
+      if (!lastDroppedCatInfo) return;
+
+      const { catName, catId } = lastDroppedCatInfo;
+      const catIdentifier = `${catName}${
+        settings.cleaningLogShowID ? ` ${catId}` : ""
+      }`;
+
+      let logLines = cleaningLogBuffer
+        .split(".")
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+      let putdownRemoved = false;
+      let pickupRemoved = false;
+
+      for (let i = logLines.length - 1; i >= 0; i--) {
+        let line = logLines[i];
+        if (line.startsWith("Опущен") && line.includes(catIdentifier)) {
+          const match = line.match(/\[([^\]]+)\]/);
+          if (match) {
+            let catsInGroup = match[1].split(",").map((c) => c.trim());
+            if (catsInGroup.length > 1) {
+              catsInGroup = catsInGroup.filter((c) => c !== catIdentifier);
+              logLines[i] = line.replace(
+                /\[([^\]]+)\]/,
+                `[${catsInGroup.join(", ")}]`
+              );
+            } else {
+              logLines.splice(i, 1);
+            }
+            putdownRemoved = true;
+            break;
+          }
+        }
+      }
+
+      if (putdownRemoved) {
+        for (let i = logLines.length - 1; i >= 0; i--) {
+          let line = logLines[i];
+          if (
+            line.startsWith("Проверен и поднят") &&
+            line.includes(catIdentifier)
+          ) {
+            const match = line.match(/\[([^\]]+)\]/);
+            if (match) {
+              let catsInGroup = match[1].split(",").map((c) => c.trim());
+              if (catsInGroup.length > 1) {
+                catsInGroup = catsInGroup.filter((c) => c !== catIdentifier);
+                logLines[i] = line.replace(
+                  /\[([^\]]+)\]/,
+                  `[${catsInGroup.join(", ")}]`
+                );
+              } else {
+                logLines.splice(i, 1);
+              }
+              pickupRemoved = true;
+              break;
+            }
+          }
+        }
+      }
+
+      if (putdownRemoved && pickupRemoved) {
+        cleaningLogBuffer =
+          logLines.join(". ") + (logLines.length > 0 ? "." : "");
+
+        const pickupCounter = document.getElementById(
+          "uwu-cleaningLog-counter-pickup"
+        );
+        const putdownCounter = document.getElementById(
+          "uwu-cleaningLog-counter-putdown"
+        );
+        pickupCounter.textContent = parseInt(pickupCounter.textContent) - 1;
+        putdownCounter.textContent = parseInt(putdownCounter.textContent) - 1;
+
+        const cleaningLogContent = document.getElementById(
+          "uwu-cleaningLog-content"
+        );
+        cleaningLogContent.innerHTML = addCatLinksToLog(
+          cleaningLogBuffer,
+          catNamesAndIds
+        );
+
+        uwuStorage.setItem("uwu_cleaningLogSmart", {
+          log: cleaningLogBuffer,
+          catNamesAndIds,
+          counters: {
+            pickup: parseInt(pickupCounter.textContent),
+            putdown: parseInt(putdownCounter.textContent),
+          },
+        });
+      } else {
+        console.warn("UwU | Не удалось найти парные записи для удаления.");
+      }
+
+      lastDroppedCatInfo = null;
+      document
+        .getElementById("uwu-cleaningLog-delete-last")
+        ?.classList.add("disabled");
+    }
+
     function processCheckAction(logLines, catName, catId, location) {
       const lastLogIndex = logLines.length - 1;
       const isCatSleeping = checkCatStatus(catId);
@@ -11717,6 +11865,10 @@ if (targetCW3.test(window.location.href)) {
       if (!catNamesAndIds.some((cat) => cat.id === catId)) {
         catNamesAndIds.push({ name: catName, id: catId });
       }
+      lastDroppedCatInfo = null;
+      document
+        .getElementById("uwu-cleaningLog-delete-last")
+        ?.classList.add("disabled");
     }
 
     function processPutdownAction(logLines, catName, catId, location) {
@@ -11775,6 +11927,10 @@ if (targetCW3.test(window.location.href)) {
         "uwu-cleaningLog-counter-putdown"
       );
       putdownCounter.textContent = parseInt(putdownCounter.textContent) + 1;
+      lastDroppedCatInfo = { catName, catId };
+      document
+        .getElementById("uwu-cleaningLog-delete-last")
+        ?.classList.remove("disabled");
     }
 
     function processPickupAction(logLines, catName, catId, location) {
@@ -11866,6 +12022,10 @@ if (targetCW3.test(window.location.href)) {
         "uwu-cleaningLog-counter-pickup"
       );
       pickupCounter.textContent = parseInt(pickupCounter.textContent) + 1;
+      lastDroppedCatInfo = null;
+      document
+        .getElementById("uwu-cleaningLog-delete-last")
+        ?.classList.add("disabled");
     }
 
     function processUnmatchedAction(logLines, cleaningLogContent, action) {
@@ -11886,6 +12046,10 @@ if (targetCW3.test(window.location.href)) {
           catNamesAndIds
         );
       }
+      lastDroppedCatInfo = null;
+      document
+        .getElementById("uwu-cleaningLog-delete-last")
+        ?.classList.add("disabled");
     }
 
     setupMutationObserver("#history_block", cleaningLogUpdate, {
@@ -11899,6 +12063,17 @@ if (targetCW3.test(window.location.href)) {
             height: ${settings.cleaningLogHeight || 120}px;
             overflow-y: auto;
             resize: vertical;
+          }
+          #uwu-cleaningLog-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 5px;
+          }
+          #uwu-cleaningLog-delete-last.disabled {
+            pointer-events: none;
+            opacity: 0.5;
+            cursor: not-allowed;
           }
           `;
     document.head.appendChild(cleaningLogStyle);
