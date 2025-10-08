@@ -3205,25 +3205,29 @@ const newsPanel =
         <p>
           — Стрелочка Минного поля показывает теперь скорее "состояние" окна,
           чем "что сделается при клике". Нужно для уравнивания со стилем
-          Таймера-напоминалки, и просто выглядит "вроде" логичней для таких
+          Таймера-напоминалки, и просто "вроде" выглядит логичней для таких
           штук.
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
         <p>— Надеюсь исправлен расчёт значений Чистоты и Бодрости (Сна).</p>
         <p>
-          — Добавлены статусы "На удалении" и "Заблокирован'о" на валидацию в
-          Лог Чистильщика.
+          — Добавлены статусы "На удалении" и "Заблокирован" на валидацию в Лог
+          Чистильщика.
         </p>
-        <p>— Повышено КД перед повторной проверкой онлайн времени.</p>
+        <p>
+          — Повышено КД перед повторной проверкой онлайн времени, чтобы не
+          спамить бедным на сервера.
+        </p>
         <p>— Починка дублирования запросов на проверки онлайн времени.</p>
         <p>
           — Коты в Логе чистильщика теперь должны быть снова кликабельными при
-          объединении в одни квадратные скобки.
+          объединении в одни квадратные скобки (Хотя бывает всё равно глючит,
+          мне лень править)
         </p>
         <p>
-          — Потенциальный быстрый фикс Экспорта. Теперь работает со всеми
-          сохранениями, как минимум личные сообщения не будут теряться.
+          — Кривой недофикс Экспорта настроек. Теперь работает "со всеми"
+          сохранениями. Как минимум личные сообщения не будут теряться.
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: .10.25</p>
@@ -12101,7 +12105,8 @@ if (targetCW3.test(window.location.href)) {
 
     let isWaitingForItem = false;
     let mouthSnapshot = new Set();
-    let pendingActivity = null;
+
+    const stopWordsRegex = /Отменил|Отменила|Пошла|Пошёл|Поднял|Подняла/;
 
     let catchingState = {
       isWaiting: false, // Находимся ли мы в процессе ожидания результата?
@@ -12109,6 +12114,7 @@ if (targetCW3.test(window.location.href)) {
       actionVerb: null, // Глагол действия (Нырнул, Осмотрела)
       foundItem: null, // Информация о найденном, но не подтвержденном предмете
       historyGaveClear: false, // Дала ли история "зеленый свет"?
+      attemptCounted: false, // Гарант, что попытка засчитана только один раз
     };
 
     function resetCatchingState() {
@@ -12117,6 +12123,7 @@ if (targetCW3.test(window.location.href)) {
       catchingState.actionVerb = null;
       catchingState.foundItem = null;
       catchingState.historyGaveClear = false;
+      catchingState.attemptCounted = false;
       isWaitingForItem = false;
     }
 
@@ -12345,14 +12352,28 @@ if (targetCW3.test(window.location.href)) {
       const lastAction = actions[actions.length - 1];
       const isNewStartAction = getActivityType(lastAction);
 
-      // Если мы в состоянии ожидания, анализируем новую запись в истории
       if (catchingState.isWaiting) {
-        const stopWordsRegex = /Отменил|Отменила|Пошла|Поднял|Подняла/;
-
-        // Если это новое действие или стоп-слово, завершаем предыдущую попытку
         if (isNewStartAction || stopWordsRegex.test(lastAction)) {
-          // Если это не отмена, значит попытка была, просто она пустая
           if (!/Отменил|Отменила/.test(lastAction)) {
+            if (!catchingState.attemptCounted) {
+              const logData = uwuStorage.getItem("uwu_catchingLogData") || [];
+              let lastSession =
+                logData.length > 0 ? logData[logData.length - 1] : null;
+              if (
+                lastSession &&
+                lastSession.type === catchingState.actionType
+              ) {
+                lastSession.totalDives++;
+                lastSession.lastActionTime = Date.now();
+                uwuStorage.setItem("uwu_catchingLogData", logData);
+                renderCatchingLog(logData);
+              }
+              catchingState.attemptCounted = true;
+            }
+          }
+          resetCatchingState();
+        } else {
+          if (!catchingState.attemptCounted) {
             const logData = uwuStorage.getItem("uwu_catchingLogData") || [];
             let lastSession =
               logData.length > 0 ? logData[logData.length - 1] : null;
@@ -12362,28 +12383,15 @@ if (targetCW3.test(window.location.href)) {
               uwuStorage.setItem("uwu_catchingLogData", logData);
               renderCatchingLog(logData);
             }
-          }
-          // Сбрасываем состояние, так как попытка завершена (успешно или нет)
-          resetCatchingState();
-        } else {
-          // Если это не стоп-слово, значит это "зеленый свет"
-          catchingState.historyGaveClear = true;
-          const logData = uwuStorage.getItem("uwu_catchingLogData") || [];
-          let lastSession =
-            logData.length > 0 ? logData[logData.length - 1] : null;
-          if (lastSession && lastSession.type === catchingState.actionType) {
-            lastSession.totalDives++;
-            lastSession.lastActionTime = Date.now();
-            uwuStorage.setItem("uwu_catchingLogData", logData);
-            renderCatchingLog(logData);
+            catchingState.attemptCounted = true;
           }
 
-          // Если предмет уже был найден (появился раньше истории), логируем его
+          catchingState.historyGaveClear = true;
+
           if (catchingState.foundItem) {
             logFoundItem(catchingState.foundItem);
             resetCatchingState();
           }
-          // Если предмета еще нет, просто оставляем флаг historyGaveClear=true и ждем его появления
         }
       }
 
@@ -12413,13 +12421,11 @@ if (targetCW3.test(window.location.href)) {
           renderCatchingLog(logData);
         }
 
-        // Взводим систему в состояние ожидания
         resetCatchingState();
         catchingState.isWaiting = true;
         catchingState.actionType = isNewStartAction.type;
         catchingState.actionVerb = lastAction;
 
-        // Делаем снимок рта
         mouthSnapshot.clear();
         const itemsInMouth = document.querySelectorAll("#itemList > div");
         itemsInMouth.forEach((item) => {
