@@ -11546,19 +11546,25 @@ if (targetCW3.test(window.location.href)) {
       }
 
       const clearButton = historyBlock.querySelector("#uwu-cleaningLog-clear");
-      clearButton.addEventListener("click", () => {
-        cleaningLogBuffer = "";
-        catNamesAndIds = [];
-        document.getElementById("uwu-cleaningLog-counter-pickup").textContent =
-          "0";
-        document.getElementById("uwu-cleaningLog-counter-putdown").textContent =
-          "0";
-        cleaningLogContent.innerHTML = "";
-        uwuStorage.removeItem("uwu_cleaningLogSmart");
-        lastDroppedCatInfo = null;
-        document
-          .getElementById("uwu-cleaningLog-delete-last")
-          ?.classList.add("disabled");
+      clearButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (confirm("Вы уверены, что хотите очистить лог чистильщика?")) {
+          cleaningLogBuffer = "";
+          catNamesAndIds = [];
+          document.getElementById(
+            "uwu-cleaningLog-counter-pickup"
+          ).textContent = "0";
+          document.getElementById(
+            "uwu-cleaningLog-counter-putdown"
+          ).textContent = "0";
+          cleaningLogContent.innerHTML = "";
+          uwuStorage.removeItem("uwu_cleaningLogSmart");
+
+          lastDroppedCatInfo = null;
+          document
+            .getElementById("uwu-cleaningLog-delete-last")
+            ?.classList.add("disabled");
+        }
       });
 
       const deleteLastButton = historyBlock.querySelector(
