@@ -3229,6 +3229,7 @@ const newsPanel =
           — Кривой недофикс Экспорта настроек. Теперь работает "со всеми"
           сохранениями. Как минимум личные сообщения не будут теряться.
         </p>
+        <p>— Убран спам часами в консоль браузера.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: .10.25</p>
       </div>
@@ -8230,13 +8231,13 @@ if (targetCW3.test(window.location.href)) {
             internetTime = await provider.parseResponse(response);
             useInternetTime = true;
             lastSyncTimestamp = Date.now();
-            console.log(`Время успешно получено от ${provider.name}.`);
+            // console.log(`Время успешно получено от ${provider.name}.`);
             break;
           } catch (error) {
-            console.warn(
-              `Не удалось получить время от ${provider.name}, пробую следующий источник.`,
-              error
-            );
+            // console.warn(
+            //   `Не удалось получить время от ${provider.name}, пробую следующий источник.`,
+            //   error
+            // );
             useInternetTime = false;
           }
         }
@@ -8244,9 +8245,9 @@ if (targetCW3.test(window.location.href)) {
         if (useInternetTime) {
           updateClockWithInternetTime();
         } else {
-          console.warn(
-            "Не удалось получить время от всех онлайн-источников, используется локальное время."
-          );
+          // console.warn(
+          //   "Не удалось получить время от всех онлайн-источников, используется локальное время."
+          // );
           useInternetTime = false;
           updateClockWithLocalTime();
         }
@@ -12115,6 +12116,8 @@ if (targetCW3.test(window.location.href)) {
       foundItem: null, // Информация о найденном, но не подтвержденном предмете
       historyGaveClear: false, // Дала ли история "зеленый свет"?
       attemptCounted: false, // Гарант, что попытка засчитана только один раз
+      lastLoggedItemInCycle: null,
+      catchLoggedThisCycle: false,
     };
 
     function resetCatchingState() {
@@ -12124,6 +12127,8 @@ if (targetCW3.test(window.location.href)) {
       catchingState.foundItem = null;
       catchingState.historyGaveClear = false;
       catchingState.attemptCounted = false;
+      catchingState.lastLoggedItemInCycle = null;
+      catchingState.catchLoggedThisCycle = false;
       isWaitingForItem = false;
     }
 
@@ -12137,12 +12142,36 @@ if (targetCW3.test(window.location.href)) {
           hour: "2-digit",
           minute: "2-digit",
         });
-        lastSession.summary.unshift({
+        const newCatch = {
           itemId: itemId,
           time: catchTime,
-        });
+        };
+        lastSession.summary.unshift(newCatch);
         uwuStorage.setItem("uwu_catchingLogData", logData);
         renderCatchingLog(logData);
+        return newCatch;
+      }
+      return null;
+    }
+
+    function undoLastCatch() {
+      if (!catchingState.lastLoggedItemInCycle) return;
+
+      const { itemId, time } = catchingState.lastLoggedItemInCycle;
+      const logData = uwuStorage.getItem("uwu_catchingLogData") || [];
+      const lastSession =
+        logData.length > 0 ? logData[logData.length - 1] : null;
+
+      if (lastSession && lastSession.type === catchingState.actionType) {
+        const indexToRemove = lastSession.summary.findIndex(
+          (c) => c.itemId === itemId && c.time === time
+        );
+
+        if (indexToRemove > -1) {
+          lastSession.summary.splice(indexToRemove, 1);
+          uwuStorage.setItem("uwu_catchingLogData", logData);
+          renderCatchingLog(logData);
+        }
       }
     }
 
@@ -12323,13 +12352,7 @@ if (targetCW3.test(window.location.href)) {
                 const itemIdMatch = img.src.match(/things\/(\d+)\.png/);
                 if (itemIdMatch) {
                   const itemId = itemIdMatch[1];
-
-                  if (catchingState.historyGaveClear) {
-                    logFoundItem(itemId);
-                    resetCatchingState();
-                  } else {
-                    catchingState.foundItem = itemId;
-                  }
+                  catchingState.foundItem = itemId;
                   return;
                 }
               }
@@ -12350,52 +12373,12 @@ if (targetCW3.test(window.location.href)) {
       if (actions.length === 0) return;
 
       const lastAction = actions[actions.length - 1];
-      const isNewStartAction = getActivityType(lastAction);
+      const activityConfig = getActivityType(lastAction);
 
-      if (catchingState.isWaiting) {
-        if (isNewStartAction || stopWordsRegex.test(lastAction)) {
-          if (!/Отменил|Отменила/.test(lastAction)) {
-            if (!catchingState.attemptCounted) {
-              const logData = uwuStorage.getItem("uwu_catchingLogData") || [];
-              let lastSession =
-                logData.length > 0 ? logData[logData.length - 1] : null;
-              if (
-                lastSession &&
-                lastSession.type === catchingState.actionType
-              ) {
-                lastSession.totalDives++;
-                lastSession.lastActionTime = Date.now();
-                uwuStorage.setItem("uwu_catchingLogData", logData);
-                renderCatchingLog(logData);
-              }
-              catchingState.attemptCounted = true;
-            }
-          }
-          resetCatchingState();
-        } else {
-          if (!catchingState.attemptCounted) {
-            const logData = uwuStorage.getItem("uwu_catchingLogData") || [];
-            let lastSession =
-              logData.length > 0 ? logData[logData.length - 1] : null;
-            if (lastSession && lastSession.type === catchingState.actionType) {
-              lastSession.totalDives++;
-              lastSession.lastActionTime = Date.now();
-              uwuStorage.setItem("uwu_catchingLogData", logData);
-              renderCatchingLog(logData);
-            }
-            catchingState.attemptCounted = true;
-          }
+      const stopWordsRegex = /Отменил|Отменила|Пошла|Пошёл|Положил|Положила/;
+      const pickupWordsRegex = /Поднял|Подняла/;
 
-          catchingState.historyGaveClear = true;
-
-          if (catchingState.foundItem) {
-            logFoundItem(catchingState.foundItem);
-            resetCatchingState();
-          }
-        }
-      }
-
-      if (isNewStartAction) {
+      if (activityConfig) {
         const logData = uwuStorage.getItem("uwu_catchingLogData") || [];
         let lastSession =
           logData.length > 0 ? logData[logData.length - 1] : null;
@@ -12404,12 +12387,12 @@ if (targetCW3.test(window.location.href)) {
 
         const isContinuingSession =
           lastSession &&
-          lastSession.type === isNewStartAction.type &&
+          lastSession.type === activityConfig.type &&
           currentTime - lastSession.lastActionTime < twoHours;
 
         if (!isContinuingSession) {
           const newSession = {
-            type: isNewStartAction.type,
+            type: activityConfig.type,
             startTime: currentTime,
             lastActionTime: currentTime,
             actionVerb: lastAction,
@@ -12423,7 +12406,7 @@ if (targetCW3.test(window.location.href)) {
 
         resetCatchingState();
         catchingState.isWaiting = true;
-        catchingState.actionType = isNewStartAction.type;
+        catchingState.actionType = activityConfig.type;
         catchingState.actionVerb = lastAction;
 
         mouthSnapshot.clear();
@@ -12433,6 +12416,58 @@ if (targetCW3.test(window.location.href)) {
             mouthSnapshot.add(item.id);
           }
         });
+        return;
+      }
+
+      if (!catchingState.isWaiting) return;
+
+      if (pickupWordsRegex.test(lastAction)) {
+        if (!catchingState.catchLoggedThisCycle) {
+          undoLastCatch();
+        }
+        resetCatchingState();
+        return;
+      }
+
+      if (stopWordsRegex.test(lastAction)) {
+        if (
+          !/Отменил|Отменила/.test(lastAction) &&
+          !catchingState.attemptCounted
+        ) {
+          const logData = uwuStorage.getItem("uwu_catchingLogData") || [];
+          let lastSession =
+            logData.length > 0 ? logData[logData.length - 1] : null;
+          if (lastSession && lastSession.type === catchingState.actionType) {
+            lastSession.totalDives++;
+            lastSession.lastActionTime = Date.now();
+            uwuStorage.setItem("uwu_catchingLogData", logData);
+            renderCatchingLog(logData);
+          }
+        }
+        resetCatchingState();
+        return;
+      }
+
+      if (!catchingState.attemptCounted) {
+        const logData = uwuStorage.getItem("uwu_catchingLogData") || [];
+        let lastSession =
+          logData.length > 0 ? logData[logData.length - 1] : null;
+        if (lastSession && lastSession.type === catchingState.actionType) {
+          lastSession.totalDives++;
+          lastSession.lastActionTime = Date.now();
+          uwuStorage.setItem("uwu_catchingLogData", logData);
+          renderCatchingLog(logData);
+        }
+        catchingState.attemptCounted = true;
+      }
+
+      if (catchingState.foundItem) {
+        const loggedItem = logFoundItem(catchingState.foundItem);
+        if (loggedItem) {
+          catchingState.lastLoggedItemInCycle = loggedItem;
+          catchingState.catchLoggedThisCycle = true;
+        }
+        catchingState.foundItem = null;
       }
     }
 
