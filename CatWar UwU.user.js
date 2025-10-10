@@ -1942,6 +1942,24 @@ const uwusettings =
                   />
                 </td>
               </tr>
+              <tr>
+                <td>Шаманские штучки</td>
+                <td>
+                  <input
+                    type="color"
+                    class="uwu-color-picker"
+                    data-resource="Шаманские штучки"
+                    value="#00BFFF"
+                  />
+                </td>
+                <td class="uwu-checkbox-cell">
+                  <input
+                    type="checkbox"
+                    class="uwu-highlight-checkbox"
+                    data-resource="Шаманские штучки"
+                  />
+                </td>
+              </tr>
             </tbody>
           </table>
 
@@ -3220,6 +3238,7 @@ const newsPanel =
           штук.
         </p>
         <p>— Добавлена регулировка высоты инвентаря.</p>
+        <p>— Добавлены шаманские штуки на подсветку.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
         <p>— Надеюсь исправлен расчёт значений Чистоты и Бодрости (Сна).</p>
@@ -10397,6 +10416,19 @@ if (targetCW3.test(window.location.href)) {
         "7804",
         "7805",
         "7806",
+      ],
+      "Шаманские штучки": [
+        "120",
+        "121",
+        "122",
+        "123",
+        "124",
+        "125",
+        "128",
+        "129",
+        "130",
+        "131",
+        "132",
       ],
     };
 
