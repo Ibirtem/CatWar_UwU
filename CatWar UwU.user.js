@@ -222,6 +222,7 @@ const uwuDefaultSettings = {
 
   userQuickLinks: "",
   historyHeight: "215",
+  itemListHeight: "180",
 
   parametersColors: {
     dream: ["#008000", "#008000", "#ff0000", "#ff0000"],
@@ -1103,6 +1104,16 @@ const uwusettings =
               data-setting="historyHeight"
             />
             <label for="history-height">px; Высота Истории</label>
+          </div>
+
+          <div>
+            <input
+              type="text"
+              id="item-list-height"
+              placeholder="Вставьте значение"
+              data-setting="itemListHeight"
+            />
+            <label for="item-list-height">px; Высота инвентаря</label>
           </div>
 
           <label>Отображать Душевых котов:</label>
@@ -3208,6 +3219,7 @@ const newsPanel =
           Таймера-напоминалки, и просто "вроде" выглядит логичней для таких
           штук.
         </p>
+        <p>— Добавлена регулировка высоты инвентаря.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
         <p>— Надеюсь исправлен расчёт значений Чистоты и Бодрости (Сна).</p>
@@ -10962,7 +10974,7 @@ if (targetCW3.test(window.location.href)) {
 
       #itemList {
         overflow-y: auto;
-        max-height: 180px;
+        max-height: ${settings.itemListHeight || 180}px;
         display: flex;
         flex-wrap: wrap;
       }
