@@ -3249,6 +3249,7 @@ const newsPanel =
         <p>
           — Одиночки, ваши травы теперь тоже светятся, простите что так долго.
         </p>
+        <p>— Шрифт кнопок в Боевом режиме теперь норм кушает цвета текста из кастом темы цветов.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
         <p>— Надеюсь исправлен расчёт значений Чистоты и Бодрости (Сна).</p>
@@ -7038,7 +7039,7 @@ if (targetCW3.test(window.location.href)) {
         background-color: ${theme?.chatColor || ""};
       }
     
-      body, input, select, .ui-slider-handle {
+      body, input, select, .ui-slider-handle, .hotkey {
         color: ${theme?.textColor || ""};
       }
     
