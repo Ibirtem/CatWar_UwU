@@ -3167,8 +3167,9 @@ const uwusettings =
               <div>
                 <h3>Изменить Костюм:</h3>
                 <div>
-                  Примечание: Убедитесь, что ваше изображение имеет размер
-                  100x150 для наилучших результатов
+                  Примечание: Изображение будет автоматически вписано в рамку
+                  кота. Убедитесь, что оно изначально имеет соотношение сторон
+                  2:3 (100x150 или будущие 200x300).
                 </div>
               </div>
 
@@ -3181,7 +3182,7 @@ const uwusettings =
               <br />
               <br />
               <button class="uwu-button install-button" id="changeCostume">
-                Загрузить Костюм
+                Установить костюм
               </button>
               <br />
               <span>или </span>
@@ -3190,7 +3191,7 @@ const uwusettings =
                 class="uwu-button remove-button"
                 id="removeCostume"
                 style="display:inline-block; padding:4px 10px; border-radius:20px; text-decoration:none; color:inherit;"
-                >Удалить ваш костюм</a
+                >Снять костюм с кота</a
               >
               <br />
               <span>или </span>
@@ -3199,7 +3200,7 @@ const uwusettings =
                 class="uwu-button install-button"
                 id="saveCostumeToNewSlot"
               >
-                Сохранить в новый слот
+                Сохранить костюм в новый слот
               </button>
             </div>
             <div id="cat-image">
@@ -3249,7 +3250,10 @@ const newsPanel =
         <p>
           — Одиночки, ваши травы теперь тоже светятся, простите что так долго.
         </p>
-        <p>— Шрифт кнопок в Боевом режиме теперь норм кушает цвета текста из кастом темы цветов.</p>
+        <p>
+          — Шрифт кнопок в Боевом режиме теперь норм кушает цвета текста из
+          кастом темы цветов.
+        </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
         <p>— Надеюсь исправлен расчёт значений Чистоты и Бодрости (Сна).</p>
@@ -3272,6 +3276,13 @@ const newsPanel =
           сохранениями. Как минимум личные сообщения не будут теряться.
         </p>
         <p>— Убран спам часами в консоль браузера.</p>
+        <p>
+          — Чёта там костюмы не так было починилось теперь всё круто 👍👍👍👍👍.
+        </p>
+        <p>
+          — Теперь можно ставить костюмы любых пикселей, играйтесь
+          растягиваниями как хотите.
+        </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: .10.25</p>
       </div>
@@ -4707,6 +4718,40 @@ if (targetSettings.test(window.location.href)) {
   // ====================================================================================================================
   //  . . . ПАРАМЕТРЫ КОСТЮМА . . .
   // ====================================================================================================================
+
+  /**
+   * Изменяет размер изображения до соотношения сторон 2:3.
+   * @param {string} dataUrl - Изображение в формате Data URL.
+   * @param {number} aspectRatio - Целевое соотношение сторон (ширина / высота).
+   * @returns {Promise<string>} - Новый Data URL изображения с измененным размером.
+   */
+  async function resizeImageToAspectRatio(dataUrl, aspectRatio = 2 / 3) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.height = img.height;
+          canvas.width = img.height * aspectRatio;
+
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          const resizedDataUrl = canvas.toDataURL("image/png");
+          resolve(resizedDataUrl);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      img.onerror = () => {
+        reject(
+          new Error("Не удалось загрузить изображение для изменения размера.")
+        );
+      };
+      img.src = dataUrl;
+    });
+  }
+
   const costumeCheckbox = document.getElementById("personal-costume-panel");
   function updateCostumeFlexBoxState() {
     const costumeFlexBox = document.querySelectorAll(".costume-flex-box");
@@ -4902,7 +4947,7 @@ if (targetSettings.test(window.location.href)) {
 
   if (settings.personalCostumes) {
     const costumeImg = document.getElementById("cat-image");
-    var data = uwuStorage.getItem("uwu_personal") || "{}";
+    var data = uwuStorage.getItem("uwu_personal") || {};
     if (data && data.id && data.catImg) {
       costumeImg.innerHTML = "Предпросмотр: ";
       const container = document.createElement("div");
@@ -4922,39 +4967,23 @@ if (targetSettings.test(window.location.href)) {
     }
 
     const changeButton = document.getElementById("changeCostume");
-    changeButton.addEventListener("click", () => {
+    changeButton.addEventListener("click", async () => {
       readImageFileAsDataURL(
         "costume-file",
-        (dataUrl) => {
-          const img = new Image();
-          img.onerror = function () {
-            alert(
-              "Ошибка при загрузке изображения. Убедитесь, что файл является корректным PNG изображением."
-            );
-          };
-          img.onload = function () {
-            try {
-              let data = uwuStorage.getItem("uwu_personal") || "{}";
-              const canvas = document.createElement("canvas");
-              canvas.width = 100;
-              canvas.height = 150;
-              const ctx = canvas.getContext("2d");
-              ctx.drawImage(img, 0, 0, 100, 150);
-
-              const resizedDataUrl = canvas.toDataURL("image/png");
-
-              data.costumes = {
-                base: resizedDataUrl,
-              };
-              uwuStorage.setItem("uwu_personal", data);
-              alert("Костюм успешно изменён! Вы можете увидеть его в игре.");
-              loadCostume();
-            } catch (error) {
-              console.error("Ошибка при сохранении костюма:", error);
-              alert("Ошибка при сохранении костюма.");
-            }
-          };
-          img.src = dataUrl;
+        async (dataUrl) => {
+          try {
+            const resizedDataUrl = await resizeImageToAspectRatio(dataUrl);
+            let data = uwuStorage.getItem("uwu_personal") || {};
+            data.costumes = {
+              base: resizedDataUrl,
+            };
+            uwuStorage.setItem("uwu_personal", data);
+            alert("Костюм успешно изменён! Вы можете увидеть его в игре.");
+            loadCostume();
+          } catch (error) {
+            console.error("Ошибка при сохранении костюма:", error);
+            alert("Ошибка при сохранении костюма.");
+          }
         },
         alert
       );
@@ -4962,7 +4991,7 @@ if (targetSettings.test(window.location.href)) {
 
     const removeButton = document.getElementById("removeCostume");
     removeButton.addEventListener("click", () => {
-      let data = uwuStorage.getItem("uwu_personal") || "{}";
+      let data = uwuStorage.getItem("uwu_personal") || {};
       if (!data.costumes || !data.costumes.base) {
         alert("Нет костюма для удаления.");
         return;
@@ -4978,49 +5007,34 @@ if (targetSettings.test(window.location.href)) {
     });
 
     const saveToNewSlotButton = document.getElementById("saveCostumeToNewSlot");
-    saveToNewSlotButton.addEventListener("click", (event) => {
+    saveToNewSlotButton.addEventListener("click", async (event) => {
       readImageFileAsDataURL(
         "costume-file",
-        (dataUrl) => {
-          const img = new Image();
-          img.onerror = function () {
-            alert(
-              "Ошибка при загрузке изображения. Убедитесь, что файл является корректным PNG изображением."
-            );
-          };
-          img.onload = function () {
-            try {
-              let data = uwuStorage.getItem("uwu_personal") || "{}";
-              const canvas = document.createElement("canvas");
-              canvas.width = 100;
-              canvas.height = 150;
-              const ctx = canvas.getContext("2d");
-              ctx.drawImage(img, 0, 0, 100, 150);
+        async (dataUrl) => {
+          try {
+            const resizedDataUrl = await resizeImageToAspectRatio(dataUrl);
+            let data = uwuStorage.getItem("uwu_personal") || {};
 
-              const resizedDataUrl = canvas.toDataURL("image/png");
-
-              if (!data.costumes) {
-                data.costumes = { base: "", slots: [] };
-              }
-              if (!Array.isArray(data.costumes.slots)) {
-                data.costumes.slots = [];
-              }
-
-              data.costumes.slots.push({
-                base: resizedDataUrl,
-              });
-
-              data.costumes.slots = data.costumes.slots.filter((slot) => slot);
-
-              uwuStorage.setItem("uwu_personal", data);
-              alert("Костюм успешно сохранен в новый слот!");
-              loadCostume();
-            } catch (error) {
-              console.error("Ошибка при сохранении костюма:", error);
-              alert("Ошибка при сохранении костюма.");
+            if (!data.costumes) {
+              data.costumes = { base: "", slots: [] };
             }
-          };
-          img.src = dataUrl;
+            if (!Array.isArray(data.costumes.slots)) {
+              data.costumes.slots = [];
+            }
+
+            data.costumes.slots.push({
+              base: resizedDataUrl,
+            });
+
+            data.costumes.slots = data.costumes.slots.filter((slot) => slot);
+
+            uwuStorage.setItem("uwu_personal", data);
+            alert("Костюм успешно сохранен в новый слот!");
+            loadCostume();
+          } catch (error) {
+            console.error("Ошибка при сохранении костюма:", error);
+            alert("Ошибка при сохранении костюма.");
+          }
         },
         (error) => {
           if (error.includes("Пожалуйста, выберите изображение")) {
@@ -7326,7 +7340,7 @@ if (targetCW3.test(window.location.href)) {
   async function personalCostumes() {
     if (settings.personalCostumes) {
       const match = window.location.hostname.match(/catwar\.(net|su)/);
-      let items = uwuStorage.getItem("uwu_personal") ?? "{}";
+      let items = uwuStorage.getItem("uwu_personal") ?? {};
       if (match && !items.catImg) {
         const fullDomain = `catwar.${match[1]}`;
         if (!items.id) {
@@ -7393,61 +7407,45 @@ if (targetCW3.test(window.location.href)) {
   }
 
   function saveCostumeToSlot(dataUrl, choice) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onerror = function () {
-        alert("Костюм сейчас недоступен. Попробуйте позже.");
-        reject(new Error("Image load error"));
-      };
-      img.onload = function () {
-        try {
-          let data = uwuStorage.getItem("uwu_personal") || "{}";
-          const canvas = document.createElement("canvas");
-          canvas.width = 100;
-          canvas.height = 150;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, 100, 150);
+    return new Promise(async (resolve, reject) => {
+      try {
+        const resizedDataUrl = await resizeImageToAspectRatio(dataUrl);
+        let data = uwuStorage.getItem("uwu_personal") || {};
 
-          const resizedDataUrl = canvas.toDataURL("image/png");
-
-          if (!data.costumes) {
-            data.costumes = { base: "", slots: [] };
-          }
-          if (!Array.isArray(data.costumes.slots)) {
-            data.costumes.slots = [];
-          }
-
-          if (choice === "new") {
-            data.costumes.slots.push({ base: resizedDataUrl });
-            alert("Костюм успешно сохранен в новый слот.");
-          } else {
-            const slotIndex = parseInt(choice, 10);
-            if (data.costumes.slots[slotIndex]) {
-              if (
-                !confirm("Этот слот уже занят. Вы хотите перезаписать его?")
-              ) {
-                return resolve();
-              }
-            }
-            data.costumes.slots[slotIndex] = { base: resizedDataUrl };
-            alert(`Костюм успешно сохранен в слот ${slotIndex + 1}.`);
-          }
-
-          uwuStorage.setItem("uwu_personal", data);
-          resolve();
-        } catch (error) {
-          console.error("Ошибка при сохранении костюма:", error);
-          alert("Ошибка при сохранении костюма.");
-          reject(error);
+        if (!data.costumes) {
+          data.costumes = { base: "", slots: [] };
         }
-      };
-      img.src = dataUrl;
+        if (!Array.isArray(data.costumes.slots)) {
+          data.costumes.slots = [];
+        }
+
+        if (choice === "new") {
+          data.costumes.slots.push({ base: resizedDataUrl });
+          alert("Костюм успешно сохранен в новый слот.");
+        } else {
+          const slotIndex = parseInt(choice, 10);
+          if (data.costumes.slots[slotIndex]) {
+            if (!confirm("Этот слот уже занят. Вы хотите перезаписать его?")) {
+              return resolve();
+            }
+          }
+          data.costumes.slots[slotIndex] = { base: resizedDataUrl };
+          alert(`Костюм успешно сохранен в слот ${slotIndex + 1}.`);
+        }
+
+        uwuStorage.setItem("uwu_personal", data);
+        resolve();
+      } catch (error) {
+        console.error("Ошибка при сохранении костюма:", error);
+        alert("Ошибка при сохранении костюма.");
+        reject(error);
+      }
     });
   }
 
   function createCostumeSavePopup(costumes) {
     let { catInfoElement, contentContainer } = createCatInfoContainer();
-    let data = uwuStorage.getItem("uwu_personal") || "{}";
+    let data = uwuStorage.getItem("uwu_personal") || {};
     const savedSlots =
       data.costumes && data.costumes.slots ? data.costumes.slots : [];
 
