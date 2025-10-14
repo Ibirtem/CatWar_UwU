@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.40.1-08.25
+// @version      v1.41.1-10.25
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2025, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -13,14 +13,98 @@
 // @downloadURL  https://github.com/Ibirtem/CatWar/raw/main/CatWar%20UwU.user.js
 // @license      MIT
 // @iconURL      https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/partly_sunny_rain.png
+// @grant        GM_setValue
+// @grant        GM_getValue
+// @grant        GM_deleteValue
+// @grant        GM_listValues
 // ==/UserScript==
 
 "use strict"; // Делаю вид что крутой.
 
 // ====================================================================================================================
+//   . . . ЕДИНОЕ ХРАНИЛИЩЕ . . .
+// ====================================================================================================================
+
+let useUnifiedStorage = false;
+
+(() => {
+  if (typeof GM_getValue === "undefined") {
+    return;
+  }
+
+  try {
+    const gmSettingsRaw = GM_getValue("uwu_settings");
+    if (gmSettingsRaw) {
+      const gmSettings = JSON.parse(gmSettingsRaw);
+      useUnifiedStorage = !!gmSettings.unifiedStorage;
+      return;
+    }
+  } catch (e) {
+    // Ошибка парсинга GM JSON, продолжаем с localStorage
+  }
+
+  try {
+    const localSettingsRaw = localStorage.getItem("uwu_settings");
+    if (localSettingsRaw) {
+      const localSettings = JSON.parse(localSettingsRaw);
+      if (localSettings.unifiedStorage) {
+        useUnifiedStorage = true;
+      }
+    }
+  } catch (e) {}
+})();
+
+const uwuStorage = {
+  setItem: (key, value) => {
+    const stringValue = JSON.stringify(value);
+    if (useUnifiedStorage) {
+      GM_setValue(key, stringValue);
+    } else {
+      localStorage.setItem(key, stringValue);
+    }
+  },
+
+  getItem: (key) => {
+    const rawValue = useUnifiedStorage
+      ? GM_getValue(key)
+      : localStorage.getItem(key);
+
+    if (rawValue === null || typeof rawValue === "undefined") {
+      return null;
+    }
+
+    try {
+      return JSON.parse(rawValue);
+    } catch (e) {
+      return rawValue;
+    }
+  },
+
+  removeItem: (key) => {
+    if (useUnifiedStorage) {
+      GM_deleteValue(key);
+    } else {
+      localStorage.removeItem(key);
+    }
+  },
+
+  migrateAllToGM: () => {
+    console.log("UwU | Перенос данных из localStorage в единое хранилище...");
+    const keysToMigrate = Object.keys(localStorage);
+    for (const key of keysToMigrate) {
+      if (key.startsWith("uwu_")) {
+        const value = localStorage.getItem(key);
+        GM_setValue(key, value);
+      }
+    }
+    console.log("UwU | Перенос завершен.");
+  },
+};
+
+// ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.40.1";
+const current_uwu_version = "1.41.1";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -109,6 +193,10 @@ const uwuDefaultSettings = {
   clockFontSize: "14",
   clockPosition: "fly",
 
+  intervalTimerEnabled: false,
+  intervalTimerSound: "notificationSound1",
+  intervalTimerVolume: 5,
+
   describeHuntingSmell: false,
   huntingVirtualJoystick: false,
   sizeHuntingVirtualJoystick: "150",
@@ -126,11 +214,15 @@ const uwuDefaultSettings = {
   cleaningLogShowID: false,
   cleaningLogHeight: "120",
 
+  catchingLog: false,
+  catchingLogHeight: "120",
+
   myNameNotificationSound: "notificationSound2",
   notificationMyNameVolume: "5",
 
   userQuickLinks: "",
   historyHeight: "215",
+  itemListHeight: "180",
 
   parametersColors: {
     dream: ["#008000", "#008000", "#ff0000", "#ff0000"],
@@ -169,6 +261,8 @@ const uwuDefaultSettings = {
   personalCostumes: false,
   showCostumesButtons: false,
   blockItemDrop: false,
+
+  unifiedStorage: false,
 };
 
 // ====================================================================================================================
@@ -1012,6 +1106,16 @@ const uwusettings =
             <label for="history-height">px; Высота Истории</label>
           </div>
 
+          <div>
+            <input
+              type="text"
+              id="item-list-height"
+              placeholder="Вставьте значение"
+              data-setting="itemListHeight"
+            />
+            <label for="item-list-height">px; Высота инвентаря</label>
+          </div>
+
           <label>Отображать Душевых котов:</label>
           <div class="custom-select" id="showOtherCatsList">
             <div class="select-selected">
@@ -1838,6 +1942,24 @@ const uwusettings =
                   />
                 </td>
               </tr>
+              <tr>
+                <td>Шаманские штучки</td>
+                <td>
+                  <input
+                    type="color"
+                    class="uwu-color-picker"
+                    data-resource="Шаманские штучки"
+                    value="#00BFFF"
+                  />
+                </td>
+                <td class="uwu-checkbox-cell">
+                  <input
+                    type="checkbox"
+                    class="uwu-highlight-checkbox"
+                    data-resource="Шаманские штучки"
+                  />
+                </td>
+              </tr>
             </tbody>
           </table>
 
@@ -2126,6 +2248,45 @@ const uwusettings =
             </button>
           </div>
           <hr id="uwu-hr" class="uwu-hr" />
+          <h2>Таймер-напоминалка</h2>
+          <div>
+            <p>
+              Включает перетаскиваемое окно с таймером, который будет циклично
+              воспроизводить звуковой сигнал через заданный интервал времени.
+            </p>
+            <input
+              type="checkbox"
+              id="interval-timer-enabled"
+              data-setting="intervalTimerEnabled"
+            />
+            <label for="interval-timer-enabled"
+              >Включить таймер-напоминалку</label
+            >
+          </div>
+          <div id="intervalTimerContainer">
+            <div class="custom-select" id="intervalTimerSound">
+              <div class="select-selected">Выберите звук</div>
+              <div class="select-items"></div>
+            </div>
+            <div id="notification-volume">
+              <p>Громкость</p>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value="5"
+                class="uwu-range-slider"
+                id="intervalTimerVolume"
+                list="volumeStep"
+                data-setting="intervalTimerVolume"
+              />
+              <datalist id="volumeStep">
+                <option value="1">10%</option>
+                <option value="10">100%</option>
+              </datalist>
+            </div>
+          </div>
+          <hr id="uwu-hr" class="uwu-hr" />
           <h2>Рот (инвентарь)</h2>
           <div>
             <p>
@@ -2407,6 +2568,13 @@ const uwusettings =
               странны и нелогичны, или даже что-то теряется, то можете сообщить
               о проблеме в группу ВК!
             </p>
+            <p>3. Попросились отпуститься?</p>
+            <p>
+              — Вы можете удалить из Лога последнего опущенного вами кота
+              кнопкой справа от "Очистить лог" в виде корзинки! Например, если
+              он выпросился погулять и он больше не актуален. Ещё разок!
+              Опускаете кота и он становится целью кнопки "Удалить"!
+            </p>
             <hr id="uwu-hr" class="uwu-hr" />
           </details>
 
@@ -2431,6 +2599,95 @@ const uwusettings =
               data-setting="cleaningLogHeight"
             />
             <label>px; - Начальная высота Лога</label>
+          </div>
+
+          <hr id="uwu-hr" class="uwu-hr" />
+          <h2>BETA 🚧 Лог ловли 🚧 BETA</h2>
+
+          <div>
+            <p>
+              Аналогично Логу чистильщика, но для отслеживания результатов
+              ныряния и ловли в ущелье. Группирует последовательные попытки в
+              один блок.
+            </p>
+            <input
+              type="checkbox"
+              id="catching-Log"
+              data-setting="catchingLog"
+            />
+            <label for="catching-Log">Включить лог ловли</label>
+          </div>
+
+          <details>
+            <summary
+              style="cursor: pointer; font-size: 16px; font-weight: bold;"
+            >
+              Как работает?
+            </summary>
+            <hr id="uwu-hr" class="uwu-hr" />
+            <p>
+              — Лог создаёт отдельные карточки для каждого типа действия
+              (Ныряние, Осмотр).
+            </p>
+            <p>
+              — Карточка считается активной 2 часа с момента последней попытки.
+            </p>
+            <p>
+              — Если вы вернётесь к тому же действию спустя 2 часа, создастся
+              новая карточка, а не дополнится старая.
+            </p>
+            <hr id="uwu-hr" class="uwu-hr" />
+          </details>
+
+          <div>
+            <input
+              type="text"
+              id="catching-Log-Height"
+              placeholder=". . ."
+              data-setting="catchingLogHeight"
+            />
+            <label>px; - Начальная высота Лога</label>
+          </div>
+
+          <div>
+            <p>
+              Здесь вы можете добавить свои собственные названия для предметов
+              по их ID. Каждая запись должна быть на новой строке в формате
+              "ID=Название". Например: <code>3966=Рыбка</code>. Этот список
+              имеет приоритет над встроенным.
+            </p>
+            <textarea
+              id="catching-log-custom-items"
+              rows="10"
+              style="width: 100%"
+              placeholder="3966=Рыба&#10;3967=Рыба побольше"
+            ></textarea>
+            <button
+              id="save-custom-items-btn"
+              class="uwu-button install-button"
+            >
+              Сохранить
+            </button>
+          </div>
+          <div>
+            <p>Импорт/Экспорт вашего списка названий предметов.</p>
+            <input
+              type="text"
+              id="custom-items-export-field"
+              placeholder="Экспорт"
+              readonly
+            />
+            <input
+              type="text"
+              id="custom-items-import-field"
+              placeholder="Импорт"
+            />
+            <button
+              id="custom-items-import-btn"
+              class="uwu-button install-button"
+            >
+              Вставить
+            </button>
           </div>
 
           <hr id="uwu-hr" class="uwu-hr" />
@@ -2830,6 +3087,30 @@ const uwusettings =
           </div>
 
           <hr id="uwu-hr" class="uwu-hr" />
+          <h2>Единое Хранилище</h2>
+          <div>
+            <p>
+              Включает синхронизацию скрипта/мода между разными доменами CatWar
+              через хранилище 'monkey плагинов.
+            </p>
+            <p>
+              <b>ВНИМАНИЕ:</b> При первом включении этой опции, ваши текущие
+              локальные настройки и данные с этого сайта (например, catwar.net)
+              будут скопированы в единое хранилище и станут основными.
+              Убедитесь, что вы включаете эту опцию на том сайте, настройки и
+              данные которого хотите сохранить.
+            </p>
+            <input
+              type="checkbox"
+              id="unified-storage"
+              data-setting="unifiedStorage"
+            />
+            <label for="unified-storage"
+              >Использовать единое хранилище (.net & .su)</label
+            >
+          </div>
+
+          <hr id="uwu-hr" class="uwu-hr" />
           <h2>Импорт/Экспорт</h2>
 
           <div>
@@ -2886,8 +3167,9 @@ const uwusettings =
               <div>
                 <h3>Изменить Костюм:</h3>
                 <div>
-                  Примечание: Убедитесь, что ваше изображение имеет размер
-                  100x150 для наилучших результатов
+                  Примечание: Изображение будет автоматически вписано в рамку
+                  кота. Убедитесь, что оно изначально имеет соотношение сторон
+                  2:3 (100x150 или будущие 200x300).
                 </div>
               </div>
 
@@ -2900,7 +3182,7 @@ const uwusettings =
               <br />
               <br />
               <button class="uwu-button install-button" id="changeCostume">
-                Загрузить Костюм
+                Установить костюм
               </button>
               <br />
               <span>или </span>
@@ -2909,7 +3191,7 @@ const uwusettings =
                 class="uwu-button remove-button"
                 id="removeCostume"
                 style="display:inline-block; padding:4px 10px; border-radius:20px; text-decoration:none; color:inherit;"
-                >Удалить ваш костюм</a
+                >Снять костюм с кота</a
               >
               <br />
               <span>или </span>
@@ -2918,7 +3200,7 @@ const uwusettings =
                 class="uwu-button install-button"
                 id="saveCostumeToNewSlot"
               >
-                Сохранить в новый слот
+                Сохранить костюм в новый слот
               </button>
             </div>
             <div id="cat-image">
@@ -2942,27 +3224,71 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        v${current_uwu_version} - Добавлены иконки для дефектов и чуть более
-        крутое блокирование предметов во рту!
+        v${current_uwu_version} - Логи ловли, ура! (Меня заставили). Общие
+        сохранения между разными доменами и таймер-напоминалка, например для
+        осмотров!
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
-        <p>— Пу-пу-пу... Добавлена настройка отображения погоды за или перед элементами игровой.</p>
+        <p>— Я усталь.</p>
+        <p>
+          — Добавлена возможность удалять из Лога чистильщика последнего
+          опущенного кота. Полезно, когда он проснулся во рту и попросился
+          погулять.
+        </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
-        <p>— Погодные эффекты теперь не привязаны к FPS и работают стабильно всегда и везде. 
-        Давно надо было это сделать... Надеюсь никто не испугается слишком быстрых частиц.</p>
+        <p>— Возможность скрывать и раскрывать логи.</p>
+        <p>
+          — Стрелочка Минного поля показывает теперь скорее "состояние" окна,
+          чем "что сделается при клике". Нужно для уравнивания со стилем
+          Таймера-напоминалки, и просто "вроде" выглядит логичней для таких
+          штук.
+        </p>
+        <p>— Добавлена регулировка высоты инвентаря.</p>
+        <p>— Добавлены шаманские штуки на подсветку.</p>
+        <p>
+          — Одиночки, ваши травы теперь тоже светятся, простите что так долго.
+        </p>
+        <p>
+          — Шрифт кнопок в Боевом режиме теперь норм кушает цвета текста из
+          кастом темы цветов.
+        </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
-        <p>— Часы теперь инициализируются хоть с какими-то числами.</p>
-        <p>— Цвет команды теперь применяется и работает во всех трёх боевых режимах.</p>
-        <p>— Фикс null значения селектора активности.</p>
-        <p>— Слово "часы" больше не пропадают в калькуляторе при дробных значениях времени.</p>
-        <p>— Оказывается я недореализовал сохранение ЛС как надо, и мне никто не сказал об этом, жесть.</p>
-        <p>—— Fix 1.40.1</p>
-        <p>—— Я забыл поменять ссылку на изображения иконок.</p>
+        <p>— Надеюсь исправлен расчёт значений Чистоты и Бодрости (Сна).</p>
+        <p>
+          — Добавлены статусы "На удалении" и "Заблокирован" на валидацию в Лог
+          Чистильщика.
+        </p>
+        <p>
+          — Повышено КД перед повторной проверкой онлайн времени, чтобы не
+          спамить бедным на сервера.
+        </p>
+        <p>— Починка дублирования запросов на проверки онлайн времени.</p>
+        <p>
+          — Коты в Логе чистильщика теперь должны быть снова кликабельными при
+          объединении в одни квадратные скобки (Хотя бывает всё равно глючит,
+          мне лень править)
+        </p>
+        <p>
+          — Кривой недофикс Экспорта настроек. Теперь работает "со всеми"
+          сохранениями. Как минимум личные сообщения не будут теряться.
+        </p>
+        <p>— Убран спам часами в консоль браузера.</p>
+        <p>
+          — Чёта там костюмы не так было починилось теперь всё круто 👍👍👍👍👍.
+        </p>
+        <p>
+          — Теперь можно ставить костюмы любых пикселей, играйтесь
+          растягиваниями как хотите.
+        </p>
+        <p>
+          —— Аппаем до 1.41.1 чтобы у тестеров точно обновилось до финальной
+          версии.
+        </p>
         <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: 22.09.25</p>
+        <p>Дата выпуска: 14.10.25</p>
       </div>
     </div>
   `;
@@ -3298,6 +3624,10 @@ const css_uwu_main = `
 #notification-volume,
 #step-slider {
   width: 150px;
+}
+
+details {
+  margin-top: 5px;
 }
 
 #layout-preview button {
@@ -4127,26 +4457,24 @@ let settings;
 
 function saveSettings() {
   try {
-    localStorage.setItem("uwu_settings", JSON.stringify(settings));
-    // console.log("Настройки сохранены:", settings);
+    uwuStorage.setItem("uwu_settings", settings);
   } catch (error) {
     console.error("Не удалось сохранить настройки:", error);
   }
 }
 
 function loadSettings() {
-  const storedSettings = localStorage.getItem("uwu_settings");
+  const storedSettings = uwuStorage.getItem("uwu_settings");
   if (storedSettings) {
     try {
-      const loadedSettings = JSON.parse(storedSettings);
-      if (typeof loadedSettings === "object" && loadedSettings !== null) {
-        settings = { ...uwuDefaultSettings, ...loadedSettings };
+      if (typeof storedSettings === "object" && storedSettings !== null) {
+        settings = { ...uwuDefaultSettings, ...storedSettings };
       } else {
         throw new Error("Сохраненные настройки не являются объектом.");
       }
     } catch (error) {
       console.error(
-        "Ошибка парсинга uwu_settings, будут применены настройки по умолчанию.",
+        "Ошибка обработки uwu_settings, будут применены настройки по умолчанию.",
         error
       );
       settings = { ...uwuDefaultSettings };
@@ -4214,8 +4542,8 @@ async function setupSingleCallback(
 //   . . . СОХРАНЕНИЕ И РАБОТА С ЦВЕТОВЫМИ ТЕМАМИ . . .
 // ====================================================================================================================
 function getThemes() {
-  const storedThemes = localStorage.getItem("uwu_colorThemes");
-  const userThemes = storedThemes ? JSON.parse(storedThemes) : {};
+  const storedThemes = uwuStorage.getItem("uwu_colorThemes");
+  const userThemes = storedThemes || {};
   return { ...userThemes, ...defaultThemes };
 }
 
@@ -4227,15 +4555,15 @@ function saveThemes(themes) {
       return obj;
     }, {});
 
-  localStorage.setItem("uwu_colorThemes", JSON.stringify(themesToSave));
+  uwuStorage.setItem("uwu_colorThemes", themesToSave);
 }
 
 function getCurrentThemeName() {
-  return localStorage.getItem("uwu_currentTheme") || "Тёмная Тема";
+  return uwuStorage.getItem("uwu_currentTheme") || "Тёмная Тема";
 }
 
 function setCurrentThemeName(themeName) {
-  localStorage.setItem("uwu_currentTheme", themeName);
+  uwuStorage.setItem("uwu_currentTheme", themeName);
 }
 
 function isDefaultTheme(themeName) {
@@ -4355,7 +4683,7 @@ if (targetSettings.test(window.location.href)) {
       fontSize[input.dataset.fontSize] = input.value;
     });
 
-    localStorage.setItem("uwu_fontSize", JSON.stringify(fontSize));
+    uwuStorage.setItem("uwu_fontSize", fontSize);
   }
 
   function loadFontSettings() {
@@ -4377,8 +4705,7 @@ if (targetSettings.test(window.location.href)) {
       fontFamilyBody: "Verdana",
     };
 
-    let fontSize =
-      JSON.parse(localStorage.getItem("uwu_fontSize")) || defaultFontSize;
+    let fontSize = uwuStorage.getItem("uwu_fontSize") || defaultFontSize;
 
     document.querySelectorAll("input[data-font-size]").forEach((input) => {
       input.value = fontSize[input.dataset.fontSize] || "";
@@ -4395,6 +4722,40 @@ if (targetSettings.test(window.location.href)) {
   // ====================================================================================================================
   //  . . . ПАРАМЕТРЫ КОСТЮМА . . .
   // ====================================================================================================================
+
+  /**
+   * Изменяет размер изображения до соотношения сторон 2:3.
+   * @param {string} dataUrl - Изображение в формате Data URL.
+   * @param {number} aspectRatio - Целевое соотношение сторон (ширина / высота).
+   * @returns {Promise<string>} - Новый Data URL изображения с измененным размером.
+   */
+  async function resizeImageToAspectRatio(dataUrl, aspectRatio = 2 / 3) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.height = img.height;
+          canvas.width = img.height * aspectRatio;
+
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          const resizedDataUrl = canvas.toDataURL("image/png");
+          resolve(resizedDataUrl);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      img.onerror = () => {
+        reject(
+          new Error("Не удалось загрузить изображение для изменения размера.")
+        );
+      };
+      img.src = dataUrl;
+    });
+  }
+
   const costumeCheckbox = document.getElementById("personal-costume-panel");
   function updateCostumeFlexBoxState() {
     const costumeFlexBox = document.querySelectorAll(".costume-flex-box");
@@ -4421,8 +4782,7 @@ if (targetSettings.test(window.location.href)) {
   updateCostumeFlexBoxState();
 
   function applyCostumeFromSlot(slotIndex) {
-    let data = localStorage.getItem("uwu_personal") || "{}";
-    data = JSON.parse(data);
+    let data = uwuStorage.getItem("uwu_personal") || {};
 
     if (
       !data.costumes ||
@@ -4440,7 +4800,7 @@ if (targetSettings.test(window.location.href)) {
     }
 
     data.costumes.base = costumeImage;
-    localStorage.setItem("uwu_personal", JSON.stringify(data));
+    uwuStorage.setItem("uwu_personal", data);
 
     alert("Костюм успешно применен!");
     loadCostume();
@@ -4451,8 +4811,7 @@ if (targetSettings.test(window.location.href)) {
       return;
     }
 
-    let data = localStorage.getItem("uwu_personal") || "{}";
-    data = JSON.parse(data);
+    let data = uwuStorage.getItem("uwu_personal") || {};
 
     if (
       data.costumes &&
@@ -4461,7 +4820,7 @@ if (targetSettings.test(window.location.href)) {
     ) {
       data.costumes.slots.splice(slotIndex, 1);
       data.costumes.slots = data.costumes.slots.filter((slot) => slot);
-      localStorage.setItem("uwu_personal", JSON.stringify(data));
+      uwuStorage.setItem("uwu_personal", data);
       alert("Слот " + (slotIndex + 1) + " успешно удален.");
       loadCostume();
     } else {
@@ -4470,8 +4829,7 @@ if (targetSettings.test(window.location.href)) {
   }
 
   function loadCostume() {
-    let data = localStorage.getItem("uwu_personal") || "{}";
-    data = JSON.parse(data);
+    let data = uwuStorage.getItem("uwu_personal") || {};
     document.getElementById("cat-image-preview")?.remove();
 
     if (!data || !data.catImg) {
@@ -4593,8 +4951,7 @@ if (targetSettings.test(window.location.href)) {
 
   if (settings.personalCostumes) {
     const costumeImg = document.getElementById("cat-image");
-    var data = localStorage.getItem("uwu_personal") || "{}";
-    data = JSON.parse(data);
+    var data = uwuStorage.getItem("uwu_personal") || {};
     if (data && data.id && data.catImg) {
       costumeImg.innerHTML = "Предпросмотр: ";
       const container = document.createElement("div");
@@ -4614,40 +4971,23 @@ if (targetSettings.test(window.location.href)) {
     }
 
     const changeButton = document.getElementById("changeCostume");
-    changeButton.addEventListener("click", () => {
+    changeButton.addEventListener("click", async () => {
       readImageFileAsDataURL(
         "costume-file",
-        (dataUrl) => {
-          const img = new Image();
-          img.onerror = function () {
-            alert(
-              "Ошибка при загрузке изображения. Убедитесь, что файл является корректным PNG изображением."
-            );
-          };
-          img.onload = function () {
-            try {
-              let data = localStorage.getItem("uwu_personal") || "{}";
-              data = JSON.parse(data);
-              const canvas = document.createElement("canvas");
-              canvas.width = 100;
-              canvas.height = 150;
-              const ctx = canvas.getContext("2d");
-              ctx.drawImage(img, 0, 0, 100, 150);
-
-              const resizedDataUrl = canvas.toDataURL("image/png");
-
-              data.costumes = {
-                base: resizedDataUrl,
-              };
-              localStorage.setItem("uwu_personal", JSON.stringify(data));
-              alert("Костюм успешно изменён! Вы можете увидеть его в игре.");
-              loadCostume();
-            } catch (error) {
-              console.error("Ошибка при сохранении костюма:", error);
-              alert("Ошибка при сохранении костюма.");
-            }
-          };
-          img.src = dataUrl;
+        async (dataUrl) => {
+          try {
+            const resizedDataUrl = await resizeImageToAspectRatio(dataUrl);
+            let data = uwuStorage.getItem("uwu_personal") || {};
+            data.costumes = {
+              base: resizedDataUrl,
+            };
+            uwuStorage.setItem("uwu_personal", data);
+            alert("Костюм успешно изменён! Вы можете увидеть его в игре.");
+            loadCostume();
+          } catch (error) {
+            console.error("Ошибка при сохранении костюма:", error);
+            alert("Ошибка при сохранении костюма.");
+          }
         },
         alert
       );
@@ -4655,8 +4995,7 @@ if (targetSettings.test(window.location.href)) {
 
     const removeButton = document.getElementById("removeCostume");
     removeButton.addEventListener("click", () => {
-      let data = localStorage.getItem("uwu_personal") || "{}";
-      data = JSON.parse(data);
+      let data = uwuStorage.getItem("uwu_personal") || {};
       if (!data.costumes || !data.costumes.base) {
         alert("Нет костюма для удаления.");
         return;
@@ -4667,55 +5006,39 @@ if (targetSettings.test(window.location.href)) {
       data.costumes = {
         base: "",
       };
-      localStorage.setItem("uwu_personal", JSON.stringify(data));
+      uwuStorage.setItem("uwu_personal", data);
       loadCostume();
     });
 
     const saveToNewSlotButton = document.getElementById("saveCostumeToNewSlot");
-    saveToNewSlotButton.addEventListener("click", (event) => {
+    saveToNewSlotButton.addEventListener("click", async (event) => {
       readImageFileAsDataURL(
         "costume-file",
-        (dataUrl) => {
-          const img = new Image();
-          img.onerror = function () {
-            alert(
-              "Ошибка при загрузке изображения. Убедитесь, что файл является корректным PNG изображением."
-            );
-          };
-          img.onload = function () {
-            try {
-              let data = localStorage.getItem("uwu_personal") || "{}";
-              data = JSON.parse(data);
-              const canvas = document.createElement("canvas");
-              canvas.width = 100;
-              canvas.height = 150;
-              const ctx = canvas.getContext("2d");
-              ctx.drawImage(img, 0, 0, 100, 150);
+        async (dataUrl) => {
+          try {
+            const resizedDataUrl = await resizeImageToAspectRatio(dataUrl);
+            let data = uwuStorage.getItem("uwu_personal") || {};
 
-              const resizedDataUrl = canvas.toDataURL("image/png");
-
-              if (!data.costumes) {
-                data.costumes = { base: "", slots: [] };
-              }
-              if (!Array.isArray(data.costumes.slots)) {
-                data.costumes.slots = [];
-              }
-
-              data.costumes.slots.push({
-                base: resizedDataUrl,
-              });
-
-              data.costumes.slots = data.costumes.slots.filter((slot) => slot);
-
-              localStorage.setItem("uwu_personal", JSON.stringify(data));
-              alert("Костюм успешно сохранен в новый слот!");
-              loadCostume();
-            } catch (error) {
-              console.error("Ошибка при сохранении костюма:", error);
-              alert("Ошибка при сохранении костюма.");
+            if (!data.costumes) {
+              data.costumes = { base: "", slots: [] };
             }
-          };
-          img.src = dataUrl;
+            if (!Array.isArray(data.costumes.slots)) {
+              data.costumes.slots = [];
+            }
+
+            data.costumes.slots.push({
+              base: resizedDataUrl,
+            });
+
+            data.costumes.slots = data.costumes.slots.filter((slot) => slot);
+
+            uwuStorage.setItem("uwu_personal", data);
+            alert("Костюм успешно сохранен в новый слот!");
+            loadCostume();
+          } catch (error) {
+            console.error("Ошибка при сохранении костюма:", error);
+            alert("Ошибка при сохранении костюма.");
+          }
         },
         (error) => {
           if (error.includes("Пожалуйста, выберите изображение")) {
@@ -4732,7 +5055,7 @@ if (targetSettings.test(window.location.href)) {
   // ====================================================================================================================
   function importLsFromVarmod() {
     try {
-      const varmodLsRaw = localStorage.getItem("cwmod_ls");
+      const varmodLsRaw = uwuStorage.getItem("cwmod_ls");
       if (!varmodLsRaw) {
         alert(
           "Сохранённые ЛС из других модов или скриптов не найдены в вашем браузере."
@@ -4741,7 +5064,7 @@ if (targetSettings.test(window.location.href)) {
       }
 
       const varmodLs = JSON.parse(varmodLsRaw);
-      const uwuLs = JSON.parse(localStorage.getItem("uwu_saved_ls")) || {};
+      const uwuLs = uwuStorage.getItem("uwu_saved_ls") || {};
 
       let importedCount = 0;
       let updatedCount = 0;
@@ -4760,7 +5083,7 @@ if (targetSettings.test(window.location.href)) {
         }
       }
 
-      localStorage.setItem("uwu_saved_ls", JSON.stringify(uwuLs));
+      uwuStorage.setItem("uwu_saved_ls", uwuLs);
       alert(
         `Импорт успешно завершён!\nНовых переписок импортировано: ${importedCount}\nСуществующих переписок обновлено: ${updatedCount}`
       );
@@ -4788,8 +5111,8 @@ if (targetSettings.test(window.location.href)) {
     if (!exportField || !importField || !importButton) return;
 
     function updateLsExportField() {
-      const savedLs = localStorage.getItem("uwu_saved_ls") || "{}";
-      exportField.value = savedLs;
+      const savedLs = uwuStorage.getItem("uwu_saved_ls") || {};
+      exportField.value = JSON.stringify(savedLs);
     }
 
     importButton.addEventListener("click", () => {
@@ -4806,7 +5129,7 @@ if (targetSettings.test(window.location.href)) {
           throw new Error("Импортируемые данные не являются объектом.");
         }
 
-        localStorage.setItem("uwu_saved_ls", JSON.stringify(importedLs));
+        uwuStorage.setItem("uwu_saved_ls", importedLs);
         alert("Сохранённые ЛС успешно импортированы!");
         importField.value = "";
         updateLsExportField();
@@ -5058,17 +5381,13 @@ if (targetSettings.test(window.location.href)) {
         highlightResources.push(resource);
       });
 
-    localStorage.setItem(
-      "uwu_highlightResources",
-      JSON.stringify(highlightResources)
-    );
+    uwuStorage.setItem("uwu_highlightResources", highlightResources);
   }
 
   function restoreHighlightSettings() {
-    const savedSettings = localStorage.getItem("uwu_highlightResources");
-    if (savedSettings) {
-      const highlightResources = JSON.parse(savedSettings);
+    const highlightResources = uwuStorage.getItem("uwu_highlightResources");
 
+    if (highlightResources) {
       highlightResources.forEach((resource) => {
         const colorPicker = document.querySelector(
           `.uwu-color-picker[data-resource="${resource.name}"]`
@@ -5143,6 +5462,10 @@ if (targetSettings.test(window.location.href)) {
     "uwu_highlightResources",
     "uwu_saved_ls",
     "uwu_activity",
+    "uwu_fastStyles",
+    "uwu_fastStyles_hideCatTooltip",
+    "uwu_fightTeamsCats",
+    "uwu_catchingLog_customItems",
   ];
 
   function resetAllSaves() {
@@ -5151,7 +5474,7 @@ if (targetSettings.test(window.location.href)) {
     );
     if (confirmReset) {
       settingsKeys.forEach((key) => {
-        localStorage.removeItem(key);
+        uwuStorage.removeItem(key);
         console.log(`Удалено ${key}`);
       });
       console.log("Все настройки сброшены");
@@ -5163,6 +5486,76 @@ if (targetSettings.test(window.location.href)) {
   document
     .getElementById("resetAllSaves")
     .addEventListener("click", resetAllSaves);
+
+  // ====================================================================================================================
+  //  . . . ЕДИНОЕ ХРАНИЛИЩЕ . . .
+  // ====================================================================================================================
+
+  const unifiedStorageCheckbox = document.querySelector(
+    '[data-setting="unifiedStorage"]'
+  );
+
+  if (
+    typeof GM_setValue === "undefined" ||
+    typeof GM_getValue === "undefined" ||
+    typeof GM_listValues === "undefined" ||
+    typeof GM_deleteValue === "undefined"
+  ) {
+    const container = unifiedStorageCheckbox.parentElement;
+    container.innerHTML =
+      '<p style="color: #ff7878;"><b>Единое хранилище недоступно.</b><br>Вероятнее всего, ваш менеджер скриптов (например, Tampermonkey) не предоставляет необходимый API для кросс-доменной синхронизации :(</p>';
+  } else {
+    unifiedStorageCheckbox.addEventListener("change", () => {
+      if (unifiedStorageCheckbox.checked) {
+        const confirmation = confirm(
+          "Вы уверены, что хотите включить единое хранилище?\n\n" +
+            "Все ваши текущие настройки и данные с этого сайта будут скопированы в общее хранилище и заменят любые данные, которые могли там быть.\n\n" +
+            "Убедитесь, что вы находитесь на сайте (.net или .su) с теми настройками и данными, которые хотите сделать основными."
+        );
+
+        if (confirmation) {
+          settings.unifiedStorage = true;
+          uwuStorage.migrateAllToGM();
+          GM_setValue("uwu_settings", JSON.stringify(settings));
+          alert(
+            "Единое хранилище включено. Настройки и данные с этого сайта были скопированы. Страница будет перезагружена."
+          );
+          location.reload();
+        } else {
+          unifiedStorageCheckbox.checked = false;
+        }
+      } else {
+        const confirmation = confirm(
+          "Вы уверены, что хотите отключить единое хранилище?\n\n" +
+            "Текущие настройки и данные из единого хранилища скопируются в локальное для этого сайта.\n\n" +
+            "Скрипт снова будет использовать отдельное хранилище для этого домена (localStorage)."
+        );
+
+        if (confirmation) {
+          const keysToProcess = GM_listValues();
+          keysToProcess.forEach((key) => {
+            if (key.startsWith("uwu_")) {
+              const value = GM_getValue(key);
+              localStorage.setItem(key, value);
+            }
+          });
+
+          settings.unifiedStorage = false;
+
+          GM_setValue("uwu_settings", JSON.stringify(settings));
+          localStorage.setItem("uwu_settings", JSON.stringify(settings));
+
+          alert(
+            "Единое хранилище отключено. Ваши настройки и данные были скопированы в локальное хранилище для этого сайта. Страница будет перезагружена."
+          );
+          location.reload();
+        } else {
+          unifiedStorageCheckbox.checked = true;
+        }
+      }
+    });
+  }
+
   // ====================================================================================================================
   //  . . . ВЗАИМОИСКЛЮЧАЮЩИЕСЯ ЧЕКБОКСЫ . . .
   // ====================================================================================================================
@@ -5197,6 +5590,87 @@ if (targetSettings.test(window.location.href)) {
         saveSettings();
       });
     });
+
+  // ====================================================================================================================
+  //  . . . НАСТРОЙКИ ЛОГА ЛОВЛИ - СВОИ НАЗВАНИЯ ПРЕДМЕТОВ . . .
+  // ====================================================================================================================
+  function setupCatchingLogCustomItems() {
+    const textarea = document.getElementById("catching-log-custom-items");
+    const saveBtn = document.getElementById("save-custom-items-btn");
+    const exportField = document.getElementById("custom-items-export-field");
+    const importField = document.getElementById("custom-items-import-field");
+    const importBtn = document.getElementById("custom-items-import-btn");
+
+    if (!textarea || !saveBtn || !exportField || !importField || !importBtn)
+      return;
+
+    function parseTextareaToObject(text) {
+      const lines = text.split("\n");
+      const obj = {};
+      lines.forEach((line) => {
+        if (line.includes("=")) {
+          const parts = line.split("=");
+          const id = parts[0].trim();
+          const name = parts.slice(1).join("=").trim();
+          if (id && name) {
+            obj[id] = name;
+          }
+        }
+      });
+      return obj;
+    }
+
+    function objectToTextarea(obj) {
+      return Object.entries(obj)
+        .map(([id, name]) => `${id}=${name}`)
+        .join("\n");
+    }
+
+    function loadAndDisplay() {
+      const customItems =
+        uwuStorage.getItem("uwu_catchingLog_customItems") || {};
+      textarea.value = objectToTextarea(customItems);
+      exportField.value = JSON.stringify(customItems);
+    }
+
+    saveBtn.addEventListener("click", () => {
+      const customItemsObject = parseTextareaToObject(textarea.value);
+      uwuStorage.setItem("uwu_catchingLog_customItems", customItemsObject);
+      alert("Список названий сохранён!");
+      loadAndDisplay();
+    });
+
+    importBtn.addEventListener("click", () => {
+      const jsonString = importField.value;
+      if (!jsonString.trim()) {
+        alert("Поле для импорта пустое.");
+        return;
+      }
+      try {
+        const importedItems = JSON.parse(jsonString);
+        if (typeof importedItems !== "object" || importedItems === null) {
+          throw new Error("Неверный формат данных.");
+        }
+        uwuStorage.setItem("uwu_catchingLog_customItems", importedItems);
+        alert("Список названий успешно импортирован!");
+        importField.value = "";
+        loadAndDisplay();
+      } catch (error) {
+        alert(
+          "Ошибка! Не удалось импортировать список. Проверьте корректность вставленных данных."
+        );
+        console.error("UwU | Ошибка импорта названий предметов:", error);
+      }
+    });
+
+    exportField.addEventListener("click", function () {
+      this.select();
+    });
+
+    loadAndDisplay();
+  }
+
+  setupCatchingLogCustomItems();
   // ====================================================================================================================
   //  . . . СОЗДАНИЕ ВЫПАДАЮЩИХ СПИСКОВ ПРИ ПОМОЩИ ФУНКЦИИ createCustomSelect . . .
   // ====================================================================================================================
@@ -5216,6 +5690,7 @@ if (targetSettings.test(window.location.href)) {
   createCustomSelect("notificationInMouthSound", notificationSounds);
   createCustomSelect("notificationInFightModeSound", notificationSounds);
   createCustomSelect("notificationBlockSound", notificationSounds);
+  createCustomSelect("intervalTimerSound", notificationSounds);
   // ==============================================================================
   const howShowOtherCatsList = [
     { name: "Не отображать", id: "1" },
@@ -5405,6 +5880,11 @@ if (targetSettings.test(window.location.href)) {
     "notificationBlockSound",
     "notificationBlockVolume"
   );
+  addSoundTestButton(
+    "intervalTimerContainer",
+    "intervalTimerSound",
+    "intervalTimerVolume"
+  );
   // ====================================================================================================================
   //  . . . СБРОС ПОЗИЦИИ ЧАСИКОВ . . .
   // ====================================================================================================================
@@ -5412,13 +5892,14 @@ if (targetSettings.test(window.location.href)) {
     .getElementById("resetClockPosition")
     .addEventListener("click", () => {
       const defaultPosition = { x: 10, y: 10 };
-      localStorage.setItem("uwu_clock", JSON.stringify(defaultPosition));
+      uwuStorage.setItem("uwu_clock", defaultPosition);
     });
   // ====================================================================================================================
   //  . . . ИМПОРТ / ЭКСПОРТ ВСЕХ НАСТРОЕК . . .
   // ====================================================================================================================
   const settingsAllKeys = [
     "uwu_settings",
+    "uwu_version",
     "uwu_layoutSettings",
     "uwu_climbingPanelState",
     "uwu_moduleStates",
@@ -5426,10 +5907,15 @@ if (targetSettings.test(window.location.href)) {
     "uwu_climbingPanelStatus",
     "uwu_privateModules",
     "uwu_colorThemes",
+    "uwu_currentTheme",
     "uwu_fontSize",
     "uwu_clock",
     "uwu_templates",
     "uwu_highlightResources",
+    "uwu_saved_ls",
+    "uwu_activity",
+    "uwu_fastStyles",
+    "uwu_fightTeamsCats",
   ];
 
   const importButton = document.getElementById("importSettingsButton");
@@ -5443,7 +5929,7 @@ if (targetSettings.test(window.location.href)) {
       const parsedSettings = JSON.parse(importedSettings);
       settingsAllKeys.forEach((key) => {
         if (parsedSettings[key] !== undefined) {
-          localStorage.setItem(key, JSON.stringify(parsedSettings[key]));
+          uwuStorage.setItem(key, parsedSettings[key]);
         }
       });
       console.log("Настройки импортированы:", parsedSettings);
@@ -5454,24 +5940,17 @@ if (targetSettings.test(window.location.href)) {
   });
 
   function updateExportField() {
-    const settingsToExport = JSON.stringify(
-      getSpecificLocalStorageItems(),
-      null,
-      2
-    );
+    const settingsObject = getSpecificLocalStorageItems();
+    const settingsToExport = JSON.stringify(settingsObject, null, 2);
     exportSettingsInput.value = settingsToExport;
   }
 
   function getSpecificLocalStorageItems() {
     const items = {};
     settingsAllKeys.forEach((key) => {
-      const value = localStorage.getItem(key);
+      const value = uwuStorage.getItem(key);
       if (value !== null) {
-        try {
-          items[key] = JSON.parse(value);
-        } catch (error) {
-          console.error(`Ошибка при разборе JSON для ключа ${key}:`, error);
-        }
+        items[key] = value;
       }
     });
     return items;
@@ -5614,7 +6093,7 @@ if (targetSettings.test(window.location.href)) {
       rightBlocks,
     };
 
-    localStorage.setItem("uwu_layoutSettings", JSON.stringify(layoutSettings));
+    uwuStorage.setItem("uwu_layoutSettings", layoutSettings);
   }
 
   function createBlockElement(blockId) {
@@ -5689,10 +6168,7 @@ if (targetSettings.test(window.location.href)) {
     );
     if (confirmReset) {
       const defaultSettings = getDefaultLayoutSettings();
-      localStorage.setItem(
-        "uwu_layoutSettings",
-        JSON.stringify(defaultSettings)
-      );
+      uwuStorage.setItem("uwu_layoutSettings", defaultSettings);
       location.reload();
     }
   });
@@ -5706,9 +6182,9 @@ if (targetSettings.test(window.location.href)) {
 
   function loadLayoutSettings() {
     try {
-      const savedSettings = localStorage.getItem("uwu_layoutSettings");
+      const savedSettings = uwuStorage.getItem("uwu_layoutSettings");
       if (savedSettings) {
-        const { leftBlocks, rightBlocks } = JSON.parse(savedSettings);
+        const { leftBlocks, rightBlocks } = savedSettings;
 
         leftColumn.innerHTML = "";
         rightColumn.innerHTML = "";
@@ -5724,10 +6200,7 @@ if (targetSettings.test(window.location.href)) {
         });
       } else {
         const defaultSettings = getDefaultLayoutSettings();
-        localStorage.setItem(
-          "uwu_layoutSettings",
-          JSON.stringify(defaultSettings)
-        );
+        uwuStorage.setItem("uwu_layoutSettings", defaultSettings);
 
         defaultSettings.leftBlocks.forEach((blockId) => {
           leftColumn.appendChild(createBlockElement(blockId));
@@ -5838,7 +6311,7 @@ if (targetSettings.test(window.location.href)) {
     },
 
     saveState() {
-      localStorage.setItem("uwu_climbingPanelState", JSON.stringify(this));
+      uwuStorage.setItem("uwu_climbingPanelState", this);
     },
 
     render() {
@@ -5945,7 +6418,7 @@ if (targetSettings.test(window.location.href)) {
     },
   };
 
-  const savedState = localStorage.getItem("uwu_climbingPanelState");
+  const savedState = uwuStorage.getItem("uwu_climbingPanelState");
   if (!savedState) {
     tabManager.createTab("Вкладка 1");
     for (let i = 0; i < 5; i++) {
@@ -5959,7 +6432,7 @@ if (targetSettings.test(window.location.href)) {
 
     tabManager.saveState();
   } else {
-    const state = JSON.parse(savedState);
+    const state = savedState;
     Object.assign(tabManager, state);
   }
 
@@ -6034,19 +6507,18 @@ const defaultModules = [
 const privateModules = {};
 
 function loadModuleStates() {
-  const storedModuleStates = localStorage.getItem("uwu_moduleStates");
+  const storedModuleStates = uwuStorage.getItem("uwu_moduleStates");
   if (storedModuleStates) {
-    const loadedModuleStates = JSON.parse(storedModuleStates);
-    Object.assign(moduleStates, loadedModuleStates);
+    Object.assign(moduleStates, storedModuleStates);
   } else {
     for (const moduleName of defaultModules) {
       moduleStates[moduleName] = true;
     }
   }
 
-  const storedPrivateModules = localStorage.getItem("uwu_privateModules");
+  const storedPrivateModules = uwuStorage.getItem("uwu_privateModules");
   if (storedPrivateModules) {
-    Object.assign(privateModules, JSON.parse(storedPrivateModules));
+    Object.assign(privateModules, storedPrivateModules);
   }
 }
 
@@ -6073,7 +6545,7 @@ async function loadModuleListOnSettings() {
 
     for (const moduleInfo of modules) {
       const [moduleName, description, version] = moduleInfo.split("|");
-      const isOnlineModule = !localStorage.getItem(moduleName);
+      const isOnlineModule = !uwuStorage.getItem(moduleName);
       const moduleContainer = createModuleContainer(
         moduleName,
         description,
@@ -6119,7 +6591,7 @@ async function activateModules() {
 
     for (const moduleInfo of modules) {
       const [moduleName, description, version] = moduleInfo.split("|");
-      const isOnlineModule = !localStorage.getItem(moduleName);
+      const isOnlineModule = !uwuStorage.getItem(moduleName);
 
       if (moduleStates[moduleName]) {
         loadModule(moduleName, description, version);
@@ -6196,7 +6668,7 @@ function createModuleContainer(
 
     checkbox.addEventListener("change", () => {
       moduleStates[moduleName] = checkbox.checked;
-      localStorage.setItem("uwu_moduleStates", JSON.stringify(moduleStates));
+      uwuStorage.setItem("uwu_moduleStates", moduleStates);
 
       if (checkbox.checked) {
         loadModule(moduleName, description, version);
@@ -6213,7 +6685,7 @@ function createModuleContainer(
 }
 
 async function loadModule(moduleName, description, version) {
-  const cachedModule = localStorage.getItem(moduleName);
+  const cachedModule = uwuStorage.getItem(moduleName);
 
   if (cachedModule) {
     activateModule(cachedModule, moduleName, description, version);
@@ -6223,11 +6695,11 @@ async function loadModule(moduleName, description, version) {
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.text();
-        localStorage.setItem(moduleName, data);
+        uwuStorage.setItem(moduleName, data);
         activateModule(data, moduleName, description, version);
 
         moduleStates[moduleName] = true;
-        localStorage.setItem("uwu_moduleStates", JSON.stringify(moduleStates));
+        uwuStorage.setItem("uwu_moduleStates", moduleStates);
 
         createModuleContainer(moduleName, description, version, false);
 
@@ -6265,13 +6737,13 @@ function activateModule(data, moduleName, description, version) {
 }
 
 function unloadModule(moduleName) {
-  localStorage.removeItem(moduleName);
+  uwuStorage.removeItem(moduleName);
   delete moduleStates[moduleName];
-  localStorage.setItem("uwu_moduleStates", JSON.stringify(moduleStates));
+  uwuStorage.setItem("uwu_moduleStates", moduleStates);
 
   if (privateModules[moduleName]) {
     delete privateModules[moduleName];
-    localStorage.setItem("uwu_privateModules", JSON.stringify(privateModules));
+    uwuStorage.setItem("uwu_privateModules", privateModules);
   }
 
   loadModuleStates();
@@ -6477,7 +6949,7 @@ if (targetCW3Kns.test(window.location.href)) {
   function applyTheme() {
     const newStyle = document.createElement("style");
     newStyle.innerHTML =
-      // css
+      /* CSS */
       `
       body {
         background: ${theme?.backgroundColor || ""};
@@ -6558,7 +7030,7 @@ if (targetCW3.test(window.location.href)) {
   function applyTheme() {
     const newStyle = document.createElement("style");
     newStyle.innerHTML =
-      // css
+      /* CSS */
       `
       body {
         background: ${theme?.backgroundColor || ""};
@@ -6585,7 +7057,7 @@ if (targetCW3.test(window.location.href)) {
         background-color: ${theme?.chatColor || ""};
       }
     
-      body, input, select, .ui-slider-handle {
+      body, input, select, .ui-slider-handle, .hotkey {
         color: ${theme?.textColor || ""};
       }
     
@@ -6872,7 +7344,7 @@ if (targetCW3.test(window.location.href)) {
   async function personalCostumes() {
     if (settings.personalCostumes) {
       const match = window.location.hostname.match(/catwar\.(net|su)/);
-      let items = JSON.parse(localStorage.getItem("uwu_personal") ?? "{}");
+      let items = uwuStorage.getItem("uwu_personal") ?? {};
       if (match && !items.catImg) {
         const fullDomain = `catwar.${match[1]}`;
         if (!items.id) {
@@ -6883,7 +7355,7 @@ if (targetCW3.test(window.location.href)) {
               const htmlDocument = parser.parseFromString(text, "text/html");
               items.id = htmlDocument.getElementById("id_val").innerText;
             });
-          localStorage.setItem("uwu_personal", JSON.stringify(items));
+          uwuStorage.setItem("uwu_personal", items);
         }
 
         if (!items.catImg && items.id) {
@@ -6896,7 +7368,7 @@ if (targetCW3.test(window.location.href)) {
             src: img.style.backgroundImage.slice(5, -2),
             size: img.style.backgroundSize,
           };
-          localStorage.setItem("uwu_personal", JSON.stringify(items));
+          uwuStorage.setItem("uwu_personal", items);
         }
       }
 
@@ -6939,63 +7411,45 @@ if (targetCW3.test(window.location.href)) {
   }
 
   function saveCostumeToSlot(dataUrl, choice) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onerror = function () {
-        alert("Костюм сейчас недоступен. Попробуйте позже.");
-        reject(new Error("Image load error"));
-      };
-      img.onload = function () {
-        try {
-          let data = localStorage.getItem("uwu_personal") || "{}";
-          data = JSON.parse(data);
-          const canvas = document.createElement("canvas");
-          canvas.width = 100;
-          canvas.height = 150;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, 100, 150);
+    return new Promise(async (resolve, reject) => {
+      try {
+        const resizedDataUrl = await resizeImageToAspectRatio(dataUrl);
+        let data = uwuStorage.getItem("uwu_personal") || {};
 
-          const resizedDataUrl = canvas.toDataURL("image/png");
-
-          if (!data.costumes) {
-            data.costumes = { base: "", slots: [] };
-          }
-          if (!Array.isArray(data.costumes.slots)) {
-            data.costumes.slots = [];
-          }
-
-          if (choice === "new") {
-            data.costumes.slots.push({ base: resizedDataUrl });
-            alert("Костюм успешно сохранен в новый слот.");
-          } else {
-            const slotIndex = parseInt(choice, 10);
-            if (data.costumes.slots[slotIndex]) {
-              if (
-                !confirm("Этот слот уже занят. Вы хотите перезаписать его?")
-              ) {
-                return resolve();
-              }
-            }
-            data.costumes.slots[slotIndex] = { base: resizedDataUrl };
-            alert(`Костюм успешно сохранен в слот ${slotIndex + 1}.`);
-          }
-
-          localStorage.setItem("uwu_personal", JSON.stringify(data));
-          resolve();
-        } catch (error) {
-          console.error("Ошибка при сохранении костюма:", error);
-          alert("Ошибка при сохранении костюма.");
-          reject(error);
+        if (!data.costumes) {
+          data.costumes = { base: "", slots: [] };
         }
-      };
-      img.src = dataUrl;
+        if (!Array.isArray(data.costumes.slots)) {
+          data.costumes.slots = [];
+        }
+
+        if (choice === "new") {
+          data.costumes.slots.push({ base: resizedDataUrl });
+          alert("Костюм успешно сохранен в новый слот.");
+        } else {
+          const slotIndex = parseInt(choice, 10);
+          if (data.costumes.slots[slotIndex]) {
+            if (!confirm("Этот слот уже занят. Вы хотите перезаписать его?")) {
+              return resolve();
+            }
+          }
+          data.costumes.slots[slotIndex] = { base: resizedDataUrl };
+          alert(`Костюм успешно сохранен в слот ${slotIndex + 1}.`);
+        }
+
+        uwuStorage.setItem("uwu_personal", data);
+        resolve();
+      } catch (error) {
+        console.error("Ошибка при сохранении костюма:", error);
+        alert("Ошибка при сохранении костюма.");
+        reject(error);
+      }
     });
   }
 
   function createCostumeSavePopup(costumes) {
     let { catInfoElement, contentContainer } = createCatInfoContainer();
-    let data = localStorage.getItem("uwu_personal") || "{}";
-    data = JSON.parse(data);
+    let data = uwuStorage.getItem("uwu_personal") || {};
     const savedSlots =
       data.costumes && data.costumes.slots ? data.costumes.slots : [];
 
@@ -7058,11 +7512,11 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   if (settings.blockItemDrop) {
     function getLockedItems() {
-      return JSON.parse(localStorage.getItem("uwu_lockedItems") || "[]");
+      return uwuStorage.getItem("uwu_lockedItems") || "[]";
     }
 
     function setLockedItems(lockedItems) {
-      localStorage.setItem("uwu_lockedItems", JSON.stringify(lockedItems));
+      uwuStorage.setItem("uwu_lockedItems", lockedItems);
     }
 
     function checkIfIdIsLocked(itemId) {
@@ -7157,9 +7611,9 @@ if (targetCW3.test(window.location.href)) {
   }
 
   window.addEventListener("load", () => {
-    const savedVersion = localStorage.getItem("uwu_version");
+    const savedVersion = uwuStorage.getItem("uwu_version");
     if (savedVersion !== current_uwu_version) {
-      localStorage.setItem("uwu_version", current_uwu_version);
+      uwuStorage.setItem("uwu_version", current_uwu_version);
     }
     if (
       settings.showUpdateNotification &&
@@ -7202,6 +7656,360 @@ if (targetCW3.test(window.location.href)) {
     fireflyOnButton.addEventListener("click", () => {
       toggleFireflies();
     });
+  }
+
+  // ====================================================================================================================
+  //   . . . ТАЙМЕР-НАПОМИНАЛКА . . .
+  // ====================================================================================================================
+  if (settings.intervalTimerEnabled) {
+    const intervalTimerPanelHTML =
+      /* HTML */
+      `
+        <div id="uwu-interval-timer-main-panel">
+          <div id="uwu-interval-timer-button">
+            <div class="left-content">
+              <h2 class="timer-title">Таймер</h2>
+              <span id="timer-header-countdown" style="display: none;"
+                >00:00</span
+              >
+            </div>
+            <div class="right-content">
+              <span id="uwu-interval-timer-toggle">▼</span>
+            </div>
+          </div>
+          <div id="uwu-interval-timer-container">
+            <div id="uwu-interval-timer-content">
+              <div class="timer-inputs">
+                <input
+                  type="number"
+                  id="timer-minutes-input"
+                  min="0"
+                  placeholder="Мин"
+                />
+                <span>:</span>
+                <input
+                  type="number"
+                  id="timer-seconds-input"
+                  min="0"
+                  max="59"
+                  placeholder="Сек"
+                />
+              </div>
+              <button
+                id="timer-start-stop-btn"
+                class="uwu-button install-button"
+              >
+                Старт
+              </button>
+              <div id="timer-countdown-display">00:00</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+    const globalContainer = document.getElementById("uwu-global-container");
+    globalContainer.insertAdjacentHTML("beforeend", intervalTimerPanelHTML);
+
+    const timerStyles = document.createElement("style");
+    timerStyles.innerHTML = /* CSS */ `
+      #uwu-interval-timer-main-panel {
+        z-index: 11;
+        pointer-events: auto;
+        width: 180px;
+        position: absolute;
+        top: 100px;
+        left: 100px;
+        background-color: ${theme?.climbingPanelBackground || "#ffffff08"};
+        border: 1px solid #ffffff1a;
+        backdrop-filter: blur(20px);
+        border-radius: 10px;
+        color: ${theme?.textColor || "#d5d5d5"};
+      }
+
+      #uwu-interval-timer-button {
+        height: 31px;
+        cursor: grab;
+        background-color: #00000026;
+        border-radius: 10px;
+        border: 1px solid #ffffff1a;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+      }
+
+      #uwu-interval-timer-button .left-content {
+        pointer-events: none;
+        width: 85%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #uwu-interval-timer-button .right-content {
+        pointer-events: none;
+        width: 15%;
+        text-align: right;
+      }
+
+      #uwu-interval-timer-button h2 {
+        display: flex;
+        margin-top: 2px;
+        margin-bottom: 2px;
+        justify-content: center;
+        pointer-events: none;
+      }
+
+      #timer-start-stop-btn {
+        width: -webkit-fill-available;
+      }
+
+      #uwu-interval-timer-toggle {
+        cursor: pointer;
+        font-size: 18px;
+        margin-right: 8px;
+      }
+
+      #uwu-interval-timer-container {
+        display: block;
+        padding: 5px;
+      }
+
+      #uwu-interval-timer-container.collapsed {
+        display: none;
+      }
+
+      #uwu-interval-timer-content {
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .timer-inputs {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .timer-inputs input {
+        width: 50px;
+        text-align: center;
+      }
+      #timer-countdown-display,
+      #timer-header-countdown {
+        font-size: 1.5em;
+        font-weight: bold;
+      }
+    `;
+
+    document.head.appendChild(timerStyles);
+
+    const timerPanel = document.getElementById("uwu-interval-timer-main-panel");
+    const header = document.getElementById("uwu-interval-timer-button");
+    const container = document.getElementById("uwu-interval-timer-container");
+    const toggleBtn = document.getElementById("uwu-interval-timer-toggle");
+    const minutesInput = document.getElementById("timer-minutes-input");
+    const secondsInput = document.getElementById("timer-seconds-input");
+    const startStopBtn = document.getElementById("timer-start-stop-btn");
+    const countdownDisplay = document.getElementById("timer-countdown-display");
+    const headerCountdown = document.getElementById("timer-header-countdown");
+    const timerTitle = document.querySelector("h2.timer-title");
+
+    let timerId = null;
+    let totalSeconds = 0;
+    let remainingSeconds = 0;
+    let isRunning = false;
+
+    let isDragging = false;
+    let wasDragging = false;
+    let offsetX, offsetY;
+
+    header.addEventListener("mousedown", (e) => {
+      isDragging = true;
+      wasDragging = false;
+      offsetX = e.clientX - timerPanel.offsetLeft;
+      offsetY = e.clientY - timerPanel.offsetTop;
+      header.style.cursor = "grabbing";
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (isDragging) {
+        wasDragging = true;
+
+        let newX = e.clientX - offsetX;
+        let newY = e.clientY - offsetY;
+
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const panelWidth = timerPanel.offsetWidth;
+        const panelHeight = timerPanel.offsetHeight;
+
+        if (newX < 0) newX = 0;
+        if (newX + panelWidth > windowWidth) newX = windowWidth - panelWidth;
+
+        if (newY < 0) newY = 0;
+        if (newY + panelHeight > windowHeight)
+          newY = windowHeight - panelHeight;
+
+        timerPanel.style.left = `${newX}px`;
+        timerPanel.style.top = `${newY}px`;
+      }
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (isDragging) {
+        isDragging = false;
+        header.style.cursor = "grab";
+        saveTimerState();
+      }
+    });
+
+    function togglePanel() {
+      container.classList.toggle("collapsed");
+
+      const isCollapsed = container.classList.contains("collapsed");
+      toggleBtn.textContent = isCollapsed ? "▶" : "▼";
+
+      timerTitle.style.display = isCollapsed && isRunning ? "none" : "inline";
+      headerCountdown.style.display =
+        isCollapsed && isRunning ? "inline" : "none";
+
+      saveTimerState();
+    }
+
+    header.addEventListener("click", () => {
+      if (!wasDragging) {
+        togglePanel();
+      }
+    });
+
+    function startTimer() {
+      const minutes = parseInt(minutesInput.value) || 0;
+      const seconds = parseInt(secondsInput.value) || 0;
+      totalSeconds = minutes * 60 + seconds;
+
+      if (totalSeconds <= 0) {
+        alert("Пожалуйста, введите корректное время.");
+        return;
+      }
+
+      isRunning = true;
+      startStopBtn.textContent = "Стоп";
+      startStopBtn.classList.remove("install-button");
+      startStopBtn.classList.add("remove-button");
+
+      remainingSeconds = totalSeconds;
+      updateDisplay();
+      playSound();
+
+      timerId = setInterval(() => {
+        remainingSeconds--;
+        if (remainingSeconds < 0) {
+          remainingSeconds = totalSeconds;
+          playSound();
+        }
+        updateDisplay();
+      }, 1000);
+
+      if (container.classList.contains("collapsed")) {
+        timerTitle.style.display = "none";
+        headerCountdown.style.display = "inline";
+      }
+      saveTimerState();
+    }
+
+    function stopTimer() {
+      isRunning = false;
+      startStopBtn.textContent = "Старт";
+      startStopBtn.classList.remove("remove-button");
+      startStopBtn.classList.add("install-button");
+
+      clearInterval(timerId);
+      timerId = null;
+      remainingSeconds = 0;
+      updateDisplay();
+
+      timerTitle.style.display = "inline";
+      headerCountdown.style.display = "none";
+    }
+
+    function updateDisplay() {
+      const mins = Math.floor(remainingSeconds / 60);
+      const secs = remainingSeconds % 60;
+      const timeString = `${String(mins).padStart(2, "0")}:${String(
+        secs
+      ).padStart(2, "0")}`;
+      countdownDisplay.textContent = timeString;
+      headerCountdown.textContent = timeString;
+    }
+
+    function playSound() {
+      soundManager.playSound(
+        settings.intervalTimerSound,
+        settings.intervalTimerVolume
+      );
+    }
+
+    startStopBtn.addEventListener("click", () => {
+      if (isRunning) {
+        stopTimer();
+      } else {
+        startTimer();
+      }
+    });
+
+    function saveTimerState() {
+      const state = {
+        x: timerPanel.offsetLeft,
+        y: timerPanel.offsetTop,
+        collapsed: container.classList.contains("collapsed"),
+        minutes: minutesInput.value,
+        seconds: secondsInput.value,
+      };
+      uwuStorage.setItem("uwu_intervalTimerState", state);
+    }
+
+    function checkAndResetPosition() {
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      const panelWidth = timerPanel.offsetWidth;
+      const panelHeight = timerPanel.offsetHeight;
+
+      let currentX = timerPanel.offsetLeft;
+      let currentY = timerPanel.offsetTop;
+
+      if (
+        currentX + panelWidth > windowWidth ||
+        currentY + panelHeight > windowHeight ||
+        currentX < 0 ||
+        currentY < 0
+      ) {
+        timerPanel.style.left = `100px`;
+        timerPanel.style.top = `100px`;
+        saveTimerState();
+      }
+    }
+
+    function loadTimerState() {
+      const state = uwuStorage.getItem("uwu_intervalTimerState");
+      if (state) {
+        timerPanel.style.left = `${state.x}px`;
+        timerPanel.style.top = `${state.y}px`;
+        if (state.collapsed) {
+          container.classList.add("collapsed");
+          toggleBtn.textContent = "▶";
+        }
+        minutesInput.value = state.minutes || "";
+        secondsInput.value = state.seconds || "";
+      }
+      updateDisplay();
+      checkAndResetPosition();
+    }
+
+    minutesInput.addEventListener("change", saveTimerState);
+    secondsInput.addEventListener("change", saveTimerState);
+
+    loadTimerState();
   }
   // ====================================================================================================================
   //   . . . ЧАСЫ . . .
@@ -7353,7 +8161,8 @@ if (targetCW3.test(window.location.href)) {
     let internetTime = null;
     let timerInterval = null;
     let lastSyncTimestamp = 0;
-    const SYNC_COOLDOWN_MS = 1 * 60 * 1000;
+    const SYNC_COOLDOWN_MS = 3 * 60 * 1000;
+    let isFetchingTime = false;
 
     function updateClock(timeSource = new Date()) {
       const hours = String(timeSource.getHours()).padStart(2, "0");
@@ -7455,38 +8264,42 @@ if (targetCW3.test(window.location.href)) {
         },
       ];
 
-      for (const provider of timeProviders) {
-        try {
-          const url = provider.buildUrl(settings.clockMoscowTime);
-          const response = await fetch(url);
-          if (!response.ok) {
-            throw new Error(`Response not OK: ${response.status}`);
+      try {
+        for (const provider of timeProviders) {
+          try {
+            const url = provider.buildUrl(settings.clockMoscowTime);
+            const response = await fetch(url);
+            if (!response.ok) {
+              throw new Error(`Response not OK: ${response.status}`);
+            }
+            internetTime = await provider.parseResponse(response);
+            useInternetTime = true;
+            lastSyncTimestamp = Date.now();
+            // console.log(`Время успешно получено от ${provider.name}.`);
+            break;
+          } catch (error) {
+            // console.warn(
+            //   `Не удалось получить время от ${provider.name}, пробую следующий источник.`,
+            //   error
+            // );
+            useInternetTime = false;
           }
-          internetTime = await provider.parseResponse(response);
-          useInternetTime = true;
-          lastSyncTimestamp = Date.now();
-          console.log(`Время успешно получено от ${provider.name}.`);
-          break;
-        } catch (error) {
-          console.warn(
-            `Не удалось получить время от ${provider.name}, пробую следующий источник.`,
-            error
-          );
-          useInternetTime = false;
         }
-      }
 
-      if (useInternetTime) {
-        updateClockWithInternetTime();
-      } else {
-        console.warn(
-          "Не удалось получить время от всех онлайн-источников, используется локальное время."
-        );
-        useInternetTime = false;
-        updateClockWithLocalTime();
-      }
+        if (useInternetTime) {
+          updateClockWithInternetTime();
+        } else {
+          // console.warn(
+          //   "Не удалось получить время от всех онлайн-источников, используется локальное время."
+          // );
+          useInternetTime = false;
+          updateClockWithLocalTime();
+        }
 
-      startTimer();
+        startTimer();
+      } finally {
+        isFetchingTime = false;
+      }
     }
 
     function updateClockWithInternetTime() {
@@ -7574,26 +8387,29 @@ if (targetCW3.test(window.location.href)) {
         x: clockElement.offsetLeft,
         y: clockElement.offsetTop,
       };
-      localStorage.setItem("uwu_clock", JSON.stringify(clockPosition));
+      uwuStorage.setItem("uwu_clock", clockPosition);
     }
 
     function loadClockPosition() {
-      const storedPosition = localStorage.getItem("uwu_clock");
+      const storedPosition = uwuStorage.getItem("uwu_clock");
       if (storedPosition) {
-        const clockPosition = JSON.parse(storedPosition);
+        const clockPosition = storedPosition;
         clockElement.style.left = `${clockPosition.x}px`;
         clockElement.style.top = `${clockPosition.y}px`;
       }
     }
 
     function handleFocusOrVisibilityChange() {
-      if (document.hidden) {
+      if (document.hidden || isFetchingTime) {
         return;
       }
 
       const now = Date.now();
       if (now - lastSyncTimestamp > SYNC_COOLDOWN_MS) {
-        fetchInternetTime();
+        isFetchingTime = true;
+        fetchInternetTime().finally(() => {
+          isFetchingTime = false;
+        });
       }
     }
 
@@ -8179,8 +8995,26 @@ if (targetCW3.test(window.location.href)) {
       {
         id: "dream",
         name: "Бодрость",
-        timePerPixel: 20,
-        formula: null,
+        formula: (redPixels) => {
+          if (redPixels <= 0) return 0;
+
+          const percentageLoss = Math.round(redPixels / 1.5);
+          let totalTime = 0;
+
+          for (let i = 1; i <= percentageLoss; i++) {
+            if (i <= 2) {
+              // Первые два процента добавляют по 20 секунд
+              totalTime += 20;
+            } else if (i % 2 !== 0) {
+              // Нечётные проценты (3-й, 5-й и т.д.) добавляют 40 секунд
+              totalTime += 40;
+            } else {
+              // Чётные проценты (4-й, 6-й и т.д.) добавляют 20 секунд
+              totalTime += 20;
+            }
+          }
+          return totalTime;
+        },
       },
       {
         id: "hunger",
@@ -8199,7 +9033,8 @@ if (targetCW3.test(window.location.href)) {
         name: "Чистота",
         timePerPixel: null,
         formula: (redPixels) => {
-          return ((redPixels - 1) / 1.5) * 100 + 100;
+          if (redPixels <= 0) return 0;
+          return (200 / 3) * redPixels;
         },
       },
     ];
@@ -8248,7 +9083,7 @@ if (targetCW3.test(window.location.href)) {
         if (totalTimeSeconds !== undefined) {
           const hours = Math.floor(totalTimeSeconds / 3600);
           const minutes = Math.floor((totalTimeSeconds % 3600) / 60);
-          const seconds = totalTimeSeconds % 60;
+          const seconds = Math.ceil(totalTimeSeconds % 60);
 
           if (hours > 0) {
             timeInfo = ` (> ${hours} ч ${minutes} мин)`;
@@ -8372,19 +9207,27 @@ if (targetCW3.test(window.location.href)) {
         currentTabIndex: tabManager.currentTabIndex,
         currentTableId: tabManager.currentTableId,
       };
-      localStorage.setItem("uwu_climbingPanelStatus", JSON.stringify(status));
+      uwuStorage.setItem("uwu_climbingPanelStatus", status);
     }
 
     function loadClimbingPanelStatus() {
-      const savedStatus = localStorage.getItem("uwu_climbingPanelStatus");
+      const savedStatus = uwuStorage.getItem("uwu_climbingPanelStatus");
+      const arrow = document.getElementById("uwu-arrow");
 
       if (savedStatus) {
-        const status = JSON.parse(savedStatus);
+        const status = savedStatus;
 
         currentX = status.x;
         currentY = status.y;
 
         climbingPanelContainer.classList.toggle("open", status.isOpen);
+
+        if (status.isOpen) {
+          arrow.textContent = "▼";
+        } else {
+          arrow.textContent = "▶";
+        }
+
         transferCheckbox.checked = status.isChecked;
 
         tabManager.currentTabIndex = status.currentTabIndex;
@@ -8402,6 +9245,7 @@ if (targetCW3.test(window.location.href)) {
         }
       } else {
         tabManager.render();
+        arrow.textContent = "▶";
       }
 
       checkAndResetPanelPosition();
@@ -8540,7 +9384,7 @@ if (targetCW3.test(window.location.href)) {
               <h2>Минное поле</h2>
             </div>
             <div class="right-content">
-              <span id="uwu-arrow">▼</span>
+              <span id="uwu-arrow">▶</span>
             </div>
           </div>
           <div id="uwu-climbingPanelContainer">
@@ -8691,7 +9535,7 @@ if (targetCW3.test(window.location.href)) {
       },
 
       saveState() {
-        localStorage.setItem("uwu_climbingPanelState", JSON.stringify(this));
+        uwuStorage.setItem("uwu_climbingPanelState", this);
       },
 
       render() {
@@ -8807,9 +9651,9 @@ if (targetCW3.test(window.location.href)) {
     };
 
     function loadSavedState() {
-      const savedState = localStorage.getItem("uwu_climbingPanelState");
+      const savedState = uwuStorage.getItem("uwu_climbingPanelState");
       if (savedState) {
-        const state = JSON.parse(savedState);
+        const state = savedState;
         Object.assign(tabManager, state);
         tabManager.currentTabIndex = 0;
 
@@ -8903,9 +9747,7 @@ if (targetCW3.test(window.location.href)) {
     function dragStart(e) {
       const touch = e.touches ? e.touches[0] : e;
 
-      const savedStatus = JSON.parse(
-        localStorage.getItem("uwu_climbingPanelStatus")
-      );
+      const savedStatus = uwuStorage.getItem("uwu_climbingPanelStatus");
       initialX =
         touch.clientX -
         (savedStatus ? savedStatus.x : climbingMainPanel.offsetLeft);
@@ -8968,9 +9810,9 @@ if (targetCW3.test(window.location.href)) {
         saveClimbingPanelStatus();
 
         if (climbingPanelContainer.classList.contains("open")) {
-          arrow.textContent = "▲";
-        } else {
           arrow.textContent = "▼";
+        } else {
+          arrow.textContent = "▶";
         }
       }
       wasDragging = false;
@@ -8982,9 +9824,7 @@ if (targetCW3.test(window.location.href)) {
       const panelWidth = climbingMainPanel.offsetWidth;
       const panelHeight = climbingMainPanel.offsetHeight;
 
-      const savedStatus = JSON.parse(
-        localStorage.getItem("uwu_climbingPanelStatus")
-      );
+      const savedStatus = uwuStorage.getItem("uwu_climbingPanelStatus");
 
       if (savedStatus) {
         currentX = savedStatus.x;
@@ -9420,12 +10260,12 @@ if (targetCW3.test(window.location.href)) {
   ];
 
   const loadSettings = (storageKey) => {
-    const savedSettings = localStorage.getItem(storageKey);
-    return savedSettings ? JSON.parse(savedSettings) : {};
+    const savedSettings = uwuStorage.getItem(storageKey);
+    return savedSettings ? savedSettings : {};
   };
 
   const saveSettings = (storageKey, settings) => {
-    localStorage.setItem(storageKey, JSON.stringify(settings));
+    uwuStorage.setItem(storageKey, settings);
   };
 
   const settingsMap = {
@@ -9569,6 +10409,8 @@ if (targetCW3.test(window.location.href)) {
         "116",
         "119",
         "655",
+        "2613",
+        "2614",
       ],
       Мох: ["75", "78", "95"],
       Паутина: ["20"],
@@ -9590,13 +10432,26 @@ if (targetCW3.test(window.location.href)) {
         "7805",
         "7806",
       ],
+      "Шаманские штучки": [
+        "120",
+        "121",
+        "122",
+        "123",
+        "124",
+        "125",
+        "128",
+        "129",
+        "130",
+        "131",
+        "132",
+      ],
     };
 
     function generateHighlightStyles(cageItem) {
-      const savedSettings = localStorage.getItem("uwu_highlightResources");
+      const savedSettings = uwuStorage.getItem("uwu_highlightResources");
       if (!savedSettings) return;
 
-      const uwu_highlightResources = JSON.parse(savedSettings);
+      const uwu_highlightResources = savedSettings;
 
       if (settings.highlightResourcesStyle === "background") {
         const styleElement =
@@ -9861,7 +10716,7 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . ПОЛЬЗОВАТЕЛЬСКИЙ ШРИФТ . . .
   // ====================================================================================================================
-  let fontSize = JSON.parse(localStorage.getItem("uwu_fontSize"));
+  let fontSize = uwuStorage.getItem("uwu_fontSize");
 
   function applyFonts() {
     // Создаем элемент <link> для подключения шрифта
@@ -10001,9 +10856,9 @@ if (targetCW3.test(window.location.href)) {
     setupSingleCallback(".other_cats_list", prependOtherCatsListContent);
     // ==================================================================
     function applyLayoutSettings() {
-      const savedSettings = localStorage.getItem("uwu_layoutSettings");
+      const savedSettings = uwuStorage.getItem("uwu_layoutSettings");
       if (savedSettings) {
-        const { leftBlocks, rightBlocks } = JSON.parse(savedSettings);
+        const { leftBlocks, rightBlocks } = savedSettings;
 
         const mainTable = document.getElementById("main_table");
         const tbody = mainTable.getElementsByTagName("tbody")[0];
@@ -10166,7 +11021,7 @@ if (targetCW3.test(window.location.href)) {
 
       #itemList {
         overflow-y: auto;
-        max-height: 180px;
+        max-height: ${settings.itemListHeight || 180}px;
         display: flex;
         flex-wrap: wrap;
       }
@@ -10335,8 +11190,8 @@ if (targetCW3.test(window.location.href)) {
       }
       visualTimerStartTime = null;
       visualInitialTimerValue = 0;
-      localStorage.removeItem(visualTimerStateKey);
-      localStorage.removeItem(sniffCheckpointKey);
+      uwuStorage.removeItem(visualTimerStateKey);
+      uwuStorage.removeItem(sniffCheckpointKey);
 
       const timerElement = document.getElementById("uwu_sniff_timer");
       if (timerElement) {
@@ -10354,12 +11209,12 @@ if (targetCW3.test(window.location.href)) {
             startTime: visualTimerStartTime,
             initialValue: visualInitialTimerValue,
           };
-          localStorage.setItem(visualTimerStateKey, JSON.stringify(timerState));
+          uwuStorage.setItem(visualTimerStateKey, timerState);
         } else {
-          localStorage.removeItem(visualTimerStateKey);
+          uwuStorage.removeItem(visualTimerStateKey);
         }
       } else {
-        localStorage.removeItem(visualTimerStateKey);
+        uwuStorage.removeItem(visualTimerStateKey);
       }
     }
 
@@ -10368,7 +11223,7 @@ if (targetCW3.test(window.location.href)) {
         return;
       }
 
-      const checkpointTimestampStr = localStorage.getItem(sniffCheckpointKey);
+      const checkpointTimestampStr = uwuStorage.getItem(sniffCheckpointKey);
       if (checkpointTimestampStr) {
         const checkpointTimestamp = parseInt(checkpointTimestampStr, 10);
         if (!isNaN(checkpointTimestamp)) {
@@ -10405,14 +11260,14 @@ if (targetCW3.test(window.location.href)) {
             }
           }
         } else {
-          localStorage.removeItem(sniffCheckpointKey);
+          uwuStorage.removeItem(sniffCheckpointKey);
         }
       }
 
-      const savedVisualStateStr = localStorage.getItem(visualTimerStateKey);
+      const savedVisualStateStr = uwuStorage.getItem(visualTimerStateKey);
       if (savedVisualStateStr) {
         try {
-          const savedVisualState = JSON.parse(savedVisualStateStr);
+          const savedVisualState = savedVisualStateStr;
           const elapsedTimeSinceSave =
             (Date.now() - savedVisualState.startTime) / 1000;
           const remainingTimeFromSave =
@@ -10426,14 +11281,14 @@ if (targetCW3.test(window.location.href)) {
             smellTimerInterval = setInterval(updateVisualTimerDisplay, 1000);
             return;
           } else {
-            localStorage.removeItem(visualTimerStateKey);
+            uwuStorage.removeItem(visualTimerStateKey);
           }
         } catch (e) {
           console.error(
             "Ошибка разбора сохраненного состояния визуального таймера:",
             e
           );
-          localStorage.removeItem(visualTimerStateKey);
+          uwuStorage.removeItem(visualTimerStateKey);
         }
       }
     }
@@ -10442,7 +11297,7 @@ if (targetCW3.test(window.location.href)) {
       const blockMess = document.getElementById("block_mess");
       if (blockMess && blockMess.textContent.includes("Принюхиваться")) {
         stopVisualTimer();
-        localStorage.setItem(sniffCheckpointKey, Date.now().toString());
+        uwuStorage.setItem(sniffCheckpointKey, Date.now().toString());
       }
     }
 
@@ -10588,65 +11443,79 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . ЛОГ ЧИСТИЛЬЩИКОВ . . .
   // ====================================================================================================================function cleaningLogUpdate(mutationsList) {
-  const relevantActions = [
-    { regex: /Потёрлись носом о нос с/, type: "check" },
-    { regex: /Потёрлись щекой о щёку/, type: "check" },
-    { regex: /Помурлыкал(а)? вместе с/, type: "check" },
-    { regex: /Обнюхал(а)? /, type: "check" },
-    { regex: /Поднял(а)? /, type: "pickup" },
-    { regex: /Опустил(а)? на землю /, type: "putdown" },
-  ];
+  if (settings.cleaningLog) {
+    let logStates = uwuStorage.getItem("uwu_logStates") || {
+      cleaning: false,
+      catching: false,
+    };
 
-  let cleaningLogBuffer = "";
-  let catNamesAndIds = [];
+    let lastDroppedCatInfo = null;
 
-  function cleaningLogUpdate() {
-    const historyBlock = document.querySelector("#history");
-    const ist = historyBlock.querySelector("#ist");
-    const locationSpan = historyBlock.querySelector("#location");
-    const currentLocation = locationSpan.textContent.trim();
-
-    if (currentLocation === "[ Загружается… ]") {
-      return;
+    function saveLogStates() {
+      uwuStorage.setItem("uwu_logStates", logStates);
     }
 
-    let cleaningLogBlock = historyBlock.querySelector("#uwu-cleaningLog");
-    if (!cleaningLogBlock) {
-      createCleaningLogBlock(historyBlock);
-      cleaningLogBlock = historyBlock.querySelector("#uwu-cleaningLog");
-    }
+    const relevantActions = [
+      { regex: /Потёрлись носом о нос с/, type: "check" },
+      { regex: /Потёрлись щекой о щёку/, type: "check" },
+      { regex: /Помурлыкал(а)? вместе с/, type: "check" },
+      { regex: /Обнюхал(а)? /, type: "check" },
+      { regex: /Поднял(а)? /, type: "pickup" },
+      { regex: /Опустил(а)? на землю /, type: "putdown" },
+    ];
 
-    const istOuterHtml = ist.outerHTML;
-    const actions = istOuterHtml
-      .split(".")
-      .map((action) => action.trim())
-      .filter((action) => action);
-    const lastAction = actions[actions.length - 2];
+    let cleaningLogBuffer = "";
+    let catNamesAndIds = [];
 
-    const cleaningLogContent = cleaningLogBlock.querySelector(
-      "#uwu-cleaningLog-content"
-    );
+    function cleaningLogUpdate() {
+      const historyBlock = document.querySelector("#history");
+      const ist = historyBlock.querySelector("#ist");
+      const locationSpan = historyBlock.querySelector("#location");
+      const currentLocation = locationSpan.textContent.trim();
 
-    if (lastAction) {
-      if (settings.cleaningLogStyle === "smart") {
-        processSmartAction(lastAction, currentLocation, cleaningLogContent);
-      } else {
-        processStandardAction(lastAction, currentLocation, cleaningLogContent);
+      if (currentLocation === "[ Загружается… ]") {
+        return;
       }
 
-      let storageKey;
-      switch (settings.cleaningLogStyle) {
-        case "smart":
-          storageKey = "uwu_cleaningLogSmart";
-          break;
-        default:
-          storageKey = "uwu_cleaningLogStandard";
-          break;
+      let cleaningLogBlock = historyBlock.querySelector("#uwu-cleaningLog");
+      if (!cleaningLogBlock) {
+        createCleaningLogBlock(historyBlock);
+        cleaningLogBlock = historyBlock.querySelector("#uwu-cleaningLog");
       }
 
-      localStorage.setItem(
-        storageKey,
-        JSON.stringify({
+      const istOuterHtml = ist.outerHTML;
+      const actions = istOuterHtml
+        .split(".")
+        .map((action) => action.trim())
+        .filter((action) => action);
+      const lastAction = actions[actions.length - 2];
+
+      const cleaningLogContent = cleaningLogBlock.querySelector(
+        "#uwu-cleaningLog-content"
+      );
+
+      if (lastAction) {
+        if (settings.cleaningLogStyle === "smart") {
+          processSmartAction(lastAction, currentLocation, cleaningLogContent);
+        } else {
+          processStandardAction(
+            lastAction,
+            currentLocation,
+            cleaningLogContent
+          );
+        }
+
+        let storageKey;
+        switch (settings.cleaningLogStyle) {
+          case "smart":
+            storageKey = "uwu_cleaningLogSmart";
+            break;
+          default:
+            storageKey = "uwu_cleaningLogStandard";
+            break;
+        }
+
+        uwuStorage.setItem(storageKey, {
           log: cleaningLogBuffer,
           catNamesAndIds,
           counters: {
@@ -10659,396 +11528,603 @@ if (targetCW3.test(window.location.href)) {
                 .textContent
             ),
           },
-        })
-      );
-      cleaningLogContent.innerHTML = addCatLinksToLog(
-        cleaningLogBuffer,
-        catNamesAndIds
-      );
-    }
-  }
-
-  function createCleaningLogBlock(historyBlock) {
-    const cleaningLogTemplate = `
-      <div id="uwu-cleaningLog">
-        <h2><a href="#" id="uwu-cleaningLog-toggle" class="toggle">Лог чистильщика</a></h2>
-        <div id="uwu-cleaningLog-content"></div>
-        <div id="uwu-cleaningLog-counters">
-          <span>Успешно поднятых: <span id="uwu-cleaningLog-counter-pickup">0</span></span>
-          <span>Опущенных: <span id="uwu-cleaningLog-counter-putdown">0</span></span>
-        </div>
-        <a href="#" id="uwu-cleaningLog-clear">Очистить лог</a>
-      </div>
-    `;
-
-    historyBlock.insertAdjacentHTML("beforeend", cleaningLogTemplate);
-
-    const hr = document.createElement("hr");
-    historyBlock.insertBefore(
-      hr,
-      historyBlock.querySelector("#uwu-cleaningLog")
-    );
-
-    const cleaningLogContent = historyBlock.querySelector(
-      "#uwu-cleaningLog-content"
-    );
-    const savedLog = localStorage.getItem("uwu_cleaningLogSmart");
-    if (savedLog) {
-      const savedData = JSON.parse(savedLog);
-      cleaningLogBuffer = savedData.log;
-      catNamesAndIds = savedData.catNamesAndIds;
-      if (savedData.counters) {
-        document.getElementById("uwu-cleaningLog-counter-pickup").textContent =
-          savedData.counters.pickup;
-        document.getElementById("uwu-cleaningLog-counter-putdown").textContent =
-          savedData.counters.putdown;
-      }
-      cleaningLogContent.innerHTML = addCatLinksToLog(
-        cleaningLogBuffer,
-        catNamesAndIds
-      );
-    }
-
-    const clearButton = historyBlock.querySelector("#uwu-cleaningLog-clear");
-    clearButton.addEventListener("click", () => {
-      cleaningLogBuffer = "";
-      catNamesAndIds = [];
-      document.getElementById("uwu-cleaningLog-counter-pickup").textContent =
-        "0";
-      document.getElementById("uwu-cleaningLog-counter-putdown").textContent =
-        "0";
-      cleaningLogContent.innerHTML = "";
-      localStorage.removeItem("uwu_cleaningLogSmart");
-    });
-  }
-
-  function addCatLinksToLog(log, catNamesAndIds) {
-    let logWithLinks = log;
-    catNamesAndIds.forEach(({ name, id }) => {
-      const regex = new RegExp(`\\[${name}( ${id})?\\]`, "g");
-      logWithLinks = logWithLinks.replace(
-        regex,
-        `[<a href="/cat${id}" target="_blank">${name}</a>${
-          settings.cleaningLogShowID ? ` ${id}` : ""
-        }]`
-      );
-    });
-    return logWithLinks;
-  }
-
-  function extractCatId(action) {
-    const match = action.match(/<a href="\/cat(\d+)">/);
-    return match ? match[1] : null;
-  }
-
-  function checkCatStatus(catId) {
-    const catTooltip = document
-      .querySelector(`#cages > tbody .cat_tooltip a[href="/cat${catId}"]`)
-      .closest(".cat_tooltip");
-    if (catTooltip) {
-      const statusSpan = catTooltip.querySelector(".online");
-      if (statusSpan) {
-        const statusText = statusSpan.textContent.trim();
-        return statusText === "[ Спит ]";
-      }
-    }
-    return false;
-  }
-
-  function processStandardAction(action, location, cleaningLogContent) {
-    for (const relevantAction of relevantActions) {
-      if (relevantAction.regex.test(action)) {
-        const catNameMatch = action.match(/<a href="\/cat\d+">([^<]+)<\/a>/);
-        if (!catNameMatch) {
-          console.error("Не удалось извлечь имя кота из действия:", action);
-          return;
-        }
-        const catName = catNameMatch[1];
-        const catId = extractCatId(action);
-        const actionText = action.replace(
-          /<a href="\/cat\d+">([^<]+)<\/a>/,
-          `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
+        });
+        cleaningLogContent.innerHTML = addCatLinksToLog(
+          cleaningLogBuffer,
+          catNamesAndIds
         );
-        if (relevantAction.type === "action") {
-          cleaningLogBuffer += `${actionText} на локации "${location}". `;
-        } else {
-          const status = checkCatStatus(catId) ? "" : "Кот не спит. ";
-          cleaningLogBuffer += `Проверен [${catName}${
-            settings.cleaningLogShowID ? ` ${catId}` : ""
-          }] на локации "${location}". ${status}`;
-        }
-        if (!catNamesAndIds.some((cat) => cat.id === catId)) {
-          catNamesAndIds.push({ name: catName, id: catId });
+      }
+    }
+
+    function createCleaningLogBlock(historyBlock) {
+      const cleaningLogTemplate =
+        /* HTML */
+        `
+          <div id="uwu-cleaningLog">
+            <h2>
+              <a href="#" id="uwu-cleaningLog-toggle" class="toggle"
+                >Лог чистильщика</a
+              >
+            </h2>
+            <div id="uwu-cleaningLog-content-wrapper">
+              <div id="uwu-cleaningLog-content"></div>
+              <div id="uwu-cleaningLog-counters">
+                <span
+                  >Успешно поднятых:
+                  <span id="uwu-cleaningLog-counter-pickup">0</span></span
+                >
+                <span
+                  >Опущенных:
+                  <span id="uwu-cleaningLog-counter-putdown">0</span></span
+                >
+              </div>
+              <div id="uwu-cleaningLog-actions">
+                <a href="#" id="uwu-cleaningLog-clear">Очистить лог</a>
+                <a
+                  href="#"
+                  id="uwu-cleaningLog-delete-last"
+                  class="disabled"
+                  title="Удалить последнего опущенного персонажа"
+                >
+                  <img
+                    src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/wastebasket.png"
+                    alt="Удалить"
+                    style="width: 18px; height: 18px; vertical-align: middle;"
+                  />
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+
+      historyBlock.insertAdjacentHTML("beforeend", cleaningLogTemplate);
+
+      const hr = document.createElement("hr");
+      historyBlock.insertBefore(
+        hr,
+        historyBlock.querySelector("#uwu-cleaningLog")
+      );
+
+      const cleaningLogContent = historyBlock.querySelector(
+        "#uwu-cleaningLog-content"
+      );
+
+      const savedLog = uwuStorage.getItem("uwu_cleaningLogSmart");
+
+      if (savedLog) {
+        const savedData = savedLog;
+        cleaningLogBuffer = savedData.log;
+        catNamesAndIds = savedData.catNamesAndIds;
+        if (savedData.counters) {
+          document.getElementById(
+            "uwu-cleaningLog-counter-pickup"
+          ).textContent = savedData.counters.pickup;
+          document.getElementById(
+            "uwu-cleaningLog-counter-putdown"
+          ).textContent = savedData.counters.putdown;
         }
         cleaningLogContent.innerHTML = addCatLinksToLog(
           cleaningLogBuffer,
           catNamesAndIds
         );
-        return;
       }
+
+      const clearButton = historyBlock.querySelector("#uwu-cleaningLog-clear");
+      clearButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (confirm("Вы уверены, что хотите очистить лог чистильщика?")) {
+          cleaningLogBuffer = "";
+          catNamesAndIds = [];
+          document.getElementById(
+            "uwu-cleaningLog-counter-pickup"
+          ).textContent = "0";
+          document.getElementById(
+            "uwu-cleaningLog-counter-putdown"
+          ).textContent = "0";
+          cleaningLogContent.innerHTML = "";
+          uwuStorage.removeItem("uwu_cleaningLogSmart");
+
+          lastDroppedCatInfo = null;
+          document
+            .getElementById("uwu-cleaningLog-delete-last")
+            ?.classList.add("disabled");
+        }
+      });
+
+      const deleteLastButton = historyBlock.querySelector(
+        "#uwu-cleaningLog-delete-last"
+      );
+      deleteLastButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (!deleteLastButton.classList.contains("disabled")) {
+          deleteLastDroppedEntry();
+        }
+      });
+
+      const toggleButton = historyBlock.querySelector(
+        "#uwu-cleaningLog-toggle"
+      );
+      const contentWrapper = historyBlock.querySelector(
+        "#uwu-cleaningLog-content-wrapper"
+      );
+
+      if (logStates.cleaning) {
+        contentWrapper.style.display = "none";
+      }
+
+      toggleButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        logStates.cleaning = !logStates.cleaning;
+        contentWrapper.style.display = logStates.cleaning ? "none" : "block";
+        saveLogStates();
+      });
     }
-  }
 
-  function processSmartAction(action, location, cleaningLogContent) {
-    let matched = false;
+    function addCatLinksToLog(log, catNamesAndIds) {
+      let logWithLinks = log;
+      const nameToIdMap = new Map(
+        catNamesAndIds.map((cat) => [cat.name, cat.id])
+      );
 
-    for (const relevantAction of relevantActions) {
-      if (relevantAction.regex.test(action)) {
-        matched = true;
-        const catNameMatch = action.match(/<a href="\/cat\d+">([^<]+)<\/a>/);
-        if (!catNameMatch) {
-          console.error("Не удалось извлечь имя кота из действия:", action);
+      logWithLinks = logWithLinks.replace(/\[([^\]]+)\]/g, (match, content) => {
+        const names = content.split(", ");
+        const linkedNames = names.map((nameWithId) => {
+          const name = nameWithId.split(" ")[0];
+          const id = nameToIdMap.get(name);
+          if (id) {
+            return nameWithId.replace(
+              name,
+              `<a href="/cat${id}" target="_blank">${name}</a>`
+            );
+          }
+          return nameWithId;
+        });
+        return `[${linkedNames.join(", ")}]`;
+      });
+      return logWithLinks;
+    }
+
+    function extractCatId(action) {
+      const match = action.match(/<a href="\/cat(\d+)">/);
+      return match ? match[1] : null;
+    }
+
+    function checkCatStatus(catId) {
+      const catTooltip = document
+        .querySelector(`#cages > tbody .cat_tooltip a[href="/cat${catId}"]`)
+        .closest(".cat_tooltip");
+      if (catTooltip) {
+        const statusSpan = catTooltip.querySelector(".online");
+        if (statusSpan) {
+          const statusText = statusSpan.textContent
+            .replace(/[\[\]]/g, "")
+            .trim();
+          const validStatuses = [
+            "Спит",
+            "На удалении",
+            "Заблокирована",
+            "Заблокирован",
+          ];
+          return validStatuses.includes(statusText);
+        }
+      }
+      return false;
+    }
+
+    function processStandardAction(action, location, cleaningLogContent) {
+      for (const relevantAction of relevantActions) {
+        if (relevantAction.regex.test(action)) {
+          const catNameMatch = action.match(/<a href="\/cat\d+">([^<]+)<\/a>/);
+          if (!catNameMatch) {
+            console.error("Не удалось извлечь имя кота из действия:", action);
+            return;
+          }
+          const catName = catNameMatch[1];
+          const catId = extractCatId(action);
+          const actionText = action.replace(
+            /<a href="\/cat\d+">([^<]+)<\/a>/,
+            `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
+          );
+          if (relevantAction.type === "action") {
+            cleaningLogBuffer += `${actionText} на локации "${location}". `;
+          } else {
+            const status = checkCatStatus(catId) ? "" : "Кот не спит. ";
+            cleaningLogBuffer += `Проверен [${catName}${
+              settings.cleaningLogShowID ? ` ${catId}` : ""
+            }] на локации "${location}". ${status}`;
+          }
+          if (!catNamesAndIds.some((cat) => cat.id === catId)) {
+            catNamesAndIds.push({ name: catName, id: catId });
+          }
+          cleaningLogContent.innerHTML = addCatLinksToLog(
+            cleaningLogBuffer,
+            catNamesAndIds
+          );
           return;
         }
-        const catName = catNameMatch[1];
-        const catId = extractCatId(action);
+      }
+    }
+
+    function processSmartAction(action, location, cleaningLogContent) {
+      let matched = false;
+
+      for (const relevantAction of relevantActions) {
+        if (relevantAction.regex.test(action)) {
+          matched = true;
+          const catNameMatch = action.match(/<a href="\/cat\d+">([^<]+)<\/a>/);
+          if (!catNameMatch) {
+            console.error("Не удалось извлечь имя кота из действия:", action);
+            return;
+          }
+          const catName = catNameMatch[1];
+          const catId = extractCatId(action);
+          const logLines = cleaningLogBuffer
+            .split(".")
+            .map((line) => line.trim())
+            .filter((line) => line);
+
+          switch (relevantAction.type) {
+            case "check":
+              processCheckAction(logLines, catName, catId, location);
+              break;
+
+            case "putdown":
+              processPutdownAction(logLines, catName, catId, location);
+              break;
+
+            case "pickup":
+              processPickupAction(logLines, catName, catId, location);
+              break;
+          }
+
+          cleaningLogBuffer =
+            logLines.join(". ") + (logLines.length > 0 ? "." : "");
+          if (!catNamesAndIds.some((cat) => cat.id === catId)) {
+            catNamesAndIds.push({ name: catName, id: catId });
+          }
+          cleaningLogContent.innerHTML = addCatLinksToLog(
+            cleaningLogBuffer,
+            catNamesAndIds
+          );
+          return;
+        }
+      }
+
+      if (!matched) {
         const logLines = cleaningLogBuffer
           .split(".")
           .map((line) => line.trim())
           .filter((line) => line);
-
-        switch (relevantAction.type) {
-          case "check":
-            processCheckAction(logLines, catName, catId, location);
-            break;
-
-          case "putdown":
-            processPutdownAction(logLines, catName, catId, location);
-            break;
-
-          case "pickup":
-            processPickupAction(logLines, catName, catId, location);
-            break;
-        }
-
+        processUnmatchedAction(logLines, cleaningLogContent, action);
         cleaningLogBuffer =
           logLines.join(". ") + (logLines.length > 0 ? "." : "");
-        if (!catNamesAndIds.some((cat) => cat.id === catId)) {
-          catNamesAndIds.push({ name: catName, id: catId });
-        }
         cleaningLogContent.innerHTML = addCatLinksToLog(
           cleaningLogBuffer,
           catNamesAndIds
         );
-        return;
       }
+
+      return null;
     }
 
-    if (!matched) {
-      const logLines = cleaningLogBuffer
+    function deleteLastDroppedEntry() {
+      if (!lastDroppedCatInfo) return;
+
+      const { catName, catId } = lastDroppedCatInfo;
+      const catIdentifier = `${catName}${
+        settings.cleaningLogShowID ? ` ${catId}` : ""
+      }`;
+
+      let logLines = cleaningLogBuffer
         .split(".")
         .map((line) => line.trim())
-        .filter((line) => line);
-      processUnmatchedAction(logLines, cleaningLogContent, action);
-      cleaningLogBuffer =
-        logLines.join(". ") + (logLines.length > 0 ? "." : "");
-      cleaningLogContent.innerHTML = addCatLinksToLog(
-        cleaningLogBuffer,
-        catNamesAndIds
-      );
-    }
+        .filter(Boolean);
 
-    return null;
-  }
+      let putdownRemoved = false;
+      let pickupRemoved = false;
 
-  function processCheckAction(logLines, catName, catId, location) {
-    const lastLogIndex = logLines.length - 1;
-    const isCatSleeping = checkCatStatus(catId);
-
-    if (
-      lastLogIndex >= 0 &&
-      (logLines[lastLogIndex].includes("Проверен [") ||
-        logLines[lastLogIndex].includes("Кот не спит") ||
-        logLines[lastLogIndex].includes("Вы забыли проверить кота"))
-    ) {
-      logLines.splice(lastLogIndex, 1);
-    }
-
-    if (isCatSleeping) {
-      logLines.push(
-        `Проверен [${catName}${
-          settings.cleaningLogShowID ? ` ${catId}` : ""
-        }] на локации "${location}"`
-      );
-    } else {
-      logLines.push(
-        `Кот не спит [${catName}${
-          settings.cleaningLogShowID ? ` ${catId}` : ""
-        }]`
-      );
-    }
-    if (!catNamesAndIds.some((cat) => cat.id === catId)) {
-      catNamesAndIds.push({ name: catName, id: catId });
-    }
-  }
-
-  function processPutdownAction(logLines, catName, catId, location) {
-    const catPattern = new RegExp(
-      `\\[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}\\]`
-    );
-
-    // 1. Ищем последнее и предпоследнее предложения.
-    const lastSentenceIndex = logLines.length - 1;
-    const penultimateSentenceIndex = lastSentenceIndex - 1;
-
-    // 2. Проверяем последнее предложение на наличие "Опущен" без текущего имени кота.
-    const lastSentence = logLines[lastSentenceIndex];
-
-    if (
-      lastSentence.includes(`на локации "${location}"`) &&
-      lastSentence.includes("Опущен")
-    ) {
-      const catNamesMatch = lastSentence.match(/\[([^\]]+)\]/);
-      if (catNamesMatch) {
-        const catNames = catNamesMatch[1].split(",").map((name) => name.trim());
-        const currentCatNameWithId = `${catName}${
-          settings.cleaningLogShowID ? ` ${catId}` : ""
-        }`;
-        if (catNames.includes(currentCatNameWithId)) {
-          return;
+      for (let i = logLines.length - 1; i >= 0; i--) {
+        let line = logLines[i];
+        if (line.startsWith("Опущен") && line.includes(catIdentifier)) {
+          const match = line.match(/\[([^\]]+)\]/);
+          if (match) {
+            let catsInGroup = match[1].split(",").map((c) => c.trim());
+            if (catsInGroup.length > 1) {
+              catsInGroup = catsInGroup.filter((c) => c !== catIdentifier);
+              logLines[i] = line.replace(
+                /\[([^\]]+)\]/,
+                `[${catsInGroup.join(", ")}]`
+              );
+            } else {
+              logLines.splice(i, 1);
+            }
+            putdownRemoved = true;
+            break;
+          }
         }
       }
-    }
 
-    // 3. Если есть, добавляем имя текущего кота к этому предложению.
-    if (
-      lastSentence.includes(`на локации "${location}"`) &&
-      lastSentence.includes("Опущен") &&
-      !catPattern.test(lastSentence)
-    ) {
-      logLines[lastSentenceIndex] = lastSentence.replace(
-        /]/,
-        `, ${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
-      );
-    } else {
-      // 4. Если нет, добавляем новое предложение с "Опущен".
-      logLines.push(
-        `Опущен [${catName}${
-          settings.cleaningLogShowID ? ` ${catId}` : ""
-        }] на локации "${location}"`
-      );
-    }
-    if (!catNamesAndIds.some((cat) => cat.id === catId)) {
-      catNamesAndIds.push({ name: catName, id: catId });
-    }
-
-    const putdownCounter = document.getElementById(
-      "uwu-cleaningLog-counter-putdown"
-    );
-    putdownCounter.textContent = parseInt(putdownCounter.textContent) + 1;
-  }
-
-  function processPickupAction(logLines, catName, catId, location) {
-    const catPattern = new RegExp(
-      `\\[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}\\]`
-    );
-
-    // 1. Ищем последнее и предпоследнее предложения.
-    const lastSentenceIndex = logLines.length - 1;
-    const penultimateSentenceIndex = lastSentenceIndex - 1;
-
-    // 2. Проверяем последнее предложение на "Проверен и поднят" с именем кота.
-    const lastSentence = logLines[lastSentenceIndex];
-    if (
-      lastSentence.includes(`на локации "${location}"`) &&
-      lastSentence.includes("Проверен и поднят") &&
-      catPattern.test(lastSentence)
-    ) {
-      return;
-    }
-
-    // 3. Проверяем последнее предложение на "Проверен" с именем кота.
-    let lastSentenceChecked = false;
-    if (
-      logLines[lastSentenceIndex].includes("Проверен") &&
-      logLines[lastSentenceIndex].includes(
-        `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
-      ) &&
-      logLines[lastSentenceIndex].includes(`на локации "${location}"`)
-    ) {
-      lastSentenceChecked = true;
-    }
-
-    // 4. Если последнее предложение - "Проверен", проверяем предпоследнее на "Проверен и поднят".
-    if (lastSentenceChecked) {
-      if (
-        penultimateSentenceIndex >= 0 &&
-        logLines[penultimateSentenceIndex].includes("Проверен и поднят") &&
-        logLines[penultimateSentenceIndex].includes(
-          `на локации "${location}"`
-        ) &&
-        !logLines[penultimateSentenceIndex].includes(
-          `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
-        )
-      ) {
-        const currentCatMatch = logLines[lastSentenceIndex].match(/\[(.*?)\]/);
-        if (currentCatMatch) {
-          // Добавляем имя текущего кота к предпоследнему предложению.
-          const existingCatsMatch =
-            logLines[penultimateSentenceIndex].match(/\[(.*?)\]/);
-          if (existingCatsMatch) {
-            const existingCats = existingCatsMatch[1];
-            const newCatString = existingCats.trim()
-              ? `${existingCats}, ${catName}${
-                  settings.cleaningLogShowID ? ` ${catId}` : ""
-                }`
-              : `${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}`;
-            logLines[penultimateSentenceIndex] = logLines[
-              penultimateSentenceIndex
-            ].replace(/\[(.*?)\]/, `[${newCatString}]`);
+      if (putdownRemoved) {
+        for (let i = logLines.length - 1; i >= 0; i--) {
+          let line = logLines[i];
+          if (
+            line.startsWith("Проверен и поднят") &&
+            line.includes(catIdentifier)
+          ) {
+            const match = line.match(/\[([^\]]+)\]/);
+            if (match) {
+              let catsInGroup = match[1].split(",").map((c) => c.trim());
+              if (catsInGroup.length > 1) {
+                catsInGroup = catsInGroup.filter((c) => c !== catIdentifier);
+                logLines[i] = line.replace(
+                  /\[([^\]]+)\]/,
+                  `[${catsInGroup.join(", ")}]`
+                );
+              } else {
+                logLines.splice(i, 1);
+              }
+              pickupRemoved = true;
+              break;
+            }
           }
-
-          // Удаляем последнее предложение.
-          logLines.splice(lastSentenceIndex, 1);
         }
+      }
+
+      if (putdownRemoved && pickupRemoved) {
+        cleaningLogBuffer =
+          logLines.join(". ") + (logLines.length > 0 ? "." : "");
+
+        const pickupCounter = document.getElementById(
+          "uwu-cleaningLog-counter-pickup"
+        );
+        const putdownCounter = document.getElementById(
+          "uwu-cleaningLog-counter-putdown"
+        );
+        pickupCounter.textContent = parseInt(pickupCounter.textContent) - 1;
+        putdownCounter.textContent = parseInt(putdownCounter.textContent) - 1;
+
+        const cleaningLogContent = document.getElementById(
+          "uwu-cleaningLog-content"
+        );
+        cleaningLogContent.innerHTML = addCatLinksToLog(
+          cleaningLogBuffer,
+          catNamesAndIds
+        );
+
+        uwuStorage.setItem("uwu_cleaningLogSmart", {
+          log: cleaningLogBuffer,
+          catNamesAndIds,
+          counters: {
+            pickup: parseInt(pickupCounter.textContent),
+            putdown: parseInt(putdownCounter.textContent),
+          },
+        });
       } else {
-        // 5. Создаем новое предложение "Проверен и поднят".
-        logLines[lastSentenceIndex] = logLines[lastSentenceIndex].replace(
-          "Проверен",
-          "Проверен и поднят"
+        console.warn("UwU | Не удалось найти парные записи для удаления.");
+      }
+
+      lastDroppedCatInfo = null;
+      document
+        .getElementById("uwu-cleaningLog-delete-last")
+        ?.classList.add("disabled");
+    }
+
+    function processCheckAction(logLines, catName, catId, location) {
+      const lastLogIndex = logLines.length - 1;
+      const isCatSleeping = checkCatStatus(catId);
+
+      if (
+        lastLogIndex >= 0 &&
+        (logLines[lastLogIndex].includes("Проверен [") ||
+          logLines[lastLogIndex].includes("Кот не спит") ||
+          logLines[lastLogIndex].includes("Вы забыли проверить кота"))
+      ) {
+        logLines.splice(lastLogIndex, 1);
+      }
+
+      if (isCatSleeping) {
+        logLines.push(
+          `Проверен [${catName}${
+            settings.cleaningLogShowID ? ` ${catId}` : ""
+          }] на локации "${location}"`
+        );
+      } else {
+        logLines.push(
+          `Кот не спит [${catName}${
+            settings.cleaningLogShowID ? ` ${catId}` : ""
+          }]`
         );
       }
-    } else {
-      // 6. Если "Проверен" с именем кота нет.
-      if (logLines[lastSentenceIndex].includes("Кот не спит")) {
-        logLines[lastSentenceIndex] = "Вы забыли проверить кота";
-      } else if (
-        !logLines[lastSentenceIndex].includes("Вы забыли проверить кота")
-      ) {
-        logLines.push("Вы забыли проверить кота");
+      if (!catNamesAndIds.some((cat) => cat.id === catId)) {
+        catNamesAndIds.push({ name: catName, id: catId });
       }
+      lastDroppedCatInfo = null;
+      document
+        .getElementById("uwu-cleaningLog-delete-last")
+        ?.classList.add("disabled");
     }
-    if (!catNamesAndIds.some((cat) => cat.id === catId)) {
-      catNamesAndIds.push({ name: catName, id: catId });
-    }
 
-    const pickupCounter = document.getElementById(
-      "uwu-cleaningLog-counter-pickup"
-    );
-    pickupCounter.textContent = parseInt(pickupCounter.textContent) + 1;
-  }
-
-  function processUnmatchedAction(logLines, cleaningLogContent, action) {
-    const lastLogIndex = logLines.length - 1;
-
-    const isCancelAction = /Отменил(а)? /.test(action);
-
-    if (
-      lastLogIndex >= 0 &&
-      logLines[lastLogIndex].includes("Проверен [") &&
-      !isCancelAction
-    ) {
-      logLines.splice(lastLogIndex, 1);
-      cleaningLogBuffer =
-        logLines.join(". ") + (logLines.length > 0 ? "." : "");
-      cleaningLogContent.innerHTML = addCatLinksToLog(
-        cleaningLogBuffer,
-        catNamesAndIds
+    function processPutdownAction(logLines, catName, catId, location) {
+      const catPattern = new RegExp(
+        `\\[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}\\]`
       );
-    }
-  }
 
-  if (settings.cleaningLog) {
+      // 1. Ищем последнее и предпоследнее предложения.
+      const lastSentenceIndex = logLines.length - 1;
+      const penultimateSentenceIndex = lastSentenceIndex - 1;
+
+      // 2. Проверяем последнее предложение на наличие "Опущен" без текущего имени кота.
+      const lastSentence = logLines[lastSentenceIndex];
+
+      if (
+        lastSentence.includes(`на локации "${location}"`) &&
+        lastSentence.includes("Опущен")
+      ) {
+        const catNamesMatch = lastSentence.match(/\[([^\]]+)\]/);
+        if (catNamesMatch) {
+          const catNames = catNamesMatch[1]
+            .split(",")
+            .map((name) => name.trim());
+          const currentCatNameWithId = `${catName}${
+            settings.cleaningLogShowID ? ` ${catId}` : ""
+          }`;
+          if (catNames.includes(currentCatNameWithId)) {
+            return;
+          }
+        }
+      }
+
+      // 3. Если есть, добавляем имя текущего кота к этому предложению.
+      if (
+        lastSentence.includes(`на локации "${location}"`) &&
+        lastSentence.includes("Опущен") &&
+        !catPattern.test(lastSentence)
+      ) {
+        logLines[lastSentenceIndex] = lastSentence.replace(
+          /]/,
+          `, ${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
+        );
+      } else {
+        // 4. Если нет, добавляем новое предложение с "Опущен".
+        logLines.push(
+          `Опущен [${catName}${
+            settings.cleaningLogShowID ? ` ${catId}` : ""
+          }] на локации "${location}"`
+        );
+      }
+      if (!catNamesAndIds.some((cat) => cat.id === catId)) {
+        catNamesAndIds.push({ name: catName, id: catId });
+      }
+
+      const putdownCounter = document.getElementById(
+        "uwu-cleaningLog-counter-putdown"
+      );
+      putdownCounter.textContent = parseInt(putdownCounter.textContent) + 1;
+      lastDroppedCatInfo = { catName, catId };
+      document
+        .getElementById("uwu-cleaningLog-delete-last")
+        ?.classList.remove("disabled");
+    }
+
+    function processPickupAction(logLines, catName, catId, location) {
+      const catPattern = new RegExp(
+        `\\[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}\\]`
+      );
+
+      // 1. Ищем последнее и предпоследнее предложения.
+      const lastSentenceIndex = logLines.length - 1;
+      const penultimateSentenceIndex = lastSentenceIndex - 1;
+
+      // 2. Проверяем последнее предложение на "Проверен и поднят" с именем кота.
+      const lastSentence = logLines[lastSentenceIndex];
+      if (
+        lastSentence.includes(`на локации "${location}"`) &&
+        lastSentence.includes("Проверен и поднят") &&
+        catPattern.test(lastSentence)
+      ) {
+        return;
+      }
+
+      // 3. Проверяем последнее предложение на "Проверен" с именем кота.
+      let lastSentenceChecked = false;
+      if (
+        logLines[lastSentenceIndex].includes("Проверен") &&
+        logLines[lastSentenceIndex].includes(
+          `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
+        ) &&
+        logLines[lastSentenceIndex].includes(`на локации "${location}"`)
+      ) {
+        lastSentenceChecked = true;
+      }
+
+      // 4. Если последнее предложение - "Проверен", проверяем предпоследнее на "Проверен и поднят".
+      if (lastSentenceChecked) {
+        if (
+          penultimateSentenceIndex >= 0 &&
+          logLines[penultimateSentenceIndex].includes("Проверен и поднят") &&
+          logLines[penultimateSentenceIndex].includes(
+            `на локации "${location}"`
+          ) &&
+          !logLines[penultimateSentenceIndex].includes(
+            `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
+          )
+        ) {
+          const currentCatMatch =
+            logLines[lastSentenceIndex].match(/\[(.*?)\]/);
+          if (currentCatMatch) {
+            // Добавляем имя текущего кота к предпоследнему предложению.
+            const existingCatsMatch =
+              logLines[penultimateSentenceIndex].match(/\[(.*?)\]/);
+            if (existingCatsMatch) {
+              const existingCats = existingCatsMatch[1];
+              const newCatString = existingCats.trim()
+                ? `${existingCats}, ${catName}${
+                    settings.cleaningLogShowID ? ` ${catId}` : ""
+                  }`
+                : `${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}`;
+              logLines[penultimateSentenceIndex] = logLines[
+                penultimateSentenceIndex
+              ].replace(/\[(.*?)\]/, `[${newCatString}]`);
+            }
+
+            // Удаляем последнее предложение.
+            logLines.splice(lastSentenceIndex, 1);
+          }
+        } else {
+          // 5. Создаем новое предложение "Проверен и поднят".
+          logLines[lastSentenceIndex] = logLines[lastSentenceIndex].replace(
+            "Проверен",
+            "Проверен и поднят"
+          );
+        }
+      } else {
+        // 6. Если "Проверен" с именем кота нет.
+        if (logLines[lastSentenceIndex].includes("Кот не спит")) {
+          logLines[lastSentenceIndex] = "Вы забыли проверить кота";
+        } else if (
+          !logLines[lastSentenceIndex].includes("Вы забыли проверить кота")
+        ) {
+          logLines.push("Вы забыли проверить кота");
+        }
+      }
+      if (!catNamesAndIds.some((cat) => cat.id === catId)) {
+        catNamesAndIds.push({ name: catName, id: catId });
+      }
+
+      const pickupCounter = document.getElementById(
+        "uwu-cleaningLog-counter-pickup"
+      );
+      pickupCounter.textContent = parseInt(pickupCounter.textContent) + 1;
+      lastDroppedCatInfo = null;
+      document
+        .getElementById("uwu-cleaningLog-delete-last")
+        ?.classList.add("disabled");
+    }
+
+    function processUnmatchedAction(logLines, cleaningLogContent, action) {
+      const lastLogIndex = logLines.length - 1;
+
+      const isCancelAction = /Отменил(а)? /.test(action);
+
+      if (
+        lastLogIndex >= 0 &&
+        logLines[lastLogIndex].includes("Проверен [") &&
+        !isCancelAction
+      ) {
+        logLines.splice(lastLogIndex, 1);
+        cleaningLogBuffer =
+          logLines.join(". ") + (logLines.length > 0 ? "." : "");
+        cleaningLogContent.innerHTML = addCatLinksToLog(
+          cleaningLogBuffer,
+          catNamesAndIds
+        );
+      }
+      lastDroppedCatInfo = null;
+      document
+        .getElementById("uwu-cleaningLog-delete-last")
+        ?.classList.add("disabled");
+    }
+
     setupMutationObserver("#history_block", cleaningLogUpdate, {
       childList: true,
       subtree: true,
@@ -11061,8 +12137,473 @@ if (targetCW3.test(window.location.href)) {
             overflow-y: auto;
             resize: vertical;
           }
+          #uwu-cleaningLog-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 5px;
+          }
+          #uwu-cleaningLog-delete-last.disabled {
+            pointer-events: none;
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
           `;
     document.head.appendChild(cleaningLogStyle);
+  }
+  // ====================================================================================================================
+  //   . . . ЛОГ ЛОВЛИ . . .
+  // ====================================================================================================================
+  if (settings.catchingLog) {
+    let logStates = uwuStorage.getItem("uwu_logStates") || {
+      cleaning: false,
+      catching: false,
+    };
+    function saveLogStates() {
+      uwuStorage.setItem("uwu_logStates", logStates);
+    }
+
+    let isWaitingForItem = false;
+    let mouthSnapshot = new Set();
+
+    const stopWordsRegex = /Отменил|Отменила|Пошла|Пошёл|Поднял|Подняла/;
+
+    let catchingState = {
+      isWaiting: false, // Находимся ли мы в процессе ожидания результата?
+      actionType: null, // Тип действия (diving, crevice)
+      actionVerb: null, // Глагол действия (Нырнул, Осмотрела)
+      foundItem: null, // Информация о найденном, но не подтвержденном предмете
+      historyGaveClear: false, // Дала ли история "зеленый свет"?
+      attemptCounted: false, // Гарант, что попытка засчитана только один раз
+      lastLoggedItemInCycle: null,
+      catchLoggedThisCycle: false,
+    };
+
+    function resetCatchingState() {
+      catchingState.isWaiting = false;
+      catchingState.actionType = null;
+      catchingState.actionVerb = null;
+      catchingState.foundItem = null;
+      catchingState.historyGaveClear = false;
+      catchingState.attemptCounted = false;
+      catchingState.lastLoggedItemInCycle = null;
+      catchingState.catchLoggedThisCycle = false;
+      isWaitingForItem = false;
+    }
+
+    function logFoundItem(itemId) {
+      const logData = uwuStorage.getItem("uwu_catchingLogData") || [];
+      const lastSession =
+        logData.length > 0 ? logData[logData.length - 1] : null;
+
+      if (lastSession && lastSession.type === catchingState.actionType) {
+        const catchTime = new Date().toLocaleTimeString("ru-RU", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const newCatch = {
+          itemId: itemId,
+          time: catchTime,
+        };
+        lastSession.summary.unshift(newCatch);
+        uwuStorage.setItem("uwu_catchingLogData", logData);
+        renderCatchingLog(logData);
+        return newCatch;
+      }
+      return null;
+    }
+
+    function undoLastCatch() {
+      if (!catchingState.lastLoggedItemInCycle) return;
+
+      const { itemId, time } = catchingState.lastLoggedItemInCycle;
+      const logData = uwuStorage.getItem("uwu_catchingLogData") || [];
+      const lastSession =
+        logData.length > 0 ? logData[logData.length - 1] : null;
+
+      if (lastSession && lastSession.type === catchingState.actionType) {
+        const indexToRemove = lastSession.summary.findIndex(
+          (c) => c.itemId === itemId && c.time === time
+        );
+
+        if (indexToRemove > -1) {
+          lastSession.summary.splice(indexToRemove, 1);
+          uwuStorage.setItem("uwu_catchingLogData", logData);
+          renderCatchingLog(logData);
+        }
+      }
+    }
+
+    const activityTypes = {
+      diving: {
+        triggers: ["Нырнул.", "Нырнула."],
+        type: "diving",
+        title: "Ныряние",
+        verb: { male: "Выловил", female: "Выловила" },
+        style: {
+          backgroundColor: "rgba(173, 216, 230, 0.1)",
+          border: "1px solid rgba(173, 216, 230, 0.4)",
+        },
+      },
+      crevice: {
+        triggers: ["Осмотрел расщелину.", "Осмотрела расщелину."],
+        type: "crevice",
+        title: "Осмотр",
+        verb: { male: "Нашёл", female: "Нашла" },
+        style: {
+          backgroundColor: "rgba(144, 238, 144, 0.1)",
+          border: "1px solid rgba(144, 238, 144, 0.4)",
+        },
+      },
+      hollow: {
+        triggers: ["Осмотрел дупло.", "Осмотрела дупло."],
+        type: "hollow",
+        title: "Осмотр",
+        verb: { male: "Нашёл", female: "Нашла" },
+        style: {
+          backgroundColor: "rgba(144, 238, 144, 0.1)",
+          border: "1px solid rgba(144, 238, 144, 0.4)",
+        },
+      },
+    };
+
+    const itemNamesById = {
+      20: "Паутина",
+      21: "Целебная водоросль",
+      75: "Мох",
+      76: "Водный мох",
+      110: "Мед",
+      417: "Камень 2х местный",
+      418: "Камень 3х местный",
+      565: "Крепкая ветка",
+      566: "Вьюнок",
+      1034: "Маленький камушек",
+      2072: "Гнездо",
+      2073: "Гнездо",
+      2074: "Яйцо",
+      2075: "Черное перо",
+      2076: "Коричневое перо",
+      2077: "Голубое перо",
+      3956: "Рак",
+      3958: "Рак",
+      3960: "Рак",
+      3962: "Краснобрюхая жерлянка",
+      3965: "Карась",
+      3966: "Рыба",
+      3967: "Рыба",
+      3968: "Рыба",
+      3969: "Рыба",
+      3970: "Рыба",
+      3971: "Речной угорь",
+      3973: "Речной угорь",
+      3993: "Плотная водоросль",
+      3994: "Ракушка (+20)",
+      3995: "Ракушка (+30)",
+      3997: "Ракушка (сон)",
+      3998: "Ракушка (+15)",
+      3999: "Ракушка (+28)",
+      4001: "Коралл",
+      4002: "Коралл",
+      4004: "Водоросоль",
+      4005: "Водоросоль",
+      4006: "Водоросоль",
+      4008: "Комок",
+      4009: "Комок",
+      8021: "Тонколапый паук",
+      8022: "Светлый паук",
+      8023: "Бурый паук",
+      8024: "Тёмный паук",
+      8042: "Мышь",
+      8043: "Упитанная мышь",
+    };
+
+    let customItemNames = null;
+
+    function getItemNameById(itemId) {
+      if (customItemNames === null) {
+        customItemNames =
+          uwuStorage.getItem("uwu_catchingLog_customItems") || {};
+      }
+
+      if (customItemNames.hasOwnProperty(itemId)) {
+        return customItemNames[itemId];
+      }
+
+      if (itemNamesById.hasOwnProperty(itemId)) {
+        return itemNamesById[itemId];
+      }
+
+      return null;
+    }
+
+    function getActivityType(actionText) {
+      for (const key in activityTypes) {
+        if (activityTypes[key].triggers.includes(actionText)) {
+          return activityTypes[key];
+        }
+      }
+      return null;
+    }
+
+    function renderCatchingLog(logData) {
+      const contentDiv = document.getElementById("uwu-catchingLog-content");
+      if (!contentDiv) return;
+      contentDiv.innerHTML = "";
+
+      logData.forEach((session) => {
+        const activityConfig = activityTypes[session.type];
+        if (!activityConfig) return;
+
+        const card = document.createElement("div");
+        card.className = "uwu-catching-session";
+        card.style.backgroundColor = activityConfig.style.backgroundColor;
+        card.style.border = activityConfig.style.border;
+        card.style.borderRadius = "5px";
+        card.style.padding = "5px";
+        card.style.marginBottom = "5px";
+
+        const startTime = new Date(session.startTime).toLocaleTimeString(
+          "ru-RU",
+          { hour: "2-digit", minute: "2-digit" }
+        );
+        const lastTime = new Date(session.lastActionTime).toLocaleTimeString(
+          "ru-RU",
+          { hour: "2-digit", minute: "2-digit" }
+        );
+
+        const verb =
+          session.actionVerb === activityConfig.triggers[1]
+            ? activityConfig.verb.female
+            : activityConfig.verb.male;
+        const emptyMessageVerb = verb.toLowerCase();
+
+        let summaryHtml = "";
+        if (session.summary.length > 0) {
+          summaryHtml = "<ul style='margin: 0; padding-left: 20px;'>";
+          session.summary.forEach((catchInfo) => {
+            const itemName = getItemNameById(catchInfo.itemId);
+            const itemDisplayName = itemName ? `${itemName} ` : "";
+            summaryHtml += `<li>${itemDisplayName}ID ${catchInfo.itemId} в ${catchInfo.time}</li>`;
+          });
+          summaryHtml += "</ul>";
+        } else {
+          summaryHtml = `<p style='margin: 2px 0; font-style: italic;'>Пока что ничего не ${emptyMessageVerb} :(</p>`;
+        }
+
+        card.innerHTML = `
+        <p style="margin: 2px 0;"><strong>${activityConfig.title}. Время с ${startTime} до ${lastTime}.</strong></p>
+        <p style="margin: 2px 0;"><strong>Всего попыток:</strong> ${session.totalDives}</p>
+        ${summaryHtml}
+      `;
+        contentDiv.prepend(card);
+      });
+    }
+
+    function handleMouthChange(mutationsList) {
+      if (!catchingState.isWaiting) return;
+
+      for (const mutation of mutationsList) {
+        if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
+          for (const node of mutation.addedNodes) {
+            if (node.nodeType === 1 && node.id && !mouthSnapshot.has(node.id)) {
+              const img = node.querySelector("img");
+              if (img && img.src) {
+                const itemIdMatch = img.src.match(/things\/(\d+)\.png/);
+                if (itemIdMatch) {
+                  const itemId = itemIdMatch[1];
+                  catchingState.foundItem = itemId;
+                  return;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    function catchingLogUpdate() {
+      const ist = document.getElementById("ist");
+      if (!ist) return;
+
+      const actions = ist.innerText
+        .split(".")
+        .map((s) => s.trim() + ".")
+        .filter((s) => s.length > 2);
+      if (actions.length === 0) return;
+
+      const lastAction = actions[actions.length - 1];
+      const activityConfig = getActivityType(lastAction);
+
+      const stopWordsRegex = /Отменил|Отменила|Пошла|Пошёл|Положил|Положила/;
+      const pickupWordsRegex = /Поднял|Подняла/;
+
+      if (activityConfig) {
+        const logData = uwuStorage.getItem("uwu_catchingLogData") || [];
+        let lastSession =
+          logData.length > 0 ? logData[logData.length - 1] : null;
+        const currentTime = Date.now();
+        const twoHours = 2 * 60 * 60 * 1000;
+
+        const isContinuingSession =
+          lastSession &&
+          lastSession.type === activityConfig.type &&
+          currentTime - lastSession.lastActionTime < twoHours;
+
+        if (!isContinuingSession) {
+          const newSession = {
+            type: activityConfig.type,
+            startTime: currentTime,
+            lastActionTime: currentTime,
+            actionVerb: lastAction,
+            totalDives: 0,
+            summary: [],
+          };
+          logData.push(newSession);
+          uwuStorage.setItem("uwu_catchingLogData", logData);
+          renderCatchingLog(logData);
+        }
+
+        resetCatchingState();
+        catchingState.isWaiting = true;
+        catchingState.actionType = activityConfig.type;
+        catchingState.actionVerb = lastAction;
+
+        mouthSnapshot.clear();
+        const itemsInMouth = document.querySelectorAll("#itemList > div");
+        itemsInMouth.forEach((item) => {
+          if (item.id) {
+            mouthSnapshot.add(item.id);
+          }
+        });
+        return;
+      }
+
+      if (!catchingState.isWaiting) return;
+
+      if (pickupWordsRegex.test(lastAction)) {
+        if (!catchingState.catchLoggedThisCycle) {
+          undoLastCatch();
+        }
+        resetCatchingState();
+        return;
+      }
+
+      if (stopWordsRegex.test(lastAction)) {
+        if (
+          !/Отменил|Отменила/.test(lastAction) &&
+          !catchingState.attemptCounted
+        ) {
+          const logData = uwuStorage.getItem("uwu_catchingLogData") || [];
+          let lastSession =
+            logData.length > 0 ? logData[logData.length - 1] : null;
+          if (lastSession && lastSession.type === catchingState.actionType) {
+            lastSession.totalDives++;
+            lastSession.lastActionTime = Date.now();
+            uwuStorage.setItem("uwu_catchingLogData", logData);
+            renderCatchingLog(logData);
+          }
+        }
+        resetCatchingState();
+        return;
+      }
+
+      if (!catchingState.attemptCounted) {
+        const logData = uwuStorage.getItem("uwu_catchingLogData") || [];
+        let lastSession =
+          logData.length > 0 ? logData[logData.length - 1] : null;
+        if (lastSession && lastSession.type === catchingState.actionType) {
+          lastSession.totalDives++;
+          lastSession.lastActionTime = Date.now();
+          uwuStorage.setItem("uwu_catchingLogData", logData);
+          renderCatchingLog(logData);
+        }
+        catchingState.attemptCounted = true;
+      }
+
+      if (catchingState.foundItem) {
+        const loggedItem = logFoundItem(catchingState.foundItem);
+        if (loggedItem) {
+          catchingState.lastLoggedItemInCycle = loggedItem;
+          catchingState.catchLoggedThisCycle = true;
+        }
+        catchingState.foundItem = null;
+      }
+    }
+
+    function createCatchingLogBlock() {
+      const historyContainer = document.getElementById("history");
+      if (!historyContainer || document.getElementById("uwu-catchingLog"))
+        return;
+
+      const logContainerHTML =
+        /* HTML */
+        `
+          <div id="uwu-catchingLog">
+            <h2>
+              <a href="#" id="uwu-catchingLog-toggle" class="toggle"
+                >Лог ловли</a
+              >
+            </h2>
+            <div id="uwu-catchingLog-content-wrapper">
+              <div id="uwu-catchingLog-content"></div>
+              <a href="#" id="uwu-catchingLog-clear">Очистить лог</a>
+            </div>
+          </div>
+        `;
+
+      const hr = document.createElement("hr");
+      historyContainer.appendChild(hr);
+      historyContainer.insertAdjacentHTML("beforeend", logContainerHTML);
+
+      const contentDiv = document.getElementById("uwu-catchingLog-content");
+      contentDiv.style.height = settings.catchingLogHeight
+        ? `${settings.catchingLogHeight}px`
+        : "120px";
+      contentDiv.style.overflowY = "auto";
+      contentDiv.style.resize = "vertical";
+
+      const clearButton = document.getElementById("uwu-catchingLog-clear");
+      clearButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (confirm("Вы уверены, что хотите очистить лог ловли?")) {
+          uwuStorage.removeItem("uwu_catchingLogData");
+          renderCatchingLog([]);
+        }
+      });
+
+      const toggleButton = document.getElementById("uwu-catchingLog-toggle");
+      const contentWrapper = document.getElementById(
+        "uwu-catchingLog-content-wrapper"
+      );
+
+      if (logStates.catching) {
+        contentWrapper.style.display = "none";
+      }
+
+      toggleButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        logStates.catching = !logStates.catching;
+        contentWrapper.style.display = logStates.catching ? "none" : "block";
+        saveLogStates();
+      });
+
+      const logData = uwuStorage.getItem("uwu_catchingLogData") || [];
+      renderCatchingLog(logData);
+    }
+
+    setupSingleCallback("#history", createCatchingLogBlock);
+
+    const mouthObserver = new MutationObserver(handleMouthChange);
+    setupSingleCallback("#itemList", () => {
+      mouthObserver.observe(document.getElementById("itemList"), {
+        childList: true,
+      });
+    });
+
+    setupMutationObserver("#history_block", catchingLogUpdate, {
+      childList: true,
+      subtree: true,
+    });
   }
   // ====================================================================================================================
   //   . . . ЗВУКОВЫЕ УВЕДОМЛЕНИЯ . . .
@@ -11592,8 +13133,7 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   if (settings.fightTeams) {
     const colors = settings.fightTeamsColors;
-    const uwu_fightTeamsCats =
-      JSON.parse(localStorage.getItem("uwu_fightTeamsCats")) || {};
+    const uwu_fightTeamsCats = uwuStorage.getItem("uwu_fightTeamsCats") || {};
 
     const fightPanel = document.getElementById("fightPanel");
     const buttonHTML =
@@ -11636,7 +13176,9 @@ if (targetCW3.test(window.location.href)) {
 
       cages.forEach((cage) => {
         const catName = cage.querySelector(".cat_tooltip a")?.textContent;
-        const arrow = cage.querySelector(".arrow.arrow-paws, .arrow.arrow-claws, .arrow arrow-teeth");
+        const arrow = cage.querySelector(
+          ".arrow.arrow-paws, .arrow.arrow-claws, .arrow arrow-teeth"
+        );
 
         if (catName && arrow) {
           const arrowId = arrow.id;
@@ -11690,10 +13232,7 @@ if (targetCW3.test(window.location.href)) {
       document.head.appendChild(styleElement);
 
       uwu_fightTeamsCats[arrowId] = team;
-      localStorage.setItem(
-        "uwu_fightTeamsCats",
-        JSON.stringify(uwu_fightTeamsCats)
-      );
+      uwuStorage.setItem("uwu_fightTeamsCats", uwu_fightTeamsCats);
     }
   }
   // ====================================================================================================================
@@ -11725,13 +13264,13 @@ if (targetCW3.test(window.location.href)) {
     let isDragging = false;
 
     function saveFightPanelPosition(x, y) {
-      localStorage.setItem("uwu_fightPanelPosition", JSON.stringify({ x, y }));
+      uwuStorage.setItem("uwu_fightPanelPosition", { x, y });
     }
 
     function loadFightPanelPosition() {
-      const savedPosition = localStorage.getItem("uwu_fightPanelPosition");
+      const savedPosition = uwuStorage.getItem("uwu_fightPanelPosition");
       if (savedPosition) {
-        const position = JSON.parse(savedPosition);
+        const position = savedPosition;
         panelX = position.x;
         panelY = position.y;
       }
@@ -12598,7 +14137,7 @@ if (targetCW3.test(window.location.href)) {
   //   . . . АНИМАЦИЯ ПОГОДЫ / ЧАСТИЦ . . .
   // ====================================================================================================================
   let lastTime = 0;
-  
+
   function animateWeather() {
     const currentTime = performance.now();
     const deltaTime = (currentTime - lastTime) / 1000;
@@ -12626,8 +14165,10 @@ if (targetCW3.test(window.location.href)) {
 
     if (pixelSnowflakes.length > 0) {
       for (const pixelSnowflake of pixelSnowflakes) {
-        pixelSnowflake.y += pixelSnowflake.ySpeed * baseSpeedMultiplier * deltaTime;
-        pixelSnowflake.x += pixelSnowflake.xSpeed * baseSpeedMultiplier * deltaTime;
+        pixelSnowflake.y +=
+          pixelSnowflake.ySpeed * baseSpeedMultiplier * deltaTime;
+        pixelSnowflake.x +=
+          pixelSnowflake.xSpeed * baseSpeedMultiplier * deltaTime;
         drawPixelSnowflake(
           pixelSnowflake.x,
           pixelSnowflake.y,
@@ -12639,8 +14180,10 @@ if (targetCW3.test(window.location.href)) {
 
     if (pixelRaindrops.length > 0) {
       for (const pixelRaindrop of pixelRaindrops) {
-        pixelRaindrop.y += pixelRaindrop.ySpeed * baseSpeedMultiplier * deltaTime;
-        pixelRaindrop.x += pixelRaindrop.xSpeed * baseSpeedMultiplier * deltaTime;
+        pixelRaindrop.y +=
+          pixelRaindrop.ySpeed * baseSpeedMultiplier * deltaTime;
+        pixelRaindrop.x +=
+          pixelRaindrop.xSpeed * baseSpeedMultiplier * deltaTime;
         drawPixelRaindrop(pixelRaindrop);
       }
     }
@@ -13390,11 +14933,11 @@ if (targetBlogsCreation.test(window.location.href)) {
     const textarea = document.getElementById("creation-text");
 
     function saveTextToStorage(text) {
-      localStorage.setItem("uwu_blogCreation", text);
+      uwuStorage.setItem("uwu_blogCreation", text);
     }
 
     function restoreTextFromStorage() {
-      const savedText = localStorage.getItem("uwu_blogCreation");
+      const savedText = uwuStorage.getItem("uwu_blogCreation");
       if (savedText && !textarea.value) {
         textarea.value = savedText;
       }
@@ -13792,9 +15335,7 @@ function setupActivityCalc() {
     "декабря",
   ];
 
-  const activitySettings = JSON.parse(
-    window.localStorage.getItem("uwu_activity") || "{}"
-  );
+  const activitySettings = uwuStorage.getItem("uwu_activity") || {};
 
   if (!activitySettings[catId]) {
     activitySettings[catId] = { hours: 24, opened: false };
@@ -14063,7 +15604,7 @@ function setupActivityCalc() {
     });
 
   function saveData(data) {
-    window.localStorage.setItem("uwu_activity", JSON.stringify(data));
+    window.uwuStorage.setItem("uwu_activity", data);
   }
 
   function declensionOfNumber(number, titles) {
@@ -14531,16 +16072,16 @@ function initializeTemplates() {
     }
 
     function saveTemplate(template) {
-      if (!localStorage.getItem("uwu_templates")) {
-        localStorage.setItem("uwu_templates", JSON.stringify([]));
+      if (!uwuStorage.getItem("uwu_templates")) {
+        uwuStorage.setItem("uwu_templates", []);
       }
-      const templates = JSON.parse(localStorage.getItem("uwu_templates"));
+      const templates = uwuStorage.getItem("uwu_templates");
       templates.push(template);
-      localStorage.setItem("uwu_templates", JSON.stringify(templates));
+      uwuStorage.setItem("uwu_templates", templates);
     }
 
     function renderTemplates(pageType) {
-      const templates = JSON.parse(localStorage.getItem("uwu_templates")) || [];
+      const templates = uwuStorage.getItem("uwu_templates") || [];
       templatesList.innerHTML = "";
 
       templates.forEach((template, index) => {
@@ -14588,15 +16129,15 @@ function initializeTemplates() {
     function renameTemplate(index) {
       const newName = prompt("Введите новое название шаблона:");
       if (newName) {
-        const templates = JSON.parse(localStorage.getItem("uwu_templates"));
+        const templates = uwuStorage.getItem("uwu_templates");
         templates[index].name = newName;
-        localStorage.setItem("uwu_templates", JSON.stringify(templates));
+        uwuStorage.setItem("uwu_templates", templates);
         renderTemplates(pageType);
       }
     }
 
     function updateTemplate(index, contentElementId, subjectElementId) {
-      const templates = JSON.parse(localStorage.getItem("uwu_templates"));
+      const templates = uwuStorage.getItem("uwu_templates");
       if (document.getElementById(contentElementId).tagName === "DIV") {
         templates[index].content =
           document.getElementById(contentElementId).innerText;
@@ -14608,7 +16149,7 @@ function initializeTemplates() {
         templates[index].netbject =
           document.getElementById(subjectElementId).value || "";
       }
-      localStorage.setItem("uwu_templates", JSON.stringify(templates));
+      uwuStorage.setItem("uwu_templates", templates);
       renderTemplates(pageType);
     }
 
@@ -14617,9 +16158,9 @@ function initializeTemplates() {
         "Вы уверены, что хотите удалить этот шаблон?"
       );
       if (confirmation) {
-        const templates = JSON.parse(localStorage.getItem("uwu_templates"));
+        const templates = uwuStorage.getItem("uwu_templates");
         templates.splice(index, 1);
-        localStorage.setItem("uwu_templates", JSON.stringify(templates));
+        uwuStorage.setItem("uwu_templates", templates);
         renderTemplates(pageType);
       }
     }
@@ -14681,7 +16222,7 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
     const container = document.getElementById("uwu-saved-ls-container");
     if (!container) return;
 
-    const savedLs = JSON.parse(localStorage.getItem("uwu_saved_ls")) || {};
+    const savedLs = uwuStorage.getItem("uwu_saved_ls") || {};
     const ls = savedLs[lsId];
 
     if (!ls) {
@@ -14728,10 +16269,10 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
    */
   function deleteSavedLS(lsId, silent = false) {
     try {
-      const savedLs = JSON.parse(localStorage.getItem("uwu_saved_ls")) || {};
+      const savedLs = uwuStorage.getItem("uwu_saved_ls") || {};
       if (savedLs.hasOwnProperty(lsId)) {
         delete savedLs[lsId];
-        localStorage.setItem("uwu_saved_ls", JSON.stringify(savedLs));
+        uwuStorage.setItem("uwu_saved_ls", savedLs);
         if (!silent) {
           alert("Сохранённая переписка удалена.");
         }
@@ -14749,7 +16290,7 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
   }
 
   /**
-   * Сохраняет текущее открытое ЛС в localStorage.
+   * Сохраняет текущее открытое ЛС в uwuStorage.
    */
   function saveCurrentLS() {
     try {
@@ -14757,7 +16298,7 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
       const lsId = parseInt(window.location.href.split("=")[1], 10);
       if (isNaN(lsId)) return;
 
-      const savedLs = JSON.parse(localStorage.getItem("uwu_saved_ls")) || {};
+      const savedLs = uwuStorage.getItem("uwu_saved_ls") || {};
 
       const ls = {};
       ls.subject = document.getElementById("msg_subject").textContent;
@@ -14792,7 +16333,7 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
       ).padStart(2, "0")}`;
 
       savedLs[lsId] = ls;
-      localStorage.setItem("uwu_saved_ls", JSON.stringify(savedLs));
+      uwuStorage.setItem("uwu_saved_ls", savedLs);
 
       alert("Переписка успешно сохранена!");
       addSaveButtonsToMessagePage();
@@ -14814,7 +16355,7 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
     if (oldButtons) oldButtons.remove();
 
     const lsId = parseInt(window.location.href.split("=")[1], 10);
-    const savedLs = JSON.parse(localStorage.getItem("uwu_saved_ls")) || {};
+    const savedLs = uwuStorage.getItem("uwu_saved_ls") || {};
     const isSaved = savedLs.hasOwnProperty(lsId);
 
     const buttonsContainer = document.createElement("span");
@@ -14854,7 +16395,7 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
   function updateSavedLsCount() {
     const counter = document.getElementById("uwu-saved-ls-count");
     if (!counter) return;
-    const savedLs = JSON.parse(localStorage.getItem("uwu_saved_ls")) || {};
+    const savedLs = uwuStorage.getItem("uwu_saved_ls") || {};
     counter.textContent = Object.keys(savedLs).length;
   }
 
@@ -14941,8 +16482,8 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
    * @param {HTMLElement} container - Элемент для отрисовки.
    */
   function renderSavedMessagesList(container) {
-    const savedLsRaw = localStorage.getItem("uwu_saved_ls");
-    const savedLs = JSON.parse(savedLsRaw) || {};
+    const savedLsRaw = uwuStorage.getItem("uwu_saved_ls");
+    const savedLs = savedLsRaw || {};
     const keys = Object.keys(savedLs);
 
     const storageSize = savedLsRaw
