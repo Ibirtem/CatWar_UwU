@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.41.1-10.25
+// @version      v1.41.2-10.25
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2025, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -104,7 +104,7 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.41.1";
+const current_uwu_version = "1.41.2";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -3287,6 +3287,9 @@ const newsPanel =
           —— Аппаем до 1.41.1 чтобы у тестеров точно обновилось до финальной
           версии.
         </p>
+        <p>
+          —— Аппаем до 1.41.2 потому что фикс переноса сохранений.
+        </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: 14.10.25</p>
       </div>
@@ -5055,7 +5058,7 @@ if (targetSettings.test(window.location.href)) {
   // ====================================================================================================================
   function importLsFromVarmod() {
     try {
-      const varmodLsRaw = uwuStorage.getItem("cwmod_ls");
+      const varmodLsRaw = localStorage.getItem("cwmod_ls");
       if (!varmodLsRaw) {
         alert(
           "Сохранённые ЛС из других модов или скриптов не найдены в вашем браузере."
@@ -5064,6 +5067,7 @@ if (targetSettings.test(window.location.href)) {
       }
 
       const varmodLs = JSON.parse(varmodLsRaw);
+
       const uwuLs = uwuStorage.getItem("uwu_saved_ls") || {};
 
       let importedCount = 0;
