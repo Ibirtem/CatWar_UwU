@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.41.0-10.25
+// @version      v1.41.1-10.25
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2025, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -104,7 +104,7 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.41.0";
+const current_uwu_version = "1.41.1";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -3283,8 +3283,12 @@ const newsPanel =
           — Теперь можно ставить костюмы любых пикселей, играйтесь
           растягиваниями как хотите.
         </p>
+        <p>
+          —— Аппаем до 1.41.1 чтобы у тестеров точно обновилось до финальной
+          версии.
+        </p>
         <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: .10.25</p>
+        <p>Дата выпуска: 14.10.25</p>
       </div>
     </div>
   `;
