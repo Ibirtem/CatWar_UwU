@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.41.2-10.25
+// @version      v1.41.3-10.25
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2025, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -104,7 +104,7 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.41.2";
+const current_uwu_version = "1.41.3";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -3290,8 +3290,11 @@ const newsPanel =
         <p>
           —— Аппаем до 1.41.2 потому что фикс переноса сохранений.
         </p>
+        <p>
+          —— Аппаем до 1.41.3 потому что фикс Калькулятора активности.
+        </p>
         <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: 14.10.25</p>
+        <p>Дата выпуска: 20.10.25</p>
       </div>
     </div>
   `;
@@ -15608,7 +15611,7 @@ function setupActivityCalc() {
     });
 
   function saveData(data) {
-    window.uwuStorage.setItem("uwu_activity", data);
+    uwuStorage.setItem("uwu_activity", data);
   }
 
   function declensionOfNumber(number, titles) {
