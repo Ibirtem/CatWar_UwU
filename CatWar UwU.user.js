@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.41.3-10.25
+// @version      v1.42.0-12.25
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2025, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -104,7 +104,7 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.41.3";
+const current_uwu_version = "1.42.0";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -331,17 +331,32 @@ const uwusettings =
             </div>
 
             <h1>Настройки CatWar UwU</h1>
-            <div class="link-container" title="ВК Группа по Скрипту/Моду.">
+            <div class="link-container">
               <a
                 href="https://vk.com/catwar_uwu"
                 target="_blank"
                 rel="noopener noreferrer"
+                title="ВК Группа по Скрипту/Моду"
+                style="margin-right: 10px; text-decoration: none;"
               >
                 <img
                   src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/VK_logo.png"
-                  alt="Иконка"
-                  width="36"
-                  height="36"
+                  alt="VK"
+                  width="40"
+                  height="40"
+                />
+              </a>
+              <a
+                href="https://github.com/Ibirtem/CatWar"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="GitHub Репозиторий"
+              >
+                <img
+                  src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/icon_github.png"
+                  alt="GitHub"
+                  width="40"
+                  height="40"
                 />
               </a>
             </div>
@@ -3132,11 +3147,12 @@ const uwusettings =
             </button>
           </div>
         </div>
+
         <div id="personal-costumes-panel">
           <h2>Личные костюмы</h2>
           <p>
-            Здесь вы можете добавить, просматривать и управлять своими личными
-            костюмами.
+            Здесь вы можете управлять костюмами для всех ваших котов. Костюмы
+            привязываются к конкретному коту.
           </p>
           <div>
             <input
@@ -3148,28 +3164,65 @@ const uwusettings =
               >⚙️Включить персональные костюмы</label
             >
           </div>
-          <p>
-            Это добавляет кнопку «Сохранить костюм» при наведении курсора на
-            игрока, позволяя сохранить его костюм в одном из слотов костюмов.
-          </p>
+          <p>Добавляет кнопку «Сохранить костюм» при наведении на игрока.</p>
           <div>
             <input
               type="checkbox"
               id="show-costumes"
               data-setting="showCostumesButtons"
             />
-            <label for="show-costumes">Сохраняйте костюмы других игроков</label>
+            <label for="show-costumes">Сохранять костюмы других игроков</label>
           </div>
           <br />
           <hr id="uwu-hr" class="uwu-hr" />
+
           <div class="costume-flex-box disabled">
-            <div class="costumeSettings">
+            <div class="costumeSettings" style="flex: 2;">
+              <div
+                id="cat-selector-container"
+                style="margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;"
+              >
+                <label>Выберите кота:</label>
+                <div
+                  style="display: flex; gap: 5px; align-items: center; margin-top: 5px;"
+                >
+                  <select
+                    id="current-cat-select"
+                    class="uwu-select-selected"
+                    style="width: 100%; margin: 0;"
+                  ></select>
+                  <button
+                    id="delete-cat-btn"
+                    class="uwu-button remove-button"
+                    title="Удалить этого кота из списка"
+                  >
+                    🗑️
+                  </button>
+                </div>
+
+                <label style="display: block; margin-top: 10px;"
+                  >Выберите позу для редактирования:</label
+                >
+                <select
+                  id="current-pose-select"
+                  class="uwu-select-selected"
+                  style="width: 100%; margin: 5px 0 0 0;"
+                >
+                  <!-- Пу-пу-пу -->
+                </select>
+                <div style="font-size: 0.8em; opacity: 0.6; margin-top: 2px;">
+                  * Позы сохраняются автоматически, когда вы меняете положение в
+                  Игровой.
+                </div>
+              </div>
+
               <div>
                 <h3>Изменить Костюм:</h3>
-                <div>
-                  Примечание: Изображение будет автоматически вписано в рамку
-                  кота. Убедитесь, что оно изначально имеет соотношение сторон
-                  2:3 (100x150 или будущие 200x300).
+                <div
+                  style="font-size: 0.9em; opacity: 0.8; margin-bottom: 10px;"
+                >
+                  Загрузите изображение (желательно 200x300 или 2:3). Оно будет
+                  подогнано под размер.
                 </div>
               </div>
 
@@ -3178,38 +3231,77 @@ const uwusettings =
                 id="costume-file"
                 accept="image/png"
                 class="uwu-button"
+                style="width: 100%; box-sizing: border-box;"
               />
               <br />
-              <br />
-              <button class="uwu-button install-button" id="changeCostume">
-                Установить костюм
-              </button>
-              <br />
-              <span>или </span>
-              <br />
+
+              <div
+                style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 10px; margin-top: 10px;"
+              >
+                <button
+                  class="uwu-button install-button"
+                  id="changeCostume"
+                  style="flex: 1; white-space: normal; min-width: 120px;"
+                >
+                  Надеть на кота
+                </button>
+
+                <button
+                  class="uwu-button install-button"
+                  id="saveCostumeToNewSlot"
+                  style="flex: 1; white-space: normal; min-width: 120px;"
+                >
+                  Сохранить в библиотеку
+                </button>
+              </div>
+            </div>
+
+            <div
+              id="cat-preview-wrapper"
+              style="flex: 1; display: flex; flex-direction: column; align-items: center;"
+            >
+              <div
+                id="cat-image-container"
+                style="width: 100px; height: 150px; position: relative; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;"
+              ></div>
+              <p
+                id="cat-preview-name"
+                style="margin-top: 5px; margin-bottom: 5px; font-weight: bold; text-align: center;"
+              >
+                ...
+              </p>
+
               <a
                 class="uwu-button remove-button"
                 id="removeCostume"
-                style="display:inline-block; padding:4px 10px; border-radius:20px; text-decoration:none; color:inherit;"
-                >Снять костюм с кота</a
+                style="font-size: 0.8em; padding: 2px 10px; text-decoration: none; color: inherit; margin-top: 5px;"
+                title="Снять текущий костюм с этого кота"
+                >Снять костюм</a
               >
-              <br />
-              <span>или </span>
-              <br />
-              <button
-                class="uwu-button install-button"
-                id="saveCostumeToNewSlot"
-              >
-                Сохранить костюм в новый слот
-              </button>
-            </div>
-            <div id="cat-image">
-              Превью для вашего кота/вашей кошки отсутствует. <br /><br />
-              Перейдите в Игровую и вернитесь на эту страницу.
             </div>
           </div>
+
+          <div
+            id="no-cats-warning"
+            style="display: none; background: rgba(255, 100, 100, 0.1); border: 1px solid rgba(255, 100, 100, 0.3); padding: 15px; border-radius: 10px; margin-top: 10px; text-align: center;"
+          >
+            <h3>🔍 Коты не найдены</h3>
+            <p>
+              Чтобы настроить костюм, нужно, чтобы скрипт "увидел" вашего
+              персонажа.
+            </p>
+            <p>
+              1. Убедитесь, что галочка "Включить персональные костюмы" стоит.
+            </p>
+            <p>
+              2. Зайдите в <a href="/cw3/" target="_blank">Игровую</a> хотя бы
+              один раз.
+            </p>
+            <p>3. Вернитесь сюда и обновите страницу.</p>
+          </div>
+
           <hr id="uwu-hr" class="uwu-hr" />
-          <h3>Библиотека костюмов:</h3>
+          <h3>Библиотека костюмов (общая):</h3>
           <div class="costume-flex-box" id="costume-gallery"></div>
           <hr id="uwu-hr" class="uwu-hr-head" />
         </div>
@@ -3224,77 +3316,34 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        v${current_uwu_version} - Логи ловли, ура! (Меня заставили). Общие
-        сохранения между разными доменами и таймер-напоминалка, например для
-        осмотров!
+        v${current_uwu_version} - Перепись Библиотеки Личных Костюмов! Всякие
+        правки БР и прочая мелочь.
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
-        <p>— Я усталь.</p>
         <p>
-          — Добавлена возможность удалять из Лога чистильщика последнего
-          опущенного кота. Полезно, когда он проснулся во рту и попросился
-          погулять.
+          — Библиотека Личных Костюмов теперь поддерживает множество ваших котов
+          и их разные позы (вроде). Эм. Мяу-мяу-мяу.
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
-        <p>— Возможность скрывать и раскрывать логи.</p>
+        <p>— Кнопка "Обновить команды" в БР логе теперь не вылезает за края.</p>
+        <p>— Убран неприятный горизонтальный слайдер в таблицах команд.</p>
         <p>
-          — Стрелочка Минного поля показывает теперь скорее "состояние" окна,
-          чем "что сделается при клике". Нужно для уравнивания со стилем
-          Таймера-напоминалки, и просто "вроде" выглядит логичней для таких
-          штук.
+          — Кнопки команд теперь не улетают на следующие строки, делая табицу
+          высокой и неудобной.
         </p>
-        <p>— Добавлена регулировка высоты инвентаря.</p>
-        <p>— Добавлены шаманские штуки на подсветку.</p>
+        <p>— Возможный фикс улетающего текста из БР.</p>
         <p>
-          — Одиночки, ваши травы теперь тоже светятся, простите что так долго.
+          — Кнопки сохранения и удаления сообщения в письмах теперь появляются и
+          на мобильной версии сайта.
         </p>
-        <p>
-          — Шрифт кнопок в Боевом режиме теперь норм кушает цвета текста из
-          кастом темы цветов.
-        </p>
+        <p>— Добавлена кнопочка на GitHub Скрипта/Мода, чтобы не терялось.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
-        <p>— Надеюсь исправлен расчёт значений Чистоты и Бодрости (Сна).</p>
-        <p>
-          — Добавлены статусы "На удалении" и "Заблокирован" на валидацию в Лог
-          Чистильщика.
-        </p>
-        <p>
-          — Повышено КД перед повторной проверкой онлайн времени, чтобы не
-          спамить бедным на сервера.
-        </p>
-        <p>— Починка дублирования запросов на проверки онлайн времени.</p>
-        <p>
-          — Коты в Логе чистильщика теперь должны быть снова кликабельными при
-          объединении в одни квадратные скобки (Хотя бывает всё равно глючит,
-          мне лень править)
-        </p>
-        <p>
-          — Кривой недофикс Экспорта настроек. Теперь работает "со всеми"
-          сохранениями. Как минимум личные сообщения не будут теряться.
-        </p>
-        <p>— Убран спам часами в консоль браузера.</p>
-        <p>
-          — Чёта там костюмы не так было починилось теперь всё круто 👍👍👍👍👍.
-        </p>
-        <p>
-          — Теперь можно ставить костюмы любых пикселей, играйтесь
-          растягиваниями как хотите.
-        </p>
-        <p>
-          —— Аппаем до 1.41.1 чтобы у тестеров точно обновилось до финальной
-          версии.
-        </p>
-        <p>
-          —— Аппаем до 1.41.2 потому что фикс переноса сохранений.
-        </p>
-        <p>
-          —— Аппаем до 1.41.3 потому что фикс Калькулятора активности.
-        </p>
+        <p>— Возможно чёта, что я уже забыл.</p>
         <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: 20.10.25</p>
+        <p>Дата выпуска: 13.12.25</p>
       </div>
     </div>
   `;
@@ -4956,104 +5005,407 @@ if (targetSettings.test(window.location.href)) {
   }
 
   if (settings.personalCostumes) {
-    const costumeImg = document.getElementById("cat-image");
-    var data = uwuStorage.getItem("uwu_personal") || {};
-    if (data && data.id && data.catImg) {
-      costumeImg.innerHTML = "Предпросмотр: ";
-      const container = document.createElement("div");
-      container.id = "cat-image-container";
-      container.style.display = "flex";
-      const img = document.createElement("img");
-      img.style.backgroundImage = `url(${data.catImg.src})`;
-      img.style.backgroundColor = "transparent";
-      img.style.backgroundPosition = "center";
-      img.style.backgroundRepeat = "no-repeat";
-      img.style.backgroundSize = data.catImg.size;
-      img.style.width = "100px";
-      img.style.height = "150px";
+    let rawData = uwuStorage.getItem("uwu_personal") || {};
+    let dataChanged = false;
 
-      container.appendChild(img);
-      costumeImg.appendChild(container);
+    if (!rawData.cats && rawData.id) {
+      rawData.cats = {};
+      rawData.cats[rawData.id] = {
+        id: rawData.id,
+        name: "Мой кот",
+        img: rawData.catImg?.src || "",
+        size: rawData.catImg?.size || "contain",
+        costume: rawData.costumes?.base || "",
+      };
+      if (rawData.costumes?.slots) rawData.slots = rawData.costumes.slots;
+      delete rawData.id;
+      delete rawData.catImg;
+      delete rawData.costumes;
+      dataChanged = true;
     }
 
-    const changeButton = document.getElementById("changeCostume");
-    changeButton.addEventListener("click", async () => {
-      readImageFileAsDataURL(
-        "costume-file",
-        async (dataUrl) => {
-          try {
-            const resizedDataUrl = await resizeImageToAspectRatio(dataUrl);
-            let data = uwuStorage.getItem("uwu_personal") || {};
-            data.costumes = {
-              base: resizedDataUrl,
-            };
-            uwuStorage.setItem("uwu_personal", data);
-            alert("Костюм успешно изменён! Вы можете увидеть его в игре.");
-            loadCostume();
-          } catch (error) {
-            console.error("Ошибка при сохранении костюма:", error);
-            alert("Ошибка при сохранении костюма.");
-          }
-        },
-        alert
-      );
-    });
+    if (!rawData.cats) {
+      rawData.cats = {};
+      dataChanged = true;
+    }
+    if (!rawData.slots) {
+      rawData.slots = [];
+      dataChanged = true;
+    }
 
-    const removeButton = document.getElementById("removeCostume");
-    removeButton.addEventListener("click", () => {
-      let data = uwuStorage.getItem("uwu_personal") || {};
-      if (!data.costumes || !data.costumes.base) {
-        alert("Нет костюма для удаления.");
-        return;
-      }
-      if (!confirm("Вы уверены, что хотите удалить костюм?")) {
-        return;
-      }
-      data.costumes = {
-        base: "",
-      };
-      uwuStorage.setItem("uwu_personal", data);
-      loadCostume();
-    });
-
-    const saveToNewSlotButton = document.getElementById("saveCostumeToNewSlot");
-    saveToNewSlotButton.addEventListener("click", async (event) => {
-      readImageFileAsDataURL(
-        "costume-file",
-        async (dataUrl) => {
-          try {
-            const resizedDataUrl = await resizeImageToAspectRatio(dataUrl);
-            let data = uwuStorage.getItem("uwu_personal") || {};
-
-            if (!data.costumes) {
-              data.costumes = { base: "", slots: [] };
-            }
-            if (!Array.isArray(data.costumes.slots)) {
-              data.costumes.slots = [];
-            }
-
-            data.costumes.slots.push({
-              base: resizedDataUrl,
-            });
-
-            data.costumes.slots = data.costumes.slots.filter((slot) => slot);
-
-            uwuStorage.setItem("uwu_personal", data);
-            alert("Костюм успешно сохранен в новый слот!");
-            loadCostume();
-          } catch (error) {
-            console.error("Ошибка при сохранении костюма:", error);
-            alert("Ошибка при сохранении костюма.");
-          }
-        },
-        (error) => {
-          if (error.includes("Пожалуйста, выберите изображение")) {
-            alert(error);
-          }
+    Object.keys(rawData.cats).forEach((catId) => {
+      let cat = rawData.cats[catId];
+      if (!cat.poses) {
+        cat.poses = {};
+        if (cat.costume && cat.img) {
+          const fileName = cat.img.split("/").pop() || "unknown";
+          cat.poses[fileName] = cat.costume;
         }
-      );
+        delete cat.costume;
+        dataChanged = true;
+      }
     });
-    loadCostume();
+
+    if (dataChanged) uwuStorage.setItem("uwu_personal", rawData);
+
+    let currentEditCatId = null;
+    let currentPoseKey = null;
+
+    const catSelect = document.getElementById("current-cat-select");
+    const poseSelect = document.getElementById("current-pose-select");
+    const warningBox = document.getElementById("no-cats-warning");
+    const flexBox = document.querySelector(".costume-flex-box");
+    const previewContainer = document.getElementById("cat-image-container");
+    const previewName = document.getElementById("cat-preview-name");
+
+    function updateCatSelector() {
+      let data = uwuStorage.getItem("uwu_personal") || { cats: {}, slots: [] };
+      if (catSelect) catSelect.innerHTML = "";
+      const catIds = Object.keys(data.cats);
+
+      if (catIds.length === 0) {
+        if (warningBox) warningBox.style.display = "block";
+        if (flexBox) flexBox.classList.add("disabled");
+        return;
+      }
+
+      if (warningBox) warningBox.style.display = "none";
+      if (costumeCheckbox.checked && flexBox)
+        flexBox.classList.remove("disabled");
+
+      catIds.forEach((id) => {
+        const cat = data.cats[id];
+        const option = document.createElement("option");
+        option.value = id;
+        option.textContent = `${cat.name} (ID: ${id})`;
+        if (catSelect) catSelect.appendChild(option);
+      });
+
+      if (currentEditCatId && data.cats[currentEditCatId]) {
+        if (catSelect) catSelect.value = currentEditCatId;
+      } else {
+        currentEditCatId = catIds[0];
+        if (catSelect) catSelect.value = currentEditCatId;
+      }
+
+      updatePoseSelector();
+    }
+
+    function updatePoseSelector() {
+      let data = uwuStorage.getItem("uwu_personal");
+      if (!currentEditCatId || !data.cats[currentEditCatId]) return;
+
+      const cat = data.cats[currentEditCatId];
+      if (poseSelect) poseSelect.innerHTML = "";
+
+      const poses = Object.keys(cat.poses);
+
+      if (poses.length === 0 && cat.img) {
+        const fileName = cat.img.split("/").pop();
+        cat.poses[fileName] = "";
+        poses.push(fileName);
+        uwuStorage.setItem("uwu_personal", data);
+      }
+
+      poses.forEach((poseFile, index) => {
+        const option = document.createElement("option");
+        option.value = poseFile;
+        const hasCostume = cat.poses[poseFile] ? "✅" : "❌";
+        option.textContent = `${index + 1}. ${poseFile} [${hasCostume}]`;
+        if (poseSelect) poseSelect.appendChild(option);
+      });
+
+      if (poses.length > 0) {
+        currentPoseKey = poses[0];
+        if (poseSelect) poseSelect.value = currentPoseKey;
+      } else {
+        currentPoseKey = null;
+      }
+
+      renderPreview();
+    }
+
+    function renderPreview() {
+      let data = uwuStorage.getItem("uwu_personal");
+      if (
+        !currentEditCatId ||
+        !data.cats[currentEditCatId] ||
+        !currentPoseKey
+      ) {
+        if (previewContainer) previewContainer.innerHTML = "";
+        if (previewName) previewName.textContent = "...";
+        return;
+      }
+
+      const cat = data.cats[currentEditCatId];
+      const currentCostume = cat.poses[currentPoseKey];
+
+      if (previewName) previewName.textContent = cat.name;
+
+      if (previewContainer) {
+        previewContainer.innerHTML = "";
+        previewContainer.style.minWidth = "100px";
+        previewContainer.style.minHeight = "150px";
+        previewContainer.style.flexShrink = "0";
+
+        if (!cat.img) {
+          previewContainer.innerHTML = `
+                    <div style="
+                        width: 100%; 
+                        height: 100%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        text-align: center; 
+                        font-size: 0.8em; 
+                        color: #ffaaaa; 
+                        padding: 5px; 
+                        box-sizing: border-box;
+                    ">
+                        Внешность не загружена.<br>Зайдите в Игровую!
+                    </div>
+                `;
+          return;
+        }
+
+        let bgUrl = "";
+        if (cat.img.includes(currentPoseKey)) {
+          bgUrl = cat.img;
+        } else {
+          bgUrl = `/cw3/composited/${currentPoseKey}`;
+        }
+
+        // 1. Слой кота
+        const catImg = document.createElement("div");
+        catImg.style.width = "100px";
+        catImg.style.height = "150px";
+        catImg.style.position = "absolute";
+        catImg.style.top = "0";
+        catImg.style.left = "0";
+        catImg.style.backgroundImage = `url(${bgUrl})`;
+        catImg.style.backgroundSize = cat.size || "contain";
+        catImg.style.backgroundPosition = "center";
+        catImg.style.backgroundRepeat = "no-repeat";
+        previewContainer.appendChild(catImg);
+
+        // 2. Слой костюма
+        if (currentCostume) {
+          const costumeImg = document.createElement("div");
+          costumeImg.style.width = "100px";
+          costumeImg.style.height = "150px";
+          costumeImg.style.position = "absolute";
+          costumeImg.style.top = "0";
+          costumeImg.style.left = "0";
+          costumeImg.style.backgroundImage = `url(${currentCostume})`;
+          costumeImg.style.backgroundSize = cat.size || "contain";
+          costumeImg.style.backgroundPosition = "center";
+          costumeImg.style.backgroundRepeat = "no-repeat";
+          previewContainer.appendChild(costumeImg);
+        }
+      }
+      loadGallery();
+    }
+
+    function loadGallery() {
+      const gallery = document.getElementById("costume-gallery");
+      if (!gallery) return;
+      gallery.innerHTML = "";
+
+      let data = uwuStorage.getItem("uwu_personal") || { slots: [] };
+
+      const addBtn = document.createElement("div");
+      addBtn.className = "costume-gallery-box";
+      addBtn.style.justifyContent = "center";
+      addBtn.style.cursor = "pointer";
+      addBtn.style.minWidth = "140px";
+      addBtn.style.minHeight = "230px";
+      addBtn.innerHTML =
+        "<div style='font-size: 3em;'>+</div><div>Из файла</div>";
+      addBtn.addEventListener("click", () =>
+        document.getElementById("costume-file").click()
+      );
+      gallery.appendChild(addBtn);
+
+      data.slots.forEach((slotBase64, index) => {
+        const box = document.createElement("div");
+        box.className = "costume-gallery-box";
+        box.style.minWidth = "140px";
+
+        const slotPreview = document.createElement("div");
+        slotPreview.style.width = "100px";
+        slotPreview.style.height = "150px";
+        slotPreview.style.minWidth = "100px";
+        slotPreview.style.minHeight = "150px";
+        slotPreview.style.flexShrink = "0";
+        slotPreview.style.position = "relative";
+        slotPreview.style.border = "1px solid rgba(255,255,255,0.1)";
+        slotPreview.style.borderRadius = "5px";
+
+        if (currentEditCatId && data.cats[currentEditCatId] && currentPoseKey) {
+          const cat = data.cats[currentEditCatId];
+          let bgUrl = cat.img.includes(currentPoseKey)
+            ? cat.img
+            : `/cw3/composited/${currentPoseKey}`;
+
+          const catLayer = document.createElement("div");
+          catLayer.style.position = "absolute";
+          catLayer.style.top = "0";
+          catLayer.style.left = "0";
+          catLayer.style.width = "100%";
+          catLayer.style.height = "100%";
+          catLayer.style.backgroundImage = `url(${bgUrl})`;
+          catLayer.style.backgroundSize = cat.size || "contain";
+          catLayer.style.backgroundRepeat = "no-repeat";
+          catLayer.style.backgroundPosition = "center";
+          slotPreview.appendChild(catLayer);
+        }
+
+        const suitDiv = document.createElement("div");
+        suitDiv.style.position = "absolute";
+        suitDiv.style.top = "0";
+        suitDiv.style.left = "0";
+        suitDiv.style.width = "100%";
+        suitDiv.style.height = "100%";
+        suitDiv.style.backgroundImage = `url(${slotBase64})`;
+        suitDiv.style.backgroundSize =
+          currentEditCatId && data.cats[currentEditCatId]
+            ? data.cats[currentEditCatId].size
+            : "contain";
+        suitDiv.style.backgroundRepeat = "no-repeat";
+        suitDiv.style.backgroundPosition = "center";
+        slotPreview.appendChild(suitDiv);
+
+        box.appendChild(slotPreview);
+
+        const applyBtn = document.createElement("button");
+        applyBtn.className = "uwu-button install-button";
+        applyBtn.innerText = "Надеть";
+        applyBtn.style.width = "100%";
+        applyBtn.style.marginTop = "10px";
+        applyBtn.addEventListener("click", () => {
+          if (!currentEditCatId || !currentPoseKey)
+            return alert("Не выбран кот или поза!");
+          let d = uwuStorage.getItem("uwu_personal");
+          d.cats[currentEditCatId].poses[currentPoseKey] = slotBase64;
+          uwuStorage.setItem("uwu_personal", d);
+          updatePoseSelector();
+          renderPreview();
+        });
+
+        const delBtn = document.createElement("button");
+        delBtn.className =
+          "costume-slot-delete-button uwu-button remove-button";
+        delBtn.innerText = "✖";
+        delBtn.title = "Удалить слот";
+        delBtn.addEventListener("click", () => {
+          if (confirm("Удалить этот костюм из библиотеки?")) {
+            let d = uwuStorage.getItem("uwu_personal");
+            d.slots.splice(index, 1);
+            uwuStorage.setItem("uwu_personal", d);
+            loadGallery();
+          }
+        });
+
+        box.appendChild(applyBtn);
+        box.appendChild(delBtn);
+        gallery.appendChild(box);
+      });
+    }
+
+    if (catSelect) {
+      catSelect.addEventListener("change", (e) => {
+        currentEditCatId = e.target.value;
+        updatePoseSelector();
+      });
+    }
+
+    if (poseSelect) {
+      poseSelect.addEventListener("change", (e) => {
+        currentPoseKey = e.target.value;
+        renderPreview();
+      });
+    }
+
+    const deleteCatBtn = document.getElementById("delete-cat-btn");
+    if (deleteCatBtn) {
+      deleteCatBtn.addEventListener("click", () => {
+        if (!currentEditCatId) return;
+        if (confirm("Удалить этого кота из списка?")) {
+          let data = uwuStorage.getItem("uwu_personal");
+          delete data.cats[currentEditCatId];
+          uwuStorage.setItem("uwu_personal", data);
+          currentEditCatId = null;
+          updateCatSelector();
+        }
+      });
+    }
+
+    const changeBtn = document.getElementById("changeCostume");
+    if (changeBtn) {
+      changeBtn.addEventListener("click", () => {
+        readImageFileAsDataURL(
+          "costume-file",
+          async (dataUrl) => {
+            if (!currentEditCatId || !currentPoseKey)
+              return alert("Сначала выберите кота и позу.");
+            try {
+              const resized = await resizeImageToAspectRatio(dataUrl);
+              let data = uwuStorage.getItem("uwu_personal");
+              data.cats[currentEditCatId].poses[currentPoseKey] = resized;
+              uwuStorage.setItem("uwu_personal", data);
+              updatePoseSelector();
+              renderPreview();
+              alert("Костюм надет на выбранную позу!");
+            } catch (e) {
+              console.error(e);
+              alert("Ошибка обработки");
+            }
+          },
+          alert
+        );
+      });
+    }
+
+    const removeBtn = document.getElementById("removeCostume");
+    if (removeBtn) {
+      removeBtn.addEventListener("click", () => {
+        if (!currentEditCatId || !currentPoseKey) return;
+        let data = uwuStorage.getItem("uwu_personal");
+        data.cats[currentEditCatId].poses[currentPoseKey] = "";
+        uwuStorage.setItem("uwu_personal", data);
+        updatePoseSelector();
+        renderPreview();
+      });
+    }
+
+    const saveSlotBtn = document.getElementById("saveCostumeToNewSlot");
+    if (saveSlotBtn) {
+      saveSlotBtn.addEventListener("click", () => {
+        readImageFileAsDataURL(
+          "costume-file",
+          async (dataUrl) => {
+            try {
+              const resized = await resizeImageToAspectRatio(dataUrl);
+              let data = uwuStorage.getItem("uwu_personal") || {
+                cats: {},
+                slots: [],
+              };
+              if (!data.slots) data.slots = [];
+              data.slots.push(resized);
+              uwuStorage.setItem("uwu_personal", data);
+              loadGallery();
+              alert("Костюм сохранен!");
+            } catch (e) {
+              console.error(e);
+              alert("Ошибка");
+            }
+          },
+          alert
+        );
+      });
+    }
+
+    updateCatSelector();
   }
 
   // ====================================================================================================================
@@ -7351,38 +7703,11 @@ if (targetCW3.test(window.location.href)) {
   async function personalCostumes() {
     if (settings.personalCostumes) {
       const match = window.location.hostname.match(/catwar\.(net|su)/);
-      let items = uwuStorage.getItem("uwu_personal") ?? {};
-      if (match && !items.catImg) {
-        const fullDomain = `catwar.${match[1]}`;
-        if (!items.id) {
-          await fetch(`https://${fullDomain}/`)
-            .then((response) => response.text())
-            .then((text) => {
-              const parser = new DOMParser();
-              const htmlDocument = parser.parseFromString(text, "text/html");
-              items.id = htmlDocument.getElementById("id_val").innerText;
-            });
-          uwuStorage.setItem("uwu_personal", items);
-        }
+      if (!match) return;
 
-        if (!items.catImg && items.id) {
-          const img = document
-            .getElementById("cages")
-            .querySelectorAll("a[href='/cat" + items.id + "']")[0]
-            .closest(".cat")
-            .querySelector(".first");
-          items.catImg = {
-            src: img.style.backgroundImage.slice(5, -2),
-            size: img.style.backgroundSize,
-          };
-          uwuStorage.setItem("uwu_personal", items);
-        }
-      }
-
-      function applyCostumeStyle() {
-        if (!items.id || !items.costumes?.base || !items.catImg?.size) {
-          return;
-        }
+      function applyCostumeStyles() {
+        let items = uwuStorage.getItem("uwu_personal") || {};
+        if (!items.cats) return;
 
         let styleElement = document.getElementById(
           "uwu-personal-costume-style"
@@ -7393,27 +7718,107 @@ if (targetCW3.test(window.location.href)) {
           document.head.appendChild(styleElement);
         }
 
-        const cssRule = `
-          .cat:has(a[href='/cat${items.id}']) .d::after {
-              content: '';
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              background-image: url('${items.costumes.base}');
-              background-size: ${items.catImg.size};
-              background-repeat: no-repeat;
-              pointer-events: none;
+        let cssRules = "";
+        Object.values(items.cats).forEach((cat) => {
+          if (cat.poses) {
+            Object.keys(cat.poses).forEach((poseFile) => {
+              const costumeData = cat.poses[poseFile];
+              if (costumeData) {
+                cssRules += `
+                            .cat:has(a[href='/cat${
+                              cat.id
+                            }']) .d:has(.first[style*='${poseFile}'])::after {
+                                content: '';
+                                position: absolute;
+                                top: 0;
+                                left: 0;
+                                width: 100%;
+                                height: 100%;
+                                background-image: url('${costumeData}');
+                                background-size: ${cat.size || "contain"};
+                                background-repeat: no-repeat;
+                                pointer-events: none;
+                                z-index: 1;
+                            }
+                          `;
+              }
+            });
           }
-      `;
-
-        styleElement.innerHTML = cssRule;
+        });
+        styleElement.innerHTML = cssRules;
       }
 
-      if (items.costumes && items.costumes.base) {
-        applyCostumeStyle();
+      let lastKnownPoseUrl = "";
+
+      function checkMyPose() {
+        let personalData = uwuStorage.getItem("uwu_personal");
+        if (!personalData || !personalData.lastActiveId) return;
+
+        const currentId = personalData.lastActiveId;
+        const cages = document.getElementById("cages");
+        if (!cages) return;
+
+        const link = cages.querySelector("a[href='/cat" + currentId + "']");
+        if (!link) return;
+
+        const catNode = link.closest(".cat");
+        const img = catNode ? catNode.querySelector(".first") : null;
+
+        if (img) {
+          const rawBg = img.style.backgroundImage;
+          const src = rawBg.replace(/^url\(['"]?/, "").replace(/['"]?\)$/, "");
+          const fileName = src.split("/").pop();
+
+          if (src === lastKnownPoseUrl) return;
+
+          lastKnownPoseUrl = src;
+          const size = img.style.backgroundSize;
+
+          personalData = uwuStorage.getItem("uwu_personal") || {};
+          if (!personalData.cats) personalData.cats = {};
+          if (!personalData.cats[currentId]) {
+            personalData.cats[currentId] = {
+              id: currentId,
+              name: "Кот " + currentId,
+              poses: {},
+            };
+          }
+          const cat = personalData.cats[currentId];
+          if (!cat.poses) cat.poses = {};
+
+          cat.img = src;
+          cat.size = size;
+
+          if (!cat.poses.hasOwnProperty(fileName)) {
+            console.log(`UwU | Найдена новая поза: ${fileName}`);
+            cat.poses[fileName] = "";
+            uwuStorage.setItem("uwu_personal", personalData);
+            applyCostumeStyles();
+          } else {
+            uwuStorage.setItem("uwu_personal", personalData);
+          }
+        }
       }
+
+      applyCostumeStyles();
+
+      setupMutationObserver(
+        "#cages",
+        () => {
+          setTimeout(checkMyPose, 100);
+        },
+        { childList: true, subtree: true },
+        10,
+        500
+      );
+
+      setupMutationObserver(
+        "#tr_actions",
+        () => {
+          setTimeout(checkMyPose, 100);
+        },
+        { childList: true, subtree: true, characterData: true }
+      );
     }
   }
 
@@ -7421,26 +7826,23 @@ if (targetCW3.test(window.location.href)) {
     return new Promise(async (resolve, reject) => {
       try {
         const resizedDataUrl = await resizeImageToAspectRatio(dataUrl);
-        let data = uwuStorage.getItem("uwu_personal") || {};
-
-        if (!data.costumes) {
-          data.costumes = { base: "", slots: [] };
-        }
-        if (!Array.isArray(data.costumes.slots)) {
-          data.costumes.slots = [];
-        }
+        let data = uwuStorage.getItem("uwu_personal") || {
+          cats: {},
+          slots: [],
+        };
+        if (!data.slots) data.slots = [];
 
         if (choice === "new") {
-          data.costumes.slots.push({ base: resizedDataUrl });
+          data.slots.push(resizedDataUrl);
           alert("Костюм успешно сохранен в новый слот.");
         } else {
           const slotIndex = parseInt(choice, 10);
-          if (data.costumes.slots[slotIndex]) {
+          if (data.slots[slotIndex]) {
             if (!confirm("Этот слот уже занят. Вы хотите перезаписать его?")) {
               return resolve();
             }
           }
-          data.costumes.slots[slotIndex] = { base: resizedDataUrl };
+          data.slots[slotIndex] = resizedDataUrl;
           alert(`Костюм успешно сохранен в слот ${slotIndex + 1}.`);
         }
 
@@ -10065,7 +10467,7 @@ if (targetCW3.test(window.location.href)) {
 
     const uwuClimbingPanelHorizontal = document.createElement("style");
     uwuClimbingPanelHorizontal.innerHTML =
-      // css
+      /* CSS */
       `
     #uwu-climbingMainPanel {
       width: 390px !important;
@@ -13144,7 +13546,7 @@ if (targetCW3.test(window.location.href)) {
 
     const fightPanel = document.getElementById("fightPanel");
     const buttonHTML =
-      '<button id="updateTableButton" style="width: 100%;">Обновить команды</button>';
+      '<button id="updateTableButton" style="width: 100%; box-sizing: border-box;">Обновить команды</button>';
     fightPanel.insertAdjacentHTML("beforeend", buttonHTML);
 
     document.getElementById("updateTableButton").onclick = () => {
@@ -13156,22 +13558,27 @@ if (targetCW3.test(window.location.href)) {
 
     function createTeamTable() {
       const tableHTML =
-        // html
+        /* HTML */
         `
-        <div id="uwu-team-settings" style="height: ${
-          settings.fightTeamsPanelHight || "auto"
-        }px; overflow-y: scroll; resize: vertical;">
-          <table id="uwu-team-settings-table" style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr>
-                <th style="border: 1px solid #000; padding: 5px;">Имя</th>
-                <th style="border: 1px solid #000; padding: 5px;">Команда</th>
-              </tr>
-            </thead>
-            <tbody id="teamTableBody"></tbody>
-          </table>
-        </div>
-      `;
+          <div
+            id="uwu-team-settings"
+            style="height: ${settings.fightTeamsPanelHight ||
+            "auto"}px; box-sizing: border-box; overflow-y: scroll; overflow-x: hidden; resize: vertical;"
+          >
+            <table
+              id="uwu-team-settings-table"
+              style="width: 100%; border-collapse: collapse;"
+            >
+              <thead>
+                <tr>
+                  <th style="border: 1px solid #000; padding: 5px;">Имя</th>
+                  <th style="border: 1px solid #000; padding: 5px;">Команда</th>
+                </tr>
+              </thead>
+              <tbody id="teamTableBody"></tbody>
+            </table>
+          </div>
+        `;
       const updateButton = document.getElementById("updateTableButton");
       updateButton.insertAdjacentHTML("beforebegin", tableHTML);
     }
@@ -13199,7 +13606,16 @@ if (targetCW3.test(window.location.href)) {
                   class="team-color-button ${isSelected}"
                   data-arrow-id="${arrowId}"
                   data-team="${team}"
-                  style="background-color: ${colors[team][0]}; width: 21%; height: 16px;"
+                  style="
+                    background-color: ${colors[team][0]}; 
+                    flex: 1; 
+                    height: 20px; 
+                    border: 1px solid #333; 
+                    padding: 0; 
+                    margin: 0; 
+                    cursor: pointer;
+                    box-sizing: border-box;
+                  "
                 ></button>
               `;
             })
@@ -13207,8 +13623,17 @@ if (targetCW3.test(window.location.href)) {
 
           const rowHTML = `
             <tr>
-              <td style="border: 1px solid #000; padding: 5px;">${catName}</td>
-              <td style="border: 1px solid #000; padding: 5px;">${buttonsHTML}</td>
+              <td style="border: 1px solid #000; padding: 5px; vertical-align: middle;">${catName}</td>
+              <td style="
+                  border: 1px solid #000; 
+                  padding: 4px; 
+                  display: flex; 
+                  justify-content: space-between; 
+                  gap: 4px;
+                  align-items: center;
+              ">
+                ${buttonsHTML}
+              </td>
             </tr>
           `;
           tbody.insertAdjacentHTML("beforeend", rowHTML);
@@ -13338,6 +13763,28 @@ if (targetCW3.test(window.location.href)) {
   // емааааа ужасное решение
   // TODO - исправить переделать уничтожить пересобрать заамогусить чё за фигню я сделал
   if (settings.compactFightLog) {
+    const compactLogStyle = document.createElement("style");
+    compactLogStyle.innerHTML =
+      /* CSS */
+      `
+      #uwu-Compacted-Fight-Log {
+        width: 100%;
+        box-sizing: border-box;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        white-space: normal;
+        padding: 2px;
+      }
+      
+      #uwu-Compacted-Fight-Log > div {
+        width: 100%;
+        box-sizing: border-box;
+      }
+    `;
+
+    document.head.appendChild(compactLogStyle);
     function compactFightLog() {
       const fightLog = document.getElementById("fightLog");
       fightLog.style.display = "none";
@@ -15010,6 +15457,33 @@ if (settings.moreBBCodes) {
 //   . . . ПРОФИЛЬ ИГРОКА . . .
 // ====================================================================================================================
 if (targetMainProfile.test(window.location.href)) {
+  const idVal = document.getElementById("id_val");
+  if (idVal) {
+    const currentId = idVal.innerText.trim();
+    let data = uwuStorage.getItem("uwu_personal") || {};
+
+    if (!data.cats) data.cats = {};
+    if (!data.slots) data.slots = [];
+
+    data.lastActiveId = currentId;
+
+    if (!data.cats[currentId]) {
+      data.cats[currentId] = {
+        id: currentId,
+        name: "Кот " + currentId,
+        img: "",
+        size: "",
+        costume: "",
+      };
+    }
+
+    uwuStorage.setItem("uwu_personal", data);
+    // console.log(
+    //   `UwU | Профиль: ID игрока [${currentId}] сохранён как активный.`
+    // );
+  }
+  // --------------------------------------------------------
+
   if (settings.calculators) {
     setupSingleCallback("#info", setupActivityCalc);
     setupSingleCallback("#info", moonCalculator);
@@ -16355,10 +16829,13 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
    * Добавляет кнопки управления сохранением на страницу просмотра ЛС.
    */
   function addSaveButtonsToMessagePage() {
-    const subjectTd = document.querySelector("#msg_table td[colspan='2']");
+    const subjectSpan = document.getElementById("msg_subject");
+    if (!subjectSpan) return;
+
+    const subjectTd = subjectSpan.closest("td");
     if (!subjectTd) return;
 
-    const oldButtons = subjectTd.querySelector("#uwu-ls-buttons");
+    const oldButtons = document.getElementById("uwu-ls-buttons");
     if (oldButtons) oldButtons.remove();
 
     const lsId = parseInt(window.location.href.split("=")[1], 10);
@@ -16368,6 +16845,7 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
     const buttonsContainer = document.createElement("span");
     buttonsContainer.id = "uwu-ls-buttons";
     buttonsContainer.style.float = "right";
+    buttonsContainer.style.display = "inline-block";
 
     const saveButton = document.createElement("input");
     saveButton.type = "button";
