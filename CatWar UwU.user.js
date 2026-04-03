@@ -147,6 +147,7 @@ const uwuDefaultSettings = {
   notificationPMSound: "notificationSound1",
   notificationPMVolume: 5,
   notificationActionEnd: false,
+  notificationActionEndEarly: false,
   notificationActionEndSound: "notificationSound1",
   notificationActionEndVolume: 5,
   notificationInMouth: false,
@@ -2828,6 +2829,21 @@ const uwusettings =
                 <td>
                   <input
                     type="checkbox"
+                    id="notification-Action-End-Early"
+                    data-setting="notificationActionEndEarly"
+                  />
+                </td>
+                <td colspan="3"></td>
+                <td>
+                  <label for="notification-Action-End-Early"
+                    >За 3 секунды</label
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input
+                    type="checkbox"
                     id="notification-In-Mouth"
                     data-setting="notificationInMouth"
                   />
@@ -3316,19 +3332,20 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        v${current_uwu_version} - 
+        v${current_uwu_version} - Оказывается, у меня есть мод для какого-то сайтика с котиками, прикол да?
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>
-          — 
+          — Обновление и добавление забытых, но очень важных функций - галочка для непрозрачности котов, 
+          звук за пару секунд до окончания действия.
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
-        <p>— </p>
+        <p>— Пу-пу-пу.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
-        <p>— </p>
+        <p>— Уточнён расчёт падения активности в калькуляторе.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: ??.04.26</p>
       </div>
@@ -10653,6 +10670,26 @@ if (targetCW3.test(window.location.href)) {
         updateCellsBordersStyle(checked);
       },
     },
+    {
+      label: "Непрозрачные коты",
+      key: "opaqueCats",
+      storageKey: "uwu_fastStyles",
+      style: ".cat > div { opacity: 1 !important; }",
+      callback: function (checked) {
+        if (checked) {
+          const style = document.createElement("style");
+          style.innerHTML = this.style;
+          document.head.appendChild(style);
+        } else {
+          const styles = document.head.querySelectorAll("style");
+          styles.forEach((style) => {
+            if (style.innerHTML === this.style) {
+              document.head.removeChild(style);
+            }
+          });
+        }
+      },
+    },
   ];
 
   const loadSettings = (storageKey) => {
@@ -13045,29 +13082,53 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   if (settings.notificationActionEnd) {
     let actionStartTime = null;
+    let earlyNotified = false;
 
     const observer = new MutationObserver(() => {
       const blockMess = document.getElementById("block_mess");
+      const text = blockMess ? blockMess.textContent.trim() : "";
 
-      if (blockMess && blockMess.innerHTML.trim() !== "" && !actionStartTime) {
+      if (text !== "" && !actionStartTime) {
         actionStartTime = Date.now();
-      } else if (!blockMess && actionStartTime) {
+        earlyNotified = false;
+      }
+
+      if (text !== "") {
+        if (settings.notificationActionEndEarly && !earlyNotified) {
+          const timeMatch = text.match(/(?:(\d+)\s*ч\s*)?(?:(\d+)\s*мин\s*)?(\d+)\s*с/);
+          if (timeMatch) {
+            const h = parseInt(timeMatch[1] || 0, 10);
+            const m = parseInt(timeMatch[2] || 0, 10);
+            const s = parseInt(timeMatch[3] || 0, 10);
+            const totalSeconds = h * 3600 + m * 60 + s;
+
+            if (totalSeconds <= 3 && totalSeconds > 0) {
+              soundManager.playSound(
+                settings.notificationActionEndSound,
+                settings.notificationActionEndVolume
+              );
+              earlyNotified = true;
+            }
+          }
+        }
+      } else if (text === "" && actionStartTime) {
         const actionEndTime = Date.now();
         const actionDuration = actionEndTime - actionStartTime;
 
-        if (actionDuration >= 6000) {
+        if (actionDuration >= 6000 && !earlyNotified) {
           soundManager.playSound(
             settings.notificationActionEndSound,
             settings.notificationActionEndVolume
           );
         }
         actionStartTime = null;
+        earlyNotified = false;
       }
     });
 
     const targetNode = document.getElementById("tr_actions");
     if (targetNode) {
-      observer.observe(targetNode, { childList: true, subtree: true });
+      observer.observe(targetNode, { childList: true, subtree: true, characterData: true });
     }
   }
   // ====================================================================================================================
@@ -15848,11 +15909,11 @@ function setupActivityCalc() {
       }
       if (currentActivity >= goal) break;
       days++;
-      currentActivity -= 4.8;
+      currentActivity -= 4;
     }
 
     const actionsDecrease = Math.floor(
-      days * 4.8 + convertTime("s h", secondsToday) / 5
+      days * 4 + convertTime("s h", secondsToday) / 6
     );
     const totalTime = secondsPerDay * days + secondsToday;
 
