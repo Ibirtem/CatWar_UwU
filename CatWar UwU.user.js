@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.42.0-12.25
+// @version      v1.43.0-04.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
-// @copyright    2025, Ibirtem (https://openuserjs.org/users/Ibirtem)
+// @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
 // @supportURL   https://catwar.net/cat1477928
 // @homepageURL  https://openuserjs.org/scripts/Ibirtem/CatWar_UwU
 // @match        http*://*.catwar.net/*
@@ -104,7 +104,7 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.42.0";
+const current_uwu_version = "1.43.0";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -3316,34 +3316,21 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        v${current_uwu_version} - Перепись Библиотеки Личных Костюмов! Всякие
-        правки БР и прочая мелочь.
+        v${current_uwu_version} - 
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>
-          — Библиотека Личных Костюмов теперь поддерживает множество ваших котов
-          и их разные позы (вроде). Эм. Мяу-мяу-мяу.
+          — 
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
-        <p>— Кнопка "Обновить команды" в БР логе теперь не вылезает за края.</p>
-        <p>— Убран неприятный горизонтальный слайдер в таблицах команд.</p>
-        <p>
-          — Кнопки команд теперь не улетают на следующие строки, делая табицу
-          высокой и неудобной.
-        </p>
-        <p>— Возможный фикс улетающего текста из БР.</p>
-        <p>
-          — Кнопки сохранения и удаления сообщения в письмах теперь появляются и
-          на мобильной версии сайта.
-        </p>
-        <p>— Добавлена кнопочка на GitHub Скрипта/Мода, чтобы не терялось.</p>
+        <p>— </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
-        <p>— Возможно чёта, что я уже забыл.</p>
+        <p>— </p>
         <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: 13.12.25</p>
+        <p>Дата выпуска: ??.04.26</p>
       </div>
     </div>
   `;
