@@ -9486,6 +9486,12 @@ if (targetCW3.test(window.location.href)) {
       catInfoElement.style.width = "350px";
       contentContainer.style.paddingBottom = "10px";
 
+      const escape = (str) => {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      };
+
       contentContainer.innerHTML = `
         <h2 style="letter-spacing: 2px; margin-bottom: 15px;">ИСТОРИЯ БУ</h2>
         <div style="max-height: 400px; overflow-y: auto; border-radius: 5px; background: rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05);">
@@ -9498,9 +9504,9 @@ if (targetCW3.test(window.location.href)) {
             <tbody>
               ${logs.length ? logs.map(l => `
                 <tr style="border-bottom: 1px solid #ffffff05;">
-                  <td style="padding: 6px; opacity: 0.8;">${l.time}</td>
-                  <td style="padding: 6px;"><b>${l.val}</b><small>/${l.max}</small></td>
-                  <td style="padding: 6px; color: ${l.diff.toString().includes('+') ? '#41cd70' : (l.diff === 'Старт' ? '#83e5ff' : '#cd4141')}; font-weight: bold;">${l.diff}</td>
+                  <td style="padding: 6px; opacity: 0.8;">${escape(l.time)}</td>
+                  <td style="padding: 6px;"><b>${escape(l.val)}</b><small>/${escape(l.max)}</small></td>
+                  <td style="padding: 6px; color: ${l.diff.toString().includes('+') ? '#41cd70' : (l.diff === 'Старт' ? '#83e5ff' : '#cd4141')}; font-weight: bold;">${escape(l.diff)}</td>
                 </tr>
               `).join('') : '<tr><td colspan="3" style="padding: 20px; opacity: 0.5; text-align: center;">Истории пока нет...</td></tr>'}
             </tbody>
@@ -16131,6 +16137,9 @@ function moonCalculator() {
 function setupActivityCalc() {
   const catId = document.getElementById("id_val").textContent;
 
+  const DAILY_ACTIVITY_DECREASE = 4;
+  const HOURLY_ACTIVITY_DECREASE_DIVISOR = 6;
+
   const activityStages = [
     { name: "пустое место", fromZero: -5000 },
     { name: "подлежащий удалению", fromZero: -5000 },
@@ -16223,11 +16232,11 @@ function setupActivityCalc() {
       }
       if (currentActivity >= goal) break;
       days++;
-      currentActivity -= 4;
+      currentActivity -= DAILY_ACTIVITY_DECREASE;
     }
 
     const actionsDecrease = Math.floor(
-      days * 4 + convertTime("s h", secondsToday) / 6
+      days * DAILY_ACTIVITY_DECREASE + convertTime("s h", secondsToday) / HOURLY_ACTIVITY_DECREASE_DIVISOR
     );
     const totalTime = secondsPerDay * days + secondsToday;
 
