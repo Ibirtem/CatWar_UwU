@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.42.0-12.25
+// @version      v1.43.0-04.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
-// @copyright    2025, Ibirtem (https://openuserjs.org/users/Ibirtem)
+// @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
 // @supportURL   https://catwar.net/cat1477928
 // @homepageURL  https://openuserjs.org/scripts/Ibirtem/CatWar_UwU
 // @match        http*://*.catwar.net/*
@@ -104,7 +104,7 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.42.0";
+const current_uwu_version = "1.43.0";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -135,6 +135,7 @@ const uwuDefaultSettings = {
   reverseChat: false,
   newChatInput: false,
   showChatCharCounter: false,
+  showChatRanks: false,
   namesForNotification: "",
 
   redesignCostumsSettings: false,
@@ -147,6 +148,7 @@ const uwuDefaultSettings = {
   notificationPMSound: "notificationSound1",
   notificationPMVolume: 5,
   notificationActionEnd: false,
+  notificationActionEndEarly: false,
   notificationActionEndSound: "notificationSound1",
   notificationActionEndVolume: 5,
   notificationInMouth: false,
@@ -171,6 +173,7 @@ const uwuDefaultSettings = {
   compactMouth: false,
   showMoreCatInfo: false,
   showParametersDetails: false,
+  showExactSkillsValues: false,
 
   draggingFightPanel: false,
   compactFightLog: false,
@@ -192,6 +195,8 @@ const uwuDefaultSettings = {
   clockStyle: "compact",
   clockFontSize: "14",
   clockPosition: "fly",
+
+  showMightHistory: false,
 
   intervalTimerEnabled: false,
   intervalTimerSound: "notificationSound1",
@@ -1300,17 +1305,30 @@ const uwusettings =
               >Показывать счётчик символов в чате</label
             >
           </div>
+          <div>
+            <p>Отображает должность персонажа в чате.</p>
+            <input
+              type="checkbox"
+              id="show-chat-ranks"
+              data-setting="showChatRanks"
+            />
+            <label for="show-chat-ranks"
+              >Показывать должности</label
+            >
+          </div>
 
           <hr id="uwu-hr" class="uwu-hr" />
           <h2>Параметры и навыки</h2>
 
-          <!--
-      <div>
-        <p>Параметр наглядно отображает рядом с собой свой процент.</p>
-        <input type="checkbox" id="display-Parameters-Percentages" data-setting="displayParametersPercentages" />
-        <label for="display-Parameters-Percentages">Отображать проценты Параметров</label>
-      </div>
-      -->
+          <div>
+            <p>Отображает точные значения навыков поверх их шкал (например, Нюх (83/∞)).</p>
+            <input
+              type="checkbox"
+              id="show-exact-skills-values"
+              data-setting="showExactSkillsValues"
+            />
+            <label for="show-exact-skills-values">Точные значения навыков</label>
+          </div>
 
           <div>
             <p>Заменяет стандартное оформление Параметров и Навыков на ваш.</p>
@@ -1322,6 +1340,16 @@ const uwusettings =
             <label for="user-Parameters-Theme"
               >Использовать своё оформление</label
             >
+          </div>
+
+          <div>
+            <p>Записывает историю изменений Боевых Умений (БУ).</p>
+            <input
+              type="checkbox"
+              id="show-might-history"
+              data-setting="showMightHistory"
+            />
+            <label for="show-might-history">История прокачки БУ</label>
           </div>
 
           <div id="parameters-color-settings" class="parameters-color-settings">
@@ -2828,6 +2856,21 @@ const uwusettings =
                 <td>
                   <input
                     type="checkbox"
+                    id="notification-Action-End-Early"
+                    data-setting="notificationActionEndEarly"
+                  />
+                </td>
+                <td colspan="3"></td>
+                <td>
+                  <label for="notification-Action-End-Early"
+                    >За 3 секунды</label
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <input
+                    type="checkbox"
                     id="notification-In-Mouth"
                     data-setting="notificationInMouth"
                   />
@@ -3316,34 +3359,25 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        v${current_uwu_version} - Перепись Библиотеки Личных Костюмов! Всякие
-        правки БР и прочая мелочь.
+        🌸 v${current_uwu_version} - Довольно важное и крутое обновление, представляете?
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>
-          — Библиотека Личных Костюмов теперь поддерживает множество ваших котов
-          и их разные позы (вроде). Эм. Мяу-мяу-мяу.
+          — Обновление и добавление забытых, но очень важных функций - галочка для непрозрачности котов, 
+          звук за пару секунд до окончания действия, отображение должности в чат и чисел параметров! 
+          И самое сочное... История прокачки Боевых Умений!
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
-        <p>— Кнопка "Обновить команды" в БР логе теперь не вылезает за края.</p>
-        <p>— Убран неприятный горизонтальный слайдер в таблицах команд.</p>
-        <p>
-          — Кнопки команд теперь не улетают на следующие строки, делая табицу
-          высокой и неудобной.
-        </p>
-        <p>— Возможный фикс улетающего текста из БР.</p>
-        <p>
-          — Кнопки сохранения и удаления сообщения в письмах теперь появляются и
-          на мобильной версии сайта.
-        </p>
-        <p>— Добавлена кнопочка на GitHub Скрипта/Мода, чтобы не терялось.</p>
+        <p>— Пу-пу-пу.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
-        <p>— Возможно чёта, что я уже забыл.</p>
+        <p>— Уточнён расчёт падения активности в калькуляторе.</p>
+        <p>— Открылся огромный простор будущих оптимизаций, упрощений кода и 
+        улучшения производительности в целом.</p>
         <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: 13.12.25</p>
+        <p>Дата выпуска: 04.04.26</p>
       </div>
     </div>
   `;
@@ -4593,6 +4627,43 @@ async function setupSingleCallback(
   //   `Элемент с селектором "${selector}" не найден после ${maxAttempts} попыток.`
   // );
 }
+
+// ====================================================================================================================
+//   . . . VUE  . . .
+// ====================================================================================================================
+
+/**
+* A universal function for getting data from the Vue Game component.
+* @param {string} path Path to the data, for example: 'parameter.data' or 'cat.name'
+*/
+function getVueData(path) {
+  const app = document.getElementById('app');
+  if (!app || !app.__vue__) return null;
+  return path.split('.').reduce((acc, part) => acc && acc[part], app.__vue__);
+}
+
+/**
+* A universal subscriber for data changes in Vue.
+* @param {string} path : Path to the data (e.g., 'parameter.data').
+* @param {function} callback : Function called when a change occurs.
+* @param {object} options : Options (e.g., { deep: true, immediate: true }).
+*/
+function watchVueData(path, callback, options = { deep: true }) {
+    let attempts = 0;
+    const tryAttachWatcher = () => {
+      const app = document.getElementById("app")?.__vue__;
+      if (!app) {
+        if (attempts++ < 40) {
+          setTimeout(tryAttachWatcher, 250);
+        }
+        return;
+      }
+      app.$watch(path, callback, options);
+    };
+
+    tryAttachWatcher();
+  }
+
 // ====================================================================================================================
 //   . . . СОХРАНЕНИЕ И РАБОТА С ЦВЕТОВЫМИ ТЕМАМИ . . .
 // ====================================================================================================================
@@ -6275,6 +6346,7 @@ if (targetSettings.test(window.location.href)) {
     "uwu_activity",
     "uwu_fastStyles",
     "uwu_fightTeamsCats",
+    "uwu_mightHistory",
   ];
 
   const importButton = document.getElementById("importSettingsButton");
@@ -9341,6 +9413,162 @@ if (targetCW3.test(window.location.href)) {
 
   //   window.addEventListener("load", setupTableObservers);
   // }
+
+  // ====================================================================================================================
+  //   . . . ИСТОРИЯ ПРОКАЧКИ БУ . . .
+  // ====================================================================================================================
+  if (settings.showMightHistory) {
+    const updateMightHistory = (newVal) => {
+      if (!newVal || !newVal.tooltip) return;
+      
+      const match = newVal.tooltip.match(/\((\d+)\/([^\)]+)\)/);
+      if (!match) return;
+      
+      const currentVal = parseInt(match[1], 10);
+      const currentMaxRaw = match[2].trim();
+      const currentMax = isNaN(parseInt(currentMaxRaw, 10)) ? null : parseInt(currentMaxRaw, 10);
+      
+      const rawHistoryData = uwuStorage.getItem("uwu_mightHistory");
+      let historyData = (rawHistoryData && typeof rawHistoryData === "object" && !Array.isArray(rawHistoryData))
+          ? rawHistoryData
+          : { logs: [] };
+
+      if (!Array.isArray(historyData.logs)) {
+        historyData.logs = [];
+      }
+
+      if (historyData.lastVal === undefined || historyData.lastVal === null) {
+        const now = new Date();
+        historyData.lastVal = currentVal;
+        historyData.lastMax = currentMax;
+        historyData.logs = [{
+          val: currentVal,
+          max: currentMaxRaw,
+          diff: "Старт",
+          time: `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+        }];
+        uwuStorage.setItem("uwu_mightHistory", historyData);
+        return;
+      }
+
+      if (historyData.lastVal !== currentVal || historyData.lastMax !== currentMax) {
+        let diff = 0;
+        if (typeof currentMax === 'number' && typeof historyData.lastMax === 'number' && currentMax > historyData.lastMax) {
+          diff = (historyData.lastMax - historyData.lastVal) + currentVal;
+        } else {
+          diff = currentVal - historyData.lastVal;
+        }
+
+        if (diff !== 0 && !isNaN(diff)) {
+          const now = new Date();
+          historyData.logs.unshift({
+            val: currentVal,
+            max: currentMaxRaw,
+            diff: diff > 0 ? `+${diff}` : diff,
+            time: `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+          });
+
+          if (historyData.logs.length > 100) historyData.logs.pop();
+
+          historyData.lastVal = currentVal;
+          historyData.lastMax = currentMax;
+          uwuStorage.setItem("uwu_mightHistory", historyData);
+        }
+      }
+    };
+
+    const showMightHistoryModal = () => {
+      let { catInfoElement, contentContainer } = createCatInfoContainer();
+      
+      const rawHistoryData = uwuStorage.getItem("uwu_mightHistory");
+      const logs = (rawHistoryData && Array.isArray(rawHistoryData.logs)) ? rawHistoryData.logs : [];
+      
+      catInfoElement.style.width = "350px";
+      contentContainer.style.paddingBottom = "10px";
+
+      const escape = (str) => {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      };
+
+      contentContainer.innerHTML = `
+        <h2 style="letter-spacing: 2px; margin-bottom: 15px;">ИСТОРИЯ БУ</h2>
+        <div style="max-height: 400px; overflow-y: auto; border-radius: 5px; background: rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05);">
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+            <thead>
+              <tr style="border-bottom: 2px solid #ffffff1a; opacity: 0.7; position: sticky; top: 0; background: #222; z-index: 1;">
+                <th style="padding: 8px;">Дата</th><th style="padding: 8px;">БУ/Макс</th><th style="padding: 8px;">Прирост</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${logs.length ? logs.map(l => `
+                <tr style="border-bottom: 1px solid #ffffff05;">
+                  <td style="padding: 6px; opacity: 0.8;">${escape(l.time)}</td>
+                  <td style="padding: 6px;"><b>${escape(l.val)}</b><small>/${escape(l.max)}</small></td>
+                  <td style="padding: 6px; color: ${l.diff.toString().includes('+') ? '#41cd70' : (l.diff === 'Старт' ? '#83e5ff' : '#cd4141')}; font-weight: bold;">${escape(l.diff)}</td>
+                </tr>
+              `).join('') : '<tr><td colspan="3" style="padding: 20px; opacity: 0.5; text-align: center;">Истории пока нет...</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top: 20px; display: flex; justify-content: center; width: 100%;">
+             ${logs.length ? '<button type="button" class="uwu-reset-might-btn uwu-button remove-button" style="padding: 5px 15px; font-size: 12px; cursor: pointer;">Очистить историю</button>' : ''}
+        </div>
+      `;
+
+      const resetBtn = contentContainer.querySelector('.uwu-reset-might-btn');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', (e) => {
+          if (confirm("Удалить все записи? Текущие значения станут новой точкой отсчета.")) {
+            const currentData = getVueData('parameter.data.might');
+            const match = currentData?.tooltip?.match(/\((\d+)\/([^\)]+)\)/);
+            
+            if (match) {
+              const cVal = parseInt(match[1], 10);
+              const cMaxRaw = match[2].trim();
+              const cMax = isNaN(parseInt(cMaxRaw, 10)) ? null : parseInt(cMaxRaw, 10);
+              const now = new Date();
+
+              uwuStorage.setItem("uwu_mightHistory", { 
+                lastVal: cVal, 
+                lastMax: cMax, 
+                logs: [{
+                  val: cVal, max: cMaxRaw, diff: "Старт",
+                  time: `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+                }] 
+              });
+            } else {
+              uwuStorage.removeItem("uwu_mightHistory");
+            }
+            if (globalContainer.contains(catInfoElement)) globalContainer.removeChild(catInfoElement);
+          }
+        });
+      }
+
+      globalContainer.appendChild(catInfoElement);
+    };
+
+    setupSingleCallback("#parameters_skills_block", () => {
+      const parent = document.getElementById('parameters_skills_block');
+      if (!parent || document.getElementById('uwu-open-might-history')) return;
+
+      const btnLink = document.createElement('div');
+      btnLink.style.cssText = 'text-align: center; margin-top: 5px;';
+      btnLink.innerHTML = `<a href="#" id="uwu-open-might-history" style="font-size: 11px; opacity: 0.6; text-decoration: underline; color: inherit;">История прокачки БУ</a>`;
+      parent.appendChild(btnLink);
+
+      document.getElementById('uwu-open-might-history').onclick = (e) => {
+        e.preventDefault();
+        showMightHistoryModal();
+      };
+    });
+
+    watchVueData('parameter.data.might', (newVal) => {
+      updateMightHistory(newVal);
+    }, { deep: true, immediate: true });
+  }
+
   // ====================================================================================================================
   //   . . . ПОДРОБНЕЕ О ПАРАМЕТРАХ (И НАВЫКОВ?) . . .
   // ====================================================================================================================
@@ -9524,6 +9752,66 @@ if (targetCW3.test(window.location.href)) {
 
   if (settings.showParametersDetails) {
     setupSingleCallback("#parameters_skills_block", createMoreInfoButton);
+  }
+
+  // ====================================================================================================================
+  //   . . . ТОЧНЫЕ ЗНАЧЕНИЯ НАВЫКОВ . . .
+  // ====================================================================================================================
+  if (settings.showExactSkillsValues) {
+    const updateExactSkills = () => {
+      const paramData = getVueData('parameter.data');
+      if (!paramData) return;
+
+      const skills = ['smell', 'dig', 'swim', 'might', 'tree', 'observ', 'heal', 'power', 'pet_faith'];
+
+      skills.forEach(skillId => {
+        const skillInfo = paramData[skillId];
+        if (skillInfo && skillInfo.tooltip && !skillInfo.isHidden) {
+          const skillElement = document.getElementById(skillId);
+          if (skillElement) {
+            const bar = skillElement.querySelector('.bar');
+            if (bar) {
+              let barData = bar.querySelector('.bar-data') || (() => {
+                const el = document.createElement('div');
+                el.className = 'bar-data';
+                bar.appendChild(el);
+                return el;
+              })();
+
+              const match = skillInfo.tooltip.match(/\((.*?)\)/);
+              const newValue = match ? match[1] : skillInfo.tooltip;
+
+              if (barData.textContent !== newValue) {
+                barData.textContent = newValue;
+              }
+            }
+          }
+        }
+      });
+    };
+
+    watchVueData('parameter.data', updateExactSkills, { deep: true, immediate: true });
+
+    const css_skillsBarData = document.createElement("style");
+    css_skillsBarData.innerHTML = `
+      .skill .bar {
+        position: relative;
+      }
+      .skill .bar-data {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        font-size: 10px;
+        color: white;
+        text-shadow: 1px 1px 2px black, -1px -1px 2px black, 1px -1px 2px black, -1px 1px 2px black;
+        pointer-events: none;
+        line-height: 15px;
+        z-index: 2;
+      }
+    `;
+    document.head.appendChild(css_skillsBarData);
   }
   // ====================================================================================================================
   //   . . . ЧИСЛОВАЯ ГРОМКОСТЬ УВЕДОМЛЕНИЙ . . .
@@ -10569,6 +10857,7 @@ if (targetCW3.test(window.location.href)) {
     return;
   }
 
+  // TODO - Потом переиспользовать callback: function (checked) {}
   const checkboxes = [
     {
       label: "Не показывать всплывающее окно 'О коте'",
@@ -10664,6 +10953,26 @@ if (targetCW3.test(window.location.href)) {
       storageKey: "uwu_settings",
       callback: function (checked) {
         updateCellsBordersStyle(checked);
+      },
+    },
+    {
+      label: "Непрозрачные коты",
+      key: "opaqueCats",
+      storageKey: "uwu_fastStyles",
+      style: ".cat > div { opacity: 1 !important; }",
+      callback: function (checked) {
+        if (checked) {
+          const style = document.createElement("style");
+          style.innerHTML = this.style;
+          document.head.appendChild(style);
+        } else {
+          const styles = document.head.querySelectorAll("style");
+          styles.forEach((style) => {
+            if (style.innerHTML === this.style) {
+              document.head.removeChild(style);
+            }
+          });
+        }
       },
     },
   ];
@@ -13058,29 +13367,53 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   if (settings.notificationActionEnd) {
     let actionStartTime = null;
+    let earlyNotified = false;
 
     const observer = new MutationObserver(() => {
       const blockMess = document.getElementById("block_mess");
+      const text = blockMess ? blockMess.textContent.trim() : "";
 
-      if (blockMess && blockMess.innerHTML.trim() !== "" && !actionStartTime) {
+      if (text !== "" && !actionStartTime) {
         actionStartTime = Date.now();
-      } else if (!blockMess && actionStartTime) {
+        earlyNotified = false;
+      }
+
+      if (text !== "") {
+        if (settings.notificationActionEndEarly && !earlyNotified) {
+          const timeMatch = text.match(/(?:(\d+)\s*ч\s*)?(?:(\d+)\s*мин\s*)?(\d+)\s*с/);
+          if (timeMatch) {
+            const h = parseInt(timeMatch[1] || 0, 10);
+            const m = parseInt(timeMatch[2] || 0, 10);
+            const s = parseInt(timeMatch[3] || 0, 10);
+            const totalSeconds = h * 3600 + m * 60 + s;
+
+            if (totalSeconds <= 3 && totalSeconds > 0) {
+              soundManager.playSound(
+                settings.notificationActionEndSound,
+                settings.notificationActionEndVolume
+              );
+              earlyNotified = true;
+            }
+          }
+        }
+      } else if (text === "" && actionStartTime) {
         const actionEndTime = Date.now();
         const actionDuration = actionEndTime - actionStartTime;
 
-        if (actionDuration >= 6000) {
+        if (actionDuration >= 6000 && !earlyNotified) {
           soundManager.playSound(
             settings.notificationActionEndSound,
             settings.notificationActionEndVolume
           );
         }
         actionStartTime = null;
+        earlyNotified = false;
       }
     });
 
     const targetNode = document.getElementById("tr_actions");
     if (targetNode) {
-      observer.observe(targetNode, { childList: true, subtree: true });
+      observer.observe(targetNode, { childList: true, subtree: true, characterData: true });
     }
   }
   // ====================================================================================================================
@@ -13155,6 +13488,37 @@ if (targetCW3.test(window.location.href)) {
   // И ДО СИХ ПОР ТЕРЯЮ ААААА
   // TODO - как-то пределать шоле
   if (settings.newChat) {
+
+    const chatRanksCache = new Map();
+
+    function updateChatRankAsync(catId, rankElement) {
+      if (!rankElement || catId === ". . .") return;
+
+      if (chatRanksCache.has(catId)) {
+        rankElement.innerHTML = chatRanksCache.get(catId);
+        return;
+      }
+
+      setTimeout(() => {
+        const profileLink = document.querySelector(`.cat_tooltip a[href="/cat${catId}"]`);
+        
+        if (profileLink) {
+          const tooltip = profileLink.closest('.cat_tooltip');
+          const rankNode = tooltip.querySelector('div > small > i');
+          
+          if (rankNode && rankNode.textContent.trim() !== "") {
+            const rankText = ` <small><i>(${rankNode.textContent})</i></small> `;
+            chatRanksCache.set(catId, rankText);
+            rankElement.innerHTML = rankText;
+          } else {
+            chatRanksCache.set(catId, "");
+          }
+        } else {
+          rankElement.innerHTML = "";
+        }
+      }, 0);
+    }
+
     const newChatContainer = document.createElement("div");
     newChatContainer.id = "uwu_chat_msg";
     const chatForm = document.getElementById("chat_form");
@@ -13267,13 +13631,14 @@ if (targetCW3.test(window.location.href)) {
 
       const reportLink = chatMessage.querySelector(".msg_report");
       const dataId = reportLink ? reportLink.getAttribute("data-id") : "";
+      
+      const rankSpanId = `uwu-rank-${dataId || Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
       const newChatMessageHTML =
-        // html
         `
         <hr>
         <div id="msg">
-          <div class="${chatTextClasses}">${processedText} - <b class="nick" style="${nickStyle}">${nickName}</b> <i>[${catId}]</i></div>
+          <div class="${chatTextClasses}">${processedText} - <b class="nick" style="${nickStyle}">${nickName}</b><span id="${rankSpanId}"></span> <i>[${catId}]</i></div>
           <div style="display: flex; width: 42px; justify-content: flex-end; margin-right: 2px;">
             <a href="${profileLink}" title="Перейти в профиль" target="_blank" rel="noopener noreferrer">➝</a>&nbsp;|&nbsp;
             <a href="#" title="Пожаловаться на нарушение ОПИ" class="msg_report" data-id="${dataId}">X</a>
@@ -13281,6 +13646,10 @@ if (targetCW3.test(window.location.href)) {
         </div>
       `;
       newChatContainer.insertAdjacentHTML("afterbegin", newChatMessageHTML);
+      
+      if (settings.showChatRanks) {
+        updateChatRankAsync(catId, document.getElementById(rankSpanId));
+      }
     }
 
     const uwuChatMsg = document.createElement("style");
@@ -15769,6 +16138,9 @@ function moonCalculator() {
 function setupActivityCalc() {
   const catId = document.getElementById("id_val").textContent;
 
+  const DAILY_ACTIVITY_DECREASE = 4;
+  const HOURLY_ACTIVITY_DECREASE_DIVISOR = 6;
+
   const activityStages = [
     { name: "пустое место", fromZero: -5000 },
     { name: "подлежащий удалению", fromZero: -5000 },
@@ -15861,11 +16233,11 @@ function setupActivityCalc() {
       }
       if (currentActivity >= goal) break;
       days++;
-      currentActivity -= 4.8;
+      currentActivity -= DAILY_ACTIVITY_DECREASE;
     }
 
     const actionsDecrease = Math.floor(
-      days * 4.8 + convertTime("s h", secondsToday) / 5
+      days * DAILY_ACTIVITY_DECREASE + convertTime("s h", secondsToday) / HOURLY_ACTIVITY_DECREASE_DIVISOR
     );
     const totalTime = secondsPerDay * days + secondsToday;
 
