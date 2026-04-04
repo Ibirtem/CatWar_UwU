@@ -10857,6 +10857,7 @@ if (targetCW3.test(window.location.href)) {
     return;
   }
 
+  // TODO - Потом переиспользовать callback: function (checked) {}
   const checkboxes = [
     {
       label: "Не показывать всплывающее окно 'О коте'",
