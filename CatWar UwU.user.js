@@ -135,6 +135,7 @@ const uwuDefaultSettings = {
   reverseChat: false,
   newChatInput: false,
   showChatCharCounter: false,
+  showChatRanks: false,
   namesForNotification: "",
 
   redesignCostumsSettings: false,
@@ -1299,6 +1300,17 @@ const uwusettings =
             />
             <label for="show-chat-char-counter"
               >Показывать счётчик символов в чате</label
+            >
+          </div>
+          <div>
+            <p>Отображает должность персонажа в чате.</p>
+            <input
+              type="checkbox"
+              id="show-chat-ranks"
+              data-setting="showChatRanks"
+            />
+            <label for="show-chat-ranks"
+              >Показывать должности</label
             >
           </div>
 
@@ -3338,7 +3350,7 @@ const newsPanel =
         <h3>Главное</h3>
         <p>
           — Обновление и добавление забытых, но очень важных функций - галочка для непрозрачности котов, 
-          звук за пару секунд до окончания действия.
+          звук за пару секунд до окончания действия, отображение должности в чат.
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
@@ -13203,6 +13215,37 @@ if (targetCW3.test(window.location.href)) {
   // И ДО СИХ ПОР ТЕРЯЮ ААААА
   // TODO - как-то пределать шоле
   if (settings.newChat) {
+
+    const chatRanksCache = new Map();
+
+    function updateChatRankAsync(catId, rankElement) {
+      if (!rankElement || catId === ". . .") return;
+
+      if (chatRanksCache.has(catId)) {
+        rankElement.innerHTML = chatRanksCache.get(catId);
+        return;
+      }
+
+      setTimeout(() => {
+        const profileLink = document.querySelector(`.cat_tooltip a[href="/cat${catId}"]`);
+        
+        if (profileLink) {
+          const tooltip = profileLink.closest('.cat_tooltip');
+          const rankNode = tooltip.querySelector('div > small > i');
+          
+          if (rankNode && rankNode.textContent.trim() !== "") {
+            const rankText = ` <small><i>(${rankNode.textContent})</i></small> `;
+            chatRanksCache.set(catId, rankText);
+            rankElement.innerHTML = rankText;
+          } else {
+            chatRanksCache.set(catId, "");
+          }
+        } else {
+          rankElement.innerHTML = "";
+        }
+      }, 0);
+    }
+
     const newChatContainer = document.createElement("div");
     newChatContainer.id = "uwu_chat_msg";
     const chatForm = document.getElementById("chat_form");
@@ -13315,13 +13358,14 @@ if (targetCW3.test(window.location.href)) {
 
       const reportLink = chatMessage.querySelector(".msg_report");
       const dataId = reportLink ? reportLink.getAttribute("data-id") : "";
+      
+      const rankSpanId = `uwu-rank-${dataId || Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
       const newChatMessageHTML =
-        // html
         `
         <hr>
         <div id="msg">
-          <div class="${chatTextClasses}">${processedText} - <b class="nick" style="${nickStyle}">${nickName}</b> <i>[${catId}]</i></div>
+          <div class="${chatTextClasses}">${processedText} - <b class="nick" style="${nickStyle}">${nickName}</b><span id="${rankSpanId}"></span> <i>[${catId}]</i></div>
           <div style="display: flex; width: 42px; justify-content: flex-end; margin-right: 2px;">
             <a href="${profileLink}" title="Перейти в профиль" target="_blank" rel="noopener noreferrer">➝</a>&nbsp;|&nbsp;
             <a href="#" title="Пожаловаться на нарушение ОПИ" class="msg_report" data-id="${dataId}">X</a>
@@ -13329,6 +13373,10 @@ if (targetCW3.test(window.location.href)) {
         </div>
       `;
       newChatContainer.insertAdjacentHTML("afterbegin", newChatMessageHTML);
+      
+      if (settings.showChatRanks) {
+        updateChatRankAsync(catId, document.getElementById(rankSpanId));
+      }
     }
 
     const uwuChatMsg = document.createElement("style");
