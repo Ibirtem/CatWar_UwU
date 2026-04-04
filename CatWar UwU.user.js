@@ -3359,7 +3359,7 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        v${current_uwu_version} - Довольно важное и крутое обновление, представляете?
+        🌸 v${current_uwu_version} - Довольно важное и крутое обновление, представляете?
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
@@ -3377,7 +3377,7 @@ const newsPanel =
         <p>— Открылся огромный простор будущих оптимизаций, упрощений кода и 
         улучшения производительности в целом.</p>
         <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: ??.04.26</p>
+        <p>Дата выпуска: 04.04.26</p>
       </div>
     </div>
   `;
