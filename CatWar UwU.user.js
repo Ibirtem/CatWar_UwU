@@ -196,6 +196,8 @@ const uwuDefaultSettings = {
   clockFontSize: "14",
   clockPosition: "fly",
 
+  showMightHistory: false,
+
   intervalTimerEnabled: false,
   intervalTimerSound: "notificationSound1",
   intervalTimerVolume: 5,
@@ -1338,6 +1340,16 @@ const uwusettings =
             <label for="user-Parameters-Theme"
               >Использовать своё оформление</label
             >
+          </div>
+
+          <div>
+            <p>Записывает историю изменений Боевых Умений (БУ).</p>
+            <input
+              type="checkbox"
+              id="show-might-history"
+              data-setting="showMightHistory"
+            />
+            <label for="show-might-history">История прокачки БУ</label>
           </div>
 
           <div id="parameters-color-settings" class="parameters-color-settings">
@@ -3353,7 +3365,8 @@ const newsPanel =
         <h3>Главное</h3>
         <p>
           — Обновление и добавление забытых, но очень важных функций - галочка для непрозрачности котов, 
-          звук за пару секунд до окончания действия, отображение должности в чат и чисел параметров!
+          звук за пару секунд до окончания действия, отображение должности в чат и чисел параметров! 
+          И самое сочное... История прокачки Боевых Умений!
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
@@ -6333,6 +6346,7 @@ if (targetSettings.test(window.location.href)) {
     "uwu_activity",
     "uwu_fastStyles",
     "uwu_fightTeamsCats",
+    "uwu_mightHistory",
   ];
 
   const importButton = document.getElementById("importSettingsButton");
@@ -9399,6 +9413,156 @@ if (targetCW3.test(window.location.href)) {
 
   //   window.addEventListener("load", setupTableObservers);
   // }
+
+  // ====================================================================================================================
+  //   . . . ИСТОРИЯ ПРОКАЧКИ БУ . . .
+  // ====================================================================================================================
+  if (settings.showMightHistory) {
+    const updateMightHistory = (newVal) => {
+      if (!newVal || !newVal.tooltip) return;
+      
+      const match = newVal.tooltip.match(/\((\d+)\/([^\)]+)\)/);
+      if (!match) return;
+      
+      const currentVal = parseInt(match[1], 10);
+      const currentMaxRaw = match[2].trim();
+      const currentMax = isNaN(parseInt(currentMaxRaw, 10)) ? null : parseInt(currentMaxRaw, 10);
+      
+      const rawHistoryData = uwuStorage.getItem("uwu_mightHistory");
+      let historyData = (rawHistoryData && typeof rawHistoryData === "object" && !Array.isArray(rawHistoryData))
+          ? rawHistoryData
+          : { logs: [] };
+
+      if (!Array.isArray(historyData.logs)) {
+        historyData.logs = [];
+      }
+
+      if (historyData.lastVal === undefined || historyData.lastVal === null) {
+        const now = new Date();
+        historyData.lastVal = currentVal;
+        historyData.lastMax = currentMax;
+        historyData.logs = [{
+          val: currentVal,
+          max: currentMaxRaw,
+          diff: "Старт",
+          time: `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+        }];
+        uwuStorage.setItem("uwu_mightHistory", historyData);
+        return;
+      }
+
+      if (historyData.lastVal !== currentVal || historyData.lastMax !== currentMax) {
+        let diff = 0;
+        if (typeof currentMax === 'number' && typeof historyData.lastMax === 'number' && currentMax > historyData.lastMax) {
+          diff = (historyData.lastMax - historyData.lastVal) + currentVal;
+        } else {
+          diff = currentVal - historyData.lastVal;
+        }
+
+        if (diff !== 0 && !isNaN(diff)) {
+          const now = new Date();
+          historyData.logs.unshift({
+            val: currentVal,
+            max: currentMaxRaw,
+            diff: diff > 0 ? `+${diff}` : diff,
+            time: `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+          });
+
+          if (historyData.logs.length > 100) historyData.logs.pop();
+
+          historyData.lastVal = currentVal;
+          historyData.lastMax = currentMax;
+          uwuStorage.setItem("uwu_mightHistory", historyData);
+        }
+      }
+    };
+
+    const showMightHistoryModal = () => {
+      let { catInfoElement, contentContainer } = createCatInfoContainer();
+      
+      const rawHistoryData = uwuStorage.getItem("uwu_mightHistory");
+      const logs = (rawHistoryData && Array.isArray(rawHistoryData.logs)) ? rawHistoryData.logs : [];
+      
+      catInfoElement.style.width = "350px";
+      contentContainer.style.paddingBottom = "10px";
+
+      contentContainer.innerHTML = `
+        <h2 style="letter-spacing: 2px; margin-bottom: 15px;">ИСТОРИЯ БУ</h2>
+        <div style="max-height: 400px; overflow-y: auto; border-radius: 5px; background: rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05);">
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+            <thead>
+              <tr style="border-bottom: 2px solid #ffffff1a; opacity: 0.7; position: sticky; top: 0; background: #222; z-index: 1;">
+                <th style="padding: 8px;">Дата</th><th style="padding: 8px;">БУ/Макс</th><th style="padding: 8px;">Прирост</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${logs.length ? logs.map(l => `
+                <tr style="border-bottom: 1px solid #ffffff05;">
+                  <td style="padding: 6px; opacity: 0.8;">${l.time}</td>
+                  <td style="padding: 6px;"><b>${l.val}</b><small>/${l.max}</small></td>
+                  <td style="padding: 6px; color: ${l.diff.toString().includes('+') ? '#41cd70' : (l.diff === 'Старт' ? '#83e5ff' : '#cd4141')}; font-weight: bold;">${l.diff}</td>
+                </tr>
+              `).join('') : '<tr><td colspan="3" style="padding: 20px; opacity: 0.5; text-align: center;">Истории пока нет...</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top: 20px; display: flex; justify-content: center; width: 100%;">
+             ${logs.length ? '<button type="button" class="uwu-reset-might-btn uwu-button remove-button" style="padding: 5px 15px; font-size: 12px; cursor: pointer;">Очистить историю</button>' : ''}
+        </div>
+      `;
+
+      const resetBtn = contentContainer.querySelector('.uwu-reset-might-btn');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', (e) => {
+          if (confirm("Удалить все записи? Текущие значения станут новой точкой отсчета.")) {
+            const currentData = getVueData('parameter.data.might');
+            const match = currentData?.tooltip?.match(/\((\d+)\/([^\)]+)\)/);
+            
+            if (match) {
+              const cVal = parseInt(match[1], 10);
+              const cMaxRaw = match[2].trim();
+              const cMax = isNaN(parseInt(cMaxRaw, 10)) ? null : parseInt(cMaxRaw, 10);
+              const now = new Date();
+
+              uwuStorage.setItem("uwu_mightHistory", { 
+                lastVal: cVal, 
+                lastMax: cMax, 
+                logs: [{
+                  val: cVal, max: cMaxRaw, diff: "Старт",
+                  time: `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+                }] 
+              });
+            } else {
+              uwuStorage.removeItem("uwu_mightHistory");
+            }
+            if (globalContainer.contains(catInfoElement)) globalContainer.removeChild(catInfoElement);
+          }
+        });
+      }
+
+      globalContainer.appendChild(catInfoElement);
+    };
+
+    setupSingleCallback("#parameters_skills_block", () => {
+      const parent = document.getElementById('parameters_skills_block');
+      if (!parent || document.getElementById('uwu-open-might-history')) return;
+
+      const btnLink = document.createElement('div');
+      btnLink.style.cssText = 'text-align: center; margin-top: 5px;';
+      btnLink.innerHTML = `<a href="#" id="uwu-open-might-history" style="font-size: 11px; opacity: 0.6; text-decoration: underline; color: inherit;">История прокачки БУ</a>`;
+      parent.appendChild(btnLink);
+
+      document.getElementById('uwu-open-might-history').onclick = (e) => {
+        e.preventDefault();
+        showMightHistoryModal();
+      };
+    });
+
+    watchVueData('parameter.data.might', (newVal) => {
+      updateMightHistory(newVal);
+    }, { deep: true, immediate: true });
+  }
+
   // ====================================================================================================================
   //   . . . ПОДРОБНЕЕ О ПАРАМЕТРАХ (И НАВЫКОВ?) . . .
   // ====================================================================================================================
