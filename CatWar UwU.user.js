@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.43.0-04.26
+// @version      v1.43.1-04.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -1321,7 +1321,7 @@ const uwusettings =
           <h2>Параметры и навыки</h2>
 
           <div>
-            <p>Отображает точные значения навыков поверх их шкал (например, Нюх (83/∞)).</p>
+            <p>Отображает точные значения навыков поверх их шкал.</p>
             <input
               type="checkbox"
               id="show-exact-skills-values"
