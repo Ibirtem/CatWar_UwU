@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.43.1-04.26
+// @version      v1.43.2-04.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -3376,6 +3376,8 @@ const newsPanel =
         <p>— Уточнён расчёт падения активности в калькуляторе.</p>
         <p>— Открылся огромный простор будущих оптимизаций, упрощений кода и 
         улучшения производительности в целом.</p>
+        <p>—— Fix v1.43.2</p>
+        <p>—— Исправлено, что вместо должностей подхватывались не то.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: 04.04.26</p>
       </div>
@@ -13504,12 +13506,19 @@ if (targetCW3.test(window.location.href)) {
         
         if (profileLink) {
           const tooltip = profileLink.closest('.cat_tooltip');
-          const rankNode = tooltip.querySelector('div > small > i');
+          const rankNodes = tooltip.querySelectorAll('div > small > i');
           
-          if (rankNode && rankNode.textContent.trim() !== "") {
-            const rankText = ` <small><i>(${rankNode.textContent})</i></small> `;
-            chatRanksCache.set(catId, rankText);
-            rankElement.innerHTML = rankText;
+          if (rankNodes.length > 0) {
+            const actualRankNode = rankNodes[rankNodes.length - 1];
+            const rankTextContent = actualRankNode.textContent.trim();
+
+            if (rankTextContent !== "") {
+              const rankHtml = ` <small><i>(${rankTextContent})</i></small> `;
+              chatRanksCache.set(catId, rankHtml);
+              rankElement.innerHTML = rankHtml;
+            } else {
+              chatRanksCache.set(catId, "");
+            }
           } else {
             chatRanksCache.set(catId, "");
           }
