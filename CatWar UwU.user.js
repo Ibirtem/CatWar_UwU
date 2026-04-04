@@ -173,6 +173,7 @@ const uwuDefaultSettings = {
   compactMouth: false,
   showMoreCatInfo: false,
   showParametersDetails: false,
+  showExactSkillsValues: false,
 
   draggingFightPanel: false,
   compactFightLog: false,
@@ -1317,13 +1318,15 @@ const uwusettings =
           <hr id="uwu-hr" class="uwu-hr" />
           <h2>Параметры и навыки</h2>
 
-          <!--
-      <div>
-        <p>Параметр наглядно отображает рядом с собой свой процент.</p>
-        <input type="checkbox" id="display-Parameters-Percentages" data-setting="displayParametersPercentages" />
-        <label for="display-Parameters-Percentages">Отображать проценты Параметров</label>
-      </div>
-      -->
+          <div>
+            <p>Отображает точные значения навыков поверх их шкал (например, Нюх (83/∞)).</p>
+            <input
+              type="checkbox"
+              id="show-exact-skills-values"
+              data-setting="showExactSkillsValues"
+            />
+            <label for="show-exact-skills-values">Точные значения навыков</label>
+          </div>
 
           <div>
             <p>Заменяет стандартное оформление Параметров и Навыков на ваш.</p>
@@ -3344,13 +3347,13 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        v${current_uwu_version} - Оказывается, у меня есть мод для какого-то сайтика с котиками, прикол да?
+        v${current_uwu_version} - Довольно важное и крутое обновление, представляете?
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>
           — Обновление и добавление забытых, но очень важных функций - галочка для непрозрачности котов, 
-          звук за пару секунд до окончания действия, отображение должности в чат.
+          звук за пару секунд до окончания действия, отображение должности в чат и чисел параметров!
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
@@ -3358,6 +3361,8 @@ const newsPanel =
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
         <p>— Уточнён расчёт падения активности в калькуляторе.</p>
+        <p>— Открылся огромный простор будущих оптимизаций, упрощений кода и 
+        улучшения производительности в целом.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: ??.04.26</p>
       </div>
@@ -4609,6 +4614,43 @@ async function setupSingleCallback(
   //   `Элемент с селектором "${selector}" не найден после ${maxAttempts} попыток.`
   // );
 }
+
+// ====================================================================================================================
+//   . . . VUE  . . .
+// ====================================================================================================================
+
+/**
+* A universal function for getting data from the Vue Game component.
+* @param {string} path Path to the data, for example: 'parameter.data' or 'cat.name'
+*/
+function getVueData(path) {
+  const app = document.getElementById('app');
+  if (!app || !app.__vue__) return null;
+  return path.split('.').reduce((acc, part) => acc && acc[part], app.__vue__);
+}
+
+/**
+* A universal subscriber for data changes in Vue.
+* @param {string} path : Path to the data (e.g., 'parameter.data').
+* @param {function} callback : Function called when a change occurs.
+* @param {object} options : Options (e.g., { deep: true, immediate: true }).
+*/
+function watchVueData(path, callback, options = { deep: true }) {
+    let attempts = 0;
+    const tryAttachWatcher = () => {
+      const app = document.getElementById("app")?.__vue__;
+      if (!app) {
+        if (attempts++ < 40) {
+          setTimeout(tryAttachWatcher, 250);
+        }
+        return;
+      }
+      app.$watch(path, callback, options);
+    };
+
+    tryAttachWatcher();
+  }
+
 // ====================================================================================================================
 //   . . . СОХРАНЕНИЕ И РАБОТА С ЦВЕТОВЫМИ ТЕМАМИ . . .
 // ====================================================================================================================
@@ -9540,6 +9582,66 @@ if (targetCW3.test(window.location.href)) {
 
   if (settings.showParametersDetails) {
     setupSingleCallback("#parameters_skills_block", createMoreInfoButton);
+  }
+
+  // ====================================================================================================================
+  //   . . . ТОЧНЫЕ ЗНАЧЕНИЯ НАВЫКОВ . . .
+  // ====================================================================================================================
+  if (settings.showExactSkillsValues) {
+    const updateExactSkills = () => {
+      const paramData = getVueData('parameter.data');
+      if (!paramData) return;
+
+      const skills = ['smell', 'dig', 'swim', 'might', 'tree', 'observ', 'heal', 'power', 'pet_faith'];
+
+      skills.forEach(skillId => {
+        const skillInfo = paramData[skillId];
+        if (skillInfo && skillInfo.tooltip && !skillInfo.isHidden) {
+          const skillElement = document.getElementById(skillId);
+          if (skillElement) {
+            const bar = skillElement.querySelector('.bar');
+            if (bar) {
+              let barData = bar.querySelector('.bar-data') || (() => {
+                const el = document.createElement('div');
+                el.className = 'bar-data';
+                bar.appendChild(el);
+                return el;
+              })();
+
+              const match = skillInfo.tooltip.match(/\((.*?)\)/);
+              const newValue = match ? match[1] : skillInfo.tooltip;
+
+              if (barData.textContent !== newValue) {
+                barData.textContent = newValue;
+              }
+            }
+          }
+        }
+      });
+    };
+
+    watchVueData('parameter.data', updateExactSkills, { deep: true, immediate: true });
+
+    const css_skillsBarData = document.createElement("style");
+    css_skillsBarData.innerHTML = `
+      .skill .bar {
+        position: relative;
+      }
+      .skill .bar-data {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        font-size: 10px;
+        color: white;
+        text-shadow: 1px 1px 2px black, -1px -1px 2px black, 1px -1px 2px black, -1px 1px 2px black;
+        pointer-events: none;
+        line-height: 15px;
+        z-index: 2;
+      }
+    `;
+    document.head.appendChild(css_skillsBarData);
   }
   // ====================================================================================================================
   //   . . . ЧИСЛОВАЯ ГРОМКОСТЬ УВЕДОМЛЕНИЙ . . .
