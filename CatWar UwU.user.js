@@ -136,6 +136,7 @@ const uwuDefaultSettings = {
   newChatInput: false,
   showChatCharCounter: false,
   showChatRanks: false,
+  showChatTime: false,
   namesForNotification: "",
 
   redesignCostumsSettings: false,
@@ -1314,6 +1315,17 @@ const uwusettings =
             />
             <label for="show-chat-ranks"
               >Показывать должности</label
+            >
+          </div>
+          <div>
+            <p>Добавляет перед сообщением время его получения.</p>
+            <input
+              type="checkbox"
+              id="show-chat-time"
+              data-setting="showChatTime"
+            />
+            <label for="show-chat-time"
+              >Показывать время сообщений</label
             >
           </div>
 
@@ -13604,6 +13616,7 @@ if (targetCW3.test(window.location.href)) {
     * @param {number} [msgData.volume] - Volume level (0-10).
     * @param {number} msgData.cat - Sender ID.
     * @param {string} msgData.login - Sender nickname.
+    * @param {number} msgData.time - Server time of the message (Unix Timestamp).
     * @param {string} [msgData.textTransformation] - Style modifier (e.g., 'italic').
     */
     function buildMessageHTML(msgData) {
@@ -13623,10 +13636,18 @@ if (targetCW3.test(window.location.href)) {
       const nickName = msgData.login || "Неизвестный";
       const rankSpanId = `uwu-rank-${dataId || Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
+      let timeStr = "";
+      if (settings.showChatTime && msgData.time) {
+        const date = new Date(msgData.time * 1000);
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        timeStr = `<span class="uwu-chat-time">[${hours}:${minutes}]</span> `;
+      }
+
       const html = `
         <hr>
         <div id="msg">
-          <div class="${chatTextClasses}">${text} - <b class="nick" style="${nickStyle}">${nickName}</b><span id="${rankSpanId}"></span> <i>[${catId}]</i></div>
+          <div class="${chatTextClasses}">${timeStr}${text} - <b class="nick" style="${nickStyle}">${nickName}</b><span id="${rankSpanId}"></span> <i>[${catId}]</i></div>
           <div style="display: flex; width: 42px; justify-content: flex-end; margin-right: 2px;">
             <a href="${profileLink}" title="Перейти в профиль" target="_blank" rel="noopener noreferrer">➝</a>&nbsp;|&nbsp;
             <a href="#" title="Пожаловаться на нарушение ОПИ" class="msg_report" data-id="${dataId}">X</a>
@@ -13682,6 +13703,13 @@ if (targetCW3.test(window.location.href)) {
           overflow-y: auto;
           display: flex;
           flex-direction: ${settings.reverseChat ? "column-reverse" : "column"};
+        }
+
+        .uwu-chat-time {
+          opacity: 0.5;
+          font-size: 0.85em;
+          margin-right: 4px;
+          font-family: monospace;
         }
   
         #chat_msg {
