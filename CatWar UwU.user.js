@@ -4630,7 +4630,8 @@ async function setupSingleCallback(
 
 /**
 * A universal function for getting data from the Vue Game component.
-* @param {string} path Path to the data, for example: 'parameter.data' or 'cat.name'
+* @param {Function} callback - Callback function (newValue, oldValue).
+* @returns {any|null} The data at the specified path, or null if the node is not found.
 */
 function getVueData(path) {
   const app = document.getElementById('app');
@@ -13480,12 +13481,16 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . СОВРЕМЕННЫЙ (НОВЫЙ) ЧАТ . . .
   // ====================================================================================================================
-  // я на этом инвалиде потерял все нервы кетвар желаю тебе счастья удачи и всего хорошего 😌😌😌😌😌😌😌😌😌😌
-  // И ДО СИХ ПОР ТЕРЯЮ ААААА
-  // TODO - как-то пределать шоле
+
   if (settings.newChat) {
+    const DEBUG_CHAT = false; 
+
+    function logChatDebug(action, data) {
+      if (DEBUG_CHAT) console.log(`[UwU Chat Debug] ${action}`, data || '');
+    }
 
     const chatRanksCache = new Map();
+    const processedMessageIds = new Set();
 
     function updateChatRankAsync(catId, rankElement) {
       if (!rankElement || catId === ". . .") return;
@@ -13497,7 +13502,6 @@ if (targetCW3.test(window.location.href)) {
 
       setTimeout(() => {
         const profileLink = document.querySelector(`.cat_tooltip a[href="/cat${catId}"]`);
-        
         if (profileLink) {
           const tooltip = profileLink.closest('.cat_tooltip');
           const rankNodes = tooltip.querySelectorAll('div > small > i');
@@ -13525,79 +13529,50 @@ if (targetCW3.test(window.location.href)) {
     const newChatContainer = document.createElement("div");
     newChatContainer.id = "uwu_chat_msg";
     const chatForm = document.getElementById("chat_form");
-    chatForm.parentNode.insertBefore(newChatContainer, chatForm.nextSibling);
+    
+    if (chatForm) {
+      chatForm.parentNode.insertBefore(newChatContainer, chatForm.nextSibling);
+      logChatDebug("Контейнер нового чата успешно создан и вставлен.");
+    } else {
+      logChatDebug("ОШИБКА: chat_form не найден, контейнер не вставлен!");
+    }
 
     newChatContainer.addEventListener("click", function (event) {
       const target = event.target;
 
       const nickElement = target.closest(".nick");
       if (nickElement) {
-        const textArea = document.getElementById("text");
+        event.preventDefault();
+        const textArea = document.getElementById("text") || document.getElementById("text-hide");
         let nick = nickElement.textContent;
-        if (settings.addCommaAfterNick) {
-          nick += ", ";
-        }
+        if (settings.addCommaAfterNick) nick += ", ";
+        
         textArea.value += nick;
         textArea.focus();
+        logChatDebug(`Ник добавлен в поле ввода: ${nick}`);
         return;
       }
 
       const reportButton = target.closest(".msg_report");
       if (reportButton) {
+        event.preventDefault();
         const dataId = reportButton.getAttribute("data-id");
-        const originalReportLink = document.querySelector(
-          `#chat_msg .msg_report[data-id="${dataId}"]`
-        );
-        if (originalReportLink) {
-          originalReportLink.click();
-        }
+        logChatDebug(`Попытка отправить жалобу на сообщение ID: ${dataId}`);
+
+        const originalReportLink = document.querySelector(`#chat_msg .msg_report[data-id="${dataId}"]`);
+        if (originalReportLink) originalReportLink.click();
         return;
       }
     });
 
-    const chatElement = document.getElementById("chat_msg");
-    if (chatElement) {
-      const observer = new MutationObserver(handleNewChatMessage);
-      observer.observe(chatElement, { childList: true, subtree: true });
-    }
-
-    let addedSpanCount = 0;
-
-    function handleNewChatMessage(mutations) {
-      const addedNodes = Array.from(mutations)
-        .flatMap((mutation) => Array.from(mutation.addedNodes))
-        .filter(
-          (node) =>
-            node.nodeName === "SPAN" && node.querySelector("td > .chat_text")
-        );
-
-      addedSpanCount += addedNodes.length;
-      processChatMessages(addedSpanCount);
-      addedSpanCount = 0;
-    }
-
-    function processChatMessages(messageCount) {
-      const chatMessages = document.querySelectorAll("#chat_msg > span");
-      const messagesArray = Array.from(chatMessages);
-      const messagesToProcess = messagesArray.slice(0, messageCount);
-      messagesToProcess.reverse();
-
-      messagesToProcess.forEach((message) => {
-        copyMessageToNewChat(message);
-      });
-    }
-
-    function copyMessageToNewChat(chatMessage) {
-      const chatTextSpan = chatMessage.querySelector("td > .chat_text");
-      const messageSpan = chatTextSpan.querySelector("span");
-      const messageText = messageSpan ? messageSpan.innerHTML : "";
-      const nickElement = chatTextSpan.querySelector(".nick");
-      const nickName = nickElement ? nickElement.textContent.trim() : "";
-      const chatTextClasses = chatTextSpan.className;
-      const nickStyle = nickElement ? nickElement.getAttribute("style") : "";
-      let nameFound = false;
-
-      let processedText = messageText;
+    /**
+    * Parses the message text for nicknames from the highlighting and notification settings.
+    * @param {string} text - The original message text (HTML).
+    * @returns {{text: string, isMentioned: boolean}} The processed text and a flag indicating whether the message was mentioned.
+    */
+    function processMentions(text) {
+      let processedText = text;
+      let isMentioned = false;
 
       if (settings.namesForNotification) {
         const names = settings.namesForNotification
@@ -13606,54 +13581,98 @@ if (targetCW3.test(window.location.href)) {
           .filter((name) => name);
 
         names.forEach((name) => {
-          const regex = new RegExp(
-            `(^|\\s|[.,!?])(${name})(?=$|\\s|[.,!?])`,
-            "gi"
-          );
+          const regex = new RegExp(`(^|\\s|[.,!?])(${name})(?=$|\\s|[.,!?])`, "gi");
           processedText = processedText.replace(regex, (match, p1, p2) => {
-            nameFound = true;
+            isMentioned = true;
             return `${p1}<span class="myname">${p2}</span>`;
           });
         });
       }
 
-      if (!nameFound && messageSpan && messageSpan.querySelector(".myname")) {
-        nameFound = true;
+      if (!isMentioned && text.includes('class="myname"')) {
+        isMentioned = true;
       }
 
-      if (nameFound) {
-        soundManager.playSound(
-          settings.myNameNotificationSound,
-          settings.notificationMyNameVolume
-        );
+      return { text: processedText, isMentioned };
+    }
+
+    /**
+    * Converts a message object from the game data into ready-made HTML markup.
+    * @param {Object} msgData - Message object from the chat.messages array.
+    * @param {number} msgData.id - Unique message ID (used to filter duplicates).
+    * @param {string} msgData.text - Message content.
+    * @param {number} [msgData.volume] - Volume level (0-10).
+    * @param {number} msgData.cat - Sender ID.
+    * @param {string} msgData.login - Sender nickname.
+    * @param {string} [msgData.textTransformation] - Style modifier (e.g., 'italic').
+    */
+    function buildMessageHTML(msgData) {
+      const { text, isMentioned } = processMentions(msgData.text);
+
+      if (isMentioned) {
+        logChatDebug(`Вас упомянули в сообщении от ${msgData.login}! Воспроизведение звука.`);
+        soundManager.playSound(settings.myNameNotificationSound, settings.notificationMyNameVolume);
       }
 
-      const profileLink = chatMessage.querySelector('a[href^="/cat"]').href;
-      const catIdMatch = profileLink.match(/\/cat(\d+)/);
-      const catId = catIdMatch ? catIdMatch[1] : ". . .";
-
-      const reportLink = chatMessage.querySelector(".msg_report");
-      const dataId = reportLink ? reportLink.getAttribute("data-id") : "";
-      
+      const volumeClass = msgData.volume !== undefined ? `vlm${msgData.volume}` : "vlm5";
+      const chatTextClasses = `chat_text ${volumeClass}`;
+      const nickStyle = msgData.textTransformation === 'italic' ? 'font-style: italic;' : '';
+      const profileLink = `/cat${msgData.cat}`;
+      const catId = msgData.cat || ". . .";
+      const dataId = msgData.id;
+      const nickName = msgData.login || "Неизвестный";
       const rankSpanId = `uwu-rank-${dataId || Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
-      const newChatMessageHTML =
-        `
+      const html = `
         <hr>
         <div id="msg">
-          <div class="${chatTextClasses}">${processedText} - <b class="nick" style="${nickStyle}">${nickName}</b><span id="${rankSpanId}"></span> <i>[${catId}]</i></div>
+          <div class="${chatTextClasses}">${text} - <b class="nick" style="${nickStyle}">${nickName}</b><span id="${rankSpanId}"></span> <i>[${catId}]</i></div>
           <div style="display: flex; width: 42px; justify-content: flex-end; margin-right: 2px;">
             <a href="${profileLink}" title="Перейти в профиль" target="_blank" rel="noopener noreferrer">➝</a>&nbsp;|&nbsp;
             <a href="#" title="Пожаловаться на нарушение ОПИ" class="msg_report" data-id="${dataId}">X</a>
           </div>
         </div>
       `;
-      newChatContainer.insertAdjacentHTML("afterbegin", newChatMessageHTML);
-      
-      if (settings.showChatRanks) {
-        updateChatRankAsync(catId, document.getElementById(rankSpanId));
+
+      return { html, rankSpanId, catId };
+    }
+
+    function injectMessageToDOM(msgData) {
+      try {
+        const { html, rankSpanId, catId } = buildMessageHTML(msgData);
+        
+        newChatContainer.insertAdjacentHTML("afterbegin", html);
+        
+        if (settings.showChatRanks) {
+          updateChatRankAsync(catId, document.getElementById(rankSpanId));
+        }
+      } catch (error) {
+        logChatDebug("Ошибка при рендере сообщения:", error);
       }
     }
+
+    watchVueData('chat.messages', (newMessages) => {
+      if (!newMessages || !Array.isArray(newMessages)) return;
+
+      const batch = newMessages.filter(msg => msg && msg.id && !processedMessageIds.has(msg.id));
+      if (batch.length === 0) return;
+
+      batch.sort((a, b) => a.id - b.id);
+
+      batch.forEach(msg => {
+        processedMessageIds.add(msg.id);
+        injectMessageToDOM(msg);
+      });
+      
+      // Мы удаляем оригинальные сообщение, чтобы сам CatWar не пытался с ними возиться 
+      // (а он это делает ОЧЕНЬ плохо) и не нагружал лишний раз игровую.
+      const originalChat = document.getElementById("chat_msg");
+      if (originalChat && originalChat.innerHTML !== "") {
+        originalChat.innerHTML = ""; 
+        logChatDebug("Оригинальный чат очищен.");
+      }
+
+    }, { deep: true, immediate: true });
 
     const uwuChatMsg = document.createElement("style");
     uwuChatMsg.innerHTML = `
@@ -13666,7 +13685,7 @@ if (targetCW3.test(window.location.href)) {
         }
   
         #chat_msg {
-          display: none;
+          display: none !important; 
         }
   
         #msg {
