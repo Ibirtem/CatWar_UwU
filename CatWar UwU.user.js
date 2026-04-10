@@ -3371,19 +3371,20 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        🌸 v${current_uwu_version} - 
+        🌸 v${current_uwu_version} - Крупная перепись кода для оптимизации, улучшения производительности и стабильности.
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>
-          — 
+          — Бонусом добавлены: Время сообщения в чате...
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
-        <p>— </p>
+        <p>— Пу-пу-пу.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
-        <p>— </p>
+        <p>— Перепись "Современного чата" на более быстрые, чистые и крутые штуки.</p>
+        <p>— Перепись различных уведомлений при действиях в Игровой.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: .04.26</p>
       </div>
@@ -4641,10 +4642,10 @@ async function setupSingleCallback(
 // ====================================================================================================================
 
 /**
-* A universal function for getting data from the Vue Game component.
-* @param {Function} callback - Callback function (newValue, oldValue).
-* @returns {any|null} The data at the specified path, or null if the node is not found.
-*/
+ * Extracts data from the Vue reactive state using a string path.
+ * @param {string} path - The dot-separated path to the property (e.g., 'parameter.data').
+ * @returns {any|null} The resolved data, or null if the path is invalid or Vue is unavailable.
+ */
 function getVueData(path) {
   const app = document.getElementById('app');
   if (!app || !app.__vue__) return null;
@@ -4652,11 +4653,11 @@ function getVueData(path) {
 }
 
 /**
-* A universal subscriber for data changes in Vue.
-* @param {string} path : Path to the data (e.g., 'parameter.data').
-* @param {function} callback : Function called when a change occurs.
-* @param {object} options : Options (e.g., { deep: true, immediate: true }).
-*/
+ * Subscribes to changes in the Vue reactive state with retry logic for initialization.
+ * @param {string} path - The dot-separated path to watch (e.g., 'chat.messages').
+ * @param {function(any, any): void} callback - The function invoked on data change (newValue, oldValue).
+ * @param {Object} [options={ deep: true }] - Vue $watch options (e.g., { deep: true, immediate: true }).
+ */
 function watchVueData(path, callback, options = { deep: true }) {
     let attempts = 0;
     const tryAttachWatcher = () => {
@@ -12122,51 +12123,7 @@ if (targetCW3.test(window.location.href)) {
       500
     );
   }
-  // ====================================================================================================================
-  //   . . . ДУБЛИРОВАНИЕ ДЕЙСТВИЙ НА ВКЛАДКУ БРАУЗЕРА . . .
-  // ====================================================================================================================
-  if (settings.duplicateTimeInBrowserTab) {
-    const titleElement = document.querySelector("title");
-    let blockMess = null;
 
-    function updateTitle() {
-      if (!blockMess) {
-        blockMess = document.getElementById("block_mess");
-        if (!blockMess) {
-          titleElement.textContent = "Игровая / CatWar";
-          return;
-        }
-      }
-
-      const messageText = blockMess.textContent.trim();
-
-      const catNameMatch = messageText.match(/^(.+?)\s+держит/);
-      const catName = catNameMatch ? catNameMatch[1] : "";
-
-      if (catName) {
-        titleElement.textContent = `Поднят. Во рту | ${catName}`;
-      } else {
-        const timeActionMatch = messageText.match(
-          /^(.+?)\s+(\d+\s*(?:ч\s*)?\d+\s*мин\s*\d+\s*с|\d+\s*мин\s*\d+\s*с|\d+\s*с)\.\s*(Отменить)?$/
-        );
-
-        if (timeActionMatch) {
-          const actionText = timeActionMatch[1].trim();
-          const currentTime = timeActionMatch[2].trim();
-
-          titleElement.textContent = `${currentTime} | ${actionText}`;
-        } else {
-          titleElement.textContent = "Игровая / CatWar";
-        }
-      }
-    }
-
-    setupMutationObserver("#tr_actions", updateTitle, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-    });
-  }
   // ====================================================================================================================
   //   . . . ЛОГ ЧИСТИЛЬЩИКОВ . . .
   // ====================================================================================================================function cleaningLogUpdate(mutationsList) {
@@ -13371,85 +13328,195 @@ if (targetCW3.test(window.location.href)) {
       }
     }
   }
-  // ====================================================================================================================
-  //   . . . ОКОНЧАНИЕ ДЕЙСТВИЯ . . .
-  // ====================================================================================================================
-  if (settings.notificationActionEnd) {
-    let actionStartTime = null;
-    let earlyNotified = false;
 
-    const observer = new MutationObserver(() => {
-      const blockMess = document.getElementById("block_mess");
-      const text = blockMess ? blockMess.textContent.trim() : "";
+  // ====================================================================================================================
+  //   . . . УПРАВЛЕНИЕ ДЕЙСТВИЯМИ, ТАЙМЕРАМИ И УВЕДОМЛЕНИЯМИ . . .
+  // ====================================================================================================================
 
-      if (text !== "" && !actionStartTime) {
-        actionStartTime = Date.now();
-        earlyNotified = false;
+  /**
+   * @class ActionState
+   * @description Parses and normalizes raw action strings from Vue. 
+   */
+  const ActionState = {
+    isActive: false,
+    isPickedUp: false,
+    actionName: "",
+    timeString: "",
+    totalSeconds: 0,
+    pickerName: "",
+
+    parse(actionMess, actionMessTemplate) {
+      this.isActive = false;
+      this.isPickedUp = false;
+      this.actionName = "";
+      this.timeString = "";
+      this.totalSeconds = 0;
+      this.pickerName = "";
+
+      if (!actionMess) return;
+
+      try {
+        if (actionMess.includes("держит вас во рту")) {
+          this.isPickedUp = true;
+          const match = actionMess.match(/^(.+?)\s+держит/);
+          if (match) this.pickerName = match[1];
+          return;
+        }
+
+        this.isActive = true;
+        
+        const timeMatch = actionMess.match(/(?:(\d+)\s*ч\s*)?(?:(\d+)\s*мин\s*)?(\d+)\s*с/);
+        if (timeMatch) {
+          const h = parseInt(timeMatch[1] || 0, 10);
+          const m = parseInt(timeMatch[2] || 0, 10);
+          const s = parseInt(timeMatch[3] || 0, 10);
+          this.totalSeconds = h * 3600 + m * 60 + s;
+          this.timeString = timeMatch[0].trim();
+        }
+
+        if (actionMessTemplate && actionMessTemplate.includes("&&")) {
+          let cleanAction = actionMessTemplate.replace("&&", "").trim();
+          if (cleanAction.endsWith('.')) cleanAction = cleanAction.slice(0, -1).trim();
+          this.actionName = cleanAction;
+        } else {
+          const actionTextMatch = actionMess.match(/^(.+?)\s+(\d+\s*(?:ч\s*)?\d+\s*мин\s*\d+\s*с|\d+\s*мин\s*\d+\s*с|\d+\s*с)\.\s*(Отменить)?$/);
+          this.actionName = actionTextMatch ? actionTextMatch[1].trim() : actionMess;
+        }
+      } catch (error) {
+        console.error("UwU | ActionState parse error:", error);
       }
+    }
+  };
 
-      if (text !== "") {
-        if (settings.notificationActionEndEarly && !earlyNotified) {
-          const timeMatch = text.match(/(?:(\d+)\s*ч\s*)?(?:(\d+)\s*мин\s*)?(\d+)\s*с/);
-          if (timeMatch) {
-            const h = parseInt(timeMatch[1] || 0, 10);
-            const m = parseInt(timeMatch[2] || 0, 10);
-            const s = parseInt(timeMatch[3] || 0, 10);
-            const totalSeconds = h * 3600 + m * 60 + s;
+  /**
+   * @class BrowserTabManager
+   * @description Synchronizes the browser tab title with the current in-game action state.
+   */
+  const BrowserTabManager = {
+    baseTitle: "Игровая / CatWar",
+    
+    update() {
+      if (!settings.duplicateTimeInBrowserTab) return;
 
-            if (totalSeconds <= 3 && totalSeconds > 0) {
-              soundManager.playSound(
-                settings.notificationActionEndSound,
-                settings.notificationActionEndVolume
-              );
-              earlyNotified = true;
-            }
+      try {
+        if (!ActionState.isActive && !ActionState.isPickedUp) {
+          if (document.title !== this.baseTitle) {
+            document.title = this.baseTitle;
+          }
+          return;
+        }
+
+        if (ActionState.isPickedUp) {
+          document.title = `Поднят. Во рту | ${ActionState.pickerName}`;
+          return;
+        }
+
+        if (ActionState.isActive) {
+          document.title = `${ActionState.timeString} | ${ActionState.actionName}`;
+        }
+      } catch (error) {
+        console.error("UwU | BrowserTabManager update error:", error);
+      }
+    }
+  };
+
+  /**
+   * @class ActionSoundManager
+   * @description Handles audio alerts for action completion. 
+   */
+  const ActionSoundManager = {
+    actionStartTime: null,
+    earlyNotified: false,
+    wasActive: false,
+
+    update() {
+      if (!settings.notificationActionEnd && !settings.notificationActionEndEarly) return;
+
+      try {
+        const isCurrentlyActive = ActionState.isActive;
+        const secs = ActionState.totalSeconds;
+
+        if (isCurrentlyActive && !this.wasActive) {
+          this.actionStartTime = Date.now();
+          this.earlyNotified = false;
+          this.wasActive = true;
+        }
+
+        if (isCurrentlyActive && settings.notificationActionEndEarly && !this.earlyNotified) {
+          if (secs <= 3 && secs > 0) {
+            soundManager.playSound(settings.notificationActionEndSound, settings.notificationActionEndVolume);
+            this.earlyNotified = true;
           }
         }
-      } else if (text === "" && actionStartTime) {
-        const actionEndTime = Date.now();
-        const actionDuration = actionEndTime - actionStartTime;
 
-        if (actionDuration >= 6000 && !earlyNotified) {
-          soundManager.playSound(
-            settings.notificationActionEndSound,
-            settings.notificationActionEndVolume
-          );
+        if (!isCurrentlyActive && this.wasActive) {
+          const actionEndTime = Date.now();
+          const actionDuration = this.actionStartTime ? (actionEndTime - this.actionStartTime) : 0;
+
+          if (actionDuration >= 6000 && !this.earlyNotified && settings.notificationActionEnd) {
+            soundManager.playSound(settings.notificationActionEndSound, settings.notificationActionEndVolume);
+          }
+
+          this.actionStartTime = null;
+          this.earlyNotified = false;
+          this.wasActive = false;
         }
-        actionStartTime = null;
-        earlyNotified = false;
+      } catch (error) {
+        console.error("UwU | ActionSoundManager update error:", error);
+        this.wasActive = false; 
       }
-    });
-
-    const targetNode = document.getElementById("tr_actions");
-    if (targetNode) {
-      observer.observe(targetNode, { childList: true, subtree: true, characterData: true });
     }
-  }
-  // ====================================================================================================================
-  //   . . . ПОДНЯЛИ В РОТ . . .
-  // ====================================================================================================================
-  function handleInMouthNotification() {
-    const blockMess = document.getElementById("block_mess");
-    if (!blockMess) return;
+  };
 
-    const observer = new MutationObserver(() => {
-      if (blockMess.innerHTML.includes("во рту. Вы не сможете выбраться")) {
-        soundManager.playSound(
-          settings.notificationInMouthSound,
-          settings.notificationInMouthVolume
-        );
+  /**
+   * @class InMouthSoundManager
+   * @description Triggers a specific audio alert when the player is grabbed by another character.
+   */
+  const InMouthSoundManager = {
+    wasPickedUp: false,
+
+    update() {
+      if (!settings.notificationInMouth) return;
+
+      try {
+        const isCurrentlyPickedUp = ActionState.isPickedUp;
+
+        if (isCurrentlyPickedUp && !this.wasPickedUp) {
+          soundManager.playSound(settings.notificationInMouthSound, settings.notificationInMouthVolume);
+        }
+
+        this.wasPickedUp = isCurrentlyPickedUp;
+      } catch (error) {
+        console.error("UwU | InMouthSoundManager update error:", error);
       }
-    });
+    }
+  };
 
-    observer.observe(blockMess, { childList: true, subtree: true });
-  }
+  /**
+   * @class MainActionObserver
+   * @description The single subscriber to the Vue reactivity system. 
+   * Broadcasts state changes to all managers safely.
+   */
+  const MainActionObserver = {
+    init() {
+      watchVueData('cat.actionMess', (newMess) => {
+        try {
+          const template = getVueData('cat.actionMessTemplate') || "";
+          
+          ActionState.parse(newMess, template);
 
-  if (settings.notificationInMouth) {
-    setupMutationObserver("#tr_actions", handleInMouthNotification, {
-      childList: true,
-      subtree: true,
-    });
-  }
+          BrowserTabManager.update();
+          ActionSoundManager.update();
+          InMouthSoundManager.update();
+        } catch (error) {
+          console.error("UwU | MainActionObserver watcher error:", error);
+        }
+      }, { deep: false, immediate: true }); 
+    }
+  };
+
+  MainActionObserver.init();
+
   // ====================================================================================================================
   //   . . . ВВЕЛИ В БОЕВУЮ СТОЙКУ . . .
   // ====================================================================================================================
@@ -13495,11 +13562,6 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
 
   if (settings.newChat) {
-    const DEBUG_CHAT = false; 
-
-    function logChatDebug(action, data) {
-      if (DEBUG_CHAT) console.log(`[UwU Chat Debug] ${action}`, data || '');
-    }
 
     const chatRanksCache = new Map();
     const processedMessageIds = new Set();
@@ -13513,27 +13575,31 @@ if (targetCW3.test(window.location.href)) {
       }
 
       setTimeout(() => {
-        const profileLink = document.querySelector(`.cat_tooltip a[href="/cat${catId}"]`);
-        if (profileLink) {
-          const tooltip = profileLink.closest('.cat_tooltip');
-          const rankNodes = tooltip.querySelectorAll('div > small > i');
-          
-          if (rankNodes.length > 0) {
-            const actualRankNode = rankNodes[rankNodes.length - 1];
-            const rankTextContent = actualRankNode.textContent.trim();
+        try {
+          const profileLink = document.querySelector(`.cat_tooltip a[href="/cat${catId}"]`);
+          if (profileLink) {
+            const tooltip = profileLink.closest('.cat_tooltip');
+            const rankNodes = tooltip.querySelectorAll('div > small > i');
+            
+            if (rankNodes.length > 0) {
+              const actualRankNode = rankNodes[rankNodes.length - 1];
+              const rankTextContent = actualRankNode.textContent.trim();
 
-            if (rankTextContent !== "") {
-              const rankHtml = ` <small><i>(${rankTextContent})</i></small> `;
-              chatRanksCache.set(catId, rankHtml);
-              rankElement.innerHTML = rankHtml;
+              if (rankTextContent !== "") {
+                const rankHtml = ` <small><i>(${rankTextContent})</i></small> `;
+                chatRanksCache.set(catId, rankHtml);
+                rankElement.innerHTML = rankHtml;
+              } else {
+                chatRanksCache.set(catId, "");
+              }
             } else {
               chatRanksCache.set(catId, "");
             }
           } else {
-            chatRanksCache.set(catId, "");
+            rankElement.innerHTML = "";
           }
-        } else {
-          rankElement.innerHTML = "";
+        } catch (error) {
+          console.error(`UwU | Error fetching rank for cat ${catId}:`, error);
         }
       }, 0);
     }
@@ -13544,86 +13610,103 @@ if (targetCW3.test(window.location.href)) {
     
     if (chatForm) {
       chatForm.parentNode.insertBefore(newChatContainer, chatForm.nextSibling);
-      logChatDebug("Контейнер нового чата успешно создан и вставлен.");
     } else {
-      logChatDebug("ОШИБКА: chat_form не найден, контейнер не вставлен!");
+      console.error("UwU | chat_form not found. New chat container could not be inserted.");
     }
 
+    /**
+     * Single event delegation for the entire chat container.
+     */
     newChatContainer.addEventListener("click", function (event) {
-      const target = event.target;
+      try {
+        const target = event.target;
 
-      const nickElement = target.closest(".nick");
-      if (nickElement) {
-        event.preventDefault();
-        const textArea = document.getElementById("text") || document.getElementById("text-hide");
-        let nick = nickElement.textContent;
-        if (settings.addCommaAfterNick) nick += ", ";
-        
-        textArea.value += nick;
-        textArea.focus();
-        logChatDebug(`Ник добавлен в поле ввода: ${nick}`);
-        return;
-      }
+        const nickElement = target.closest(".nick");
+        if (nickElement) {
+          event.preventDefault();
+          const textArea = document.getElementById("text") || document.getElementById("text-hide");
+          let nick = nickElement.textContent;
+          if (settings.addCommaAfterNick) nick += ", ";
+          
+          textArea.value += nick;
+          textArea.focus();
+          return;
+        }
 
-      const reportButton = target.closest(".msg_report");
-      if (reportButton) {
-        event.preventDefault();
-        const dataId = reportButton.getAttribute("data-id");
-        logChatDebug(`Попытка отправить жалобу на сообщение ID: ${dataId}`);
-
-        const originalReportLink = document.querySelector(`#chat_msg .msg_report[data-id="${dataId}"]`);
-        if (originalReportLink) originalReportLink.click();
-        return;
+        const reportButton = target.closest(".msg_report");
+        if (reportButton) {
+          event.preventDefault();
+          
+          try {
+            const chatContext = getVueData('chat');
+            if (chatContext && typeof chatContext.report === 'function') {
+              chatContext.report({ target: reportButton });
+            } else {
+              console.error("UwU | chat.report function is missing in Vue state. Unable to report message.");
+            }
+          } catch (error) {
+            console.error("UwU | Error invoking report function:", error);
+          }
+          return;
+        }
+      } catch (error) {
+        console.error("UwU | Chat click delegation error:", error);
       }
     });
 
     /**
-    * Parses the message text for nicknames from the highlighting and notification settings.
-    * @param {string} text - The original message text (HTML).
-    * @returns {{text: string, isMentioned: boolean}} The processed text and a flag indicating whether the message was mentioned.
-    */
+     * Analyzes the message text for user-defined notification names.
+     * 
+     * @param {string} text - The raw HTML message text.
+     * @returns {{text: string, isMentioned: boolean}} Processed text with highlighted mentions and a trigger flag.
+     */
     function processMentions(text) {
       let processedText = text;
       let isMentioned = false;
 
-      if (settings.namesForNotification) {
-        const names = settings.namesForNotification
-          .trim()
-          .split(/\s*,\s*/)
-          .filter((name) => name);
+      try {
+        if (settings.namesForNotification) {
+          const names = settings.namesForNotification
+            .trim()
+            .split(/\s*,\s*/)
+            .filter((name) => name);
 
-        names.forEach((name) => {
-          const regex = new RegExp(`(^|\\s|[.,!?])(${name})(?=$|\\s|[.,!?])`, "gi");
-          processedText = processedText.replace(regex, (match, p1, p2) => {
-            isMentioned = true;
-            return `${p1}<span class="myname">${p2}</span>`;
+          names.forEach((name) => {
+            const regex = new RegExp(`(^|\\s|[.,!?])(${name})(?=$|\\s|[.,!?])`, "gi");
+            processedText = processedText.replace(regex, (match, p1, p2) => {
+              isMentioned = true;
+              return `${p1}<span class="myname">${p2}</span>`;
+            });
           });
-        });
-      }
+        }
 
-      if (!isMentioned && text.includes('class="myname"')) {
-        isMentioned = true;
+        if (!isMentioned && text.includes('class="myname"')) {
+          isMentioned = true;
+        }
+      } catch (error) {
+        console.error("UwU | Error processing mentions:", error);
       }
 
       return { text: processedText, isMentioned };
     }
 
     /**
-    * Converts a message object from the game data into ready-made HTML markup.
-    * @param {Object} msgData - Message object from the chat.messages array.
-    * @param {number} msgData.id - Unique message ID (used to filter duplicates).
-    * @param {string} msgData.text - Message content.
-    * @param {number} [msgData.volume] - Volume level (0-10).
-    * @param {number} msgData.cat - Sender ID.
-    * @param {string} msgData.login - Sender nickname.
-    * @param {number} msgData.time - Server time of the message (Unix Timestamp).
-    * @param {string} [msgData.textTransformation] - Style modifier (e.g., 'italic').
-    */
+     * Transforms the raw Vue message payload into an injected HTML string.
+     * 
+     * @param {Object} msgData - The message payload from 'chat.messages'.
+     * @param {number} msgData.id - Unique message identifier.
+     * @param {string} msgData.text - Message content.
+     * @param {number} [msgData.volume] - Notification volume (0-10).
+     * @param {number} msgData.cat - Sender's profile ID.
+     * @param {string} msgData.login - Sender's nickname.
+     * @param {number} [msgData.time] - Unix timestamp of the message (server-side).
+     * @param {string} [msgData.textTransformation] - Optional CSS modifier (e.g., 'italic').
+     * @returns {{html: string, rankSpanId: string, catId: string|number}}
+     */
     function buildMessageHTML(msgData) {
       const { text, isMentioned } = processMentions(msgData.text);
 
       if (isMentioned) {
-        logChatDebug(`Вас упомянули в сообщении от ${msgData.login}! Воспроизведение звука.`);
         soundManager.playSound(settings.myNameNotificationSound, settings.notificationMyNameVolume);
       }
 
@@ -13650,7 +13733,7 @@ if (targetCW3.test(window.location.href)) {
           <div class="${chatTextClasses}">${timeStr}${text} - <b class="nick" style="${nickStyle}">${nickName}</b><span id="${rankSpanId}"></span> <i>[${catId}]</i></div>
           <div style="display: flex; width: 42px; justify-content: flex-end; margin-right: 2px;">
             <a href="${profileLink}" title="Перейти в профиль" target="_blank" rel="noopener noreferrer">➝</a>&nbsp;|&nbsp;
-            <a href="#" title="Пожаловаться на нарушение ОПИ" class="msg_report" data-id="${dataId}">X</a>
+            <a href="#" title="Пожаловаться на нарушение ОПИ" class="msg_report" data-id="${dataId}" data-login="${nickName}">X</a>
           </div>
         </div>
       `;
@@ -13668,31 +13751,33 @@ if (targetCW3.test(window.location.href)) {
           updateChatRankAsync(catId, document.getElementById(rankSpanId));
         }
       } catch (error) {
-        logChatDebug("Ошибка при рендере сообщения:", error);
+        console.error(`UwU | Message rendering failed for ID ${msgData && msgData.id}:`, error);
       }
     }
 
     watchVueData('chat.messages', (newMessages) => {
-      if (!newMessages || !Array.isArray(newMessages)) return;
+      try {
+        if (!newMessages || !Array.isArray(newMessages)) return;
 
-      const batch = newMessages.filter(msg => msg && msg.id && !processedMessageIds.has(msg.id));
-      if (batch.length === 0) return;
+        const batch = newMessages.filter(msg => msg && msg.id && !processedMessageIds.has(msg.id));
+        if (batch.length === 0) return;
 
-      batch.sort((a, b) => a.id - b.id);
+        batch.sort((a, b) => a.id - b.id);
 
-      batch.forEach(msg => {
-        processedMessageIds.add(msg.id);
-        injectMessageToDOM(msg);
-      });
-      
-      // Мы удаляем оригинальные сообщение, чтобы сам CatWar не пытался с ними возиться 
-      // (а он это делает ОЧЕНЬ плохо) и не нагружал лишний раз игровую.
-      const originalChat = document.getElementById("chat_msg");
-      if (originalChat && originalChat.innerHTML !== "") {
-        originalChat.innerHTML = ""; 
-        logChatDebug("Оригинальный чат очищен.");
+        batch.forEach(msg => {
+          processedMessageIds.add(msg.id);
+          injectMessageToDOM(msg);
+        });
+        
+        // Мы удаляем оригинальные сообщения, чтобы сам CatWar не пытался с ними возиться 
+        // (а он это делает ОЧЕНЬ плохо) и не нагружал лишний раз игровую.
+        const originalChat = document.getElementById("chat_msg");
+        if (originalChat && originalChat.innerHTML !== "") {
+          originalChat.innerHTML = ""; 
+        }
+      } catch (error) {
+        console.error("UwU | Chat messages watcher error:", error);
       }
-
     }, { deep: true, immediate: true });
 
     const uwuChatMsg = document.createElement("style");
@@ -13727,6 +13812,7 @@ if (targetCW3.test(window.location.href)) {
      `;
     document.head.appendChild(uwuChatMsg);
   }
+
   // ====================================================================================================================
   //   . . . НОВЫЙ ВВОД ЧАТА . . .
   // ====================================================================================================================
