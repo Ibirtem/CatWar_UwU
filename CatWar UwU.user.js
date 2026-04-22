@@ -2041,6 +2041,7 @@ const uwusettings =
                 <th>Сообщения</th>
                 <th>Чаты</th>
                 <th>Блоги и Лента</th>
+                <th>Комментарии</th>
               </tr>
             </thead>
             <tbody>
@@ -2056,6 +2057,9 @@ const uwusettings =
                     type="checkbox"
                     data-setting="templatesInBlogsAndSniffs"
                   />
+                </td>
+                <td class="uwu-checkbox-cell">
+                  <input type="checkbox" data-setting="templatesInComments" />
                 </td>
               </tr>
             </tbody>
@@ -3376,15 +3380,19 @@ const newsPanel =
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>
-          — Бонусом добавлены: Время сообщения в чате...
+          — Бонусом добавлены: Время сообщения в чате... И сообщения для комментариев.
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
-        <p>— Пу-пу-пу.</p>
+        <p>— Теперь есть тени на всех барах Параметров и Навыков при использовании "Использования своего оформления".</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
-        <p>— Перепись "Современного чата" на более быстрые, чистые и крутые штуки.</p>
+        <p>— Перепись "Современного чата" на более быстрые, чистые и крутые штуки. Теперь должно меньше лагать при большом количестве сообщений!</p>
         <p>— Перепись различных уведомлений при действиях в Игровой.</p>
+        <p>— Исправлена "Ошибка при сохранении костюма".</p>
+        <p>— Теперь есть шаблоны и для комментариев.</p>
+        <p>— Шаблоны в ЛС теперь умеют сохранять и вставлять Темы сообщения.</p>
+        <p>— Чуть больше стабильности Калькулятора активности и возраста.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: .04.26</p>
       </div>
@@ -4675,6 +4683,42 @@ function watchVueData(path, callback, options = { deep: true }) {
   }
 
 // ====================================================================================================================
+//   . . . VUE  . . .
+// ====================================================================================================================
+
+/**
+ * Изменяет размер изображения до соотношения сторон 2:3.
+ * @param {string} dataUrl - Изображение в формате Data URL.
+ * @param {number} aspectRatio - Целевое соотношение сторон (ширина / высота).
+ * @returns {Promise<string>} - Новый Data URL изображения с измененным размером.
+ */
+async function resizeImageToAspectRatio(dataUrl, aspectRatio = 2 / 3) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.height = img.height;
+        canvas.width = img.height * aspectRatio;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        const resizedDataUrl = canvas.toDataURL("image/png");
+        resolve(resizedDataUrl);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    img.onerror = () => {
+      reject(
+        new Error("Не удалось загрузить изображение для изменения размера.")
+      );
+    };
+    img.src = dataUrl;
+  });
+}
+// ====================================================================================================================
 //   . . . СОХРАНЕНИЕ И РАБОТА С ЦВЕТОВЫМИ ТЕМАМИ . . .
 // ====================================================================================================================
 function getThemes() {
@@ -4858,39 +4902,6 @@ if (targetSettings.test(window.location.href)) {
   // ====================================================================================================================
   //  . . . ПАРАМЕТРЫ КОСТЮМА . . .
   // ====================================================================================================================
-
-  /**
-   * Изменяет размер изображения до соотношения сторон 2:3.
-   * @param {string} dataUrl - Изображение в формате Data URL.
-   * @param {number} aspectRatio - Целевое соотношение сторон (ширина / высота).
-   * @returns {Promise<string>} - Новый Data URL изображения с измененным размером.
-   */
-  async function resizeImageToAspectRatio(dataUrl, aspectRatio = 2 / 3) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        try {
-          const canvas = document.createElement("canvas");
-          canvas.height = img.height;
-          canvas.width = img.height * aspectRatio;
-
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-          const resizedDataUrl = canvas.toDataURL("image/png");
-          resolve(resizedDataUrl);
-        } catch (error) {
-          reject(error);
-        }
-      };
-      img.onerror = () => {
-        reject(
-          new Error("Не удалось загрузить изображение для изменения размера.")
-        );
-      };
-      img.src = dataUrl;
-    });
-  }
 
   const costumeCheckbox = document.getElementById("personal-costume-panel");
   function updateCostumeFlexBoxState() {
@@ -9110,12 +9121,15 @@ if (targetCW3.test(window.location.href)) {
         flex-direction: column;
         align-items: flex-start;
         margin-left: 8px;
+        text-align: left;
       }
 
       .cat-details > p,
       .cat-details > div > p {
         margin-top: 5px;
         margin-bottom: 5px;
+        text-align: left;
+        width: 100%;
       }
 
       #uwu-global-container > div.cat-info > div > div > div.cat-details > div {
@@ -9123,6 +9137,7 @@ if (targetCW3.test(window.location.href)) {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
+        width: 100%;
       }
     `;
 
@@ -9815,7 +9830,6 @@ if (targetCW3.test(window.location.href)) {
         text-align: center;
         font-size: 10px;
         color: white;
-        text-shadow: 1px 1px 2px black, -1px -1px 2px black, 1px -1px 2px black, -1px 1px 2px black;
         pointer-events: none;
         line-height: 15px;
         z-index: 2;
@@ -11392,6 +11406,7 @@ if (targetCW3.test(window.location.href)) {
 
     cssStyles += `#parameters_skills_block .bar-fill { background: ${otherFirstCellBackground}; }\n`;
     cssStyles += `#parameters_skills_block .bar { background: ${otherLastCellBackground}; }\n`;
+    cssStyles += `#parameters_skills_block .bar-data { text-shadow: 1px 1px 2px black; }\n`;
 
     const backgroundImageURL = settings.parametersUserBackgroundImage
       ? settings.parametersUserBackgroundImageURL
@@ -16085,6 +16100,12 @@ function moonCalculator() {
         return;
       }
 
+      const dateMatch = infoElement.textContent.match(/\d{4}-\d\d-\d\d \d\d:\d\d/);
+      if (!dateMatch) {
+        calculatorAgeElement.classList.add("hidden");
+        return;
+      }
+
       calculatorAgeElement.classList.remove("hidden");
 
       const birthDateString = infoElement.textContent
@@ -16421,19 +16442,23 @@ function setupActivityCalc() {
     `;
   }
 
-  const activity = document
-    .querySelector("#act_name b")
-    .textContent.split(" (");
+  const actNameEl = document.querySelector("#act_name b");
+  if (!actNameEl) return;
+  
+  const activity = actNameEl.textContent.toLowerCase().split(" (");
   const progress = {};
 
   const currentStage = activityStages.find(
-    (stage) => stage.name === activity[0]
+    (stage) => stage.name.toLowerCase() === activity[0].trim()
   );
 
   if (currentStage) {
     progress.doneFromZero =
       currentStage.fromZero + Number(activity[1].split("/")[0]);
     progress.stage = activityStages.indexOf(currentStage);
+  } else {
+    console.warn("UwU | Неизвестная стадия активности:", activity[0]);
+    return;
   }
 
   const activityInfoHTML =
@@ -17025,10 +17050,13 @@ function initializeTemplates() {
     pageType
   ) {
     const targetElement = document.getElementById(targetElementId);
+    if (!targetElement) return;
 
     if (!document.getElementById("uwu-templates")) {
       if (targetElementId === "mess_form") {
         targetElement.insertAdjacentHTML("beforeend", templateContainer);
+      } else if (targetElementId === "send_comment_form") {
+        targetElement.insertAdjacentHTML("afterend", templateContainer);
       } else {
         targetElement.insertAdjacentHTML("afterbegin", templateContainer);
       }
@@ -17092,7 +17120,7 @@ function initializeTemplates() {
             }
             if (subjectElementId) {
               document.getElementById(subjectElementId).value =
-                template.netbject || "";
+                template.subject || "";
             }
           });
 
@@ -17135,7 +17163,7 @@ function initializeTemplates() {
           document.getElementById(contentElementId).value;
       }
       if (subjectElementId) {
-        templates[index].netbject =
+        templates[index].subject =
           document.getElementById(subjectElementId).value || "";
       }
       uwuStorage.setItem("uwu_templates", templates);
@@ -17158,11 +17186,15 @@ function initializeTemplates() {
   }
 
   function checkUrlAndSetup() {
+    // 1. Личные сообщения
     if (targetLsNew.test(window.location.href) && settings.templatesInLs) {
       setupSingleCallback("#write_form", () =>
         setupTemplates("write_div", "text", "subject", "ls")
       );
-    } else if (
+    }
+    
+    // 2. Создание Блогов и Лент
+    if (
       (targetBlogsCreation.test(window.location.href) ||
         targetSniffCreation.test(window.location.href)) &&
       settings.templatesInBlogsAndSniffs
@@ -17175,7 +17207,23 @@ function initializeTemplates() {
           "blogsAndSniffs"
         )
       );
-    } else if (
+    }
+    
+    // 3. Комментарии в Блогах и Лентах
+    if (
+      (targetBlog.test(window.location.href) ||
+        targetSniff.test(window.location.href)) &&
+      settings.templatesInComments &&
+      !targetBlogsCreation.test(window.location.href) &&
+      !targetSniffCreation.test(window.location.href)
+    ) {
+      setupSingleCallback("#send_comment_form", () =>
+        setupTemplates("send_comment_form", "comment", null, "comments")
+      );
+    }
+
+    // 4. Чаты Игровой
+    if (
       targetChats.test(window.location.href) &&
       settings.templatesInChats
     ) {
@@ -17201,7 +17249,6 @@ initializeTemplates();
 //   . . . СОХРАНЕНИЕ ЛИЧНЫХ СООБЩЕНИЙ . . .
 // ====================================================================================================================
 if (targetLs.test(window.location.href) && settings.savingLS) {
-  // console.log("UwU | Модуль сохранения ЛС активен.");
 
   /**
    * Отображает сохраненное сообщение в контейнере.
@@ -17619,11 +17666,11 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
       window.location.search.includes("?id=") &&
       document.getElementById("msg_table")
     ) {
-      console.log("UwU | Обнаружена страница сообщения. Встраиваю кнопки...");
+      // console.log("UwU | Обнаружена страница сообщения. Встраиваю кнопки...");
       addSaveButtonsToMessagePage();
       hideSavedMessagesInterface();
     } else {
-      console.log("UwU | Обнаружена главная страница ЛС. Встраиваю вкладку...");
+      // console.log("UwU | Обнаружена главная страница ЛС. Встраиваю вкладку...");
       addSavedMessagesTab();
     }
   }
