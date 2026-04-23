@@ -3380,7 +3380,7 @@ const newsPanel =
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>
-          — Бонусом добавлены: Время сообщения в чате... И сообщения для комментариев.
+          — Бонусом добавлены: Время сообщения в чате... И шаблоны для комментариев.
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
@@ -3393,6 +3393,7 @@ const newsPanel =
         <p>— Теперь есть шаблоны и для комментариев.</p>
         <p>— Шаблоны в ЛС теперь умеют сохранять и вставлять Темы сообщения.</p>
         <p>— Чуть больше стабильности Калькулятора активности и возраста.</p>
+        <p>— Исправлена ошибка с [object Object] при предпосмотре Комментария.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: .04.26</p>
       </div>
@@ -16718,6 +16719,9 @@ if (targetSniff.test(window.location.href)) {
 // ====================================================================================================================
 //   . . . ПРЕДПРОСМОТР КОММЕНТАРИЯ . . .
 // ====================================================================================================================
+// ====================================================================================================================
+//   . . . ПРЕДПРОСМОТР КОММЕНТАРИЯ . . .
+// ====================================================================================================================
 function addCommentPreview() {
   const form = document.querySelector("#send_comment_form");
   if (!form || document.getElementById("comment-preview")) return;
@@ -16725,9 +16729,7 @@ function addCommentPreview() {
   const lastParagraph = form.querySelector("p:last-child");
   lastParagraph.insertAdjacentHTML(
     "afterbegin",
-    `
-    <input type="button" id="comment-preview" value="Предпросмотр"> 
-    `
+    `<input type="button" id="comment-preview" value="Предпросмотр"> `
   );
 
   form.insertAdjacentHTML(
@@ -16742,30 +16744,71 @@ function addCommentPreview() {
   const hideParagraph = document.getElementById("comment-preview-hide");
   const previewDiv = document.getElementById("comment-preview-div");
 
+  /**
+   * Using WebSocket parser for blogs and "sniff".
+   */
   const ws = io(window.location.origin, {
     path: "/ws/blogs/socket.io",
     reconnectionDelay: 10000,
     reconnectionDelayMax: 20000,
   });
 
+  let socketTimeout;
+
   ws.on("creation preview", (data) => {
-    previewDiv.innerHTML = data;
+    clearTimeout(socketTimeout);
+    
+    const htmlResult = (data && typeof data === 'object') ? data.text : data;
+    showResult(htmlResult);
+  });
+
+  /**
+   * Fallback to the cat profile REST API if the blog socket is unavailable.
+   */
+  async function fetchFallback(text) {
+    try {
+      const response = await fetch("/rest/site/bbCodeConvert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" },
+        body: JSON.stringify({ text: text })
+      });
+      const raw = await response.text();
+      let html = raw;
+      try {
+        const json = JSON.parse(raw);
+        html = json.text || raw;
+      } catch(e) {}
+      showResult(html);
+    } catch (err) {
+      showResult(`<span style="color:#cd4141">Ошибка: сервер не ответил на запрос предпросмотра.</span>`);
+    }
+  }
+
+  function showResult(html) {
+    previewDiv.innerHTML = html || "Пустое сообщение";
     previewDiv.style.display = "block";
     hideParagraph.style.display = "block";
-  });
+    previewButton.disabled = false;
+    previewButton.value = "Предпросмотр";
+  }
 
   previewButton.addEventListener("click", function () {
     const commentText = document.getElementById("comment").value;
-    ws.emit("creation preview", commentText);
+    if (!commentText.trim()) return;
+
+    previewButton.disabled = true;
+    previewButton.value = "Загрузка...";
+
+    if (ws && ws.connected) {
+      ws.emit("creation preview", commentText);
+      socketTimeout = setTimeout(() => fetchFallback(commentText), 3000);
+    } else {
+      fetchFallback(commentText);
+    }
   });
 
-  form
-    .querySelector('[type="submit"]')
-    .addEventListener("click", hideCommentPreview);
-  hideParagraph.addEventListener("click", function (e) {
-    e.preventDefault();
-    hideCommentPreview();
-  });
+  form.querySelector('[type="submit"]').addEventListener("click", hideCommentPreview);
+  hideParagraph.addEventListener("click", (e) => { e.preventDefault(); hideCommentPreview(); });
 
   function hideCommentPreview() {
     hideParagraph.style.display = "none";
