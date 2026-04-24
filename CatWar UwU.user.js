@@ -127,6 +127,7 @@ const uwuDefaultSettings = {
   userTheme: false,
   userThemeKns: false,
   glassStyle: false,
+  hideRelativesByDefault: false,
   automaticActionsRedesign: false,
   showOtherCatsList: "2",
   commentsAvatars: false,
@@ -1174,6 +1175,16 @@ const uwusettings =
               data-setting="sliceInfoBlock"
             />
             <label for="slice-info-block">Разделить блок Информации</label>
+          </div>
+
+          <div>
+            <p>Автоматически скрывает блок «Родственные связи» при каждой загрузке игровой... Ого!</p>
+            <input
+              type="checkbox"
+              id="hide-relatives-default"
+              data-setting="hideRelativesByDefault"
+            />
+            <label for="hide-relatives-default">Скрывать Родственные связи по умолчанию</label>
           </div>
 
           <div>
@@ -3396,8 +3407,8 @@ const newsPanel =
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>
-          — Бонусом добавлены: Время сообщения в чате, шаблоны для комментариев, встроенный переключатель Blur эффекта 
-          и Редизайн для новых Автоматических племенных действий.
+          — Бонусом добавлены: Время сообщения в чате, шаблоны для комментариев, встроенный переключатель Blur эффекта, 
+          автоматического скрытия Родственных связей и Редизайн для новых Автоматических племенных действий.
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
@@ -11610,6 +11621,17 @@ if (targetCW3.test(window.location.href)) {
 
   if (settings.useUserFonts) {
     applyFonts();
+  }
+  // ====================================================================================================================
+  //   . . . СКРЫТИЕ РОДСТВЕННЫХ СВЯЗЕЙ . . .
+  // ====================================================================================================================
+  if (settings.hideRelativesByDefault) {
+    setupSingleCallback("#relatives_block", () => {
+      const relativesBlock = document.getElementById("relatives_block");
+      if (relativesBlock) {
+        relativesBlock.style.display = "none";
+      }
+    });
   }
   // ====================================================================================================================
   //   . . . РЕДИЗАЙН ИГРОВОЙ . . .
