@@ -127,6 +127,7 @@ const uwuDefaultSettings = {
   userTheme: false,
   userThemeKns: false,
   glassStyle: false,
+  automaticActionsRedesign: false,
   showOtherCatsList: "2",
   commentsAvatars: false,
 
@@ -295,6 +296,8 @@ const targetSniff =
   /^https?:\/\/\w?\.?catwar\.(?:net|su)\/sniff(?:\d+|)(?:$|[/?#])/i;
 const targetSniffCreation =
   /^https?:\/\/\w?\.?catwar\.(?:net|su)\/sniff\?creation/;
+
+const targetClanAutoActions = /^https?:\/\/\w?\.?catwar\.(?:net|su)\/my_clan\/automatic_actions/;
 
 // ====================================================================================================================
 //   . . . СТАНДАРТНЫЕ ЦВЕТОВЫЕ ТЕМЫ . . .
@@ -908,6 +911,12 @@ const uwusettings =
             <p>Добавляет эффект размытия (Blur) заднего фона для основных блоков игровой.</p>
             <input type="checkbox" id="glass-style" data-setting="glassStyle" />
             <label for="glass-style">Эффект размытия (стекло)</label>
+          </div>
+
+          <div>
+            <p>Обновляет внешний вид страницы «Автоматические племенные действия».</p>
+            <input type="checkbox" id="automatic-actions-redesign" data-setting="automaticActionsRedesign" />
+            <label for="automatic-actions-redesign">Редизайн племенных отчетов</label>
           </div>
 
           <hr id="uwu-hr" class="uwu-hr" />
@@ -3387,7 +3396,8 @@ const newsPanel =
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>
-          — Бонусом добавлены: Время сообщения в чате, шаблоны для комментариев и встроенный переключатель Blur эффекта.
+          — Бонусом добавлены: Время сообщения в чате, шаблоны для комментариев, встроенный переключатель Blur эффекта 
+          и Редизайн для новых Автоматических племенных действий.
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
@@ -17778,4 +17788,137 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
   }
 
   setupMutationObserver("#main", initializeLSPageLogic, { childList: true });
+}
+
+// ====================================================================================================================
+//   . . . РЕДИЗАЙН АВТОМАТИЧЕСКИХ ПЛЕМЕННЫХ ДЕЙСТВИЙ . . .
+// ====================================================================================================================
+if (targetClanAutoActions.test(window.location.href) && settings.automaticActionsRedesign) {
+  function applyAutoActionsRedesign() {
+    const style = document.createElement("style");
+    style.id = "uwu-aa-redesign";
+    style.innerHTML = /* CSS */ `
+      .aa-page {
+          font-family: "Montserrat", sans-serif;
+      }
+
+      .aa-controls {
+          gap: 10px 15px !important;
+      }
+      .aa-field {
+          display: block !important;
+      }
+      .aa-field span {
+          display: block;
+          margin-bottom: 3px;
+      }
+
+      .aa-report-detail {
+          background: rgba(0, 0, 0, 0.15);
+          border: 1px solid rgba(255, 255, 255, 0.05) !important;
+          border-radius: 10px;
+          padding: 10px 15px !important;
+      }
+
+      .aa-report-detail > p:first-of-type {
+          background: rgba(0, 0, 0, 0.2);
+          padding: 10px 15px !important;
+          border-radius: 8px;
+          line-height: 1.6;
+          font-size: 13px;
+          column-count: 2;
+          column-gap: 20px;
+          border-left: 2px solid rgba(255, 255, 255, 0.2);
+      }
+      
+      .aa-report-detail > p:first-of-type b {
+          color: rgba(255, 255, 255, 0.45);
+          font-weight: normal;
+          margin-right: 4px;
+      }
+
+      .aa-table {
+          border: none !important;
+          width: 100%;
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 8px;
+          overflow: hidden;
+          margin-bottom: 10px !important;
+      }
+      .aa-table th, .aa-table td {
+          border: none !important;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+          padding: 4px 8px !important;
+          vertical-align: middle !important;
+          font-size: 13px;
+      }
+      .aa-table th {
+          background: rgba(255, 255, 255, 0.05);
+          text-transform: uppercase;
+          font-size: 11px;
+          letter-spacing: 0.5px;
+          color: rgba(255, 255, 255, 0.5);
+      }
+      .aa-table tr:last-child td {
+          border-bottom: none !important;
+      }
+      .aa-table tr:hover td {
+          background: rgba(255, 255, 255, 0.05);
+      }
+
+      .aa-field select, .aa-field input[type="text"], .aa-event-controls select {
+          background-color: rgba(0, 0, 0, 0.4) !important;
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+          color: #d5d5d5;
+          padding: 4px 8px !important;
+          border-radius: 6px;
+          outline: none;
+          font-size: 13px;
+          transition: border-color 0.2s;
+      }
+      .aa-field select:focus, .aa-field input[type="text"]:focus, .aa-event-controls select:focus {
+          border-color: rgba(255, 255, 255, 0.3) !important;
+      }
+
+      .aa-actions input[type="submit"], .aa-event-controls input[type="submit"] {
+          background-color: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          padding: 4px 12px !important;
+          border-radius: 10px;
+          font-size: 13px;
+          color: #d5d5d5;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+      }
+      .aa-actions input[type="submit"]:hover, .aa-event-controls input[type="submit"]:hover {
+          background-color: rgba(255, 255, 255, 0.15);
+      }
+
+      .aa-report-link, .aa-report-close {
+          color: #83e5ff;
+          text-decoration: none;
+          transition: opacity 0.2s;
+          font-weight: bold;
+      }
+      .aa-report-link:hover, .aa-report-close:hover {
+          opacity: 0.8;
+          text-decoration: underline;
+      }
+      
+      .aa-pages a, .aa-pages span {
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+          border-radius: 5px;
+          background: rgba(0, 0, 0, 0.2);
+          padding: 2px 6px !important;
+          font-size: 12px;
+      }
+      .aa-pages .is-current {
+          background: rgba(255, 255, 255, 0.1);
+          color: #fff;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  applyAutoActionsRedesign();
 }
