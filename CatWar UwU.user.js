@@ -126,6 +126,7 @@ const uwuDefaultSettings = {
   gameFieldBackgroundUserImageURL: "",
   userTheme: false,
   userThemeKns: false,
+  glassStyle: false,
   showOtherCatsList: "2",
   commentsAvatars: false,
 
@@ -901,6 +902,12 @@ const uwusettings =
               data-setting="userThemeKns"
             />
             <label for="user-theme-enabled">Цвета в конструкторе окрасов</label>
+          </div>
+
+          <div>
+            <p>Добавляет эффект размытия (Blur) заднего фона для основных блоков игровой.</p>
+            <input type="checkbox" id="glass-style" data-setting="glassStyle" />
+            <label for="glass-style">Эффект размытия (стекло)</label>
           </div>
 
           <hr id="uwu-hr" class="uwu-hr" />
@@ -3380,11 +3387,12 @@ const newsPanel =
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>
-          — Бонусом добавлены: Время сообщения в чате... И шаблоны для комментариев.
+          — Бонусом добавлены: Время сообщения в чате, шаблоны для комментариев и встроенный переключатель Blur эффекта.
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
         <p>— Теперь есть тени на всех барах Параметров и Навыков при использовании "Использования своего оформления".</p>
+        <p>— Темы и цвета Игровой применяются теперь и на "модальные" всплывающие окошки всяких "подтверждений".</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
         <p>— Перепись "Современного чата" на более быстрые, чистые и крутые штуки. Теперь должно меньше лагать при большом количестве сообщений!</p>
@@ -3394,6 +3402,7 @@ const newsPanel =
         <p>— Шаблоны в ЛС теперь умеют сохранять и вставлять Темы сообщения.</p>
         <p>— Чуть больше стабильности Калькулятора активности и возраста.</p>
         <p>— Исправлена ошибка с [object Object] при предпосмотре Комментария.</p>
+        <p>— Удалены Блюр модули из Надстроек :( Зато теперь эта опция встроенна! :).</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: .04.26</p>
       </div>
@@ -7573,12 +7582,62 @@ if (targetCW3.test(window.location.href)) {
       background-color: ${theme?.catTooltipBackground || ""} !important;
       color: ${theme?.textColor || ""} !important;
       }
+
+      .modal-body,
+      .vc-container {
+        background: ${theme?.catTooltipBackground || ""} !important;
+        color: ${theme?.textColor || ""} !important;
+        border: 1px solid ${theme?.accentColor2 || "transparent"} !important;
+      }
+
+      .vc-title {
+        color: ${theme?.textColor || ""};
+      }
+
+      .vc-btn {
+        background-color: ${theme?.accentColor1 || ""};
+        background: ${theme?.accentColor1 || ""};
+      }
+
+      .vc-btn:hover {
+        background-color: color-mix(in srgb, ${theme?.accentColor1 || "transparent"} 85%, white);
+        background: color-mix(in srgb, ${theme?.accentColor1 || "transparent"} 85%, white);
+      }
       `;
     document.head.appendChild(newStyle);
   }
 
   if (settings.userTheme) {
     applyTheme();
+  }
+
+  // ====================================================================================================================
+  //   . . . ЭФФЕКТ СТЕКЛА (BLUR) . . .
+  // ====================================================================================================================
+  function applyGlassStyle() {
+    const glassCss = `
+      #tr_chat,
+      #tr_actions > td,
+      #tr_mouth > td, .small,
+      #info_main > tbody > tr > td,
+      #uwu-clock,
+      #uwu-interval-timer-main-panel,
+      .modal-body,
+      #fightPanel, 
+      span.cat_tooltip, 
+      .cat-info {
+          backdrop-filter: blur(16px) !important;
+          -webkit-backdrop-filter: blur(16px) !important;
+      }
+    `;
+    const styleElement = document.createElement("style");
+    styleElement.id = "uwu-glass-blur-style";
+    styleElement.textContent = glassCss;
+    document.head.appendChild(styleElement);
+  }
+
+  if (settings.glassStyle) {
+    applyGlassStyle();
   }
 
   // ====================================================================================================================
