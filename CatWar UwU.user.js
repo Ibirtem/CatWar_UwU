@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.43.3-04.26
+// @version      v1.44.0-04.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -104,7 +104,7 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.43.3";
+const current_uwu_version = "1.44.0";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -126,6 +126,9 @@ const uwuDefaultSettings = {
   gameFieldBackgroundUserImageURL: "",
   userTheme: false,
   userThemeKns: false,
+  glassStyle: false,
+  hideRelativesByDefault: false,
+  automaticActionsRedesign: false,
   showOtherCatsList: "2",
   commentsAvatars: false,
 
@@ -136,6 +139,7 @@ const uwuDefaultSettings = {
   newChatInput: false,
   showChatCharCounter: false,
   showChatRanks: false,
+  showChatTime: false,
   namesForNotification: "",
 
   redesignCostumsSettings: false,
@@ -294,6 +298,8 @@ const targetSniff =
 const targetSniffCreation =
   /^https?:\/\/\w?\.?catwar\.(?:net|su)\/sniff\?creation/;
 
+const targetClanAutoActions = /^https?:\/\/\w?\.?catwar\.(?:net|su)\/my_clan\/automatic_actions/;
+
 // ====================================================================================================================
 //   . . . СТАНДАРТНЫЕ ЦВЕТОВЫЕ ТЕМЫ . . .
 // ====================================================================================================================
@@ -313,6 +319,23 @@ const defaultThemes = {
       moveNameColor: "#d5d5d5",
       moveNameBackground: "#242424",
       climbingPanelBackground: "#242424",
+    },
+  },
+  "Прозрачная Тема": {
+    colors: {
+      backgroundColor: "#161616",
+      blocksColor: "#2b2b2b63",
+      chatColor: "#2b2b2b63",
+      textColor: "#d5d5d5",
+      catTooltipBackground: "#2b2b2b63",
+      fightPanelBackground: "#2b2b2b63",
+      linkColor: "#d5d5d5",
+      accentColor1: "#111111",
+      accentColor2: "#2e2e2e82",
+      accentColor3: "#fc872a",
+      moveNameColor: "#d5d5d5",
+      moveNameBackground: "#2b2b2b63",
+      climbingPanelBackground: "#2b2b2b63",
     },
   },
 };
@@ -902,6 +925,18 @@ const uwusettings =
             <label for="user-theme-enabled">Цвета в конструкторе окрасов</label>
           </div>
 
+          <div>
+            <p>Добавляет эффект размытия (Blur) заднего фона для основных блоков игровой.</p>
+            <input type="checkbox" id="glass-style" data-setting="glassStyle" />
+            <label for="glass-style">Эффект размытия (стекло)</label>
+          </div>
+
+          <div>
+            <p>Обновляет внешний вид страницы «Автоматические племенные действия».</p>
+            <input type="checkbox" id="automatic-actions-redesign" data-setting="automaticActionsRedesign" />
+            <label for="automatic-actions-redesign">Редизайн племенных отчетов</label>
+          </div>
+
           <hr id="uwu-hr" class="uwu-hr" />
           <h2>Шрифты и текст</h2>
 
@@ -1160,6 +1195,16 @@ const uwusettings =
           </div>
 
           <div>
+            <p>Автоматически скрывает блок «Родственные связи» при каждой загрузке игровой... Ого!</p>
+            <input
+              type="checkbox"
+              id="hide-relatives-default"
+              data-setting="hideRelativesByDefault"
+            />
+            <label for="hide-relatives-default">Скрывать Родственные связи по умолчанию</label>
+          </div>
+
+          <div>
             <p>Скругляет края блоков в Игровой.</p>
             <input
               type="checkbox"
@@ -1314,6 +1359,17 @@ const uwusettings =
             />
             <label for="show-chat-ranks"
               >Показывать должности</label
+            >
+          </div>
+          <div>
+            <p>Добавляет перед сообщением время его получения.</p>
+            <input
+              type="checkbox"
+              id="show-chat-time"
+              data-setting="showChatTime"
+            />
+            <label for="show-chat-time"
+              >Показывать время сообщений</label
             >
           </div>
 
@@ -2029,6 +2085,7 @@ const uwusettings =
                 <th>Сообщения</th>
                 <th>Чаты</th>
                 <th>Блоги и Лента</th>
+                <th>Комментарии</th>
               </tr>
             </thead>
             <tbody>
@@ -2044,6 +2101,9 @@ const uwusettings =
                     type="checkbox"
                     data-setting="templatesInBlogsAndSniffs"
                   />
+                </td>
+                <td class="uwu-checkbox-cell">
+                  <input type="checkbox" data-setting="templatesInComments" />
                 </td>
               </tr>
             </tbody>
@@ -3359,27 +3419,31 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        🌸 v${current_uwu_version} - Довольно важное и крутое обновление, представляете?
+        🌿 v${current_uwu_version} - Крупная перепись кода для оптимизации, улучшения производительности и стабильности.
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>
-          — Обновление и добавление забытых, но очень важных функций - галочка для непрозрачности котов, 
-          звук за пару секунд до окончания действия, отображение должности в чат и чисел параметров! 
-          И самое сочное... История прокачки Боевых Умений!
+          — Бонусом добавлены: Время сообщения в чате, шаблоны для комментариев, встроенный переключатель Blur эффекта, 
+          автоматического скрытия Родственных связей и Редизайн для новых Автоматических племенных действий.
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
-        <p>— Пу-пу-пу.</p>
+        <p>— Теперь есть тени на всех барах Параметров и Навыков при использовании "Использования своего оформления".</p>
+        <p>— Темы и цвета Игровой применяются теперь и на "модальные" всплывающие окошки всяких "подтверждений".</p>
+        <p>— Я добавил дефолт прозрачную тему в оформление, потому что мне лень хранить её у себя локально и я очень люблю прозрачные темы.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
-        <p>— Уточнён расчёт падения активности в калькуляторе.</p>
-        <p>— Открылся огромный простор будущих оптимизаций, упрощений кода и 
-        улучшения производительности в целом.</p>
-        <p>—— Fix v1.43.2</p>
-        <p>—— Исправлено, что вместо должностей подхватывались не то.</p>
+        <p>— Перепись "Современного чата" на более быстрые, чистые и крутые штуки. Теперь должно меньше лагать при большом количестве сообщений!</p>
+        <p>— Перепись различных уведомлений при действиях в Игровой.</p>
+        <p>— Исправлена "Ошибка при сохранении костюма".</p>
+        <p>— Теперь есть шаблоны и для комментариев.</p>
+        <p>— Шаблоны в ЛС теперь умеют сохранять и вставлять Темы сообщения.</p>
+        <p>— Чуть больше стабильности Калькулятора активности и возраста.</p>
+        <p>— Исправлена ошибка с [object Object] при предпосмотре Комментария.</p>
+        <p>— Удалены Блюр модули из Надстроек :( Зато теперь эта опция встроенна! :).</p>
         <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: 04.04.26</p>
+        <p>Дата выпуска: 26.04.26</p>
       </div>
     </div>
   `;
@@ -4635,9 +4699,10 @@ async function setupSingleCallback(
 // ====================================================================================================================
 
 /**
-* A universal function for getting data from the Vue Game component.
-* @param {string} path Path to the data, for example: 'parameter.data' or 'cat.name'
-*/
+ * Extracts data from the Vue reactive state using a string path.
+ * @param {string} path - The dot-separated path to the property (e.g., 'parameter.data').
+ * @returns {any|null} The resolved data, or null if the path is invalid or Vue is unavailable.
+ */
 function getVueData(path) {
   const app = document.getElementById('app');
   if (!app || !app.__vue__) return null;
@@ -4645,11 +4710,11 @@ function getVueData(path) {
 }
 
 /**
-* A universal subscriber for data changes in Vue.
-* @param {string} path : Path to the data (e.g., 'parameter.data').
-* @param {function} callback : Function called when a change occurs.
-* @param {object} options : Options (e.g., { deep: true, immediate: true }).
-*/
+ * Subscribes to changes in the Vue reactive state with retry logic for initialization.
+ * @param {string} path - The dot-separated path to watch (e.g., 'chat.messages').
+ * @param {function(any, any): void} callback - The function invoked on data change (newValue, oldValue).
+ * @param {Object} [options={ deep: true }] - Vue $watch options (e.g., { deep: true, immediate: true }).
+ */
 function watchVueData(path, callback, options = { deep: true }) {
     let attempts = 0;
     const tryAttachWatcher = () => {
@@ -4666,6 +4731,42 @@ function watchVueData(path, callback, options = { deep: true }) {
     tryAttachWatcher();
   }
 
+// ====================================================================================================================
+//   . . . VUE  . . .
+// ====================================================================================================================
+
+/**
+ * Изменяет размер изображения до соотношения сторон 2:3.
+ * @param {string} dataUrl - Изображение в формате Data URL.
+ * @param {number} aspectRatio - Целевое соотношение сторон (ширина / высота).
+ * @returns {Promise<string>} - Новый Data URL изображения с измененным размером.
+ */
+async function resizeImageToAspectRatio(dataUrl, aspectRatio = 2 / 3) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.height = img.height;
+        canvas.width = img.height * aspectRatio;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        const resizedDataUrl = canvas.toDataURL("image/png");
+        resolve(resizedDataUrl);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    img.onerror = () => {
+      reject(
+        new Error("Не удалось загрузить изображение для изменения размера.")
+      );
+    };
+    img.src = dataUrl;
+  });
+}
 // ====================================================================================================================
 //   . . . СОХРАНЕНИЕ И РАБОТА С ЦВЕТОВЫМИ ТЕМАМИ . . .
 // ====================================================================================================================
@@ -4850,39 +4951,6 @@ if (targetSettings.test(window.location.href)) {
   // ====================================================================================================================
   //  . . . ПАРАМЕТРЫ КОСТЮМА . . .
   // ====================================================================================================================
-
-  /**
-   * Изменяет размер изображения до соотношения сторон 2:3.
-   * @param {string} dataUrl - Изображение в формате Data URL.
-   * @param {number} aspectRatio - Целевое соотношение сторон (ширина / высота).
-   * @returns {Promise<string>} - Новый Data URL изображения с измененным размером.
-   */
-  async function resizeImageToAspectRatio(dataUrl, aspectRatio = 2 / 3) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        try {
-          const canvas = document.createElement("canvas");
-          canvas.height = img.height;
-          canvas.width = img.height * aspectRatio;
-
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-          const resizedDataUrl = canvas.toDataURL("image/png");
-          resolve(resizedDataUrl);
-        } catch (error) {
-          reject(error);
-        }
-      };
-      img.onerror = () => {
-        reject(
-          new Error("Не удалось загрузить изображение для изменения размера.")
-        );
-      };
-      img.src = dataUrl;
-    });
-  }
 
   const costumeCheckbox = document.getElementById("personal-costume-panel");
   function updateCostumeFlexBoxState() {
@@ -7553,12 +7621,62 @@ if (targetCW3.test(window.location.href)) {
       background-color: ${theme?.catTooltipBackground || ""} !important;
       color: ${theme?.textColor || ""} !important;
       }
+
+      .modal-body,
+      .vc-container {
+        background: ${theme?.catTooltipBackground || ""} !important;
+        color: ${theme?.textColor || ""} !important;
+        border: 1px solid ${theme?.accentColor2 || "transparent"} !important;
+      }
+
+      .vc-title {
+        color: ${theme?.textColor || ""};
+      }
+
+      .vc-btn {
+        background-color: ${theme?.accentColor1 || ""};
+        background: ${theme?.accentColor1 || ""};
+      }
+
+      .vc-btn:hover {
+        background-color: color-mix(in srgb, ${theme?.accentColor1 || "transparent"} 85%, white);
+        background: color-mix(in srgb, ${theme?.accentColor1 || "transparent"} 85%, white);
+      }
       `;
     document.head.appendChild(newStyle);
   }
 
   if (settings.userTheme) {
     applyTheme();
+  }
+
+  // ====================================================================================================================
+  //   . . . ЭФФЕКТ СТЕКЛА (BLUR) . . .
+  // ====================================================================================================================
+  function applyGlassStyle() {
+    const glassCss = `
+      #tr_chat,
+      #tr_actions > td,
+      #tr_mouth > td, .small,
+      #info_main > tbody > tr > td,
+      #uwu-clock,
+      #uwu-interval-timer-main-panel,
+      .modal-body,
+      #fightPanel, 
+      span.cat_tooltip, 
+      .cat-info {
+          backdrop-filter: blur(16px) !important;
+          -webkit-backdrop-filter: blur(16px) !important;
+      }
+    `;
+    const styleElement = document.createElement("style");
+    styleElement.id = "uwu-glass-blur-style";
+    styleElement.textContent = glassCss;
+    document.head.appendChild(styleElement);
+  }
+
+  if (settings.glassStyle) {
+    applyGlassStyle();
   }
 
   // ====================================================================================================================
@@ -9102,12 +9220,15 @@ if (targetCW3.test(window.location.href)) {
         flex-direction: column;
         align-items: flex-start;
         margin-left: 8px;
+        text-align: left;
       }
 
       .cat-details > p,
       .cat-details > div > p {
         margin-top: 5px;
         margin-bottom: 5px;
+        text-align: left;
+        width: 100%;
       }
 
       #uwu-global-container > div.cat-info > div > div > div.cat-details > div {
@@ -9115,6 +9236,7 @@ if (targetCW3.test(window.location.href)) {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
+        width: 100%;
       }
     `;
 
@@ -9807,7 +9929,6 @@ if (targetCW3.test(window.location.href)) {
         text-align: center;
         font-size: 10px;
         color: white;
-        text-shadow: 1px 1px 2px black, -1px -1px 2px black, 1px -1px 2px black, -1px 1px 2px black;
         pointer-events: none;
         line-height: 15px;
         z-index: 2;
@@ -11384,6 +11505,7 @@ if (targetCW3.test(window.location.href)) {
 
     cssStyles += `#parameters_skills_block .bar-fill { background: ${otherFirstCellBackground}; }\n`;
     cssStyles += `#parameters_skills_block .bar { background: ${otherLastCellBackground}; }\n`;
+    cssStyles += `#parameters_skills_block .bar-data { text-shadow: 1px 1px 2px black; }\n`;
 
     const backgroundImageURL = settings.parametersUserBackgroundImage
       ? settings.parametersUserBackgroundImageURL
@@ -11517,6 +11639,17 @@ if (targetCW3.test(window.location.href)) {
 
   if (settings.useUserFonts) {
     applyFonts();
+  }
+  // ====================================================================================================================
+  //   . . . СКРЫТИЕ РОДСТВЕННЫХ СВЯЗЕЙ . . .
+  // ====================================================================================================================
+  if (settings.hideRelativesByDefault) {
+    setupSingleCallback("#relatives_block", () => {
+      const relativesBlock = document.getElementById("relatives_block");
+      if (relativesBlock) {
+        relativesBlock.style.display = "none";
+      }
+    });
   }
   // ====================================================================================================================
   //   . . . РЕДИЗАЙН ИГРОВОЙ . . .
@@ -12115,51 +12248,7 @@ if (targetCW3.test(window.location.href)) {
       500
     );
   }
-  // ====================================================================================================================
-  //   . . . ДУБЛИРОВАНИЕ ДЕЙСТВИЙ НА ВКЛАДКУ БРАУЗЕРА . . .
-  // ====================================================================================================================
-  if (settings.duplicateTimeInBrowserTab) {
-    const titleElement = document.querySelector("title");
-    let blockMess = null;
 
-    function updateTitle() {
-      if (!blockMess) {
-        blockMess = document.getElementById("block_mess");
-        if (!blockMess) {
-          titleElement.textContent = "Игровая / CatWar";
-          return;
-        }
-      }
-
-      const messageText = blockMess.textContent.trim();
-
-      const catNameMatch = messageText.match(/^(.+?)\s+держит/);
-      const catName = catNameMatch ? catNameMatch[1] : "";
-
-      if (catName) {
-        titleElement.textContent = `Поднят. Во рту | ${catName}`;
-      } else {
-        const timeActionMatch = messageText.match(
-          /^(.+?)\s+(\d+\s*(?:ч\s*)?\d+\s*мин\s*\d+\s*с|\d+\s*мин\s*\d+\s*с|\d+\s*с)\.\s*(Отменить)?$/
-        );
-
-        if (timeActionMatch) {
-          const actionText = timeActionMatch[1].trim();
-          const currentTime = timeActionMatch[2].trim();
-
-          titleElement.textContent = `${currentTime} | ${actionText}`;
-        } else {
-          titleElement.textContent = "Игровая / CatWar";
-        }
-      }
-    }
-
-    setupMutationObserver("#tr_actions", updateTitle, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-    });
-  }
   // ====================================================================================================================
   //   . . . ЛОГ ЧИСТИЛЬЩИКОВ . . .
   // ====================================================================================================================function cleaningLogUpdate(mutationsList) {
@@ -13364,85 +13453,195 @@ if (targetCW3.test(window.location.href)) {
       }
     }
   }
-  // ====================================================================================================================
-  //   . . . ОКОНЧАНИЕ ДЕЙСТВИЯ . . .
-  // ====================================================================================================================
-  if (settings.notificationActionEnd) {
-    let actionStartTime = null;
-    let earlyNotified = false;
 
-    const observer = new MutationObserver(() => {
-      const blockMess = document.getElementById("block_mess");
-      const text = blockMess ? blockMess.textContent.trim() : "";
+  // ====================================================================================================================
+  //   . . . УПРАВЛЕНИЕ ДЕЙСТВИЯМИ, ТАЙМЕРАМИ И УВЕДОМЛЕНИЯМИ . . .
+  // ====================================================================================================================
 
-      if (text !== "" && !actionStartTime) {
-        actionStartTime = Date.now();
-        earlyNotified = false;
+  /**
+   * @class ActionState
+   * @description Parses and normalizes raw action strings from Vue. 
+   */
+  const ActionState = {
+    isActive: false,
+    isPickedUp: false,
+    actionName: "",
+    timeString: "",
+    totalSeconds: 0,
+    pickerName: "",
+
+    parse(actionMess, actionMessTemplate) {
+      this.isActive = false;
+      this.isPickedUp = false;
+      this.actionName = "";
+      this.timeString = "";
+      this.totalSeconds = 0;
+      this.pickerName = "";
+
+      if (!actionMess) return;
+
+      try {
+        if (actionMess.includes("держит вас во рту")) {
+          this.isPickedUp = true;
+          const match = actionMess.match(/^(.+?)\s+держит/);
+          if (match) this.pickerName = match[1];
+          return;
+        }
+
+        this.isActive = true;
+        
+        const timeMatch = actionMess.match(/(?:(\d+)\s*ч\s*)?(?:(\d+)\s*мин\s*)?(\d+)\s*с/);
+        if (timeMatch) {
+          const h = parseInt(timeMatch[1] || 0, 10);
+          const m = parseInt(timeMatch[2] || 0, 10);
+          const s = parseInt(timeMatch[3] || 0, 10);
+          this.totalSeconds = h * 3600 + m * 60 + s;
+          this.timeString = timeMatch[0].trim();
+        }
+
+        if (actionMessTemplate && actionMessTemplate.includes("&&")) {
+          let cleanAction = actionMessTemplate.replace("&&", "").trim();
+          if (cleanAction.endsWith('.')) cleanAction = cleanAction.slice(0, -1).trim();
+          this.actionName = cleanAction;
+        } else {
+          const actionTextMatch = actionMess.match(/^(.+?)\s+(\d+\s*(?:ч\s*)?\d+\s*мин\s*\d+\s*с|\d+\s*мин\s*\d+\s*с|\d+\s*с)\.\s*(Отменить)?$/);
+          this.actionName = actionTextMatch ? actionTextMatch[1].trim() : actionMess;
+        }
+      } catch (error) {
+        console.error("UwU | ActionState parse error:", error);
       }
+    }
+  };
 
-      if (text !== "") {
-        if (settings.notificationActionEndEarly && !earlyNotified) {
-          const timeMatch = text.match(/(?:(\d+)\s*ч\s*)?(?:(\d+)\s*мин\s*)?(\d+)\s*с/);
-          if (timeMatch) {
-            const h = parseInt(timeMatch[1] || 0, 10);
-            const m = parseInt(timeMatch[2] || 0, 10);
-            const s = parseInt(timeMatch[3] || 0, 10);
-            const totalSeconds = h * 3600 + m * 60 + s;
+  /**
+   * @class BrowserTabManager
+   * @description Synchronizes the browser tab title with the current in-game action state.
+   */
+  const BrowserTabManager = {
+    baseTitle: "Игровая / CatWar",
+    
+    update() {
+      if (!settings.duplicateTimeInBrowserTab) return;
 
-            if (totalSeconds <= 3 && totalSeconds > 0) {
-              soundManager.playSound(
-                settings.notificationActionEndSound,
-                settings.notificationActionEndVolume
-              );
-              earlyNotified = true;
-            }
+      try {
+        if (!ActionState.isActive && !ActionState.isPickedUp) {
+          if (document.title !== this.baseTitle) {
+            document.title = this.baseTitle;
+          }
+          return;
+        }
+
+        if (ActionState.isPickedUp) {
+          document.title = `Поднят. Во рту | ${ActionState.pickerName}`;
+          return;
+        }
+
+        if (ActionState.isActive) {
+          document.title = `${ActionState.timeString} | ${ActionState.actionName}`;
+        }
+      } catch (error) {
+        console.error("UwU | BrowserTabManager update error:", error);
+      }
+    }
+  };
+
+  /**
+   * @class ActionSoundManager
+   * @description Handles audio alerts for action completion. 
+   */
+  const ActionSoundManager = {
+    actionStartTime: null,
+    earlyNotified: false,
+    wasActive: false,
+
+    update() {
+      if (!settings.notificationActionEnd && !settings.notificationActionEndEarly) return;
+
+      try {
+        const isCurrentlyActive = ActionState.isActive;
+        const secs = ActionState.totalSeconds;
+
+        if (isCurrentlyActive && !this.wasActive) {
+          this.actionStartTime = Date.now();
+          this.earlyNotified = false;
+          this.wasActive = true;
+        }
+
+        if (isCurrentlyActive && settings.notificationActionEndEarly && !this.earlyNotified) {
+          if (secs <= 3 && secs > 0) {
+            soundManager.playSound(settings.notificationActionEndSound, settings.notificationActionEndVolume);
+            this.earlyNotified = true;
           }
         }
-      } else if (text === "" && actionStartTime) {
-        const actionEndTime = Date.now();
-        const actionDuration = actionEndTime - actionStartTime;
 
-        if (actionDuration >= 6000 && !earlyNotified) {
-          soundManager.playSound(
-            settings.notificationActionEndSound,
-            settings.notificationActionEndVolume
-          );
+        if (!isCurrentlyActive && this.wasActive) {
+          const actionEndTime = Date.now();
+          const actionDuration = this.actionStartTime ? (actionEndTime - this.actionStartTime) : 0;
+
+          if (actionDuration >= 6000 && !this.earlyNotified && settings.notificationActionEnd) {
+            soundManager.playSound(settings.notificationActionEndSound, settings.notificationActionEndVolume);
+          }
+
+          this.actionStartTime = null;
+          this.earlyNotified = false;
+          this.wasActive = false;
         }
-        actionStartTime = null;
-        earlyNotified = false;
+      } catch (error) {
+        console.error("UwU | ActionSoundManager update error:", error);
+        this.wasActive = false; 
       }
-    });
-
-    const targetNode = document.getElementById("tr_actions");
-    if (targetNode) {
-      observer.observe(targetNode, { childList: true, subtree: true, characterData: true });
     }
-  }
-  // ====================================================================================================================
-  //   . . . ПОДНЯЛИ В РОТ . . .
-  // ====================================================================================================================
-  function handleInMouthNotification() {
-    const blockMess = document.getElementById("block_mess");
-    if (!blockMess) return;
+  };
 
-    const observer = new MutationObserver(() => {
-      if (blockMess.innerHTML.includes("во рту. Вы не сможете выбраться")) {
-        soundManager.playSound(
-          settings.notificationInMouthSound,
-          settings.notificationInMouthVolume
-        );
+  /**
+   * @class InMouthSoundManager
+   * @description Triggers a specific audio alert when the player is grabbed by another character.
+   */
+  const InMouthSoundManager = {
+    wasPickedUp: false,
+
+    update() {
+      if (!settings.notificationInMouth) return;
+
+      try {
+        const isCurrentlyPickedUp = ActionState.isPickedUp;
+
+        if (isCurrentlyPickedUp && !this.wasPickedUp) {
+          soundManager.playSound(settings.notificationInMouthSound, settings.notificationInMouthVolume);
+        }
+
+        this.wasPickedUp = isCurrentlyPickedUp;
+      } catch (error) {
+        console.error("UwU | InMouthSoundManager update error:", error);
       }
-    });
+    }
+  };
 
-    observer.observe(blockMess, { childList: true, subtree: true });
-  }
+  /**
+   * @class MainActionObserver
+   * @description The single subscriber to the Vue reactivity system. 
+   * Broadcasts state changes to all managers safely.
+   */
+  const MainActionObserver = {
+    init() {
+      watchVueData('cat.actionMess', (newMess) => {
+        try {
+          const template = getVueData('cat.actionMessTemplate') || "";
+          
+          ActionState.parse(newMess, template);
 
-  if (settings.notificationInMouth) {
-    setupMutationObserver("#tr_actions", handleInMouthNotification, {
-      childList: true,
-      subtree: true,
-    });
-  }
+          BrowserTabManager.update();
+          ActionSoundManager.update();
+          InMouthSoundManager.update();
+        } catch (error) {
+          console.error("UwU | MainActionObserver watcher error:", error);
+        }
+      }, { deep: false, immediate: true }); 
+    }
+  };
+
+  MainActionObserver.init();
+
   // ====================================================================================================================
   //   . . . ВВЕЛИ В БОЕВУЮ СТОЙКУ . . .
   // ====================================================================================================================
@@ -13486,12 +13685,11 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . СОВРЕМЕННЫЙ (НОВЫЙ) ЧАТ . . .
   // ====================================================================================================================
-  // я на этом инвалиде потерял все нервы кетвар желаю тебе счастья удачи и всего хорошего 😌😌😌😌😌😌😌😌😌😌
-  // И ДО СИХ ПОР ТЕРЯЮ ААААА
-  // TODO - как-то пределать шоле
+
   if (settings.newChat) {
 
     const chatRanksCache = new Map();
+    const processedMessageIds = new Set();
 
     function updateChatRankAsync(catId, rankElement) {
       if (!rankElement || catId === ". . .") return;
@@ -13502,28 +13700,31 @@ if (targetCW3.test(window.location.href)) {
       }
 
       setTimeout(() => {
-        const profileLink = document.querySelector(`.cat_tooltip a[href="/cat${catId}"]`);
-        
-        if (profileLink) {
-          const tooltip = profileLink.closest('.cat_tooltip');
-          const rankNodes = tooltip.querySelectorAll('div > small > i');
-          
-          if (rankNodes.length > 0) {
-            const actualRankNode = rankNodes[rankNodes.length - 1];
-            const rankTextContent = actualRankNode.textContent.trim();
+        try {
+          const profileLink = document.querySelector(`.cat_tooltip a[href="/cat${catId}"]`);
+          if (profileLink) {
+            const tooltip = profileLink.closest('.cat_tooltip');
+            const rankNodes = tooltip.querySelectorAll('div > small > i');
+            
+            if (rankNodes.length > 0) {
+              const actualRankNode = rankNodes[rankNodes.length - 1];
+              const rankTextContent = actualRankNode.textContent.trim();
 
-            if (rankTextContent !== "") {
-              const rankHtml = ` <small><i>(${rankTextContent})</i></small> `;
-              chatRanksCache.set(catId, rankHtml);
-              rankElement.innerHTML = rankHtml;
+              if (rankTextContent !== "") {
+                const rankHtml = ` <small><i>(${rankTextContent})</i></small> `;
+                chatRanksCache.set(catId, rankHtml);
+                rankElement.innerHTML = rankHtml;
+              } else {
+                chatRanksCache.set(catId, "");
+              }
             } else {
               chatRanksCache.set(catId, "");
             }
           } else {
-            chatRanksCache.set(catId, "");
+            rankElement.innerHTML = "";
           }
-        } else {
-          rankElement.innerHTML = "";
+        } catch (error) {
+          console.error(`UwU | Error fetching rank for cat ${catId}:`, error);
         }
       }, 0);
     }
@@ -13531,135 +13732,178 @@ if (targetCW3.test(window.location.href)) {
     const newChatContainer = document.createElement("div");
     newChatContainer.id = "uwu_chat_msg";
     const chatForm = document.getElementById("chat_form");
-    chatForm.parentNode.insertBefore(newChatContainer, chatForm.nextSibling);
+    
+    if (chatForm) {
+      chatForm.parentNode.insertBefore(newChatContainer, chatForm.nextSibling);
+    } else {
+      console.error("UwU | chat_form not found. New chat container could not be inserted.");
+    }
 
+    /**
+     * Single event delegation for the entire chat container.
+     */
     newChatContainer.addEventListener("click", function (event) {
-      const target = event.target;
+      try {
+        const target = event.target;
 
-      const nickElement = target.closest(".nick");
-      if (nickElement) {
-        const textArea = document.getElementById("text");
-        let nick = nickElement.textContent;
-        if (settings.addCommaAfterNick) {
-          nick += ", ";
+        const nickElement = target.closest(".nick");
+        if (nickElement) {
+          event.preventDefault();
+          const textArea = document.getElementById("text") || document.getElementById("text-hide");
+          let nick = nickElement.textContent;
+          if (settings.addCommaAfterNick) nick += ", ";
+          
+          textArea.value += nick;
+          textArea.focus();
+          return;
         }
-        textArea.value += nick;
-        textArea.focus();
-        return;
-      }
 
-      const reportButton = target.closest(".msg_report");
-      if (reportButton) {
-        const dataId = reportButton.getAttribute("data-id");
-        const originalReportLink = document.querySelector(
-          `#chat_msg .msg_report[data-id="${dataId}"]`
-        );
-        if (originalReportLink) {
-          originalReportLink.click();
+        const reportButton = target.closest(".msg_report");
+        if (reportButton) {
+          event.preventDefault();
+          
+          try {
+            const chatContext = getVueData('chat');
+            if (chatContext && typeof chatContext.report === 'function') {
+              chatContext.report({ target: reportButton });
+            } else {
+              console.error("UwU | chat.report function is missing in Vue state. Unable to report message.");
+            }
+          } catch (error) {
+            console.error("UwU | Error invoking report function:", error);
+          }
+          return;
         }
-        return;
+      } catch (error) {
+        console.error("UwU | Chat click delegation error:", error);
       }
     });
 
-    const chatElement = document.getElementById("chat_msg");
-    if (chatElement) {
-      const observer = new MutationObserver(handleNewChatMessage);
-      observer.observe(chatElement, { childList: true, subtree: true });
-    }
+    /**
+     * Analyzes the message text for user-defined notification names.
+     * 
+     * @param {string} text - The raw HTML message text.
+     * @returns {{text: string, isMentioned: boolean}} Processed text with highlighted mentions and a trigger flag.
+     */
+    function processMentions(text) {
+      let processedText = text;
+      let isMentioned = false;
 
-    let addedSpanCount = 0;
+      try {
+        if (settings.namesForNotification) {
+          const names = settings.namesForNotification
+            .trim()
+            .split(/\s*,\s*/)
+            .filter((name) => name);
 
-    function handleNewChatMessage(mutations) {
-      const addedNodes = Array.from(mutations)
-        .flatMap((mutation) => Array.from(mutation.addedNodes))
-        .filter(
-          (node) =>
-            node.nodeName === "SPAN" && node.querySelector("td > .chat_text")
-        );
-
-      addedSpanCount += addedNodes.length;
-      processChatMessages(addedSpanCount);
-      addedSpanCount = 0;
-    }
-
-    function processChatMessages(messageCount) {
-      const chatMessages = document.querySelectorAll("#chat_msg > span");
-      const messagesArray = Array.from(chatMessages);
-      const messagesToProcess = messagesArray.slice(0, messageCount);
-      messagesToProcess.reverse();
-
-      messagesToProcess.forEach((message) => {
-        copyMessageToNewChat(message);
-      });
-    }
-
-    function copyMessageToNewChat(chatMessage) {
-      const chatTextSpan = chatMessage.querySelector("td > .chat_text");
-      const messageSpan = chatTextSpan.querySelector("span");
-      const messageText = messageSpan ? messageSpan.innerHTML : "";
-      const nickElement = chatTextSpan.querySelector(".nick");
-      const nickName = nickElement ? nickElement.textContent.trim() : "";
-      const chatTextClasses = chatTextSpan.className;
-      const nickStyle = nickElement ? nickElement.getAttribute("style") : "";
-      let nameFound = false;
-
-      let processedText = messageText;
-
-      if (settings.namesForNotification) {
-        const names = settings.namesForNotification
-          .trim()
-          .split(/\s*,\s*/)
-          .filter((name) => name);
-
-        names.forEach((name) => {
-          const regex = new RegExp(
-            `(^|\\s|[.,!?])(${name})(?=$|\\s|[.,!?])`,
-            "gi"
-          );
-          processedText = processedText.replace(regex, (match, p1, p2) => {
-            nameFound = true;
-            return `${p1}<span class="myname">${p2}</span>`;
+          names.forEach((name) => {
+            const regex = new RegExp(`(^|\\s|[.,!?])(${name})(?=$|\\s|[.,!?])`, "gi");
+            processedText = processedText.replace(regex, (match, p1, p2) => {
+              isMentioned = true;
+              return `${p1}<span class="myname">${p2}</span>`;
+            });
           });
-        });
+        }
+
+        if (!isMentioned && text.includes('class="myname"')) {
+          isMentioned = true;
+        }
+      } catch (error) {
+        console.error("UwU | Error processing mentions:", error);
       }
 
-      if (!nameFound && messageSpan && messageSpan.querySelector(".myname")) {
-        nameFound = true;
+      return { text: processedText, isMentioned };
+    }
+
+    /**
+     * Transforms the raw Vue message payload into an injected HTML string.
+     * 
+     * @param {Object} msgData - The message payload from 'chat.messages'.
+     * @param {number} msgData.id - Unique message identifier.
+     * @param {string} msgData.text - Message content.
+     * @param {number} [msgData.volume] - Notification volume (0-10).
+     * @param {number} msgData.cat - Sender's profile ID.
+     * @param {string} msgData.login - Sender's nickname.
+     * @param {number} [msgData.time] - Unix timestamp of the message (server-side).
+     * @param {string} [msgData.textTransformation] - Optional CSS modifier (e.g., 'italic').
+     * @returns {{html: string, rankSpanId: string, catId: string|number}}
+     */
+    function buildMessageHTML(msgData) {
+      const { text, isMentioned } = processMentions(msgData.text);
+
+      if (isMentioned) {
+        soundManager.playSound(settings.myNameNotificationSound, settings.notificationMyNameVolume);
       }
 
-      if (nameFound) {
-        soundManager.playSound(
-          settings.myNameNotificationSound,
-          settings.notificationMyNameVolume
-        );
-      }
-
-      const profileLink = chatMessage.querySelector('a[href^="/cat"]').href;
-      const catIdMatch = profileLink.match(/\/cat(\d+)/);
-      const catId = catIdMatch ? catIdMatch[1] : ". . .";
-
-      const reportLink = chatMessage.querySelector(".msg_report");
-      const dataId = reportLink ? reportLink.getAttribute("data-id") : "";
-      
+      const volumeClass = msgData.volume !== undefined ? `vlm${msgData.volume}` : "vlm5";
+      const chatTextClasses = `chat_text ${volumeClass}`;
+      const nickStyle = msgData.textTransformation === 'italic' ? 'font-style: italic;' : '';
+      const profileLink = `/cat${msgData.cat}`;
+      const catId = msgData.cat || ". . .";
+      const dataId = msgData.id;
+      const nickName = msgData.login || "Неизвестный";
       const rankSpanId = `uwu-rank-${dataId || Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
-      const newChatMessageHTML =
-        `
+      let timeStr = "";
+      if (settings.showChatTime && msgData.time) {
+        const date = new Date(msgData.time * 1000);
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        timeStr = `<span class="uwu-chat-time">[${hours}:${minutes}]</span> `;
+      }
+
+      const html = `
         <hr>
         <div id="msg">
-          <div class="${chatTextClasses}">${processedText} - <b class="nick" style="${nickStyle}">${nickName}</b><span id="${rankSpanId}"></span> <i>[${catId}]</i></div>
+          <div class="${chatTextClasses}">${timeStr}${text} - <b class="nick" style="${nickStyle}">${nickName}</b><span id="${rankSpanId}"></span> <i>[${catId}]</i></div>
           <div style="display: flex; width: 42px; justify-content: flex-end; margin-right: 2px;">
             <a href="${profileLink}" title="Перейти в профиль" target="_blank" rel="noopener noreferrer">➝</a>&nbsp;|&nbsp;
-            <a href="#" title="Пожаловаться на нарушение ОПИ" class="msg_report" data-id="${dataId}">X</a>
+            <a href="#" title="Пожаловаться на нарушение ОПИ" class="msg_report" data-id="${dataId}" data-login="${nickName}">X</a>
           </div>
         </div>
       `;
-      newChatContainer.insertAdjacentHTML("afterbegin", newChatMessageHTML);
-      
-      if (settings.showChatRanks) {
-        updateChatRankAsync(catId, document.getElementById(rankSpanId));
+
+      return { html, rankSpanId, catId };
+    }
+
+    function injectMessageToDOM(msgData) {
+      try {
+        const { html, rankSpanId, catId } = buildMessageHTML(msgData);
+        
+        newChatContainer.insertAdjacentHTML("afterbegin", html);
+        
+        if (settings.showChatRanks) {
+          updateChatRankAsync(catId, document.getElementById(rankSpanId));
+        }
+      } catch (error) {
+        console.error(`UwU | Message rendering failed for ID ${msgData && msgData.id}:`, error);
       }
     }
+
+    watchVueData('chat.messages', (newMessages) => {
+      try {
+        if (!newMessages || !Array.isArray(newMessages)) return;
+
+        const batch = newMessages.filter(msg => msg && msg.id && !processedMessageIds.has(msg.id));
+        if (batch.length === 0) return;
+
+        batch.sort((a, b) => a.id - b.id);
+
+        batch.forEach(msg => {
+          processedMessageIds.add(msg.id);
+          injectMessageToDOM(msg);
+        });
+        
+        // Мы удаляем оригинальные сообщения, чтобы сам CatWar не пытался с ними возиться 
+        // (а он это делает ОЧЕНЬ плохо) и не нагружал лишний раз игровую.
+        const originalChat = document.getElementById("chat_msg");
+        if (originalChat && originalChat.innerHTML !== "") {
+          originalChat.innerHTML = ""; 
+        }
+      } catch (error) {
+        console.error("UwU | Chat messages watcher error:", error);
+      }
+    }, { deep: true, immediate: true });
 
     const uwuChatMsg = document.createElement("style");
     uwuChatMsg.innerHTML = `
@@ -13670,9 +13914,16 @@ if (targetCW3.test(window.location.href)) {
           display: flex;
           flex-direction: ${settings.reverseChat ? "column-reverse" : "column"};
         }
+
+        .uwu-chat-time {
+          opacity: 0.5;
+          font-size: 0.85em;
+          margin-right: 4px;
+          font-family: monospace;
+        }
   
         #chat_msg {
-          display: none;
+          display: none !important; 
         }
   
         #msg {
@@ -13686,6 +13937,7 @@ if (targetCW3.test(window.location.href)) {
      `;
     document.head.appendChild(uwuChatMsg);
   }
+
   // ====================================================================================================================
   //   . . . НОВЫЙ ВВОД ЧАТА . . .
   // ====================================================================================================================
@@ -15958,6 +16210,12 @@ function moonCalculator() {
         return;
       }
 
+      const dateMatch = infoElement.textContent.match(/\d{4}-\d\d-\d\d \d\d:\d\d/);
+      if (!dateMatch) {
+        calculatorAgeElement.classList.add("hidden");
+        return;
+      }
+
       calculatorAgeElement.classList.remove("hidden");
 
       const birthDateString = infoElement.textContent
@@ -16294,19 +16552,23 @@ function setupActivityCalc() {
     `;
   }
 
-  const activity = document
-    .querySelector("#act_name b")
-    .textContent.split(" (");
+  const actNameEl = document.querySelector("#act_name b");
+  if (!actNameEl) return;
+  
+  const activity = actNameEl.textContent.toLowerCase().split(" (");
   const progress = {};
 
   const currentStage = activityStages.find(
-    (stage) => stage.name === activity[0]
+    (stage) => stage.name.toLowerCase() === activity[0].trim()
   );
 
   if (currentStage) {
     progress.doneFromZero =
       currentStage.fromZero + Number(activity[1].split("/")[0]);
     progress.stage = activityStages.indexOf(currentStage);
+  } else {
+    console.warn("UwU | Неизвестная стадия активности:", activity[0]);
+    return;
   }
 
   const activityInfoHTML =
@@ -16566,6 +16828,50 @@ if (targetSniff.test(window.location.href)) {
 // ====================================================================================================================
 //   . . . ПРЕДПРОСМОТР КОММЕНТАРИЯ . . .
 // ====================================================================================================================
+
+let sharedPreviewSocket = null;
+let sharedPreviewTimeout = null;
+let sharedPreviewCallback = null;
+
+/**
+ * Returns a single instance of the socket, creating it on the first call.
+ */
+function getPreviewSocket() {
+  if (!sharedPreviewSocket && typeof io !== "undefined") {
+    sharedPreviewSocket = io(window.location.origin, {
+      path: "/ws/blogs/socket.io",
+      reconnectionDelay: 10000,
+      reconnectionDelayMax: 20000,
+    });
+
+    sharedPreviewSocket.on("creation preview", (data) => {
+      if (sharedPreviewTimeout) {
+        clearTimeout(sharedPreviewTimeout);
+        sharedPreviewTimeout = null;
+      }
+
+      let htmlResult = data;
+      if (typeof data === "string") {
+        try {
+          const parsed = JSON.parse(data);
+          if (typeof parsed === "string") {
+            htmlResult = parsed;
+          } else if (parsed && parsed.text !== undefined) {
+            htmlResult = parsed.text;
+          }
+        } catch (e) {}
+      } else if (data && typeof data === "object") {
+        htmlResult = data.text !== undefined ? data.text : data;
+      }
+
+      if (sharedPreviewCallback) {
+        sharedPreviewCallback(htmlResult);
+      }
+    });
+  }
+  return sharedPreviewSocket;
+}
+
 function addCommentPreview() {
   const form = document.querySelector("#send_comment_form");
   if (!form || document.getElementById("comment-preview")) return;
@@ -16573,9 +16879,7 @@ function addCommentPreview() {
   const lastParagraph = form.querySelector("p:last-child");
   lastParagraph.insertAdjacentHTML(
     "afterbegin",
-    `
-    <input type="button" id="comment-preview" value="Предпросмотр"> 
-    `
+    `<input type="button" id="comment-preview" value="Предпросмотр"> `,
   );
 
   form.insertAdjacentHTML(
@@ -16583,34 +16887,80 @@ function addCommentPreview() {
     `
     <p id="comment-preview-hide" style="display: none; margin: 0.5em 0;"><a href="#">Скрыть предпросмотр</a></p>
     <div id="comment-preview-div" style="display: none;"></div>
-    `
+    `,
   );
 
   const previewButton = document.getElementById("comment-preview");
   const hideParagraph = document.getElementById("comment-preview-hide");
   const previewDiv = document.getElementById("comment-preview-div");
 
-  const ws = io(window.location.origin, {
-    path: "/ws/blogs/socket.io",
-    reconnectionDelay: 10000,
-    reconnectionDelayMax: 20000,
-  });
-
-  ws.on("creation preview", (data) => {
-    previewDiv.innerHTML = data;
+  function showResult(html) {
+    previewDiv.innerHTML = html || "Пустое сообщение";
     previewDiv.style.display = "block";
     hideParagraph.style.display = "block";
-  });
+    previewButton.disabled = false;
+    previewButton.value = "Предпросмотр";
+  }
+
+  /**
+   * Fallback to the cat profile REST API if the blog socket is unavailable.
+   */
+  async function fetchFallback(text) {
+    try {
+      const response = await fetch("/rest/site/bbCodeConvert", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: JSON.stringify({ text: text }),
+      });
+      const raw = await response.text();
+      let html = raw;
+
+      try {
+        const json = JSON.parse(raw);
+        if (typeof json === "string") {
+          html = json;
+        } else if (json && json.text !== undefined) {
+          html = json.text;
+        }
+      } catch (e) {}
+
+      showResult(html);
+    } catch (err) {
+      showResult(
+        `<span style="color:#cd4141">Ошибка: сервер не ответил на запрос предпросмотра.</span>`,
+      );
+    }
+  }
 
   previewButton.addEventListener("click", function () {
     const commentText = document.getElementById("comment").value;
-    ws.emit("creation preview", commentText);
+    if (!commentText.trim()) return;
+
+    previewButton.disabled = true;
+    previewButton.value = "Загрузка...";
+
+    sharedPreviewCallback = showResult;
+
+    const ws = getPreviewSocket();
+
+    if (ws && ws.connected) {
+      ws.emit("creation preview", commentText);
+
+      if (sharedPreviewTimeout) clearTimeout(sharedPreviewTimeout);
+      sharedPreviewTimeout = setTimeout(() => fetchFallback(commentText), 3000);
+    } else {
+      fetchFallback(commentText);
+    }
   });
 
   form
     .querySelector('[type="submit"]')
     .addEventListener("click", hideCommentPreview);
-  hideParagraph.addEventListener("click", function (e) {
+
+  hideParagraph.addEventListener("click", (e) => {
     e.preventDefault();
     hideCommentPreview();
   });
@@ -16619,8 +16969,11 @@ function addCommentPreview() {
     hideParagraph.style.display = "none";
     previewDiv.innerHTML = "";
     previewDiv.style.display = "none";
+    previewButton.disabled = false;
+    previewButton.value = "Предпросмотр";
   }
 }
+
 // ====================================================================================================================
 //   . . . КНОПКИ ОТВЕТИТЬ И ЦИТИРОВАТЬ . . .
 // ====================================================================================================================
@@ -16898,10 +17251,13 @@ function initializeTemplates() {
     pageType
   ) {
     const targetElement = document.getElementById(targetElementId);
+    if (!targetElement) return;
 
     if (!document.getElementById("uwu-templates")) {
       if (targetElementId === "mess_form") {
         targetElement.insertAdjacentHTML("beforeend", templateContainer);
+      } else if (targetElementId === "send_comment_form") {
+        targetElement.insertAdjacentHTML("afterend", templateContainer);
       } else {
         targetElement.insertAdjacentHTML("afterbegin", templateContainer);
       }
@@ -16965,7 +17321,7 @@ function initializeTemplates() {
             }
             if (subjectElementId) {
               document.getElementById(subjectElementId).value =
-                template.netbject || "";
+                template.subject || "";
             }
           });
 
@@ -17008,7 +17364,7 @@ function initializeTemplates() {
           document.getElementById(contentElementId).value;
       }
       if (subjectElementId) {
-        templates[index].netbject =
+        templates[index].subject =
           document.getElementById(subjectElementId).value || "";
       }
       uwuStorage.setItem("uwu_templates", templates);
@@ -17031,11 +17387,15 @@ function initializeTemplates() {
   }
 
   function checkUrlAndSetup() {
+    // 1. Личные сообщения
     if (targetLsNew.test(window.location.href) && settings.templatesInLs) {
       setupSingleCallback("#write_form", () =>
         setupTemplates("write_div", "text", "subject", "ls")
       );
-    } else if (
+    }
+    
+    // 2. Создание Блогов и Лент
+    if (
       (targetBlogsCreation.test(window.location.href) ||
         targetSniffCreation.test(window.location.href)) &&
       settings.templatesInBlogsAndSniffs
@@ -17048,7 +17408,23 @@ function initializeTemplates() {
           "blogsAndSniffs"
         )
       );
-    } else if (
+    }
+    
+    // 3. Комментарии в Блогах и Лентах
+    if (
+      (targetBlog.test(window.location.href) ||
+        targetSniff.test(window.location.href)) &&
+      settings.templatesInComments &&
+      !targetBlogsCreation.test(window.location.href) &&
+      !targetSniffCreation.test(window.location.href)
+    ) {
+      setupSingleCallback("#send_comment_form", () =>
+        setupTemplates("send_comment_form", "comment", null, "comments")
+      );
+    }
+
+    // 4. Чаты Игровой
+    if (
       targetChats.test(window.location.href) &&
       settings.templatesInChats
     ) {
@@ -17074,7 +17450,6 @@ initializeTemplates();
 //   . . . СОХРАНЕНИЕ ЛИЧНЫХ СООБЩЕНИЙ . . .
 // ====================================================================================================================
 if (targetLs.test(window.location.href) && settings.savingLS) {
-  // console.log("UwU | Модуль сохранения ЛС активен.");
 
   /**
    * Отображает сохраненное сообщение в контейнере.
@@ -17492,14 +17867,147 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
       window.location.search.includes("?id=") &&
       document.getElementById("msg_table")
     ) {
-      console.log("UwU | Обнаружена страница сообщения. Встраиваю кнопки...");
+      // console.log("UwU | Обнаружена страница сообщения. Встраиваю кнопки...");
       addSaveButtonsToMessagePage();
       hideSavedMessagesInterface();
     } else {
-      console.log("UwU | Обнаружена главная страница ЛС. Встраиваю вкладку...");
+      // console.log("UwU | Обнаружена главная страница ЛС. Встраиваю вкладку...");
       addSavedMessagesTab();
     }
   }
 
   setupMutationObserver("#main", initializeLSPageLogic, { childList: true });
+}
+
+// ====================================================================================================================
+//   . . . РЕДИЗАЙН АВТОМАТИЧЕСКИХ ПЛЕМЕННЫХ ДЕЙСТВИЙ . . .
+// ====================================================================================================================
+if (targetClanAutoActions.test(window.location.href) && settings.automaticActionsRedesign) {
+  function applyAutoActionsRedesign() {
+    const style = document.createElement("style");
+    style.id = "uwu-aa-redesign";
+    style.innerHTML = /* CSS */ `
+      .aa-page {
+          font-family: "Montserrat", sans-serif;
+      }
+
+      .aa-controls {
+          gap: 10px 15px !important;
+      }
+      .aa-field {
+          display: block !important;
+      }
+      .aa-field span {
+          display: block;
+          margin-bottom: 3px;
+      }
+
+      .aa-report-detail {
+          background: rgba(0, 0, 0, 0.15);
+          border: 1px solid rgba(255, 255, 255, 0.05) !important;
+          border-radius: 10px;
+          padding: 10px 15px !important;
+      }
+
+      .aa-report-detail > p:first-of-type {
+          background: rgba(0, 0, 0, 0.2);
+          padding: 10px 15px !important;
+          border-radius: 8px;
+          line-height: 1.6;
+          font-size: 13px;
+          column-count: 2;
+          column-gap: 20px;
+          border-left: 2px solid rgba(255, 255, 255, 0.2);
+      }
+      
+      .aa-report-detail > p:first-of-type b {
+          color: rgba(255, 255, 255, 0.45);
+          font-weight: normal;
+          margin-right: 4px;
+      }
+
+      .aa-table {
+          border: none !important;
+          width: 100%;
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 8px;
+          overflow: hidden;
+          margin-bottom: 10px !important;
+      }
+      .aa-table th, .aa-table td {
+          border: none !important;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+          padding: 4px 8px !important;
+          vertical-align: middle !important;
+          font-size: 13px;
+      }
+      .aa-table th {
+          background: rgba(255, 255, 255, 0.05);
+          text-transform: uppercase;
+          font-size: 11px;
+          letter-spacing: 0.5px;
+          color: rgba(255, 255, 255, 0.5);
+      }
+      .aa-table tr:last-child td {
+          border-bottom: none !important;
+      }
+      .aa-table tr:hover td {
+          background: rgba(255, 255, 255, 0.05);
+      }
+
+      .aa-field select, .aa-field input[type="text"], .aa-event-controls select {
+          background-color: rgba(0, 0, 0, 0.4) !important;
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+          color: #d5d5d5;
+          padding: 4px 8px !important;
+          border-radius: 6px;
+          outline: none;
+          font-size: 13px;
+          transition: border-color 0.2s;
+      }
+      .aa-field select:focus, .aa-field input[type="text"]:focus, .aa-event-controls select:focus {
+          border-color: rgba(255, 255, 255, 0.3) !important;
+      }
+
+      .aa-actions input[type="submit"], .aa-event-controls input[type="submit"] {
+          background-color: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          padding: 4px 12px !important;
+          border-radius: 10px;
+          font-size: 13px;
+          color: #d5d5d5;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+      }
+      .aa-actions input[type="submit"]:hover, .aa-event-controls input[type="submit"]:hover {
+          background-color: rgba(255, 255, 255, 0.15);
+      }
+
+      .aa-report-link, .aa-report-close {
+          color: #83e5ff;
+          text-decoration: none;
+          transition: opacity 0.2s;
+          font-weight: bold;
+      }
+      .aa-report-link:hover, .aa-report-close:hover {
+          opacity: 0.8;
+          text-decoration: underline;
+      }
+      
+      .aa-pages a, .aa-pages span {
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+          border-radius: 5px;
+          background: rgba(0, 0, 0, 0.2);
+          padding: 2px 6px !important;
+          font-size: 12px;
+      }
+      .aa-pages .is-current {
+          background: rgba(255, 255, 255, 0.1);
+          color: #fff;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  applyAutoActionsRedesign();
 }
