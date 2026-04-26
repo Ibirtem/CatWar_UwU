@@ -16828,9 +16828,50 @@ if (targetSniff.test(window.location.href)) {
 // ====================================================================================================================
 //   . . . ПРЕДПРОСМОТР КОММЕНТАРИЯ . . .
 // ====================================================================================================================
-// ====================================================================================================================
-//   . . . ПРЕДПРОСМОТР КОММЕНТАРИЯ . . .
-// ====================================================================================================================
+
+let sharedPreviewSocket = null;
+let sharedPreviewTimeout = null;
+let sharedPreviewCallback = null;
+
+/**
+ * Returns a single instance of the socket, creating it on the first call.
+ */
+function getPreviewSocket() {
+  if (!sharedPreviewSocket && typeof io !== "undefined") {
+    sharedPreviewSocket = io(window.location.origin, {
+      path: "/ws/blogs/socket.io",
+      reconnectionDelay: 10000,
+      reconnectionDelayMax: 20000,
+    });
+
+    sharedPreviewSocket.on("creation preview", (data) => {
+      if (sharedPreviewTimeout) {
+        clearTimeout(sharedPreviewTimeout);
+        sharedPreviewTimeout = null;
+      }
+
+      let htmlResult = data;
+      if (typeof data === "string") {
+        try {
+          const parsed = JSON.parse(data);
+          if (typeof parsed === "string") {
+            htmlResult = parsed;
+          } else if (parsed && parsed.text !== undefined) {
+            htmlResult = parsed.text;
+          }
+        } catch (e) {}
+      } else if (data && typeof data === "object") {
+        htmlResult = data.text !== undefined ? data.text : data;
+      }
+
+      if (sharedPreviewCallback) {
+        sharedPreviewCallback(htmlResult);
+      }
+    });
+  }
+  return sharedPreviewSocket;
+}
+
 function addCommentPreview() {
   const form = document.querySelector("#send_comment_form");
   if (!form || document.getElementById("comment-preview")) return;
@@ -16838,7 +16879,7 @@ function addCommentPreview() {
   const lastParagraph = form.querySelector("p:last-child");
   lastParagraph.insertAdjacentHTML(
     "afterbegin",
-    `<input type="button" id="comment-preview" value="Предпросмотр"> `
+    `<input type="button" id="comment-preview" value="Предпросмотр"> `,
   );
 
   form.insertAdjacentHTML(
@@ -16846,52 +16887,12 @@ function addCommentPreview() {
     `
     <p id="comment-preview-hide" style="display: none; margin: 0.5em 0;"><a href="#">Скрыть предпросмотр</a></p>
     <div id="comment-preview-div" style="display: none;"></div>
-    `
+    `,
   );
 
   const previewButton = document.getElementById("comment-preview");
   const hideParagraph = document.getElementById("comment-preview-hide");
   const previewDiv = document.getElementById("comment-preview-div");
-
-  /**
-   * Using WebSocket parser for blogs and "sniff".
-   */
-  const ws = io(window.location.origin, {
-    path: "/ws/blogs/socket.io",
-    reconnectionDelay: 10000,
-    reconnectionDelayMax: 20000,
-  });
-
-  let socketTimeout;
-
-  ws.on("creation preview", (data) => {
-    clearTimeout(socketTimeout);
-    
-    const htmlResult = (data && typeof data === 'object') ? data.text : data;
-    showResult(htmlResult);
-  });
-
-  /**
-   * Fallback to the cat profile REST API if the blog socket is unavailable.
-   */
-  async function fetchFallback(text) {
-    try {
-      const response = await fetch("/rest/site/bbCodeConvert", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" },
-        body: JSON.stringify({ text: text })
-      });
-      const raw = await response.text();
-      let html = raw;
-      try {
-        const json = JSON.parse(raw);
-        html = json.text || raw;
-      } catch(e) {}
-      showResult(html);
-    } catch (err) {
-      showResult(`<span style="color:#cd4141">Ошибка: сервер не ответил на запрос предпросмотра.</span>`);
-    }
-  }
 
   function showResult(html) {
     previewDiv.innerHTML = html || "Пустое сообщение";
@@ -16901,6 +16902,39 @@ function addCommentPreview() {
     previewButton.value = "Предпросмотр";
   }
 
+  /**
+   * Fallback to the cat profile REST API if the blog socket is unavailable.
+   */
+  async function fetchFallback(text) {
+    try {
+      const response = await fetch("/rest/site/bbCodeConvert", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: JSON.stringify({ text: text }),
+      });
+      const raw = await response.text();
+      let html = raw;
+
+      try {
+        const json = JSON.parse(raw);
+        if (typeof json === "string") {
+          html = json;
+        } else if (json && json.text !== undefined) {
+          html = json.text;
+        }
+      } catch (e) {}
+
+      showResult(html);
+    } catch (err) {
+      showResult(
+        `<span style="color:#cd4141">Ошибка: сервер не ответил на запрос предпросмотра.</span>`,
+      );
+    }
+  }
+
   previewButton.addEventListener("click", function () {
     const commentText = document.getElementById("comment").value;
     if (!commentText.trim()) return;
@@ -16908,23 +16942,38 @@ function addCommentPreview() {
     previewButton.disabled = true;
     previewButton.value = "Загрузка...";
 
+    sharedPreviewCallback = showResult;
+
+    const ws = getPreviewSocket();
+
     if (ws && ws.connected) {
       ws.emit("creation preview", commentText);
-      socketTimeout = setTimeout(() => fetchFallback(commentText), 3000);
+
+      if (sharedPreviewTimeout) clearTimeout(sharedPreviewTimeout);
+      sharedPreviewTimeout = setTimeout(() => fetchFallback(commentText), 3000);
     } else {
       fetchFallback(commentText);
     }
   });
 
-  form.querySelector('[type="submit"]').addEventListener("click", hideCommentPreview);
-  hideParagraph.addEventListener("click", (e) => { e.preventDefault(); hideCommentPreview(); });
+  form
+    .querySelector('[type="submit"]')
+    .addEventListener("click", hideCommentPreview);
+
+  hideParagraph.addEventListener("click", (e) => {
+    e.preventDefault();
+    hideCommentPreview();
+  });
 
   function hideCommentPreview() {
     hideParagraph.style.display = "none";
     previewDiv.innerHTML = "";
     previewDiv.style.display = "none";
+    previewButton.disabled = false;
+    previewButton.value = "Предпросмотр";
   }
 }
+
 // ====================================================================================================================
 //   . . . КНОПКИ ОТВЕТИТЬ И ЦИТИРОВАТЬ . . .
 // ====================================================================================================================
