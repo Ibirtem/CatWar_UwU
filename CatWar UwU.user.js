@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.44.0-04.26
+// @version      v1.44.1-04.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -104,7 +104,7 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.44.0";
+const current_uwu_version = "1.44.1";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -253,6 +253,7 @@ const uwuDefaultSettings = {
   parametersBackgroundImage: false,
   parametersUserBackgroundImage: false,
   parametersUserBackgroundImageURL: "",
+  parametersTextShadow: false,
 
   restoreBlogCreation: false,
   moreBBCodes: false,
@@ -1395,6 +1396,18 @@ const uwusettings =
             />
             <label for="user-Parameters-Theme"
               >Использовать своё оформление</label
+            >
+          </div>
+
+          <div>
+            <p>Полезно когда светлый текст на светлом фоне.</p>
+            <input
+              type="checkbox"
+              id="parameters-Text-Shadow"
+              data-setting="parametersTextShadow"
+            />
+            <label for="parameters-Text-Shadow"
+              >Тень текста параметров</label
             >
           </div>
 
@@ -3442,8 +3455,10 @@ const newsPanel =
         <p>— Чуть больше стабильности Калькулятора активности и возраста.</p>
         <p>— Исправлена ошибка с [object Object] при предпосмотре Комментария.</p>
         <p>— Удалены Блюр модули из Надстроек :( Зато теперь эта опция встроенна! :).</p>
+        <p>—— Update 1.44.1</p>
+        <p>—— Тени на Параметры и навыки теперь переключаются галочкой.</p>
         <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: 26.04.26</p>
+        <p>Дата выпуска: 27.04.26</p>
       </div>
     </div>
   `;
@@ -11505,7 +11520,6 @@ if (targetCW3.test(window.location.href)) {
 
     cssStyles += `#parameters_skills_block .bar-fill { background: ${otherFirstCellBackground}; }\n`;
     cssStyles += `#parameters_skills_block .bar { background: ${otherLastCellBackground}; }\n`;
-    cssStyles += `#parameters_skills_block .bar-data { text-shadow: 1px 1px 2px black; }\n`;
 
     const backgroundImageURL = settings.parametersUserBackgroundImage
       ? settings.parametersUserBackgroundImageURL
@@ -11555,6 +11569,17 @@ if (targetCW3.test(window.location.href)) {
   if (settings.userParametersTheme) {
     applyParameterColors();
   }
+
+  function applyParametersTextShadow() {
+    if (settings.parametersTextShadow) {
+      const styleTag = document.createElement("style");
+      styleTag.id = "uwu-parameters-text-shadow-style";
+      styleTag.innerHTML = `#parameters_skills_block .bar-data { text-shadow: 1px 1px 2px black; }\n`;
+      document.head.appendChild(styleTag);
+    }
+  }
+
+  applyParametersTextShadow();
   // ====================================================================================================================
   //   . . . ПОЛЬЗОВАТЕЛЬСКИЙ ШРИФТ . . .
   // ====================================================================================================================
