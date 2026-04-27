@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.44.1-04.26
+// @version      v1.44.2-04.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -104,7 +104,7 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.44.1";
+const current_uwu_version = "1.44.2";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -3457,6 +3457,8 @@ const newsPanel =
         <p>— Удалены Блюр модули из Надстроек :( Зато теперь эта опция встроенна! :).</p>
         <p>—— Update 1.44.1</p>
         <p>—— Тени на Параметры и навыки теперь переключаются галочкой.</p>
+        <p>——— Fix 1.44.2</p>
+        <p>——— В современном чате снова показывается числовая громкость в лазательных локациях.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: 27.04.26</p>
       </div>
@@ -9959,7 +9961,8 @@ if (targetCW3.test(window.location.href)) {
       const styles = Array.from(
         { length: 11 },
         (_, i) => `
-          .vlm${i} > .nick[style*="italic"]:after {
+          .vlm${i} > .nick[style*="italic"]:after,
+          .vlm${i} > .nick.is-notification:after {
             content: " [${i}]";
           }
         `
@@ -13863,6 +13866,11 @@ if (targetCW3.test(window.location.href)) {
       const volumeClass = msgData.volume !== undefined ? `vlm${msgData.volume}` : "vlm5";
       const chatTextClasses = `chat_text ${volumeClass}`;
       const nickStyle = msgData.textTransformation === 'italic' ? 'font-style: italic;' : '';
+      
+      const isNotification = msgData.textTransformation === 'italic' || 
+                             (msgData.text && msgData.text.trim().startsWith('[') && msgData.text.trim().endsWith(']'));
+      const nickClass = isNotification ? "nick is-notification" : "nick";
+
       const profileLink = `/cat${msgData.cat}`;
       const catId = msgData.cat || ". . .";
       const dataId = msgData.id;
@@ -13880,7 +13888,7 @@ if (targetCW3.test(window.location.href)) {
       const html = `
         <hr>
         <div id="msg">
-          <div class="${chatTextClasses}">${timeStr}${text} - <b class="nick" style="${nickStyle}">${nickName}</b><span id="${rankSpanId}"></span> <i>[${catId}]</i></div>
+          <div class="${chatTextClasses}">${timeStr}${text} - <b class="${nickClass}" style="${nickStyle}">${nickName}</b><span id="${rankSpanId}"></span> <i>[${catId}]</i></div>
           <div style="display: flex; width: 42px; justify-content: flex-end; margin-right: 2px;">
             <a href="${profileLink}" title="Перейти в профиль" target="_blank" rel="noopener noreferrer">➝</a>&nbsp;|&nbsp;
             <a href="#" title="Пожаловаться на нарушение ОПИ" class="msg_report" data-id="${dataId}" data-login="${nickName}">X</a>
