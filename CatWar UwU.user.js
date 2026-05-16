@@ -362,7 +362,7 @@ function createSoundManager() {
   /** @type {Map<string, SoundDefinition>} */
   const soundRegistry = new Map();
   let isUserInteracted = false;
-  let pendingSounds = {};
+  let pendingSounds = [];
 
   /**
    * Retrieves or initializes an Audio instance for the given sound ID.
@@ -432,7 +432,7 @@ function createSoundManager() {
         audio.play().then(resolve).catch((error) => {
           if (!isUserInteracted) {
             console.warn("UwU | Audio blocked by autoplay policy. Waiting for user interaction.");
-            pendingSounds[id] = { id, volume, resolve };
+            pendingSounds.push({ id, volume, resolve });
           } else {
             console.warn(`UwU | Failed to play sound ${id}:`, error);
             reject(error);
@@ -462,11 +462,10 @@ function createSoundManager() {
     document.removeEventListener("touchstart", handleUserInteraction);
     document.removeEventListener("keydown", handleUserInteraction);
 
-    for (const id in pendingSounds) {
-      const { volume, resolve } = pendingSounds[id];
+    pendingSounds.forEach(({ id, volume, resolve }) => {
       playSoundNow(id, volume, resolve);
-    }
-    pendingSounds = {};
+    });
+    pendingSounds = [];
   }
 
   document.addEventListener("mousedown", handleUserInteraction);
@@ -6711,7 +6710,7 @@ if (targetSettings.test(window.location.href)) {
         return;
       }
 
-      const id = "customSound_" + Date.now();
+      const id = "customSound_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
       const newSound = { id, name, url };
 
       const sounds = uwuStorage.getItem("uwu_customSounds") || [];
@@ -8050,8 +8049,8 @@ if (targetCW3.test(window.location.href)) {
 
     if (settings.disableCustomChatColors) {
       css += `
-        #chat_msg [style*="color"],
-        #cws_chat_msg [style*="color"],
+        #chat_msg [style*="color" i],
+        #cws_chat_msg [style*="color" i],
         #chat_msg font[color],
         #cws_chat_msg font[color] {
           color: ${textColor} !important;
@@ -8059,12 +8058,12 @@ if (targetCW3.test(window.location.href)) {
       `;
     } else if (settings.userTheme) {
       css += `
-        #chat_msg [style*="rgb(17, 17, 17)"],
-        #cws_chat_msg [style*="rgb(17, 17, 17)"],
-        #chat_msg [style*="rgb(17,17,17)"],
-        #cws_chat_msg [style*="rgb(17,17,17)"],
-        #chat_msg [style*="#111111"],
-        #cws_chat_msg [style*="#111111"] {
+        #chat_msg [style*="rgb(17, 17, 17)" i],
+        #cws_chat_msg [style*="rgb(17, 17, 17)" i],
+        #chat_msg [style*="rgb(17,17,17)" i],
+        #cws_chat_msg [style*="rgb(17,17,17)" i],
+        #chat_msg [style*="#111111" i],
+        #cws_chat_msg [style*="#111111" i] {
           color: ${textColor} !important;
         }
       `;
@@ -8072,12 +8071,8 @@ if (targetCW3.test(window.location.href)) {
 
     if (settings.useUserFonts) {
       css += `
-        #chat_msg [style*="font-family: Verdana"],
-        #cws_chat_msg [style*="font-family: Verdana"],
-        #chat_msg [style*="font-family:Verdana"],
-        #cws_chat_msg [style*="font-family:Verdana"],
-        #chat_msg [style*="font-family: 'Verdana'"],
-        #cws_chat_msg [style*="font-family: 'Verdana'"] {
+        #chat_msg [style*="verdana" i],
+        #cws_chat_msg [style*="verdana" i] {
           font-family: inherit !important;
         }
       `;
@@ -14182,8 +14177,6 @@ if (targetCW3.test(window.location.href)) {
       }, 0);
     }
 
-    const newChatContainer = document.createElement("div");
-    newChatContainer.id = "uwu_chat_msg";
     const chatForm = document.getElementById("chat_form");
     
     if (chatForm) {
@@ -18792,35 +18785,41 @@ if (targetBlogsea.test(window.location.href) && settings.blogseaRedesign) {
   }
 
   function parseRussianDate(dateString) {
-    const months = {
-      "января": 0, "февраля": 1, "марта": 2, "апреля": 3, "мая": 4, "июня": 5,
-      "июля": 6, "августа": 7, "сентября": 8, "октября": 9, "ноября": 10, "декабря": 11
-    };
-    
-    const parts = dateString.replace(/\u00A0/g, ' ').replace(' в ', ' ').trim().split(/\s+/);
-    if (parts.length < 3) return 0;
+      const months = {
+        "января": 0, "февраля": 1, "марта": 2, "апреля": 3, "мая": 4, "июня": 5,
+        "июля": 6, "августа": 7, "сентября": 8, "октября": 9, "ноября": 10, "декабря": 11
+      };
+      
+      const parts = dateString.replace(/\u00A0/g, ' ').replace(' в ', ' ').trim().split(/\s+/);
+      if (parts.length < 3) return 0;
 
-    let day = parseInt(parts[0], 10);
-    let month = months[parts[1]] || 0;
-    let year = new Date().getFullYear();
-    let timePart = "";
+      let day = parseInt(parts[0], 10);
+      let month = months[parts[1]] || 0;
+      let year = new Date().getFullYear();
+      let timePart = "";
 
-    if (parts.length >= 4 && !parts[2].includes(':')) {
-      year = parseInt(parts[2], 10);
-      timePart = parts[3];
-    } else if (parts.length >= 3) {
-      timePart = parts[2];
+      if (parts.length >= 4 && !parts[2].includes(':')) {
+        year = parseInt(parts[2], 10);
+        timePart = parts[3];
+      } else if (parts.length >= 3) {
+        timePart = parts[2];
+      }
+
+      let hours = 0, minutes = 0;
+      if (timePart && timePart.includes(':')) {
+        const timeSplit = timePart.split(':');
+        hours = parseInt(timeSplit[0], 10);
+        minutes = parseInt(timeSplit[1], 10);
+      }
+
+      const parsedDate = new Date(year, month, day, hours, minutes);
+      
+      if (parsedDate.getTime() > Date.now() + 30 * 24 * 60 * 60 * 1000) {
+        parsedDate.setFullYear(year - 1);
+      }
+
+      return parsedDate.getTime();
     }
-
-    let hours = 0, minutes = 0;
-    if (timePart && timePart.includes(':')) {
-      const timeSplit = timePart.split(':');
-      hours = parseInt(timeSplit[0], 10);
-      minutes = parseInt(timeSplit[1], 10);
-    }
-
-    return new Date(year, month, day, hours, minutes).getTime();
-  }
 
   setupMutationObserver("#branch", applyBlogseaRedesign, { childList: true, subtree: true });
 }
