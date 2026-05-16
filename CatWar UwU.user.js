@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.44.2-04.26
+// @version      v1.45.0-05.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -104,13 +104,14 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.44.2";
+const current_uwu_version = "1.45.0";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
 
   weatherEnabled: false,
   weatherDrops: false,
+  weatherParticlesAmount: "normal",
   lowPerformanceMode: false,
   minecraftStyle: false,
   alwaysDay: false,
@@ -141,8 +142,11 @@ const uwuDefaultSettings = {
   showChatRanks: false,
   showChatTime: false,
   namesForNotification: "",
+  disableCustomChatColors: false,
 
   redesignCostumsSettings: false,
+  profileMenuRedesign: false,
+  blogseaRedesign: false,
 
   showDefectsEnabled: false,
   defectsStyle: "default",
@@ -300,6 +304,7 @@ const targetSniffCreation =
   /^https?:\/\/\w?\.?catwar\.(?:net|su)\/sniff\?creation/;
 
 const targetClanAutoActions = /^https?:\/\/\w?\.?catwar\.(?:net|su)\/my_clan\/automatic_actions/;
+const targetBlogsea = /^https?:\/\/\w?\.?catwar\.(?:net|su)\/blogsea/;
 
 // ====================================================================================================================
 //   . . . СТАНДАРТНЫЕ ЦВЕТОВЫЕ ТЕМЫ . . .
@@ -340,6 +345,182 @@ const defaultThemes = {
     },
   },
 };
+
+// ====================================================================================================================
+//   . . . МЕНЕДЖЕР ЗВУКОВ . . .
+// ====================================================================================================================
+/**
+ * @typedef {Object} SoundDefinition
+ * @property {string} id - Unique identifier for the sound.
+ * @property {string} name - Display name for the UI.
+ * @property {string} url - Source URL of the audio file.
+ * @property {boolean} isCustom - Indicates if the sound is user-defined.
+ * @property {HTMLAudioElement|null} audio - Cached Audio instance.
+ */
+
+function createSoundManager() {
+  /** @type {Map<string, SoundDefinition>} */
+  const soundRegistry = new Map();
+  let isUserInteracted = false;
+  let pendingSounds = [];
+
+  /**
+   * Retrieves or initializes an Audio instance for the given sound ID.
+   * Uses lazy loading to prevent preloading all audio files at startup.
+   * 
+   * @param {string} id - The sound identifier.
+   * @returns {HTMLAudioElement|null}
+   */
+  function getAudioInstance(id) {
+    const soundDef = soundRegistry.get(id);
+    if (!soundDef) return null;
+    
+    if (!soundDef.audio) {
+      soundDef.audio = new Audio(soundDef.url);
+    }
+    return soundDef.audio;
+  }
+
+  /**
+   * Registers a new sound in the manager.
+   * 
+   * @param {string} id - Unique identifier.
+   * @param {string} name - Display name.
+   * @param {string} url - URL of the audio file.
+   * @param {boolean} [isCustom=false] - Whether it is a user-added sound.
+   */
+  function registerSound(id, name, url, isCustom = false) {
+    soundRegistry.set(id, { id, name, url, isCustom, audio: null });
+  }
+
+  /**
+   * Removes a sound from the registry by its ID.
+   * 
+   * @param {string} id - The sound identifier to remove.
+   */
+  function unregisterSound(id) {
+    soundRegistry.delete(id);
+  }
+
+  /**
+   * Returns a formatted list of all registered sounds for UI dropdowns.
+   * 
+   * @returns {Array<{id: string, name: string, isCustom: boolean}>}
+   */
+  function getSoundList() {
+    return Array.from(soundRegistry.values()).map(def => ({
+      id: def.id,
+      name: def.name,
+      isCustom: def.isCustom
+    }));
+  }
+
+  /**
+   * Plays the sound with the given ID and volume. Handles browser autoplay policies.
+   * 
+   * @param {string} id - The sound identifier.
+   * @param {number} volume - Volume level (0 to 10).
+   * @returns {Promise<void>}
+   */
+  function playSound(id, volume) {
+    return new Promise((resolve, reject) => {
+      const audio = getAudioInstance(id);
+      if (audio) {
+        audio.currentTime = 0;
+        audio.volume = Math.max(0, Math.min(1, volume / 10));
+        
+        audio.play().then(resolve).catch((error) => {
+          if (!isUserInteracted) {
+            console.warn("UwU | Audio blocked by autoplay policy. Waiting for user interaction.");
+            pendingSounds.push({ id, volume, resolve });
+          } else {
+            console.warn(`UwU | Failed to play sound ${id}:`, error);
+            reject(error);
+          }
+        });
+      } else {
+        reject(new Error(`UwU | Sound with ID ${id} not found.`));
+      }
+    });
+  }
+
+  function playSoundNow(id, volume, resolve) {
+    const audio = getAudioInstance(id);
+    if (audio) {
+      audio.volume = Math.max(0, Math.min(1, volume / 10));
+      audio.play().then(resolve).catch((error) => {
+        console.error(`UwU | Failed to play pending sound ${id}:`, error);
+        resolve();
+      });
+    }
+  }
+
+  function handleUserInteraction() {
+    isUserInteracted = true;
+
+    document.removeEventListener("mousedown", handleUserInteraction);
+    document.removeEventListener("touchstart", handleUserInteraction);
+    document.removeEventListener("keydown", handleUserInteraction);
+
+    pendingSounds.forEach(({ id, volume, resolve }) => {
+      playSoundNow(id, volume, resolve);
+    });
+    pendingSounds = [];
+  }
+
+  document.addEventListener("mousedown", handleUserInteraction);
+  document.addEventListener("touchstart", handleUserInteraction);
+  document.addEventListener("keydown", handleUserInteraction);
+
+  return {
+    registerSound,
+    unregisterSound,
+    getSoundList,
+    playSound,
+  };
+}
+
+const soundManager = createSoundManager();
+
+// ===================== СПИСОК ДОСТУПНЫХ ЗВУКОВ =====================
+
+soundManager.registerSound(
+  "notificationSound1",
+  "Звук 1",
+  "https://github.com/Ibirtem/CatWar/raw/main/sounds/notification_1.mp3"
+);
+soundManager.registerSound(
+  "notificationSound2",
+  "Звук 2",
+  "https://github.com/Ibirtem/CatWar/raw/main/sounds/notification_2.mp3"
+);
+soundManager.registerSound(
+  "notificationSound3",
+  "Звук 3",
+  "https://github.com/Ibirtem/CatWar/raw/main/sounds/notification_3.mp3"
+);
+soundManager.registerSound(
+  "notificationBlockSound1",
+  "Блокирование",
+  "https://github.com/Ibirtem/CatWar/raw/main/sounds/block_1.mp3"
+);
+
+const savedCustomSoundsRaw = uwuStorage.getItem("uwu_customSounds");
+const savedCustomSounds = Array.isArray(savedCustomSoundsRaw)
+  ? savedCustomSoundsRaw
+  : [];
+
+savedCustomSounds
+  .filter(
+    (sound) =>
+      sound &&
+      typeof sound.id === "string" &&
+      typeof sound.name === "string" &&
+      typeof sound.url === "string",
+  )
+  .forEach((sound) => {
+    soundManager.registerSound(sound.id, sound.name, sound.url, true);
+  });
 
 // ====================================================================================================================
 //   . . . HTML ПАНЕЛЬ НАСТРОЕК . . .
@@ -472,17 +653,15 @@ const uwusettings =
 
           <div>
             <p>
-              Сокращает количество частиц динамичной погоды, увеличивая тем
-              самым производительность на слабых устройствах.
+              Количество частиц динамичной погоды (снег, дождь). "Мало частиц" повысит производительность на слабых устройствах.
             </p>
-            <input
-              type="checkbox"
-              id="low-Performance-Mode"
-              data-setting="lowPerformanceMode"
-            />
-            <label for="low-Performance-Mode"
-              >Режим низкой производительности</label
-            >
+            <label>Интенсивность осадков:</label>
+            <div class="custom-select" id="weatherParticlesAmount">
+              <div class="select-selected">Много частиц (Стандарт)</div>
+              <div class="select-items">
+                <!-- Опции будут добавлены сюда -->
+              </div>
+            </div>
           </div>
 
           <div>
@@ -531,22 +710,16 @@ const uwusettings =
           </div>
 
           <hr id="uwu-hr" class="uwu-hr" />
-          <p>Расположение Северного Сияния</p>
-          <div id="auroraPanel">
-            <input
-              type="range"
-              min="1"
-              max="2"
-              value="1"
-              class="uwu-range-slider"
-              id="aurora-pos"
-              list="auroraStep"
-              data-setting="auroraPos"
-            />
-            <datalist id="auroraStep">
-              <option value="1">Верх</option>
-              <option value="2">Низ</option>
-            </datalist>
+          
+          <div>
+            <p>Расположение Северного Сияния на экране.</p>
+            <label>Северное Сияние:</label>
+            <div class="custom-select" id="auroraPos">
+              <div class="select-selected">Сверху</div>
+              <div class="select-items">
+                <!-- Опции будут добавлены сюда -->
+              </div>
+            </div>
           </div>
 
           <div>
@@ -564,26 +737,19 @@ const uwusettings =
           </div>
 
           <hr id="uwu-hr" class="uwu-hr" />
-          <p>
-            Z-index Погоды. Позволяет настроить, будут ли эффекты отображаться
-            поверх или позади игровых элементов.
-          </p>
-          <div id="weatherZIndexPanel">
-            <input
-              type="range"
-              min="-1"
-              max="1"
-              value="0"
-              class="uwu-range-slider"
-              id="weather-z-index"
-              list="weatherZIndexStep"
-              data-setting="weatherZIndex"
-            />
-            <datalist id="weatherZIndexStep">
-              <option value="-1">За блоками</option>
-              <option value="0">Стандарт</option>
-              <option value="1">Перед блоками</option>
-            </datalist>
+          
+          <div>
+            <p>
+              Z-index Погоды. Позволяет настроить, будут ли эффекты отображаться
+              поверх или позади игровых элементов.
+            </p>
+            <label>Перекрытие элементов:</label>
+            <div class="custom-select" id="weatherZIndex">
+              <div class="select-selected">Стандарт</div>
+              <div class="select-items">
+                <!-- Опции будут добавлены сюда -->
+              </div>
+            </div>
           </div>
         </div>
 
@@ -932,12 +1098,6 @@ const uwusettings =
             <label for="glass-style">Эффект размытия (стекло)</label>
           </div>
 
-          <div>
-            <p>Обновляет внешний вид страницы «Автоматические племенные действия».</p>
-            <input type="checkbox" id="automatic-actions-redesign" data-setting="automaticActionsRedesign" />
-            <label for="automatic-actions-redesign">Редизайн племенных отчетов</label>
-          </div>
-
           <hr id="uwu-hr" class="uwu-hr" />
           <h2>Шрифты и текст</h2>
 
@@ -1234,8 +1394,23 @@ const uwusettings =
             >
           </div>
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Общение</h2>
+          <div>
+            <p>Обновляет внешний вид страницы «Автоматические племенные действия».</p>
+            <input type="checkbox" id="automatic-actions-redesign" data-setting="automaticActionsRedesign" />
+            <label for="automatic-actions-redesign">Редизайн племенных отчетов</label>
+          </div>
+
+          <div>
+            <p>
+              Превращает текстовые ссылки в меню вашего профиля (Обучение, Блоги, Настройки и т.д.) в удобные кнопки.
+            </p>
+            <input
+              type="checkbox"
+              id="profile-menu-redesign"
+              data-setting="profileMenuRedesign"
+            />
+            <label for="profile-menu-redesign">Редизайн меню профиля</label>
+          </div>
 
           <div>
             <p>
@@ -1251,38 +1426,21 @@ const uwusettings =
           </div>
 
           <div>
+            <p>Обновляет внешний вид поиска блогов и добавляет кликабельную сортировку по столбцам.</p>
+            <input type="checkbox" id="blogsea-redesign" data-setting="blogseaRedesign" />
+            <label for="blogsea-redesign">Редизайн поиска блогов/лент</label>
+          </div>
+
+          <hr id="uwu-hr" class="uwu-hr" />
+          <h2>Чат Игровой</h2>
+
+          <div>
             <p>
               Более функциональный Чат: допись ID отправителя и звуковое
               уведомление при вашем упоминании.
             </p>
             <input type="checkbox" id="new-chat" data-setting="newChat" />
             <label for="new-chat">Современный Чат</label>
-          </div>
-
-          <div>
-            <p>
-              При клике на имя кота в строку чата будет выставляться его имя с
-              запятой.
-            </p>
-            <input
-              type="checkbox"
-              id="add-comma-after-nick"
-              data-setting="addCommaAfterNick"
-            />
-            <label for="add-comma-after-nick">Обращение с запятой</label>
-          </div>
-
-          <div>
-            <p>
-              Работает только с "Современным чатом". Отображет чат снизу вверх,
-              а так же смещает окно ввода сообщения под чат.
-            </p>
-            <input
-              type="checkbox"
-              id="reverse-Chat"
-              data-setting="reverseChat"
-            />
-            <label for="reverse-Chat">Инверсия чата</label>
           </div>
 
           <div id="myNameNotificationSoundContainer">
@@ -1327,6 +1485,32 @@ const uwusettings =
 
           <div>
             <p>
+              При клике на имя кота в строку чата будет выставляться его имя с
+              запятой.
+            </p>
+            <input
+              type="checkbox"
+              id="add-comma-after-nick"
+              data-setting="addCommaAfterNick"
+            />
+            <label for="add-comma-after-nick">Обращение с запятой</label>
+          </div>
+
+          <div>
+            <p>
+              Работает только с "Современным чатом". Отображет чат снизу вверх,
+              а так же смещает окно ввода сообщения под чат.
+            </p>
+            <input
+              type="checkbox"
+              id="reverse-Chat"
+              data-setting="reverseChat"
+            />
+            <label for="reverse-Chat">Инверсия чата</label>
+          </div>
+
+          <div>
+            <p>
               Более удобная строка ввода сообщений над чатом с возможностью
               растягивания. Пока что насильно берёт цвета с "Использовать свои
               цвета".
@@ -1340,6 +1524,7 @@ const uwusettings =
               >Альтернативная строка ввода сообщений</label
             >
           </div>
+
           <div>
             <p>Отображает счётчик символов в строке ввода Современного Чата.</p>
             <input
@@ -1351,6 +1536,7 @@ const uwusettings =
               >Показывать счётчик символов в чате</label
             >
           </div>
+
           <div>
             <p>Отображает должность персонажа в чате.</p>
             <input
@@ -1362,6 +1548,7 @@ const uwusettings =
               >Показывать должности</label
             >
           </div>
+
           <div>
             <p>Добавляет перед сообщением время его получения.</p>
             <input
@@ -1372,6 +1559,18 @@ const uwusettings =
             <label for="show-chat-time"
               >Показывать время сообщений</label
             >
+          </div>
+
+          <div>
+            <p>
+              Игнорирует кастомные цвета, которые игроки ставят на свои сообщения, оставляя только их шрифт.
+            </p>
+            <input
+              type="checkbox"
+              id="disable-custom-chat-colors"
+              data-setting="disableCustomChatColors"
+            />
+            <label for="disable-custom-chat-colors">Не красить в кастомные цвета текст чата</label>
           </div>
 
           <hr id="uwu-hr" class="uwu-hr" />
@@ -3218,6 +3417,55 @@ const uwusettings =
           </div>
 
           <hr id="uwu-hr" class="uwu-hr" />
+          <h2>Пользовательские звуки</h2>
+          <div>
+            <p>
+              Добавляйте собственные звуки по прямым ссылкам (mp3, ogg, wav) для
+              уведомлений.
+            </p>
+            <div
+              id="custom-sounds-container"
+              class="extended-settings-block"
+              style="padding: 10px; margin-top: 10px; width: 100%; box-sizing: border-box"
+            >
+              <div
+                id="custom-sounds-list"
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  gap: 5px;
+                  margin-bottom: 10px;
+                "
+              >
+                <!-- Список звуков будет генерироваться здесь -->
+              </div>
+
+              <!-- Адаптивный блок добавления (Mobile First) -->
+              <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch">
+                <input
+                  type="text"
+                  id="custom-sound-name"
+                  placeholder="Название (напр. Мяу)"
+                  style="flex: 1 1 100px; margin: 0; width: auto"
+                />
+                <input
+                  type="text"
+                  id="custom-sound-url"
+                  placeholder="URL (https://...)"
+                  style="flex: 3 1 150px; margin: 0; width: auto"
+                />
+                <button
+                  id="add-custom-sound-btn"
+                  class="uwu-button install-button"
+                  style="flex: 1 1 auto; margin: 0; padding: 0 15px; white-space: nowrap"
+                >
+                  Добавить
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <hr id="uwu-hr" class="uwu-hr" />
           <h2>Единое Хранилище</h2>
           <div>
             <p>
@@ -3432,35 +3680,32 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        🌿 v${current_uwu_version} - Крупная перепись кода для оптимизации, улучшения производительности и стабильности.
+        🌿 v${current_uwu_version} - Редизайн ссылок в меню профиля, поиска в блогах/лентах 
+        и возможность добавлять свои звуки!
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>
-          — Бонусом добавлены: Время сообщения в чате, шаблоны для комментариев, встроенный переключатель Blur эффекта, 
-          автоматического скрытия Родственных связей и Редизайн для новых Автоматических племенных действий.
+          — Мяу мяу мяу и что вы мне сделаете?
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
-        <p>— Теперь есть тени на всех барах Параметров и Навыков при использовании "Использования своего оформления".</p>
-        <p>— Темы и цвета Игровой применяются теперь и на "модальные" всплывающие окошки всяких "подтверждений".</p>
-        <p>— Я добавил дефолт прозрачную тему в оформление, потому что мне лень хранить её у себя локально и я очень люблю прозрачные темы.</p>
+        <p>— Перенос Редизайн племенных отчетов в "Остальные редизайны" для логичности.</p>
+        <p>— И Аватарки в комментариях тоже в "Остальные редизайны".</p>
+        <p>— Категория "Общение" теперь просто стало "Чат Игровой".</p>
+        <p>— Мизерный фикс-поддержка Фаерфокс браузеров полосками в чате и где-то чё-то там ещё.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
-        <p>— Перепись "Современного чата" на более быстрые, чистые и крутые штуки. Теперь должно меньше лагать при большом количестве сообщений!</p>
-        <p>— Перепись различных уведомлений при действиях в Игровой.</p>
-        <p>— Исправлена "Ошибка при сохранении костюма".</p>
-        <p>— Теперь есть шаблоны и для комментариев.</p>
-        <p>— Шаблоны в ЛС теперь умеют сохранять и вставлять Темы сообщения.</p>
-        <p>— Чуть больше стабильности Калькулятора активности и возраста.</p>
-        <p>— Исправлена ошибка с [object Object] при предпосмотре Комментария.</p>
-        <p>— Удалены Блюр модули из Надстроек :( Зато теперь эта опция встроенна! :).</p>
-        <p>—— Update 1.44.1</p>
-        <p>—— Тени на Параметры и навыки теперь переключаются галочкой.</p>
-        <p>——— Fix 1.44.2</p>
-        <p>——— В современном чате снова показывается числовая громкость в лазательных локациях.</p>
+        <p>— Будущие кастомные шрифты и цвета ванильного чата переносятся и на 
+        Современный чат (Кроме verdana, он отвратительный. Кто не согласен, тому в глаз.)</p>
+        <p>— Возможно, фикс того, что чаты в редких случаях бывают пустыми.</p>
+        <p>— Небольшое улучшение производительности Лога чистильщика.</p>
+        <p>— Переделаны настройки "Природных эффектов". Неудобные ползунки превращены в выпадающие списки.</p>
+        <p>— Перепись Менеджера звука под новые нужды.</p>
+        <p>— Цвета темы теперь должны адекватно снова ложиться на Ванильный чат (И не только).</p>
+        <p>— Таймер-напоминалка более точный.</p>
         <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: 27.04.26</p>
+        <p>Дата выпуска: 16.05.26</p>
       </div>
     </div>
   `;
@@ -5983,6 +6228,7 @@ if (targetSettings.test(window.location.href)) {
     "uwu_fastStyles_hideCatTooltip",
     "uwu_fightTeamsCats",
     "uwu_catchingLog_customItems",
+    "uwu_customSounds",
   ];
 
   function resetAllSaves() {
@@ -6193,12 +6439,7 @@ if (targetSettings.test(window.location.href)) {
   // ====================================================================================================================
   loadSettings();
   // Звуки звуки звуки, вуху.
-  const notificationSounds = [
-    { name: "Звук 1", id: "notificationSound1" },
-    { name: "Звук 2", id: "notificationSound2" },
-    { name: "Звук 3", id: "notificationSound3" },
-    { name: "Блокирование", id: "notificationBlockSound1" },
-  ];
+  const notificationSounds = soundManager.getSoundList();
 
   createCustomSelect("climbingRefreshNotificationSound", notificationSounds);
   createCustomSelect("myNameNotificationSound", notificationSounds);
@@ -6214,22 +6455,38 @@ if (targetSettings.test(window.location.href)) {
     { name: "Компактно", id: "2" },
     { name: "Целиком", id: "3" },
   ];
-
   createCustomSelect("showOtherCatsList", howShowOtherCatsList);
+  // ==============================================================================
+  const weatherParticlesAmounts =[
+    { id: "normal", name: "Много частиц (Стандарт)" },
+    { id: "low", name: "Мало частиц (Производительность)" },
+  ];
+  createCustomSelect("weatherParticlesAmount", weatherParticlesAmounts);
+  // ==============================================================================
+  const auroraPositions =[
+    { id: "1", name: "Сверху" },
+    { id: "2", name: "Снизу" },
+  ];
+  createCustomSelect("auroraPos", auroraPositions);
+  // ==============================================================================
+  const weatherZIndexes =[
+    { id: "-1", name: "За блоками" },
+    { id: "0", name: "Стандарт" },
+    { id: "1", name: "Перед блоками" },
+  ];
+  createCustomSelect("weatherZIndex", weatherZIndexes);
   // ==============================================================================
   const themeOptions = [
     { id: "classic", name: "Классическая" },
     { id: "dark", name: "Тёмная" },
     { id: "glass", name: "Стеклянная" },
   ];
-
   createCustomSelect("settingsTheme", themeOptions);
   // ==============================================================================
   const climbingPanelOrientations = [
     { id: "vertical", name: "Вертикальный" },
     { id: "horizontal", name: "Горизонтальный" },
   ];
-
   createCustomSelect("climbingPanelOrientation", climbingPanelOrientations);
   // ==============================================================================
   const clockStyles = [
@@ -6237,46 +6494,39 @@ if (targetSettings.test(window.location.href)) {
     { id: "standard", name: "Стандартный" },
     { id: "string", name: "Строчный" },
   ];
-
   createCustomSelect("clockStyle", clockStyles);
   // ==============================================================================
   const clockPositions = [
     { id: "fly", name: "Свободно" },
     { id: "tos", name: "В блоке погоды" },
   ];
-
   createCustomSelect("clockPosition", clockPositions);
   // ==============================================================================
   const highlightResourcesStyles = [
     { id: "background", name: "Фон / Быстро" },
     { id: "glow", name: "Свечение / Медленно" },
   ];
-
   createCustomSelect("highlightResourcesStyle", highlightResourcesStyles);
   // ==============================================================================
   const cleaningLogStyles = [
     { id: "smart", name: "Умный" },
     // { id: "standart", name: "Стандартный" },
   ];
-
   createCustomSelect("cleaningLogStyle", cleaningLogStyles);
   // ==============================================================================
   const defectsStyles = [{ id: "default", name: "Стандартный" }];
-
   createCustomSelect("defectsStyle", defectsStyles);
   // ==============================================================================
   const defectsQualities = [
     { id: "low", name: "Низкое/Старое (100x150)" },
     { id: "high", name: "Высокое/Новое (200x300)" },
   ];
-
   createCustomSelect("defectsQuality", defectsQualities);
   // ==============================================================================
   const climbingPanelInputsStyles = [
     { id: "keyboard", name: "Клавиатура" },
     { id: "standart", name: "Галочки + Клавиатура" },
   ];
-
   createCustomSelect("climbingPanelInputsStyle", climbingPanelInputsStyles);
   // ====================================================================================================================
   //   . . . СОЗДАНИЕ ВЫПАДАЮЩИХ СПИСКОВ . . .
@@ -6314,6 +6564,186 @@ if (targetSettings.test(window.location.href)) {
       selectContainer.classList.toggle("active");
     });
   }
+
+  // ====================================================================================================================
+  //  . . . ПОЛЬЗОВАТЕЛЬСКИЕ ЗВУКИ . . .
+  // ====================================================================================================================
+  const customSoundsListEl = document.getElementById("custom-sounds-list");
+  const addCustomSoundBtn = document.getElementById("add-custom-sound-btn");
+
+  /**
+   * Renders the list of custom sounds in the UI.
+   */
+  function renderCustomSoundsList() {
+    if (!customSoundsListEl) return;
+    customSoundsListEl.innerHTML = "";
+    
+    const sounds = uwuStorage.getItem("uwu_customSounds") || [];
+    if (sounds.length === 0) {
+      customSoundsListEl.innerHTML = "<p style='opacity: 0.5; text-align: center; margin: 0;'>Нет добавленных звуков.</p>";
+      return;
+    }
+
+    sounds.forEach(sound => {
+      const itemEl = document.createElement("div");
+      itemEl.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 5px; border: 1px solid rgba(255,255,255,0.1);";
+      
+      const meta = document.createElement("div");
+      meta.style.cssText = "display:flex; flex-direction: column; overflow: hidden; margin-right: 10px; flex: 1;";
+
+      const nameEl = document.createElement("span");
+      nameEl.style.cssText = "font-weight: bold; font-size: 14px;";
+      nameEl.textContent = sound.name;
+
+      const urlEl = document.createElement("span");
+      urlEl.style.cssText = "font-size: 11px; opacity: 0.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;";
+      urlEl.textContent = sound.url;
+
+      const actions = document.createElement("div");
+      actions.style.cssText = "display:flex; gap: 5px; flex-shrink: 0;";
+
+      const playBtn = document.createElement("button");
+      playBtn.className = "uwu-button install-button play-custom-sound";
+      playBtn.dataset.id = sound.id;
+      playBtn.title = "Прослушать";
+      playBtn.style.cssText = "margin:0; padding: 4px 10px;";
+      playBtn.textContent = "▶";
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "uwu-button remove-button delete-custom-sound";
+      deleteBtn.dataset.id = sound.id;
+      deleteBtn.title = "Удалить";
+      deleteBtn.style.cssText = "margin:0; padding: 4px 10px;";
+      deleteBtn.textContent = "✖";
+
+      meta.append(nameEl, urlEl);
+      actions.append(playBtn, deleteBtn);
+      itemEl.append(meta, actions);
+      
+      customSoundsListEl.appendChild(itemEl);
+    });
+
+    customSoundsListEl.querySelectorAll(".play-custom-sound").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        soundManager.playSound(btn.dataset.id, 5); 
+      });
+    });
+
+    customSoundsListEl.querySelectorAll(".delete-custom-sound").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        deleteCustomSound(e.currentTarget.dataset.id);
+      });
+    });
+  }
+
+  /**
+   * Rebuilds all sound-related custom select dropdowns dynamically.
+   */
+  function updateAllSoundSelects() {
+    const soundSelectIds = [
+      "climbingRefreshNotificationSound",
+      "myNameNotificationSound",
+      "notificationPMSound",
+      "notificationActionEndSound",
+      "notificationInMouthSound",
+      "notificationInFightModeSound",
+      "notificationBlockSound",
+      "intervalTimerSound"
+    ];
+    
+    const currentSounds = soundManager.getSoundList();
+
+    soundSelectIds.forEach(selectId => {
+      const selectContainer = document.getElementById(selectId);
+      if (!selectContainer) return;
+      
+      const optionsContainer = selectContainer.querySelector(".select-items");
+      const selectedElement = selectContainer.querySelector(".select-selected");
+      if (!optionsContainer || !selectedElement) return;
+
+      optionsContainer.innerHTML = "";
+      let foundCurrent = false;
+
+      currentSounds.forEach(option => {
+        const optionElement = document.createElement("div");
+        optionElement.textContent = option.name;
+        optionElement.dataset.id = option.id;
+
+        if (option.id === settings[selectId]) {
+          foundCurrent = true;
+          selectedElement.textContent = option.name;
+        }
+
+        optionElement.addEventListener("click", () => {
+          selectedElement.textContent = option.name;
+          settings[selectId] = option.id;
+          saveSettings();
+          selectContainer.classList.remove("active");
+        });
+
+        optionsContainer.appendChild(optionElement);
+      });
+
+      if (!foundCurrent && currentSounds.length > 0) {
+        settings[selectId] = currentSounds[0].id;
+        saveSettings();
+        selectedElement.textContent = currentSounds[0].name;
+      }
+    });
+  }
+
+  /**
+   * Adds a new custom sound from input fields.
+   */
+  if (addCustomSoundBtn) {
+    addCustomSoundBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const nameInput = document.getElementById("custom-sound-name");
+      const urlInput = document.getElementById("custom-sound-url");
+      const name = nameInput.value.trim();
+      const url = urlInput.value.trim();
+
+      if (!name || !url) {
+        alert("Пожалуйста, заполните оба поля (Название и URL).");
+        return;
+      }
+
+      const id = "customSound_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
+      const newSound = { id, name, url };
+
+      const sounds = uwuStorage.getItem("uwu_customSounds") || [];
+      sounds.push(newSound);
+      uwuStorage.setItem("uwu_customSounds", sounds);
+
+      soundManager.registerSound(id, name, url, true);
+      
+      nameInput.value = "";
+      urlInput.value = "";
+
+      renderCustomSoundsList();
+      updateAllSoundSelects();
+    });
+  }
+
+  /**
+   * Deletes a custom sound by ID.
+   */
+  function deleteCustomSound(id) {
+    if (!confirm("Вы уверены, что хотите удалить этот звук?")) return;
+
+    let sounds = uwuStorage.getItem("uwu_customSounds") || [];
+    sounds = sounds.filter(s => s.id !== id);
+    uwuStorage.setItem("uwu_customSounds", sounds);
+
+    soundManager.unregisterSound(id);
+    renderCustomSoundsList();
+    updateAllSoundSelects();
+  }
+
+  renderCustomSoundsList();
+
   // ====================================================================================================================
   //  . . . КНОПКА НОВОСТЕЙ . . .
   // ====================================================================================================================
@@ -6434,6 +6864,7 @@ if (targetSettings.test(window.location.href)) {
     "uwu_fastStyles",
     "uwu_fightTeamsCats",
     "uwu_mightHistory",
+    "uwu_customSounds",
   ];
 
   const importButton = document.getElementById("importSettingsButton");
@@ -7360,98 +7791,6 @@ if (!targetCW3.test(window.location.href)) {
     tryNextFormat();
   }
 }
-// ====================================================================================================================
-//   . . . МЕНЕДЖЕР ЗВУКОВ . . .
-// ====================================================================================================================
-function createSoundManager() {
-  const sounds = {};
-  let isUserInteracted = false;
-  let pendingSounds = {};
-
-  function loadSound(id, url) {
-    const audio = new Audio(url);
-    sounds[id] = audio;
-  }
-
-  function playSound(id, volume) {
-    return new Promise((resolve, reject) => {
-      if (sounds[id]) {
-        sounds[id].currentTime = 0;
-        sounds[id].volume = volume / 10;
-        sounds[id]
-          .play()
-          .then(resolve)
-          .catch((error) => {
-            if (!isUserInteracted) {
-              console.warn(
-                "Политика браузера заблокировала звук. Ждём взаимодействия со стороны пользователя для новой попытки."
-              );
-              pendingSounds[id] = { id, volume, resolve };
-            } else {
-              console.warn("Ошибка воспроизведения звука:", error);
-              reject(error);
-            }
-          });
-      } else {
-        reject(new Error(`Звук с ID ${id} не найден.`));
-      }
-    });
-  }
-
-  function playSoundNow(id, volume, resolve) {
-    sounds[id]
-      .play()
-      .then(resolve)
-      .catch((error) => {
-        console.error(`Не удалось воспроизвести звук с ID ${id}:`, error);
-        resolve();
-      });
-  }
-
-  function handleUserInteraction() {
-    isUserInteracted = true;
-
-    document.removeEventListener("mousedown", handleUserInteraction);
-    document.removeEventListener("touchstart", handleUserInteraction);
-    document.removeEventListener("keydown", handleUserInteraction);
-
-    for (const id in pendingSounds) {
-      const { volume, resolve } = pendingSounds[id];
-      playSoundNow(id, volume, resolve);
-    }
-    pendingSounds = {};
-  }
-
-  document.addEventListener("mousedown", handleUserInteraction);
-  document.addEventListener("touchstart", handleUserInteraction);
-  document.addEventListener("keydown", handleUserInteraction);
-
-  return {
-    loadSound,
-    playSound,
-  };
-}
-
-const soundManager = createSoundManager();
-
-// ===================== СПИСОК ДОСТУПНЫХ ЗВУКОВ =====================
-
-soundManager.loadSound(
-  "notificationSound1",
-  "https://github.com/Ibirtem/CatWar/raw/main/sounds/notification_1.mp3"
-);
-soundManager.loadSound(
-  "notificationSound2",
-  "https://github.com/Ibirtem/CatWar/raw/main/sounds/notification_2.mp3"
-);
-soundManager.loadSound(
-  "notificationSound3",
-  "https://github.com/Ibirtem/CatWar/raw/main/sounds/notification_3.mp3"
-);
-soundManager.loadSound(
-  "notificationBlockSound1",
-  "https://github.com/Ibirtem/CatWar/raw/main/sounds/block_1.mp3"
-);
 
 if (targetCW3Kns.test(window.location.href)) {
   // ====================================================================================================================
@@ -7695,6 +8034,57 @@ if (targetCW3.test(window.location.href)) {
   if (settings.glassStyle) {
     applyGlassStyle();
   }
+
+  // ====================================================================================================================
+  //   . . . КОРРЕКЦИЯ ЦВЕТОВ И ШРИФТОВ ВАНИЛЬНОГО ЧАТА . . .
+  // ====================================================================================================================
+  function applyVanillaChatFixes() {
+    if (!settings.userTheme && !settings.disableCustomChatColors && !settings.useUserFonts) return;
+
+    const style = document.createElement("style");
+    style.id = "uwu-vanilla-chat-fixes";
+    let css = "";
+    
+    const textColor = (settings.userTheme && theme && theme.textColor) ? theme.textColor : "inherit";
+
+    if (settings.disableCustomChatColors) {
+      css += `
+        #chat_msg [style*="color" i],
+        #cws_chat_msg [style*="color" i],
+        #chat_msg font[color],
+        #cws_chat_msg font[color] {
+          color: ${textColor} !important;
+        }
+      `;
+    } else if (settings.userTheme) {
+      css += `
+        #chat_msg [style*="rgb(17, 17, 17)" i],
+        #cws_chat_msg [style*="rgb(17, 17, 17)" i],
+        #chat_msg [style*="rgb(17,17,17)" i],
+        #cws_chat_msg [style*="rgb(17,17,17)" i],
+        #chat_msg [style*="#111111" i],
+        #cws_chat_msg [style*="#111111" i] {
+          color: ${textColor} !important;
+        }
+      `;
+    }
+
+    if (settings.useUserFonts) {
+      css += `
+        #chat_msg [style*="verdana" i],
+        #cws_chat_msg [style*="verdana" i] {
+          font-family: inherit !important;
+        }
+      `;
+    }
+
+    if (css) {
+      style.innerHTML = css;
+      document.head.appendChild(style);
+    }
+  }
+
+  applyVanillaChatFixes();
 
   // ====================================================================================================================
   //  . . . ДЕФЕКТИКИ И СТИЛИ . . .
@@ -8379,6 +8769,7 @@ if (targetCW3.test(window.location.href)) {
 
       #timer-start-stop-btn {
         width: -webkit-fill-available;
+        width: -moz-available;
       }
 
       #uwu-interval-timer-toggle {
@@ -8501,6 +8892,8 @@ if (targetCW3.test(window.location.href)) {
       }
     });
 
+    let targetTimestamp = null; // Время, когда таймер должен сработать
+
     function startTimer() {
       const minutes = parseInt(minutesInput.value) || 0;
       const seconds = parseInt(secondsInput.value) || 0;
@@ -8516,18 +8909,25 @@ if (targetCW3.test(window.location.href)) {
       startStopBtn.classList.remove("install-button");
       startStopBtn.classList.add("remove-button");
 
-      remainingSeconds = totalSeconds;
+      targetTimestamp = Date.now() + (totalSeconds * 1000);
+      
       updateDisplay();
-      playSound();
 
       timerId = setInterval(() => {
-        remainingSeconds--;
-        if (remainingSeconds < 0) {
-          remainingSeconds = totalSeconds;
+        const now = Date.now();
+        const diff = targetTimestamp - now;
+
+        if (diff <= 0) {
           playSound();
+          
+          targetTimestamp = now + (totalSeconds * 1000);
+          remainingSeconds = totalSeconds;
+        } else {
+          remainingSeconds = Math.ceil(diff / 1000);
         }
+        
         updateDisplay();
-      }, 1000);
+      }, 200);
 
       if (container.classList.contains("collapsed")) {
         timerTitle.style.display = "none";
@@ -8538,6 +8938,7 @@ if (targetCW3.test(window.location.href)) {
 
     function stopTimer() {
       isRunning = false;
+      targetTimestamp = null;
       startStopBtn.textContent = "Старт";
       startStopBtn.classList.remove("remove-button");
       startStopBtn.classList.add("install-button");
@@ -8552,11 +8953,12 @@ if (targetCW3.test(window.location.href)) {
     }
 
     function updateDisplay() {
-      const mins = Math.floor(remainingSeconds / 60);
-      const secs = remainingSeconds % 60;
-      const timeString = `${String(mins).padStart(2, "0")}:${String(
-        secs
-      ).padStart(2, "0")}`;
+      let displaySecs = isRunning ? remainingSeconds : 0;
+      
+      const mins = Math.floor(displaySecs / 60);
+      const secs = displaySecs % 60;
+      const timeString = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+      
       countdownDisplay.textContent = timeString;
       headerCountdown.textContent = timeString;
     }
@@ -12279,7 +12681,7 @@ if (targetCW3.test(window.location.href)) {
 
   // ====================================================================================================================
   //   . . . ЛОГ ЧИСТИЛЬЩИКОВ . . .
-  // ====================================================================================================================function cleaningLogUpdate(mutationsList) {
+  // ====================================================================================================================
   if (settings.cleaningLog) {
     let logStates = uwuStorage.getItem("uwu_logStates") || {
       cleaning: false,
@@ -12304,11 +12706,20 @@ if (targetCW3.test(window.location.href)) {
     let cleaningLogBuffer = "";
     let catNamesAndIds = [];
 
-    function cleaningLogUpdate() {
+    /**
+     * Updates the cleaner log based on new history data.
+     * Data fetching has been moved from DOM (outerHTML) to Vue reactive state.
+     *
+     * @param {string} newHistory - The new full history string retrieved from Vue.
+     */
+    function cleaningLogUpdate(newHistory) {
       const historyBlock = document.querySelector("#history");
-      const ist = historyBlock.querySelector("#ist");
+      if (!historyBlock) return;
+
       const locationSpan = historyBlock.querySelector("#location");
-      const currentLocation = locationSpan.textContent.trim();
+      const currentLocation = locationSpan
+        ? locationSpan.textContent.trim()
+        : "";
 
       if (currentLocation === "[ Загружается… ]") {
         return;
@@ -12320,15 +12731,15 @@ if (targetCW3.test(window.location.href)) {
         cleaningLogBlock = historyBlock.querySelector("#uwu-cleaningLog");
       }
 
-      const istOuterHtml = ist.outerHTML;
-      const actions = istOuterHtml
+      const actions = newHistory
         .split(".")
         .map((action) => action.trim())
         .filter((action) => action);
-      const lastAction = actions[actions.length - 2];
+
+      const lastAction = actions[actions.length - 1];
 
       const cleaningLogContent = cleaningLogBlock.querySelector(
-        "#uwu-cleaningLog-content"
+        "#uwu-cleaningLog-content",
       );
 
       if (lastAction) {
@@ -12338,7 +12749,7 @@ if (targetCW3.test(window.location.href)) {
           processStandardAction(
             lastAction,
             currentLocation,
-            cleaningLogContent
+            cleaningLogContent,
           );
         }
 
@@ -12358,17 +12769,17 @@ if (targetCW3.test(window.location.href)) {
           counters: {
             pickup: parseInt(
               document.getElementById("uwu-cleaningLog-counter-pickup")
-                .textContent
+                .textContent,
             ),
             putdown: parseInt(
               document.getElementById("uwu-cleaningLog-counter-putdown")
-                .textContent
+                .textContent,
             ),
           },
         });
         cleaningLogContent.innerHTML = addCatLinksToLog(
           cleaningLogBuffer,
-          catNamesAndIds
+          catNamesAndIds,
         );
       }
     }
@@ -12419,11 +12830,11 @@ if (targetCW3.test(window.location.href)) {
       const hr = document.createElement("hr");
       historyBlock.insertBefore(
         hr,
-        historyBlock.querySelector("#uwu-cleaningLog")
+        historyBlock.querySelector("#uwu-cleaningLog"),
       );
 
       const cleaningLogContent = historyBlock.querySelector(
-        "#uwu-cleaningLog-content"
+        "#uwu-cleaningLog-content",
       );
 
       const savedLog = uwuStorage.getItem("uwu_cleaningLogSmart");
@@ -12434,15 +12845,15 @@ if (targetCW3.test(window.location.href)) {
         catNamesAndIds = savedData.catNamesAndIds;
         if (savedData.counters) {
           document.getElementById(
-            "uwu-cleaningLog-counter-pickup"
+            "uwu-cleaningLog-counter-pickup",
           ).textContent = savedData.counters.pickup;
           document.getElementById(
-            "uwu-cleaningLog-counter-putdown"
+            "uwu-cleaningLog-counter-putdown",
           ).textContent = savedData.counters.putdown;
         }
         cleaningLogContent.innerHTML = addCatLinksToLog(
           cleaningLogBuffer,
-          catNamesAndIds
+          catNamesAndIds,
         );
       }
 
@@ -12453,10 +12864,10 @@ if (targetCW3.test(window.location.href)) {
           cleaningLogBuffer = "";
           catNamesAndIds = [];
           document.getElementById(
-            "uwu-cleaningLog-counter-pickup"
+            "uwu-cleaningLog-counter-pickup",
           ).textContent = "0";
           document.getElementById(
-            "uwu-cleaningLog-counter-putdown"
+            "uwu-cleaningLog-counter-putdown",
           ).textContent = "0";
           cleaningLogContent.innerHTML = "";
           uwuStorage.removeItem("uwu_cleaningLogSmart");
@@ -12469,7 +12880,7 @@ if (targetCW3.test(window.location.href)) {
       });
 
       const deleteLastButton = historyBlock.querySelector(
-        "#uwu-cleaningLog-delete-last"
+        "#uwu-cleaningLog-delete-last",
       );
       deleteLastButton.addEventListener("click", (e) => {
         e.preventDefault();
@@ -12479,10 +12890,10 @@ if (targetCW3.test(window.location.href)) {
       });
 
       const toggleButton = historyBlock.querySelector(
-        "#uwu-cleaningLog-toggle"
+        "#uwu-cleaningLog-toggle",
       );
       const contentWrapper = historyBlock.querySelector(
-        "#uwu-cleaningLog-content-wrapper"
+        "#uwu-cleaningLog-content-wrapper",
       );
 
       if (logStates.cleaning) {
@@ -12962,9 +13373,17 @@ if (targetCW3.test(window.location.href)) {
         ?.classList.add("disabled");
     }
 
-    setupMutationObserver("#history_block", cleaningLogUpdate, {
-      childList: true,
-      subtree: true,
+    setupSingleCallback("#history", () => {
+      const historyBlock = document.querySelector("#history");
+      if (historyBlock && !document.getElementById("uwu-cleaningLog")) {
+        createCleaningLogBlock(historyBlock);
+      }
+
+      watchVueData('cat.history', (newHistory) => {
+        if (newHistory) {
+          cleaningLogUpdate(newHistory);
+        }
+      }, { deep: false, immediate: true });
     });
 
     const cleaningLogStyle = document.createElement("style");
@@ -13715,7 +14134,6 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
 
   if (settings.newChat) {
-
     const chatRanksCache = new Map();
     const processedMessageIds = new Set();
 
@@ -13729,11 +14147,13 @@ if (targetCW3.test(window.location.href)) {
 
       setTimeout(() => {
         try {
-          const profileLink = document.querySelector(`.cat_tooltip a[href="/cat${catId}"]`);
+          const profileLink = document.querySelector(
+            `.cat_tooltip a[href="/cat${catId}"]`,
+          );
           if (profileLink) {
-            const tooltip = profileLink.closest('.cat_tooltip');
-            const rankNodes = tooltip.querySelectorAll('div > small > i');
-            
+            const tooltip = profileLink.closest(".cat_tooltip");
+            const rankNodes = tooltip.querySelectorAll("div > small > i");
+
             if (rankNodes.length > 0) {
               const actualRankNode = rankNodes[rankNodes.length - 1];
               const rankTextContent = actualRankNode.textContent.trim();
@@ -13757,15 +14177,12 @@ if (targetCW3.test(window.location.href)) {
       }, 0);
     }
 
-    const newChatContainer = document.createElement("div");
-    newChatContainer.id = "uwu_chat_msg";
     const chatForm = document.getElementById("chat_form");
     
     if (chatForm) {
+      const newChatContainer = document.createElement("div");
+      newChatContainer.id = "uwu_chat_msg";
       chatForm.parentNode.insertBefore(newChatContainer, chatForm.nextSibling);
-    } else {
-      console.error("UwU | chat_form not found. New chat container could not be inserted.");
-    }
 
     /**
      * Single event delegation for the entire chat container.
@@ -13777,7 +14194,10 @@ if (targetCW3.test(window.location.href)) {
         const nickElement = target.closest(".nick");
         if (nickElement) {
           event.preventDefault();
-          const textArea = document.getElementById("text") || document.getElementById("text-hide");
+          
+          const textArea = document.querySelector("textarea#text, textarea#text-hide, input#text");
+          if (!textArea) return;
+          
           let nick = nickElement.textContent;
           if (settings.addCommaAfterNick) nick += ", ";
           
@@ -13789,13 +14209,15 @@ if (targetCW3.test(window.location.href)) {
         const reportButton = target.closest(".msg_report");
         if (reportButton) {
           event.preventDefault();
-          
+
           try {
-            const chatContext = getVueData('chat');
-            if (chatContext && typeof chatContext.report === 'function') {
+            const chatContext = getVueData("chat");
+            if (chatContext && typeof chatContext.report === "function") {
               chatContext.report({ target: reportButton });
             } else {
-              console.error("UwU | chat.report function is missing in Vue state. Unable to report message.");
+              console.error(
+                "UwU | chat.report function is missing in Vue state. Unable to report message.",
+              );
             }
           } catch (error) {
             console.error("UwU | Error invoking report function:", error);
@@ -13809,7 +14231,7 @@ if (targetCW3.test(window.location.href)) {
 
     /**
      * Analyzes the message text for user-defined notification names.
-     * 
+     *
      * @param {string} text - The raw HTML message text.
      * @returns {{text: string, isMentioned: boolean}} Processed text with highlighted mentions and a trigger flag.
      */
@@ -13825,7 +14247,10 @@ if (targetCW3.test(window.location.href)) {
             .filter((name) => name);
 
           names.forEach((name) => {
-            const regex = new RegExp(`(^|\\s|[.,!?])(${name})(?=$|\\s|[.,!?])`, "gi");
+            const regex = new RegExp(
+              `(^|\\s|[.,!?])(${name})(?=$|\\s|[.,!?])`,
+              "gi",
+            );
             processedText = processedText.replace(regex, (match, p1, p2) => {
               isMentioned = true;
               return `${p1}<span class="myname">${p2}</span>`;
@@ -13844,8 +14269,71 @@ if (targetCW3.test(window.location.href)) {
     }
 
     /**
-     * Transforms the raw Vue message payload into an injected HTML string.
+     * Extracts and formats CSS styles for chat text and nicknames.
+     * Handles custom fonts and inline colors, respecting user theme settings.
      * 
+     * @param {Object} msgData - The message payload.
+     * @returns {{textStyle: string, nickStyle: string}}
+     */
+    function getChatStyles(msgData) {
+      let textStyle = "";
+      let nickStyle = msgData.textTransformation === 'italic' ? 'font-style: italic; ' : '';
+
+      if (msgData.font) {
+        const cleanFont = msgData.font.replace(/['"]/g, '').trim();
+        if (cleanFont.toLowerCase() !== 'verdana') {
+          textStyle += `font-family: '${cleanFont}'; `;
+          nickStyle += `font-family: '${cleanFont}'; `;
+        }
+      }
+
+      const isVanillaColor = !msgData.color || 
+                             msgData.color.toLowerCase() === '#111111' || 
+                             msgData.color.replace(/\s/g, '') === 'rgb(17,17,17)';
+
+      if (!isVanillaColor && !settings.disableCustomChatColors) {
+        textStyle += `color: ${msgData.color}; `;
+        nickStyle += `color: ${msgData.color}; `;
+      } else if (settings.userTheme && theme?.textColor) {
+        textStyle += `color: ${theme.textColor}; `;
+        nickStyle += `color: ${theme.textColor}; `;
+      }
+
+      return { textStyle, nickStyle };
+    }
+
+    /**
+     * Determines if a message is a system notification (e.g., italic or wrapped in brackets).
+     *
+     * @param {Object} msgData - The message payload.
+     * @returns {boolean}
+     */
+    function isChatNotification(msgData) {
+      return (
+        msgData.textTransformation === "italic" ||
+        (msgData.text &&
+          msgData.text.trim().startsWith("[") &&
+          msgData.text.trim().endsWith("]"))
+      );
+    }
+
+    /**
+     * Formats the message timestamp into a readable HTML string.
+     *
+     * @param {number} [timeSeconds] - Unix timestamp of the message.
+     * @returns {string} Formatted time string or empty string.
+     */
+    function formatChatTime(timeSeconds) {
+      if (!settings.showChatTime || !timeSeconds) return "";
+      const date = new Date(timeSeconds * 1000);
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      return `<span class="uwu-chat-time">[${hours}:${minutes}]</span> `;
+    }
+
+    /**
+     * Transforms the raw Vue message payload into an injected HTML string.
+     *
      * @param {Object} msgData - The message payload from 'chat.messages'.
      * @param {number} msgData.id - Unique message identifier.
      * @param {string} msgData.text - Message content.
@@ -13854,44 +14342,40 @@ if (targetCW3.test(window.location.href)) {
      * @param {string} msgData.login - Sender's nickname.
      * @param {number} [msgData.time] - Unix timestamp of the message (server-side).
      * @param {string} [msgData.textTransformation] - Optional CSS modifier (e.g., 'italic').
+     * @param {string}[msgData.font] - Custom font for the message.
      * @returns {{html: string, rankSpanId: string, catId: string|number}}
      */
     function buildMessageHTML(msgData) {
       const { text, isMentioned } = processMentions(msgData.text);
 
       if (isMentioned) {
-        soundManager.playSound(settings.myNameNotificationSound, settings.notificationMyNameVolume);
+        soundManager.playSound(
+          settings.myNameNotificationSound,
+          settings.notificationMyNameVolume,
+        );
       }
 
-      const volumeClass = msgData.volume !== undefined ? `vlm${msgData.volume}` : "vlm5";
-      const chatTextClasses = `chat_text ${volumeClass}`;
-      const nickStyle = msgData.textTransformation === 'italic' ? 'font-style: italic;' : '';
-      
-      const isNotification = msgData.textTransformation === 'italic' || 
-                             (msgData.text && msgData.text.trim().startsWith('[') && msgData.text.trim().endsWith(']'));
-      const nickClass = isNotification ? "nick is-notification" : "nick";
+      const volumeClass =
+        msgData.volume !== undefined ? `vlm${msgData.volume}` : "vlm5";
+      const { textStyle, nickStyle } = getChatStyles(msgData);
 
-      const profileLink = `/cat${msgData.cat}`;
+      const nickClass = isChatNotification(msgData)
+        ? "nick is-notification"
+        : "nick";
       const catId = msgData.cat || ". . .";
-      const dataId = msgData.id;
       const nickName = msgData.login || "Неизвестный";
-      const rankSpanId = `uwu-rank-${dataId || Date.now()}-${Math.floor(Math.random() * 10000)}`;
-
-      let timeStr = "";
-      if (settings.showChatTime && msgData.time) {
-        const date = new Date(msgData.time * 1000);
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        timeStr = `<span class="uwu-chat-time">[${hours}:${minutes}]</span> `;
-      }
+      const rankSpanId = `uwu-rank-${msgData.id || Date.now()}-${Math.floor(Math.random() * 10000)}`;
+      const timeStr = formatChatTime(msgData.time);
 
       const html = `
         <hr>
         <div id="msg">
-          <div class="${chatTextClasses}">${timeStr}${text} - <b class="${nickClass}" style="${nickStyle}">${nickName}</b><span id="${rankSpanId}"></span> <i>[${catId}]</i></div>
+          <div class="chat_text ${volumeClass}">
+            ${timeStr}<span style="${textStyle}">${text}</span> - <b class="${nickClass}" style="${nickStyle}">${nickName}</b><span id="${rankSpanId}"></span> <i>[${catId}]</i>
+          </div>
           <div style="display: flex; width: 42px; justify-content: flex-end; margin-right: 2px;">
-            <a href="${profileLink}" title="Перейти в профиль" target="_blank" rel="noopener noreferrer">➝</a>&nbsp;|&nbsp;
-            <a href="#" title="Пожаловаться на нарушение ОПИ" class="msg_report" data-id="${dataId}" data-login="${nickName}">X</a>
+            <a href="/cat${catId}" title="Перейти в профиль" target="_blank" rel="noopener noreferrer">➝</a>&nbsp;|&nbsp;
+            <a href="#" title="Пожаловаться на нарушение ОПИ" class="msg_report" data-id="${msgData.id}" data-login="${nickName}">X</a>
           </div>
         </div>
       `;
@@ -13902,41 +14386,50 @@ if (targetCW3.test(window.location.href)) {
     function injectMessageToDOM(msgData) {
       try {
         const { html, rankSpanId, catId } = buildMessageHTML(msgData);
-        
+
         newChatContainer.insertAdjacentHTML("afterbegin", html);
-        
+
         if (settings.showChatRanks) {
           updateChatRankAsync(catId, document.getElementById(rankSpanId));
         }
       } catch (error) {
-        console.error(`UwU | Message rendering failed for ID ${msgData && msgData.id}:`, error);
+        console.error(
+          `UwU | Message rendering failed for ID ${msgData && msgData.id}:`,
+          error,
+        );
       }
     }
 
-    watchVueData('chat.messages', (newMessages) => {
-      try {
-        if (!newMessages || !Array.isArray(newMessages)) return;
+    watchVueData(
+      "chat.messages",
+      (newMessages) => {
+        try {
+          if (!newMessages || !Array.isArray(newMessages)) return;
 
-        const batch = newMessages.filter(msg => msg && msg.id && !processedMessageIds.has(msg.id));
-        if (batch.length === 0) return;
+          const batch = newMessages.filter(
+            (msg) => msg && msg.id && !processedMessageIds.has(msg.id),
+          );
+          if (batch.length === 0) return;
 
-        batch.sort((a, b) => a.id - b.id);
+          batch.sort((a, b) => a.id - b.id);
 
-        batch.forEach(msg => {
-          processedMessageIds.add(msg.id);
-          injectMessageToDOM(msg);
-        });
-        
-        // Мы удаляем оригинальные сообщения, чтобы сам CatWar не пытался с ними возиться 
-        // (а он это делает ОЧЕНЬ плохо) и не нагружал лишний раз игровую.
-        const originalChat = document.getElementById("chat_msg");
-        if (originalChat && originalChat.innerHTML !== "") {
-          originalChat.innerHTML = ""; 
+          batch.forEach((msg) => {
+            processedMessageIds.add(msg.id);
+            injectMessageToDOM(msg);
+          });
+
+          // Мы удаляем оригинальные сообщения, чтобы сам CatWar не пытался с ними возиться
+          // (а он это делает ОЧЕНЬ плохо) и не нагружал лишний раз игровую.
+          const originalChat = document.getElementById("chat_msg");
+          if (originalChat && originalChat.innerHTML !== "") {
+            originalChat.innerHTML = "";
+          }
+        } catch (error) {
+          console.error("UwU | Chat messages watcher error:", error);
         }
-      } catch (error) {
-        console.error("UwU | Chat messages watcher error:", error);
-      }
-    }, { deep: true, immediate: true });
+      },
+      { deep: true, immediate: true },
+    );
 
     const uwuChatMsg = document.createElement("style");
     uwuChatMsg.innerHTML = `
@@ -13966,9 +14459,14 @@ if (targetCW3.test(window.location.href)) {
 
         #uwu_chat_msg > hr {
           width: -webkit-fill-available;
+          width: -moz-available;
         }
      `;
     document.head.appendChild(uwuChatMsg);
+      
+    } else {
+      console.warn("UwU | chat_form не найден. Современный чат не будет инициализирован.");
+    }
   }
 
   // ====================================================================================================================
@@ -15009,11 +15507,6 @@ if (targetCW3.test(window.location.href)) {
         url: "https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/splash_1.png",
       },
     ],
-    sus: [
-      {
-        url: "https://firebasestorage.googleapis.com/v0/b/xwx-823ac.appspot.com/o/images%2Ftiny-red-among-us.png?alt=media&token=354b34c6-6297-4a4d-8a73-f36a903170c0",
-      },
-    ],
   };
 
   async function loadImages(type) {
@@ -15047,7 +15540,6 @@ if (targetCW3.test(window.location.href)) {
   loadImages("pixelSnow");
   loadImages("pixelRain");
   loadImages("pixelSplash");
-  loadImages("sus");
 
   const { raindrops } = generateRain();
   const { snowflakes } = generateSnowflakes();
@@ -15063,9 +15555,11 @@ if (targetCW3.test(window.location.href)) {
   var desiredNumberOfFireflies = 10;
 
   function setWeatherPerformanceMode() {
-    rainNumParticles = settings.lowPerformanceMode ? 4 : 10;
-    snowTimerValue = settings.lowPerformanceMode ? 240 : 120;
-    desiredNumberOfFireflies = settings.lowPerformanceMode ? 6 : 10;
+    const isLow = settings.weatherParticlesAmount === "low";
+    
+    rainNumParticles = isLow ? 4 : 10;
+    snowTimerValue = isLow ? 240 : 120;
+    desiredNumberOfFireflies = isLow ? 6 : 10;
 
     return { rainNumParticles, snowTimerValue, desiredNumberOfFireflies };
   }
@@ -16150,6 +16644,112 @@ if (targetMainProfile.test(window.location.href)) {
   if (settings.calculators) {
     setupSingleCallback("#info", setupActivityCalc);
     setupSingleCallback("#info", moonCalculator);
+  }
+
+  // ====================================================================================================================
+  //   . . . РЕДИЗАЙН ССЫЛОК МЕНЮ ПРОФИЛЯ . . .
+  // ====================================================================================================================
+  if (settings.profileMenuRedesign) {
+    function applyProfileMenuRedesign() {
+      const profileLinksLayout = "column"; // "column" или "row"
+      
+      const profileLinksStyle = document.createElement("style");
+      profileLinksStyle.innerHTML = /* CSS */ `
+          #education-show,
+          #education-show ~ a {
+              display: ${profileLinksLayout === "column" ? "flex" : "inline-flex"};
+              align-items: center;
+              width: ${profileLinksLayout === "column" ? "fit-content" : "auto"};
+              background-color: rgba(0, 0, 0, 0.2);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+              color: #d5d5d5 !important;
+              padding: 4px 8px;
+              border-radius: 8px;
+              margin: ${profileLinksLayout === "column" ? "0 0 8px 0" : "4px 6px 4px 0"};
+              text-decoration: none !important;
+              font-family: "Montserrat", sans-serif;
+              font-size: 13px;
+              transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+          }
+
+          #education-show:hover,
+          #education-show ~ a:hover {
+              background-color: rgba(255, 255, 255, 0.1);
+              border-color: rgba(255, 255, 255, 0.3);
+              transform: ${profileLinksLayout === "column" ? "translateX(4px)" : "translateY(-2px)"};
+          }
+
+          #education-show::before { content: "🎓"; margin-right: 8px; font-size: 1.1em; }
+          a[href="fae"]::before { content: "⚔️"; margin-right: 8px; font-size: 1.1em; }
+          a[href="myblogs"]::before { content: "📝"; margin-right: 8px; font-size: 1.1em; }
+          a[href="tags"]::before { content: "🏷️"; margin-right: 8px; font-size: 1.1em; }
+          a[href="achievements"]::before { content: "🏆"; margin-right: 8px; font-size: 1.1em; }
+          a[href="log_tb"]::before { content: "🌑"; margin-right: 8px; font-size: 1.1em; }
+          a[href="activity_shop"]::before { content: "🛒"; margin-right: 8px; font-size: 1.1em; }
+          a[href="settings"]::before { content: "⚙️"; margin-right: 8px; font-size: 1.1em; }
+          a[href="my_clan"]::before { content: "🌲"; margin-right: 8px; font-size: 1.1em; }
+          a[href="rabbit"]::before { content: "🐇"; margin-right: 8px; font-size: 1.1em; }
+
+          .uwu-unknown-link::before {
+              content: "✨"; 
+              margin-right: 8px; 
+              font-size: 1.1em;
+          }
+
+          .uwu-new-link::after {
+              content: "NEW";
+              font-size: 9px;
+              background-color: #cd4141; 
+              color: white;
+              padding: 2px 5px;
+              border-radius: 4px;
+              margin-left: 8px;
+              font-weight: bold;
+              letter-spacing: 0.5px;
+          }
+
+          #education-show + br,
+          #education-show ~ a + br {
+              display: none;
+          }
+      `;
+      document.head.appendChild(profileLinksStyle);
+
+      const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
+      const knownLinks =[
+        "fae", "myblogs", "tags", "achievements", 
+        "log_tb", "activity_shop", "settings", "my_clan", "rabbit"
+      ];
+      
+      let trackedLinks = uwuStorage.getItem("uwu_profileLinksTracker") || {};
+      let isStorageUpdated = false;
+
+      const linkElements = document.querySelectorAll('#education-show ~ a');
+      
+      linkElements.forEach(link => {
+        const href = link.getAttribute("href");
+        
+        if (href && !knownLinks.includes(href)) {
+          link.classList.add("uwu-unknown-link");
+          
+          if (!trackedLinks[href]) {
+            trackedLinks[href] = Date.now();
+            isStorageUpdated = true;
+          }
+          
+          const linkAgeMs = Date.now() - trackedLinks[href];
+          if (linkAgeMs <= TWO_DAYS_MS) {
+            link.classList.add("uwu-new-link");
+          }
+        }
+      });
+
+      if (isStorageUpdated) {
+        uwuStorage.setItem("uwu_profileLinksTracker", trackedLinks);
+      }
+    }
+
+    setupSingleCallback("#education-show", applyProfileMenuRedesign);
   }
 }
 // ====================================================================================================================
@@ -18043,4 +18643,183 @@ if (targetClanAutoActions.test(window.location.href) && settings.automaticAction
   }
 
   applyAutoActionsRedesign();
+}
+
+// ====================================================================================================================
+//   . . . РЕДИЗАЙН ПОИСКА БЛОГОВ И СОРТИРОВКА . . .
+// ====================================================================================================================
+if (targetBlogsea.test(window.location.href) && settings.blogseaRedesign) {
+  const style = document.createElement("style");
+  style.id = "uwu-blogsea-redesign";
+  style.innerHTML = /* CSS */ `
+      #branch {
+          font-family: "Montserrat", sans-serif;
+      }
+      .blogsea-table {
+          border: none !important;
+          width: 100%;
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 8px;
+          overflow: hidden;
+          margin-bottom: 10px !important;
+          border-spacing: 0;
+      }
+      .blogsea-table th, .blogsea-table td {
+          border: none !important;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+          padding: 4px 8px !important;
+          vertical-align: middle !important;
+          font-size: 13px;
+      }
+      .blogsea-table th {
+          background: rgba(255, 255, 255, 0.05);
+          text-transform: uppercase;
+          font-size: 11px;
+          letter-spacing: 0.5px;
+          color: rgba(255, 255, 255, 0.5);
+          cursor: pointer;
+          user-select: none;
+          transition: background 0.2s;
+      }
+      .blogsea-table th:hover {
+          background: rgba(255, 255, 255, 0.1);
+      }
+      .blogsea-table tr:last-child td {
+          border-bottom: none !important;
+      }
+      .blogsea-table tr:hover td {
+          background: rgba(255, 255, 255, 0.05);
+      }
+      .blogsea-table a {
+          text-decoration: none;
+          transition: opacity 0.2s;
+      }
+      .blogsea-table a:hover {
+          opacity: 0.8;
+          text-decoration: underline;
+      }
+      .sort-arrow {
+          display: inline-block;
+          width: 14px;
+          text-align: center;
+          margin-left: 4px;
+      }
+    `;
+  document.head.appendChild(style);
+
+  function applyBlogseaRedesign() {
+    const table = document.querySelector("#branch > table");
+    
+    if (!table || table.classList.contains("blogsea-table")) return;
+
+    const tbody = table.querySelector("tbody");
+    if (!tbody) return;
+
+    const headerRow = tbody.querySelector("tr");
+    if (!headerRow) return;
+
+    const firstCell = headerRow.querySelector("td");
+    if (!firstCell || !firstCell.textContent.includes("Название")) return;
+
+    table.classList.add("blogsea-table");
+    table.removeAttribute("border");
+
+    const headerCells = Array.from(headerRow.children);
+    const thead = document.createElement("thead");
+    const newHeaderRow = document.createElement("tr");
+
+    const columns = [
+      { index: 0, type: 'string' },
+      { index: 1, type: 'date' },
+      { index: 2, type: 'string' }
+    ];
+
+    let sortState = { column: -1, asc: true };
+
+    headerCells.forEach((td, index) => {
+      const th = document.createElement("th");
+      th.innerHTML = td.textContent.replace(/\u00A0/g, ' ').trim() + ' <span class="sort-arrow">↕</span>';
+      
+      th.addEventListener("click", () => {
+        const isAscending = sortState.column === index ? !sortState.asc : true;
+        sortState = { column: index, asc: isAscending };
+        
+        Array.from(newHeaderRow.children).forEach((h, i) => {
+          const arrow = h.querySelector('.sort-arrow');
+          if (arrow) {
+            if (i === index) {
+              arrow.textContent = isAscending ? '↓' : '↑';
+            } else {
+              arrow.textContent = '↕';
+            }
+          }
+        });
+
+        sortTable(index, isAscending, columns[index].type);
+      });
+      newHeaderRow.appendChild(th);
+    });
+
+    thead.appendChild(newHeaderRow);
+    table.insertBefore(thead, tbody);
+    headerRow.remove();
+
+    function sortTable(columnIndex, asc, type) {
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+      
+      rows.sort((a, b) => {
+        const aCell = a.children[columnIndex].textContent.trim();
+        const bCell = b.children[columnIndex].textContent.trim();
+
+        if (type === 'date') {
+          const aDate = parseRussianDate(aCell);
+          const bDate = parseRussianDate(bCell);
+          return asc ? aDate - bDate : bDate - aDate;
+        } else {
+          return asc ? aCell.localeCompare(bCell) : bCell.localeCompare(aCell);
+        }
+      });
+
+      rows.forEach(row => tbody.appendChild(row));
+    }
+  }
+
+  function parseRussianDate(dateString) {
+      const months = {
+        "января": 0, "февраля": 1, "марта": 2, "апреля": 3, "мая": 4, "июня": 5,
+        "июля": 6, "августа": 7, "сентября": 8, "октября": 9, "ноября": 10, "декабря": 11
+      };
+      
+      const parts = dateString.replace(/\u00A0/g, ' ').replace(' в ', ' ').trim().split(/\s+/);
+      if (parts.length < 3) return 0;
+
+      let day = parseInt(parts[0], 10);
+      let month = months[parts[1]] || 0;
+      let year = new Date().getFullYear();
+      let timePart = "";
+
+      if (parts.length >= 4 && !parts[2].includes(':')) {
+        year = parseInt(parts[2], 10);
+        timePart = parts[3];
+      } else if (parts.length >= 3) {
+        timePart = parts[2];
+      }
+
+      let hours = 0, minutes = 0;
+      if (timePart && timePart.includes(':')) {
+        const timeSplit = timePart.split(':');
+        hours = parseInt(timeSplit[0], 10);
+        minutes = parseInt(timeSplit[1], 10);
+      }
+
+      const parsedDate = new Date(year, month, day, hours, minutes);
+      
+      if (parsedDate.getTime() > Date.now() + 30 * 24 * 60 * 60 * 1000) {
+        parsedDate.setFullYear(year - 1);
+      }
+
+      return parsedDate.getTime();
+    }
+
+  setupMutationObserver("#branch", applyBlogseaRedesign, { childList: true, subtree: true });
 }
