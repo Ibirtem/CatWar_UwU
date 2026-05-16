@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.45.0-05.26
+// @version      v1.45.1-05.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -104,7 +104,7 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.45.0";
+const current_uwu_version = "1.45.1";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -9887,75 +9887,6 @@ if (targetCW3.test(window.location.href)) {
       opacity: 0.8,
     });
   }
-  // ====================================================================================================================
-  //   . . . ПРОЦЕНТЫ ПАРАМЕТРОВ . . .
-  // ====================================================================================================================
-  // if (settings.displayParametersPercentages) {
-  //   const parameterTableIds = [
-  //     "dream_table",
-  //     "hunger_table",
-  //     "thirst_table",
-  //     "need_table",
-  //     "health_table",
-  //     "clean_table",
-  //   ];
-
-  //   function updateParameterPercentages(tableId) {
-  //     const table = document.getElementById(tableId);
-  //     if (table) {
-  //       const row = table.querySelector("tbody tr");
-  //       if (!row) {
-  //         console.warn(`Строка не найдена в таблице с ID "${tableId}".`);
-  //         return;
-  //       }
-  //       const greenBar = row.querySelector(
-  //         "td[style*='background-color: green;']"
-  //       );
-  //       const redBar = row.querySelector("td[style*='background-color: red;']");
-  //       if (!greenBar || !redBar) {
-  //         console.warn(`Бары не найдены в строке таблицы с ID "${tableId}".`);
-  //         return;
-  //       }
-  //       const greenBarWidth = parseInt(greenBar.style.width, 10);
-  //       const redBarWidth = parseInt(redBar.style.width, 10);
-  //       const totalWidth = greenBarWidth + redBarWidth;
-  //       let percentage = (greenBarWidth / totalWidth) * 100;
-  //       percentage =
-  //         percentage % 1 !== 0 ? percentage.toFixed(2) : Math.round(percentage);
-
-  //       let percentageCell = row.querySelector(".percentage-cell");
-  //       if (!percentageCell) {
-  //         percentageCell = document.createElement("td");
-  //         percentageCell.classList.add("percentage-cell");
-  //         row.appendChild(percentageCell);
-  //       }
-  //       percentageCell.textContent = `${percentage}%`;
-  //     } else {
-  //       console.warn(`Таблица с ID "${tableId}" не найдена.`);
-  //     }
-  //   }
-
-  //   async function setupTableObservers() {
-  //     for (const tableId of parameterTableIds) {
-  //       const tableSelector = `#${tableId}`;
-  //       const rowSelector = `${tableSelector} tbody tr`;
-  //       const greenBarSelector = `${rowSelector} td[style*='background-color: green;']`;
-  //       const redBarSelector = `${rowSelector} td[style*='background-color: red;']`;
-
-  //       await setupMutationObserver(tableSelector, () =>
-  //         updateParameterPercentages(tableId)
-  //       );
-  //       await setupMutationObserver(greenBarSelector, () =>
-  //         updateParameterPercentages(tableId)
-  //       );
-  //       await setupMutationObserver(redBarSelector, () =>
-  //         updateParameterPercentages(tableId)
-  //       );
-  //     }
-  //   }
-
-  //   window.addEventListener("load", setupTableObservers);
-  // }
 
   // ====================================================================================================================
   //   . . . ИСТОРИЯ ПРОКАЧКИ БУ . . .
@@ -10135,38 +10066,6 @@ if (targetCW3.test(window.location.href)) {
 
     parametersBlock.insertBefore(buttonContainer, parametersBlock.firstChild);
   }
-
-  // const parameters = [
-  //   {
-  //     id: "dream_table",
-  //     name: "Сонливость",
-  //     timePerPixel: 20,
-  //     formula: null,
-  //   },
-  //   {
-  //     id: "hunger_table",
-  //     name: "Голод",
-  //     timePerPixel: null,
-  //     formula: (red) => Math.ceil((red / 150) * 9) * 15,
-  //   },
-  //   { id: "thirst_table", name: "Жажда", timePerPixel: 60, formula: null },
-  //   { id: "need_table", name: "Нужда", timePerPixel: 30, formula: null },
-  //   {
-  //     id: "health_table",
-  //     name: "Здоровье",
-  //     timePerPixel: null,
-  //     formula: null,
-  //   },
-  //   {
-  //     id: "clean_table",
-  //     name: "Чистота",
-  //     timePerPixel: null,
-  //     formula: (red) => {
-  //       red = red % 3 ? red : red - 0.5;
-  //       return ((red - 1) / 1.5) * 100 + 100;
-  //     },
-  //   },
-  // ];
 
   const maxWidthPx = 150;
 
