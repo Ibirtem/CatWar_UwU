@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.45.0-04.26
+// @version      v1.45.0-05.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -146,6 +146,7 @@ const uwuDefaultSettings = {
 
   redesignCostumsSettings: false,
   profileMenuRedesign: false,
+  blogseaRedesign: false,
 
   showDefectsEnabled: false,
   defectsStyle: "default",
@@ -303,6 +304,7 @@ const targetSniffCreation =
   /^https?:\/\/\w?\.?catwar\.(?:net|su)\/sniff\?creation/;
 
 const targetClanAutoActions = /^https?:\/\/\w?\.?catwar\.(?:net|su)\/my_clan\/automatic_actions/;
+const targetBlogsea = /^https?:\/\/\w?\.?catwar\.(?:net|su)\/blogsea/;
 
 // ====================================================================================================================
 //   . . . СТАНДАРТНЫЕ ЦВЕТОВЫЕ ТЕМЫ . . .
@@ -504,10 +506,22 @@ soundManager.registerSound(
   "https://github.com/Ibirtem/CatWar/raw/main/sounds/block_1.mp3"
 );
 
-const savedCustomSounds = uwuStorage.getItem("uwu_customSounds") || [];
-savedCustomSounds.forEach(sound => {
-  soundManager.registerSound(sound.id, sound.name, sound.url, true);
-});
+const savedCustomSoundsRaw = uwuStorage.getItem("uwu_customSounds");
+const savedCustomSounds = Array.isArray(savedCustomSoundsRaw)
+  ? savedCustomSoundsRaw
+  : [];
+
+savedCustomSounds
+  .filter(
+    (sound) =>
+      sound &&
+      typeof sound.id === "string" &&
+      typeof sound.name === "string" &&
+      typeof sound.url === "string",
+  )
+  .forEach((sound) => {
+    soundManager.registerSound(sound.id, sound.name, sound.url, true);
+  });
 
 // ====================================================================================================================
 //   . . . HTML ПАНЕЛЬ НАСТРОЕК . . .
@@ -1410,6 +1424,12 @@ const uwusettings =
               data-setting="commentsAvatars"
             />
             <label for="comments-avatars">Аватарки в комментариях</label>
+          </div>
+
+          <div>
+            <p>Обновляет внешний вид поиска блогов и добавляет кликабельную сортировку по столбцам.</p>
+            <input type="checkbox" id="blogsea-redesign" data-setting="blogseaRedesign" />
+            <label for="blogsea-redesign">Редизайн поиска блогов/лент</label>
           </div>
 
           <hr id="uwu-hr" class="uwu-hr" />
@@ -3661,7 +3681,8 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        🌿 v${current_uwu_version} - Редизайн ссылок в меню профиля и возможность добавлять свои звуки!
+        🌿 v${current_uwu_version} - Редизайн ссылок в меню профиля, поиска в блогах/лентах 
+        и возможность добавлять свои звуки!
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
@@ -3685,7 +3706,7 @@ const newsPanel =
         <p>— Цвета темы теперь должны адекватно снова ложиться на Ванильный чат (И не только).</p>
         <p>— Таймер-напоминалка более точный.</p>
         <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: ??.04.26</p>
+        <p>Дата выпуска: 16.05.26</p>
       </div>
     </div>
   `;
@@ -18629,4 +18650,177 @@ if (targetClanAutoActions.test(window.location.href) && settings.automaticAction
   }
 
   applyAutoActionsRedesign();
+}
+
+// ====================================================================================================================
+//   . . . РЕДИЗАЙН ПОИСКА БЛОГОВ И СОРТИРОВКА . . .
+// ====================================================================================================================
+if (targetBlogsea.test(window.location.href) && settings.blogseaRedesign) {
+  const style = document.createElement("style");
+  style.id = "uwu-blogsea-redesign";
+  style.innerHTML = /* CSS */ `
+      #branch {
+          font-family: "Montserrat", sans-serif;
+      }
+      .blogsea-table {
+          border: none !important;
+          width: 100%;
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 8px;
+          overflow: hidden;
+          margin-bottom: 10px !important;
+          border-spacing: 0;
+      }
+      .blogsea-table th, .blogsea-table td {
+          border: none !important;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+          padding: 4px 8px !important;
+          vertical-align: middle !important;
+          font-size: 13px;
+      }
+      .blogsea-table th {
+          background: rgba(255, 255, 255, 0.05);
+          text-transform: uppercase;
+          font-size: 11px;
+          letter-spacing: 0.5px;
+          color: rgba(255, 255, 255, 0.5);
+          cursor: pointer;
+          user-select: none;
+          transition: background 0.2s;
+      }
+      .blogsea-table th:hover {
+          background: rgba(255, 255, 255, 0.1);
+      }
+      .blogsea-table tr:last-child td {
+          border-bottom: none !important;
+      }
+      .blogsea-table tr:hover td {
+          background: rgba(255, 255, 255, 0.05);
+      }
+      .blogsea-table a {
+          text-decoration: none;
+          transition: opacity 0.2s;
+      }
+      .blogsea-table a:hover {
+          opacity: 0.8;
+          text-decoration: underline;
+      }
+      .sort-arrow {
+          display: inline-block;
+          width: 14px;
+          text-align: center;
+          margin-left: 4px;
+      }
+    `;
+  document.head.appendChild(style);
+
+  function applyBlogseaRedesign() {
+    const table = document.querySelector("#branch > table");
+    
+    if (!table || table.classList.contains("blogsea-table")) return;
+
+    const tbody = table.querySelector("tbody");
+    if (!tbody) return;
+
+    const headerRow = tbody.querySelector("tr");
+    if (!headerRow) return;
+
+    const firstCell = headerRow.querySelector("td");
+    if (!firstCell || !firstCell.textContent.includes("Название")) return;
+
+    table.classList.add("blogsea-table");
+    table.removeAttribute("border");
+
+    const headerCells = Array.from(headerRow.children);
+    const thead = document.createElement("thead");
+    const newHeaderRow = document.createElement("tr");
+
+    const columns = [
+      { index: 0, type: 'string' },
+      { index: 1, type: 'date' },
+      { index: 2, type: 'string' }
+    ];
+
+    let sortState = { column: -1, asc: true };
+
+    headerCells.forEach((td, index) => {
+      const th = document.createElement("th");
+      th.innerHTML = td.textContent.replace(/\u00A0/g, ' ').trim() + ' <span class="sort-arrow">↕</span>';
+      
+      th.addEventListener("click", () => {
+        const isAscending = sortState.column === index ? !sortState.asc : true;
+        sortState = { column: index, asc: isAscending };
+        
+        Array.from(newHeaderRow.children).forEach((h, i) => {
+          const arrow = h.querySelector('.sort-arrow');
+          if (arrow) {
+            if (i === index) {
+              arrow.textContent = isAscending ? '↓' : '↑';
+            } else {
+              arrow.textContent = '↕';
+            }
+          }
+        });
+
+        sortTable(index, isAscending, columns[index].type);
+      });
+      newHeaderRow.appendChild(th);
+    });
+
+    thead.appendChild(newHeaderRow);
+    table.insertBefore(thead, tbody);
+    headerRow.remove();
+
+    function sortTable(columnIndex, asc, type) {
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+      
+      rows.sort((a, b) => {
+        const aCell = a.children[columnIndex].textContent.trim();
+        const bCell = b.children[columnIndex].textContent.trim();
+
+        if (type === 'date') {
+          const aDate = parseRussianDate(aCell);
+          const bDate = parseRussianDate(bCell);
+          return asc ? aDate - bDate : bDate - aDate;
+        } else {
+          return asc ? aCell.localeCompare(bCell) : bCell.localeCompare(aCell);
+        }
+      });
+
+      rows.forEach(row => tbody.appendChild(row));
+    }
+  }
+
+  function parseRussianDate(dateString) {
+    const months = {
+      "января": 0, "февраля": 1, "марта": 2, "апреля": 3, "мая": 4, "июня": 5,
+      "июля": 6, "августа": 7, "сентября": 8, "октября": 9, "ноября": 10, "декабря": 11
+    };
+    
+    const parts = dateString.replace(/\u00A0/g, ' ').replace(' в ', ' ').trim().split(/\s+/);
+    if (parts.length < 3) return 0;
+
+    let day = parseInt(parts[0], 10);
+    let month = months[parts[1]] || 0;
+    let year = new Date().getFullYear();
+    let timePart = "";
+
+    if (parts.length >= 4 && !parts[2].includes(':')) {
+      year = parseInt(parts[2], 10);
+      timePart = parts[3];
+    } else if (parts.length >= 3) {
+      timePart = parts[2];
+    }
+
+    let hours = 0, minutes = 0;
+    if (timePart && timePart.includes(':')) {
+      const timeSplit = timePart.split(':');
+      hours = parseInt(timeSplit[0], 10);
+      minutes = parseInt(timeSplit[1], 10);
+    }
+
+    return new Date(year, month, day, hours, minutes).getTime();
+  }
+
+  setupMutationObserver("#branch", applyBlogseaRedesign, { childList: true, subtree: true });
 }
