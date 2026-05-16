@@ -1635,424 +1635,7 @@ const uwusettings =
                 id="color-settings-body"
                 class="parameters-color-table--body"
               >
-                <tr>
-                  <th class="parameters-color-table--cell" colspan="5">
-                    Параметры
-                  </th>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Сон</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="dream"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="dream"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="dream"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="dream"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Голод</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="hunger"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="hunger"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="hunger"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="hunger"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Жажда</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="thirst"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="thirst"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="thirst"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="thirst"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Нужда</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="need"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="need"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="need"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="need"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Здоровье</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="health"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="health"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="health"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="health"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Чистота</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="clean"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="clean"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="clean"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="clean"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th class="parameters-color-table--cell" colspan="5">
-                    Навыки
-                  </th>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Запах</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="smell"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="smell"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="smell"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="smell"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Копание</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="dig"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="dig"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="dig"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="dig"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Плавание</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="swim"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="swim"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="swim"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="swim"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">БУ</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="might"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="might"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="might"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="might"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Лазание</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="tree"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="tree"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="tree"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="tree"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Зоркость</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="observ"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="observ"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="observ"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="observ"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th class="parameters-color-table--cell" colspan="5">
-                    Уникальные навыки
-                  </th>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell"></td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="other"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="other"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="other"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="other"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
+                <!-- JS Вставит строки -->
               </tbody>
             </table>
           </div>
@@ -3704,6 +3287,8 @@ const newsPanel =
         <p>— Перепись Менеджера звука под новые нужды.</p>
         <p>— Цвета темы теперь должны адекватно снова ложиться на Ванильный чат (И не только).</p>
         <p>— Таймер-напоминалка более точный.</p>
+        <p>—— Сайт для скриптов стал жаловаться, что у меня слишком громадный мод.</p>
+        <p>—— Поэтому немного переписал кусочек HTML шаблона цветов Параметров и Навыков на Генерацию кодом.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: 16.05.26</p>
       </div>
@@ -5095,6 +4680,43 @@ if (targetSettings.test(window.location.href)) {
   if (uwuSettingsElement) {
     uwuSettingsElement.insertAdjacentHTML("beforeend", newsPanel);
   }
+
+  // ========================================================
+  const paramTableBody = document.getElementById("color-settings-body");
+  if (paramTableBody) {
+    const paramsList = [
+      { id: "dream", name: "Сон", group: "Параметры" },
+      { id: "hunger", name: "Голод" },
+      { id: "thirst", name: "Жажда" },
+      { id: "need", name: "Нужда" },
+      { id: "health", name: "Здоровье" },
+      { id: "clean", name: "Чистота" },
+      { id: "smell", name: "Запах", group: "Навыки" },
+      { id: "dig", name: "Копание" },
+      { id: "swim", name: "Плавание" },
+      { id: "might", name: "БУ" },
+      { id: "tree", name: "Лазание" },
+      { id: "observ", name: "Зоркость" },
+      { id: "other", name: "", group: "Уникальные навыки" }
+    ];
+
+    let paramsHTML = "";
+    paramsList.forEach(p => {
+      if (p.group) {
+        paramsHTML += `<tr><th class="parameters-color-table--cell" colspan="5">${p.group}</th></tr>`;
+      }
+      paramsHTML += `
+        <tr>
+          <td class="parameters-color-table--cell">${p.name}</td>
+          <td class="parameters-color-table--cell"><input type="color" data-param="${p.id}" data-color-type="bar-from" /></td>
+          <td class="parameters-color-table--cell"><input type="color" data-param="${p.id}" data-color-type="bar-to" /></td>
+          <td class="parameters-color-table--cell"><input type="color" data-param="${p.id}" data-color-type="bg-from" /></td>
+          <td class="parameters-color-table--cell"><input type="color" data-param="${p.id}" data-color-type="bg-to" /></td>
+        </tr>`;
+    });
+    paramTableBody.innerHTML = paramsHTML;
+  }
+  // ========================================================
 
   loadSettings();
 
