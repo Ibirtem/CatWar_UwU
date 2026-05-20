@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.45.1-05.26
+// @version      v1.45.2-05.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -104,7 +104,7 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.45.1";
+const current_uwu_version = "1.45.2";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -3289,8 +3289,12 @@ const newsPanel =
         <p>— Таймер-напоминалка более точный.</p>
         <p>—— Сайт для скриптов стал жаловаться, что у меня слишком громадный мод.</p>
         <p>—— Поэтому немного переписал кусочек HTML шаблона цветов Параметров и Навыков на Генерацию кодом.</p>
+        <p>——— Подправлено что счётчик Успешно поднятых считал и Неуспешно поднятых.</p>
+        <p>——— Теперь пишется кого конкретно забыло проверить перед поднятием.</p>
+        <p>——— Лог чистильщика теперь в основном опирается на цвет статуса Онлайна игрока, 
+        чтобы не ломаться от новых кастомных Статусов.</p>
         <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: 16.05.26</p>
+        <p>Дата выпуска: 20.05.26</p>
       </div>
     </div>
   `;
@@ -12461,10 +12465,17 @@ if (targetCW3.test(window.location.href)) {
     function checkCatStatus(catId) {
       const catTooltip = document
         .querySelector(`#cages > tbody .cat_tooltip a[href="/cat${catId}"]`)
-        .closest(".cat_tooltip");
+        ?.closest(".cat_tooltip");
       if (catTooltip) {
         const statusSpan = catTooltip.querySelector(".online");
         if (statusSpan) {
+          const fontTag = statusSpan.querySelector("font");
+          if (fontTag) {
+            const color = fontTag.getAttribute("color")?.toUpperCase();
+            if (color === "#006400" || color === "#333333") return false;
+            if (color === "#A52A2A") return true;
+          }
+          
           const statusText = statusSpan.textContent
             .replace(/[\[\]]/g, "")
             .trim();
@@ -12776,6 +12787,7 @@ if (targetCW3.test(window.location.href)) {
     }
 
     function processPickupAction(logLines, catName, catId, location) {
+      const catIdentifier = `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`;
       const catPattern = new RegExp(
         `\\[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}\\]`
       );
@@ -12785,7 +12797,7 @@ if (targetCW3.test(window.location.href)) {
       const penultimateSentenceIndex = lastSentenceIndex - 1;
 
       // 2. Проверяем последнее предложение на "Проверен и поднят" с именем кота.
-      const lastSentence = logLines[lastSentenceIndex];
+      const lastSentence = logLines[lastSentenceIndex] || "";
       if (
         lastSentence.includes(`на локации "${location}"`) &&
         lastSentence.includes("Проверен и поднят") &&
@@ -12797,11 +12809,9 @@ if (targetCW3.test(window.location.href)) {
       // 3. Проверяем последнее предложение на "Проверен" с именем кота.
       let lastSentenceChecked = false;
       if (
-        logLines[lastSentenceIndex].includes("Проверен") &&
-        logLines[lastSentenceIndex].includes(
-          `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
-        ) &&
-        logLines[lastSentenceIndex].includes(`на локации "${location}"`)
+        lastSentence.includes("Проверен") &&
+        lastSentence.includes(catIdentifier) &&
+        lastSentence.includes(`на локации "${location}"`)
       ) {
         lastSentenceChecked = true;
       }
@@ -12814,12 +12824,10 @@ if (targetCW3.test(window.location.href)) {
           logLines[penultimateSentenceIndex].includes(
             `на локации "${location}"`
           ) &&
-          !logLines[penultimateSentenceIndex].includes(
-            `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
-          )
+          !logLines[penultimateSentenceIndex].includes(catIdentifier)
         ) {
           const currentCatMatch =
-            logLines[lastSentenceIndex].match(/\[(.*?)\]/);
+            lastSentence.match(/\[(.*?)\]/);
           if (currentCatMatch) {
             // Добавляем имя текущего кота к предпоследнему предложению.
             const existingCatsMatch =
@@ -12841,29 +12849,33 @@ if (targetCW3.test(window.location.href)) {
           }
         } else {
           // 5. Создаем новое предложение "Проверен и поднят".
-          logLines[lastSentenceIndex] = logLines[lastSentenceIndex].replace(
+          logLines[lastSentenceIndex] = lastSentence.replace(
             "Проверен",
             "Проверен и поднят"
           );
         }
+
+        // Увеличиваем счетчик только если кот был успешно проверен и поднят
+        const pickupCounter = document.getElementById(
+          "uwu-cleaningLog-counter-pickup"
+        );
+        pickupCounter.textContent = parseInt(pickupCounter.textContent) + 1;
+
       } else {
         // 6. Если "Проверен" с именем кота нет.
-        if (logLines[lastSentenceIndex].includes("Кот не спит")) {
-          logLines[lastSentenceIndex] = "Вы забыли проверить кота";
-        } else if (
-          !logLines[lastSentenceIndex].includes("Вы забыли проверить кота")
-        ) {
-          logLines.push("Вы забыли проверить кота");
+        const forgotText = `Вы забыли проверить кота ${catIdentifier}`;
+
+        if (lastSentence.includes("Кот не спит") && lastSentence.includes(catIdentifier)) {
+          logLines[lastSentenceIndex] = forgotText;
+        } else if (!lastSentence.includes(forgotText)) {
+          logLines.push(forgotText);
         }
       }
+      
       if (!catNamesAndIds.some((cat) => cat.id === catId)) {
         catNamesAndIds.push({ name: catName, id: catId });
       }
 
-      const pickupCounter = document.getElementById(
-        "uwu-cleaningLog-counter-pickup"
-      );
-      pickupCounter.textContent = parseInt(pickupCounter.textContent) + 1;
       lastDroppedCatInfo = null;
       document
         .getElementById("uwu-cleaningLog-delete-last")
