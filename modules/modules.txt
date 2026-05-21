@@ -1,3 +1,2 @@
 newParametersIcons.css|Иконочки параметров в стиле Смайликов (Сломано).|1.0.0
 rainbowMyName.css|Радужное уведомление вас в чате.|1.0.0
-void.js|Void is coming...|1.0.0
