@@ -3263,36 +3263,21 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        🌿 v${current_uwu_version} - Редизайн ссылок в меню профиля, поиска в блогах/лентах 
-        и возможность добавлять свои звуки!
+        🌿 v${current_uwu_version} - Оптимизация скрипта/мода.
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>
-          — Мяу мяу мяу и что вы мне сделаете?
+          — 
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
-        <p>— Перенос Редизайн племенных отчетов в "Остальные редизайны" для логичности.</p>
-        <p>— И Аватарки в комментариях тоже в "Остальные редизайны".</p>
-        <p>— Категория "Общение" теперь просто стало "Чат Игровой".</p>
-        <p>— Мизерный фикс-поддержка Фаерфокс браузеров полосками в чате и где-то чё-то там ещё.</p>
+        <p>— </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
-        <p>— Будущие кастомные шрифты и цвета ванильного чата переносятся и на 
-        Современный чат (Кроме verdana, он отвратительный. Кто не согласен, тому в глаз.)</p>
-        <p>— Возможно, фикс того, что чаты в редких случаях бывают пустыми.</p>
-        <p>— Небольшое улучшение производительности Лога чистильщика.</p>
-        <p>— Переделаны настройки "Природных эффектов". Неудобные ползунки превращены в выпадающие списки.</p>
-        <p>— Перепись Менеджера звука под новые нужды.</p>
-        <p>— Цвета темы теперь должны адекватно снова ложиться на Ванильный чат (И не только).</p>
-        <p>— Таймер-напоминалка более точный.</p>
-        <p>—— Сайт для скриптов стал жаловаться, что у меня слишком громадный мод.</p>
-        <p>—— Поэтому немного переписал кусочек HTML шаблона цветов Параметров и Навыков на Генерацию кодом.</p>
-        <p>——— Подправлено что счётчик Успешно поднятых считал и Неуспешно поднятых.</p>
-        <p>——— Теперь пишется кого конкретно забыло проверить перед поднятием.</p>
-        <p>——— Лог чистильщика теперь в основном опирается на цвет статуса Онлайна игрока, 
-        чтобы не ломаться от новых кастомных Статусов.</p>
+        <p>— Создание кнопок звуков при помощи массивов.</p>
+        <p>— Быстрые стили теперь в "единой функции".</p>
+        <p>— Объединение функции склонения в калькуляторах профиля.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: 20.05.26</p>
       </div>
@@ -6418,46 +6403,16 @@ if (targetSettings.test(window.location.href)) {
     container.appendChild(testButton);
   }
 
-  addSoundTestButton(
-    "notificationPMContainer",
-    "notificationPMSound",
-    "notificationPMVolume"
-  );
-  addSoundTestButton(
-    "notificationActionEndContainer",
-    "notificationActionEndSound",
-    "notificationActionEndVolume"
-  );
-  addSoundTestButton(
-    "notificationInMouthContainer",
-    "notificationInMouthSound",
-    "notificationInMouthVolume"
-  );
-  addSoundTestButton(
-    "notificationInFightModeContainer",
-    "notificationInFightModeSound",
-    "notificationInFightModeVolume"
-  );
-  addSoundTestButton(
-    "climbingRefreshNotificationSoundContainer",
-    "climbingRefreshNotificationSound",
-    "climbingRefreshNotificationVolume"
-  );
-  addSoundTestButton(
-    "myNameNotificationSoundContainer",
-    "myNameNotificationSound",
-    "notificationMyNameVolume"
-  );
-  addSoundTestButton(
-    "notificationBlockContainer",
-    "notificationBlockSound",
-    "notificationBlockVolume"
-  );
-  addSoundTestButton(
-    "intervalTimerContainer",
-    "intervalTimerSound",
-    "intervalTimerVolume"
-  );
+  [
+    ["notificationPMContainer", "notificationPMSound", "notificationPMVolume"],
+    ["notificationActionEndContainer", "notificationActionEndSound", "notificationActionEndVolume"],
+    ["notificationInMouthContainer", "notificationInMouthSound", "notificationInMouthVolume"],
+    ["notificationInFightModeContainer", "notificationInFightModeSound", "notificationInFightModeVolume"],
+    ["climbingRefreshNotificationSoundContainer", "climbingRefreshNotificationSound", "climbingRefreshNotificationVolume"],
+    ["myNameNotificationSoundContainer", "myNameNotificationSound", "notificationMyNameVolume"],
+    ["notificationBlockContainer", "notificationBlockSound", "notificationBlockVolume"],
+    ["intervalTimerContainer", "intervalTimerSound", "intervalTimerVolume"]
+  ].forEach(args => addSoundTestButton(...args));
   // ====================================================================================================================
   //  . . . СБРОС ПОЗИЦИИ ЧАСИКОВ . . .
   // ====================================================================================================================
@@ -10925,87 +10880,51 @@ if (targetCW3.test(window.location.href)) {
     return;
   }
 
-  // TODO - Потом переиспользовать callback: function (checked) {}
+  const sharedFastStyleCallback = function (checked) {
+    const styleId = "uwu-fast-style-" + this.key;
+    if (checked) {
+      if (!document.getElementById(styleId)) {
+        const style = document.createElement("style");
+        style.id = styleId;
+        style.innerHTML = this.style;
+        document.head.appendChild(style);
+      }
+    } else {
+      const existingStyle = document.getElementById(styleId);
+      if (existingStyle) {
+        document.head.removeChild(existingStyle);
+      }
+    }
+  };
+
   const checkboxes = [
     {
       label: "Не показывать всплывающее окно 'О коте'",
       key: "hideCatTooltip",
       storageKey: "uwu_fastStyles",
       style: ".cat_tooltip { display: none !important; }",
-      callback: function (checked) {
-        if (checked) {
-          const style = document.createElement("style");
-          style.innerHTML = this.style;
-          document.head.appendChild(style);
-        } else {
-          const styles = document.head.querySelectorAll("style");
-          styles.forEach((style) => {
-            if (style.innerHTML === this.style) {
-              document.head.removeChild(style);
-            }
-          });
-        }
-      },
+      callback: sharedFastStyleCallback,
     },
     {
       label: "Скрыть Игровое поле",
       key: "hideGameField",
       storageKey: "uwu_fastStyles",
       style: "#cages_overflow { visibility: hidden !important; }",
-      callback: function (checked) {
-        if (checked) {
-          const style = document.createElement("style");
-          style.innerHTML = this.style;
-          document.head.appendChild(style);
-        } else {
-          const styles = document.head.querySelectorAll("style");
-          styles.forEach((style) => {
-            if (style.innerHTML === this.style) {
-              document.head.removeChild(style);
-            }
-          });
-        }
-      },
+      callback: sharedFastStyleCallback,
     },
     {
       label: "Скрыть фон Игрового Поля",
       key: "hideGameFieldBackground",
       storageKey: "uwu_fastStyles",
       style: "#cages_div { background-image: none !important; }",
-      callback: function (checked) {
-        if (checked) {
-          const style = document.createElement("style");
-          style.innerHTML = this.style;
-          document.head.appendChild(style);
-        } else {
-          const styles = document.head.querySelectorAll("style");
-          styles.forEach((style) => {
-            if (style.innerHTML === this.style) {
-              document.head.removeChild(style);
-            }
-          });
-        }
-      },
+      callback: sharedFastStyleCallback,
     },
     {
       label: "Скрыть Небо",
       key: "hideSky",
       storageKey: "uwu_fastStyles",
       style: "#tr_sky { display: none !important; }",
-      callback: function (checked) {
-        if (checked) {
-          const style = document.createElement("style");
-          style.innerHTML = this.style;
-          document.head.appendChild(style);
-        } else {
-          const styles = document.head.querySelectorAll("style");
-          styles.forEach((style) => {
-            if (style.innerHTML === this.style) {
-              document.head.removeChild(style);
-            }
-          });
-        }
-      },
+      callback: sharedFastStyleCallback,
     },
     {
       label: "Всегда день/ярко",
@@ -11028,20 +10947,7 @@ if (targetCW3.test(window.location.href)) {
       key: "opaqueCats",
       storageKey: "uwu_fastStyles",
       style: ".cat > div { opacity: 1 !important; }",
-      callback: function (checked) {
-        if (checked) {
-          const style = document.createElement("style");
-          style.innerHTML = this.style;
-          document.head.appendChild(style);
-        } else {
-          const styles = document.head.querySelectorAll("style");
-          styles.forEach((style) => {
-            if (style.innerHTML === this.style) {
-              document.head.removeChild(style);
-            }
-          });
-        }
-      },
+      callback: sharedFastStyleCallback,
     },
   ];
 
@@ -16331,6 +16237,19 @@ if (targetProfile.test(window.location.href)) {
 // ====================================================================================================================
 //   . . . КАЛЬКУЛЯТОР ВОЗРАСТА / ЛУН . . .
 // ====================================================================================================================
+function uwuDeclOfNum(number, titles) {
+  if (!Number.isInteger(number)) {
+    return titles[1]; 
+  }
+  const cases = [2, 0, 1, 1, 1, 2];
+  const intNumber = Math.floor(Math.abs(number));
+  return titles[
+    intNumber % 100 > 4 && intNumber % 100 < 20
+      ? 2
+      : cases[intNumber % 10 < 5 ? intNumber % 10 : 5]
+  ];
+}
+
 function moonCalculator() {
   const months = [
     "января",
@@ -16548,20 +16467,11 @@ function moonCalculator() {
 
   function updateMoonWord(moons) {
     const integerMoons = Math.floor(moons);
-    document.getElementById("moon-word").textContent = declOfNum(integerMoons, [
+    document.getElementById("moon-word").textContent = uwuDeclOfNum(integerMoons, [
       "луна",
       "луны",
       "лун",
     ]);
-  }
-
-  function declOfNum(number, titles) {
-    const cases = [2, 0, 1, 1, 1, 2];
-    return titles[
-      number % 100 > 4 && number % 100 < 20
-        ? 2
-        : cases[number % 10 < 5 ? number % 10 : 5]
-    ];
   }
 }
 // ====================================================================================================================
@@ -16709,7 +16619,7 @@ function setupActivityCalc() {
       activitySettings[catId].hours
     );
     document.querySelector("#goal-progress > ul").innerHTML = `
-      <li>${result.actions} ${declensionOfNumber(result.actions, [
+      <li>${result.actions} ${uwuDeclOfNum(result.actions, [
       "переход",
       "перехода",
       "переходов",
@@ -16897,16 +16807,6 @@ function setupActivityCalc() {
     uwuStorage.setItem("uwu_activity", data);
   }
 
-  function declensionOfNumber(number, titles) {
-    const cases = [2, 0, 1, 1, 1, 2];
-    const intNumber = Math.floor(Math.abs(number));
-    return titles[
-      intNumber % 100 > 4 && intNumber % 100 < 20
-        ? 2
-        : cases[intNumber % 10 < 5 ? intNumber % 10 : 5]
-    ];
-  }
-
   function convertTime(from, value) {
     const factors = {
       ms: 1,
@@ -16933,14 +16833,14 @@ function setupActivityCalc() {
   }
 
   function updateHourWord(hours) {
-    document.getElementById("hour-word").textContent = declensionOfNumber(
+    document.getElementById("hour-word").textContent = uwuDeclOfNum(
       hours,
       ["час", "часа", "часов"]
     );
   }
 
   function updateMinusWord(minusValue) {
-    document.getElementById("minus-word").textContent = declensionOfNumber(
+    document.getElementById("minus-word").textContent = uwuDeclOfNum(
       minusValue,
       ["секунду", "секунды", "секунд"]
     );
