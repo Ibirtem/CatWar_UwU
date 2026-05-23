@@ -147,6 +147,7 @@ const uwuDefaultSettings = {
   redesignCostumsSettings: false,
   profileMenuRedesign: false,
   blogseaRedesign: false,
+  blogsRedesign: false,
 
   showDefectsEnabled: false,
   defectsStyle: "default",
@@ -1429,6 +1430,12 @@ const uwusettings =
             <p>Обновляет внешний вид поиска блогов и добавляет кликабельную сортировку по столбцам.</p>
             <input type="checkbox" id="blogsea-redesign" data-setting="blogseaRedesign" />
             <label for="blogsea-redesign">Редизайн поиска блогов/лент</label>
+          </div>
+
+          <div>
+            <p>Обновляет внешний вид навигации и постов в блогах и лентах, превращая их в аккуратные карточки.</p>
+            <input type="checkbox" id="blogs-redesign" data-setting="blogsRedesign" />
+            <label for="blogs-redesign">Редизайн постов в блогах/лентах</label>
           </div>
 
           <hr id="uwu-hr" class="uwu-hr" />
@@ -3263,16 +3270,16 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        🌿 v${current_uwu_version} - Оптимизация скрипта/мода.
+        🌿 v${current_uwu_version} - Добавлен редизайн Блогов и Ленты, и оптимизация скрипта/мода.
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>
-          — 
+          — Я забыл что я сюда пишу обычно.
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
-        <p>— </p>
+        <p>— Дизайны, вау.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
         <p>— Создание кнопок звуков при помощи массивов.</p>
@@ -18255,4 +18262,329 @@ if (targetBlogsea.test(window.location.href) && settings.blogseaRedesign) {
     }
 
   setupMutationObserver("#branch", applyBlogseaRedesign, { childList: true, subtree: true });
+}
+
+// ====================================================================================================================
+//   . . . РЕДИЗАЙН БЛОГОВ И ЛЕНТЫ . . .
+// ====================================================================================================================
+if ((targetBlog.test(window.location.href) || targetSniff.test(window.location.href)) && settings.blogsRedesign) {
+  function applyBlogsNavRedesign() {
+    const pageFormDiv = document.querySelector('#page_form > div');
+    if (!pageFormDiv || pageFormDiv.classList.contains('uwu-blog-nav-applied')) return;
+    pageFormDiv.classList.add('uwu-blog-nav-applied');
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentPage = parseInt(urlParams.get('page')) || 1;
+
+    const headerWrapper = document.createElement('div');
+    headerWrapper.className = 'uwu-blogs-header-wrapper';
+
+    const topRow = document.createElement('div');
+    topRow.className = 'uwu-header-top-row';
+
+    const pagContainer = document.createElement('div');
+    pagContainer.className = 'uwu-pagination-container';
+
+    const actionContainer = document.createElement('div');
+    actionContainer.className = 'uwu-action-container';
+
+    const filterContainer = document.createElement('div');
+    filterContainer.className = 'uwu-filter-container';
+
+    const prevSpan = document.getElementById('prev_page_span');
+    const nextSpan = document.getElementById('next_page_span');
+    const prevLink = document.getElementById('prev_page');
+    const nextLink = document.getElementById('next_page');
+    
+    const pageLabel = document.createElement('div');
+    pageLabel.className = 'uwu-page-label';
+    pageLabel.textContent = `Страница ${currentPage}`;
+
+    if (prevLink) {
+        prevLink.innerHTML = '← Назад';
+        prevLink.addEventListener('click', () => {
+            currentPage = Math.max(1, currentPage - 1);
+            pageLabel.textContent = `Страница ${currentPage}`;
+        });
+    }
+    if (nextLink) {
+        nextLink.innerHTML = 'Вперёд →';
+        nextLink.addEventListener('click', () => {
+            currentPage++;
+            pageLabel.textContent = `Страница ${currentPage}`;
+        });
+    }
+
+    if (prevSpan) pagContainer.appendChild(prevSpan);
+    pagContainer.appendChild(pageLabel);
+    if (nextSpan) pagContainer.appendChild(nextSpan);
+
+    const anchors = Array.from(pageFormDiv.querySelectorAll('a'));
+    anchors.forEach(a => {
+        if (a.id === 'prev_page' || a.id === 'next_page') return; 
+        
+        if (a.textContent.includes('Создать')) {
+            a.innerHTML = '✍️ Создать';
+            actionContainer.appendChild(a);
+        } else if (a.textContent.includes('Поиск')) {
+            a.innerHTML = '🔍 Поиск';
+            filterContainer.appendChild(a);
+        } else {
+            filterContainer.appendChild(a);
+        }
+    });
+
+    const notApproved = document.getElementById('notApproved');
+    if (notApproved) {
+        filterContainer.appendChild(notApproved);
+    }
+
+    pageFormDiv.innerHTML = '';
+    
+    topRow.appendChild(pagContainer);
+    if (actionContainer.childNodes.length > 0) {
+        topRow.appendChild(actionContainer);
+    }
+    
+    headerWrapper.appendChild(topRow);
+    if (filterContainer.childNodes.length > 0) {
+        headerWrapper.appendChild(filterContainer);
+    }
+
+    pageFormDiv.appendChild(headerWrapper);
+
+    if (!document.getElementById('uwu-blogs-redesign-styles')) {
+        const style = document.createElement("style");
+        style.id = "uwu-blogs-redesign-styles";
+        style.innerHTML = /* CSS */`
+            .uwu-blogs-header-wrapper {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+
+            .uwu-header-top-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .uwu-pagination-container {
+                display: flex;
+                align-items: center;
+                background: rgba(127, 127, 127, 0.15);
+                border: 1px solid rgba(127, 127, 127, 0.2);
+                border-radius: 12px;
+                padding: 4px;
+            }
+
+            #prev_page_span, #next_page_span, #notApproved {
+                font-size: 0 !important;
+                color: transparent !important;
+                display: inline-flex !important;
+                align-items: center;
+            }
+
+            .uwu-page-label {
+                opacity: 0.8;
+                font-weight: 600;
+                padding: 0 15px;
+                user-select: none;
+            }
+
+            #prev_page, #next_page {
+                background: rgba(127, 127, 127, 0.1);
+                padding: 6px 14px;
+                border-radius: 8px;
+                text-decoration: none !important;
+                font-size: 13px !important;
+                font-weight: normal !important;
+                transition: background-color 0.2s ease, transform 0.2s ease;
+            }
+
+            #prev_page:hover, #next_page:hover {
+                background: rgba(127, 127, 127, 0.25);
+                transform: translateY(-1px);
+            }
+
+            .uwu-action-container a {
+                display: inline-flex;
+                background: rgba(127, 127, 127, 0.2);
+                border: 1px solid rgba(127, 127, 127, 0.3);
+                padding: 8px 16px;
+                border-radius: 12px;
+                text-decoration: none;
+                font-weight: 600;
+                transition: all 0.2s ease;
+            }
+
+            .uwu-action-container a:hover {
+                background: rgba(127, 127, 127, 0.3);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .uwu-filter-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                background: rgba(127, 127, 127, 0.1);
+                padding: 10px;
+                border-radius: 12px;
+                border: 1px solid rgba(127, 127, 127, 0.2);
+            }
+
+            .uwu-filter-container a {
+                background: rgba(127, 127, 127, 0.1);
+                border: 1px solid rgba(127, 127, 127, 0.15);
+                padding: 6px 12px;
+                border-radius: 8px;
+                text-decoration: none;
+                transition: all 0.2s ease;
+            }
+
+            .uwu-filter-container a:hover, 
+            .uwu-filter-container a.active {
+                background: rgba(127, 127, 127, 0.25);
+                border-color: rgba(127, 127, 127, 0.3);
+            }
+            
+            .blog, .comment {
+                background: rgba(127, 127, 127, 0.08);
+                border: 1px solid rgba(127, 127, 127, 0.2);
+                border-radius: 12px;
+                padding: 16px;
+                margin-bottom: 16px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+                transition: transform 0.2s ease, border-color 0.2s ease;
+                position: relative;
+            }
+
+            .blog:hover, .comment:hover {
+                border-color: rgba(127, 127, 127, 0.3);
+            }
+
+            .blog-title, .comment-title {
+                font-size: 17px;
+                font-weight: 600;
+                margin: 0 0 6px 0 !important;
+                line-height: 1.3;
+            }
+
+            .comment-title {
+                font-size: 14px;
+                padding-right: 60px;
+            }
+
+            .blog-title a, .comment-title a {
+                text-decoration: none !important;
+                transition: opacity 0.2s ease;
+            }
+
+            .blog-title a:hover, .comment-title a:hover {
+                opacity: 0.7;
+            }
+
+            .blog-info, .comment-info {
+                font-size: 11px;
+                opacity: 0.6;
+                margin: 0 0 12px 0 !important;
+                padding-bottom: 12px;
+                border-bottom: 1px solid rgba(127, 127, 127, 0.2);
+            }
+
+            .blog-info a, .comment-info a {
+                font-weight: 500;
+                text-decoration: none;
+            }
+
+            .blog-info a:hover, .comment-info a:hover {
+                opacity: 0.8;
+                text-decoration: underline;
+            }
+
+            .blog-tags {
+                font-size: 11px;
+                margin-bottom: 12px !important;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                align-items: center;
+            }
+
+            .blog-tags .tag {
+                background: rgba(127, 127, 127, 0.15);
+                padding: 4px 8px;
+                border-radius: 6px;
+                color: inherit !important;
+                text-decoration: none !important;
+                border: 1px solid transparent;
+                transition: all 0.2s ease;
+            }
+
+            .blog-tags .tag:hover {
+                background: rgba(127, 127, 127, 0.25);
+                border-color: rgba(127, 127, 127, 0.3);
+            }
+
+            .blog > hr.line, .comment > hr.line {
+                display: none !important;
+            }
+
+            .blog-read {
+                margin-top: 12px !important;
+            }
+            
+            .blog-read a {
+                display: inline-block;
+                font-weight: 600;
+                color: inherit !important;
+                background: rgba(127, 127, 127, 0.15);
+                padding: 6px 12px;
+                border-radius: 8px;
+                text-decoration: none !important;
+                transition: background 0.2s ease;
+            }
+
+            .blog-read a:hover {
+                background: rgba(127, 127, 127, 0.25);
+            }
+            
+            .comment p:has(> .comment-delete) {
+                margin: 0;
+            }
+
+            .comment-delete {
+                position: absolute;
+                top: 16px;
+                right: 16px;
+                font-size: 11px;
+                color: inherit !important;
+                background: rgba(127, 127, 127, 0.1);
+                border: 1px solid rgba(127, 127, 127, 0.2);
+                padding: 4px 8px;
+                border-radius: 6px;
+                text-decoration: none !important;
+                opacity: 0.5;
+                transition: all 0.2s ease;
+            }
+            
+            .comment:hover .comment-delete {
+                opacity: 0.8;
+            }
+            
+            .comment-delete:hover {
+                background: rgba(255, 100, 100, 0.2);
+                border-color: rgba(255, 100, 100, 0.4);
+                opacity: 1;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+  }
+
+  setupMutationObserver("#blog-links", applyBlogsNavRedesign, { childList: true, subtree: true });
 }
