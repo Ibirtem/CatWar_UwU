@@ -129,6 +129,7 @@ const uwuDefaultSettings = {
   userThemeKns: false,
   glassStyle: false,
   hideRelativesByDefault: false,
+  twoColumnParameters: false,
   automaticActionsRedesign: false,
   showOtherCatsList: "2",
   commentsAvatars: false,
@@ -1354,6 +1355,18 @@ const uwusettings =
               data-setting="sliceInfoBlock"
             />
             <label for="slice-info-block">Разделить блок Информации</label>
+          </div>
+
+          <div>
+            <p>
+              Выстраивает Состояния/Потребности и Навыки в две компактные колонки бок о бок, экономя место по высоте.
+            </p>
+            <input
+              type="checkbox"
+              id="two-column-parameters"
+              data-setting="twoColumnParameters"
+            />
+            <label for="two-column-parameters">Компактные параметры и навыки</label>
           </div>
 
           <div>
@@ -3270,7 +3283,8 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        🌿 v${current_uwu_version} - Добавлен редизайн Блогов и Ленты, и оптимизация скрипта/мода.
+        🌿 v${current_uwu_version} - Добавлен редизайн Блогов и Ленты, Компактные параметры и навыки
+         и новые оптимизации скрипта/мода.
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
@@ -12115,6 +12129,44 @@ if (targetCW3.test(window.location.href)) {
       8,
       500
     );
+  }
+
+  // ====================================================================================================================
+  //   . . . КОМПАКТНЫЕ ПАРАМЕТРЫ И НАВЫКИ (В ДВЕ КОЛОНКИ) . . .
+  // ====================================================================================================================
+  if (settings.twoColumnParameters) {
+    const twoColumnParamStyle = document.createElement("style");
+    twoColumnParamStyle.id = "uwu-two-column-parameters-style";
+    twoColumnParamStyle.innerHTML = /* CSS */ `
+      #parameters_skills_block {
+          column-count: 2;
+          column-gap: 15px;
+      }
+
+      #parameters_skills_block > * {
+          break-inside: avoid;
+          page-break-inside: avoid;
+      }
+
+      #parameters_skills_block > div:not(.parameter):not(.skill) {
+          column-span: all;
+          -webkit-column-span: all;
+          width: 100%;
+          margin-bottom: 5px;
+      }
+
+      #parameters_skills_block > h3:nth-of-type(3) {
+          break-before: column;
+          -webkit-column-break-before: always;
+      }
+
+      #parameters_skills_block > h3 {
+          text-align: center;
+          margin-top: 5px;
+          margin-bottom: 5px;
+      }
+    `;
+    document.head.appendChild(twoColumnParamStyle);
   }
 
   // ====================================================================================================================
