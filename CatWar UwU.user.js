@@ -18371,8 +18371,7 @@ if (targetBlogsea.test(window.location.href) && settings.blogseaRedesign) {
 if ((targetBlog.test(window.location.href) || targetSniff.test(window.location.href)) && settings.blogsRedesign) {
   function applyBlogsNavRedesign() {
     const pageFormDiv = document.querySelector('#page_form > div');
-    if (!pageFormDiv || pageFormDiv.classList.contains('uwu-blog-nav-applied')) return;
-    pageFormDiv.classList.add('uwu-blog-nav-applied');
+    if (!pageFormDiv || pageFormDiv.querySelector('.uwu-blogs-header-wrapper')) return;
 
     const urlParams = new URLSearchParams(window.location.search);
     let currentPage = parseInt(urlParams.get('page')) || 1;
