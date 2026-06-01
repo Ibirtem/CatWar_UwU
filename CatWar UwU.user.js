@@ -8527,7 +8527,7 @@ if (targetCW3.test(window.location.href)) {
       }
     });
 
-    let targetTimestamp = null; // Время, когда таймер должен сработать
+    let targetTimestamp = null;
 
     function startTimer() {
       const minutes = parseInt(minutesInput.value) || 0;
@@ -8876,7 +8876,7 @@ if (targetCW3.test(window.location.href)) {
 
     async function fetchInternetTime() {
       const timeProviders = [
-        // Увы, вариант со Сбером ультра рабочий, но требует работы @grant GM_xmlhttpRequest из-за CORS политики,
+        // Вариант со Сбером ультра рабочий, но требует работы @grant GM_xmlhttpRequest из-за CORS политики,
         // но тогда пользователь испугается всяких предупреждений. На будущее оставил,
         // если всё сломается вообще, но потребует потом дработки в духе новой fetchWithGM функции.
 
@@ -11476,7 +11476,6 @@ if (targetCW3.test(window.location.href)) {
   let fontSize = uwuStorage.getItem("uwu_fontSize");
 
   function applyFonts() {
-    // Создаем элемент <link> для подключения шрифта
     const fontFamily = fontSize?.fontFamilyBody;
     if (fontFamily) {
       const link = document.createElement("link");
@@ -11487,7 +11486,6 @@ if (targetCW3.test(window.location.href)) {
       document.head.appendChild(link);
     }
 
-    // Создаем элемент <style> для применения стилей
     const newFontStyle = document.createElement("style");
     newFontStyle.innerHTML = `
           body {
@@ -14452,8 +14450,7 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . СОКРАЩЕНИЕ ЛОГА БОЕВОГО РЕЖИМА . . .
   // ====================================================================================================================
-  // емааааа ужасное решение
-  // TODO - исправить переделать уничтожить пересобрать заамогусить чё за фигню я сделал
+  // TODO - Перепроверить на адекватность решения.
   if (settings.compactFightLog) {
     const compactLogStyle = document.createElement("style");
     compactLogStyle.innerHTML =
