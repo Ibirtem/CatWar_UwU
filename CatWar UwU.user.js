@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.46.0-05.26
+// @version      v1.46.0-06.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -3302,7 +3302,7 @@ const newsPanel =
         <p>— Унификация CSS стилей.</p>
         <p>— Небольшая перепись создания выпадающих списков.</p>
         <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: ??.05.26</p>
+        <p>Дата выпуска: 01.06.26</p>
       </div>
     </div>
   `;
