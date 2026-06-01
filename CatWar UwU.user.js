@@ -288,7 +288,7 @@ const targetCW3 = /^https?:\/\/\w?\.?catwar\.(?:net|su)\/cw3(?:\/)?(?:\?.*)?$/;
 const targetCW3Hunt =
   /^https?:\/\/\w?\.?catwar\.(?:net|su)\/cw3\/jagd(?:\/)?(?:\?.*)?$/;
 const targetCW3Kns =
-  /^https?:\/\/(\w+\.)?catwar\.(net|su)\/cw3\/kns\/?(\?.*)?$/;
+  /^https?:\/\/(?:\w+\.)?catwar\.(?:net|su)\/cw3\/kns\/?(?:[?#].*)?$/i;
 
 const targetSettings = /^https?:\/\/\w?\.?catwar\.(?:net|su)\/settings/;
 const targetMainProfile = /^https?:\/\/\w?\.?catwar\.(?:net|su)\/$/;
@@ -3385,19 +3385,43 @@ const manualWeatherPanel =
 // ====================================================================================================================
 //   . . . ГЛАВНЫЙ CSS СТИЛЬ . . .
 // ====================================================================================================================
-// TODO - Унифицировать шрифты, цвета текстов, прозрачность, закруглённость штучек ну кароче всё как надо чтобы не сделать в итоге лабиринт.
 const css_uwu_main = `
+:root {
+  --uwu-bg-panel: rgba(255, 255, 255, 0.03);
+  --uwu-border: rgba(255, 255, 255, 0.1);
+  --uwu-hover-light: rgba(255, 255, 255, 0.15);
+  --uwu-hover-strong: rgba(255, 255, 255, 0.2);
+  --uwu-border-active: rgba(255, 255, 255, 0.3);
+  --uwu-hover-max: rgba(255, 255, 255, 0.4);
+
+  --uwu-glass-blur: blur(16px);
+
+  --uwu-btn-install: #78c8ff87;
+  --uwu-btn-remove: #ff787887;
+  --uwu-tab-active: #abf6ffb0;
+  --uwu-table-border: #383838;
+
+  --uwu-gray-bg-05: rgba(0, 0, 0, 0.15);
+  --uwu-gray-bg-10: rgba(127, 127, 127, 0.1);
+  --uwu-gray-bg-15: rgba(127, 127, 127, 0.15);
+  --uwu-gray-bg-20: rgba(127, 127, 127, 0.2);
+  --uwu-gray-bg-25: rgba(127, 127, 127, 0.25);
+  --uwu-gray-border: rgba(127, 127, 127, 0.2);
+  --uwu-gray-border-hover: rgba(127, 127, 127, 0.3);
+}
+
 #uwu-settings {
-    margin-top: 10px;
-    margin-bottom: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 #uwusettings {
   font-family: "Montserrat", sans-serif;
   margin: 0 auto;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--uwu-border);
 }
+
 .main-settings-container {
   padding: 10px 15px 10px 15px;
 }
@@ -3416,10 +3440,10 @@ const css_uwu_main = `
 }
 
 .main-settings-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 #uwusettings h1,
@@ -3450,34 +3474,37 @@ const css_uwu_main = `
 }
 
 .uwu-hr-head {
-  border: rgba(255, 255, 255, 0.1) solid;
+  border: var(--uwu-border) solid;
   border-radius: 0px;
 }
 
 .uwu-hr {
-  border: rgba(255, 255, 255, 0.1) solid;
+  border: var(--uwu-border) solid;
   border-radius: 15px;
 }
 
 #uwusettings .parameters-color-table,
 #uwusettings .parameters-color-table tr,
 #uwusettings .parameters-color-table td {
-  border: 1px #383838 solid;
+  border: 1px var(--uwu-table-border) solid;
 }
 
 #colorSettingsTable,
 #colorSettingsTable tr,
 #colorSettingsTable td {
-  border: 1px #383838 solid;
+  border: 1px var(--uwu-table-border) solid;
 }
 
 .uwu-table-highlight-Resources,
 #uwu-table-templates {
   margin-top: 5px;
 }
-.uwu-table-highlight-Resources th, .uwu-table-highlight-Resources td,
-#uwu-table-templates th, #uwu-table-templates td {
-  border: 1px solid #383838;
+
+.uwu-table-highlight-Resources th,
+.uwu-table-highlight-Resources td,
+#uwu-table-templates th,
+#uwu-table-templates td {
+  border: 1px solid var(--uwu-table-border);
 }
 
 .uwu-color-picker {
@@ -3525,7 +3552,7 @@ const css_uwu_main = `
 }
 
 #button-container button.active {
-  box-shadow: inset 0 -2px 0 0 #ffffff4d;
+  box-shadow: inset 0 -2px 0 0 rgba(255, 255, 255, 0.3);
   transition: box-shadow 0.4s ease;
 }
 
@@ -3549,9 +3576,9 @@ const css_uwu_main = `
   flex-direction: column;
   align-items: stretch;
   padding: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--uwu-border);
   border-radius: 10px;
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: var(--uwu-bg-panel);
 }
 
 .module-info {
@@ -3588,7 +3615,7 @@ const css_uwu_main = `
 }
 
 .module-container button {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--uwu-border);
   padding: 5px 10px;
   border-radius: 20px;
   cursor: pointer;
@@ -3597,11 +3624,11 @@ const css_uwu_main = `
 }
 
 .install-button {
-  background-color: #78c8ff87 !important;
+  background-color: var(--uwu-btn-install) !important;
 }
 
 .remove-button {
-  background-color: #ff787887 !important;
+  background-color: var(--uwu-btn-remove) !important;
 }
 
 #module-info input[type="checkbox"] {
@@ -3626,12 +3653,12 @@ const css_uwu_main = `
 }
 
 .notification-table {
-    border-collapse: collapse;
+  border-collapse: collapse;
 }
 
 .notification-table td {
-    padding: 5px;
-    vertical-align: middle;
+  padding: 5px;
+  vertical-align: middle;
 }
 
 #notification-volume,
@@ -3644,7 +3671,7 @@ details {
 }
 
 #layout-preview button {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--uwu-border);
   padding: 5px 10px;
   border-radius: 20px;
   cursor: pointer;
@@ -3660,7 +3687,7 @@ details {
 
 #layout-customizer .column {
   width: 200px;
-  border: 1px solid #ffffff1a;
+  border: 1px solid var(--uwu-border);
   border-radius: 10px;
   padding: 5px;
   margin: 0 5px;
@@ -3668,7 +3695,7 @@ details {
 
 #layout-customizer .block {
   border-radius: 10px;
-  background-color: #ffffff08;
+  background-color: var(--uwu-bg-panel);
   padding: 5px;
   margin-bottom: 5px;
 }
@@ -3678,7 +3705,7 @@ details {
   box-sizing: border-box;
 
   border-radius: 10px;
-  background-color: #ffffff08;
+  background-color: var(--uwu-bg-panel);
 }
 
 #uwu-buttonRow1-settings,
@@ -3688,8 +3715,8 @@ details {
 }
 
 #uwu-buttonRow1-settings button,
-#uwu-buttonRow2-settings button  {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+#uwu-buttonRow2-settings button {
+  border: 1px solid var(--uwu-border);
   padding: 2px 10px;
   border-radius: 10px;
   cursor: pointer;
@@ -3698,14 +3725,15 @@ details {
   margin-left: 0px;
 }
 
-#uwu-buttonRow1-settings > div > button.tab-button.active, #uwu-buttonRow2-settings > div > button.table-button.active {
-  background-color: #abf6ffb0;
+#uwu-buttonRow1-settings > div > button.tab-button.active,
+#uwu-buttonRow2-settings > div > button.table-button.active {
+  background-color: var(--uwu-tab-active);
 }
 
 #uwu-buttonRow1-settings > .tab-container,
 #uwu-buttonRow2-settings > .table-container {
   border-radius: 15px;
-  background-color: #54545473;
+  background-color: rgba(84, 84, 84, 0.45);
   margin-right: 5px;
   padding-left: 4px;
   padding-right: 2px;
@@ -3743,15 +3771,15 @@ details {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  backdrop-filter: blur(16px);
+  backdrop-filter: var(--uwu-glass-blur);
   display: flex;
   justify-content: center;
   align-items: center;
   pointer-events: auto;
   cursor: pointer;
 
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--uwu-border);
+  border: 1px solid var(--uwu-border);
   font-size: 2em;
   font-weight: bold;
   color: #ff00ff;
@@ -3769,13 +3797,13 @@ details {
   right: 30px;
   width: 400px;
   height: 400px;
-  backdrop-filter: blur(16px);
+  backdrop-filter: var(--uwu-glass-blur);
   border-radius: 10px;
   display: none;
   pointer-events: auto;
 
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--uwu-bg-panel);
+  border: 1px solid var(--uwu-border);
 
   display: grid;
   place-items: center;
@@ -3786,8 +3814,8 @@ details {
 
 .extended-settings-block {
   border-radius: 10px;
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--uwu-bg-panel);
+  border: 1px solid var(--uwu-border);
   padding: 5px;
   margin-bottom: 8px;
 }
@@ -3802,8 +3830,8 @@ details {
   width: 100%;
   border-radius: 10px;
 
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--uwu-bg-panel);
+  border: 1px solid var(--uwu-border);
 
   padding: 15px;
   display: flex;
@@ -3813,8 +3841,8 @@ details {
 }
 
 #color-picker {
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--uwu-bg-panel);
+  border: 1px solid var(--uwu-border);
 
   margin-top: 10px;
   padding: 15px;
@@ -3842,8 +3870,8 @@ details {
   width: 100%;
   border-radius: 10px;
 
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--uwu-bg-panel);
+  border: 1px solid var(--uwu-border);
 
   padding: 15px;
   margin-top: 20px;
@@ -3867,22 +3895,22 @@ details {
 }
 
 #extended-settings-container::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--uwu-border);
   border-radius: 4px;
 }
 
 #extended-settings-container::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--uwu-border-active);
   border-radius: 4px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: var(--uwu-glass-blur);
+  -webkit-backdrop-filter: var(--uwu-glass-blur);
+  border: 1px solid var(--uwu-border);
   cursor: pointer;
 }
 
 #extended-settings-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--uwu-hover-max);
 }
 
 #button-container {
@@ -3910,13 +3938,13 @@ details {
   cursor: pointer;
   border-radius: 50%;
 
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--uwu-border);
+  border: 1px solid var(--uwu-border);
 }
 
 #extended-settings-button:hover,
 .uwu-button-round:hover {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: var(--uwu-hover-light);
 }
 
 @property --gradient-angle {
@@ -3939,6 +3967,7 @@ details {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -3948,6 +3977,7 @@ details {
   from {
     opacity: 1;
   }
+
   to {
     opacity: 0;
   }
@@ -3959,7 +3989,6 @@ details {
   border-radius: 50%;
   filter: blur(5px);
   pointer-events: none;
-
   animation: fadeIn 6s ease-in-out;
 }
 
@@ -3969,7 +3998,6 @@ details {
   border-radius: 50%;
   filter: blur(40px);
   pointer-events: none;
-
   animation: fadeIn 6s ease-in-out;
 }
 
@@ -3977,6 +4005,7 @@ details {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -3986,6 +4015,7 @@ details {
   from {
     opacity: 1;
   }
+
   to {
     opacity: 0;
   }
@@ -4000,14 +4030,15 @@ details {
   display: inline-block;
 }
 
-.select-selected, .uwu-select-selected {
+.select-selected,
+.uwu-select-selected {
   margin-top: 10px;
   width: fit-content;
   border-radius: 10px;
   color: white;
   background-color: #5c5c5c;
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px); 
+  -webkit-backdrop-filter: var(--uwu-glass-blur);
+  backdrop-filter: var(--uwu-glass-blur);
   padding: 10px;
   cursor: pointer;
 }
@@ -4016,7 +4047,8 @@ details {
   width: fit-content;
 }
 
-.select-items, uwu-select-items {
+.select-items,
+uwu-select-items {
   margin-top: 5px;
   display: none;
   position: absolute;
@@ -4024,9 +4056,9 @@ details {
   width: max-content;
   color: white;
   background-color: #5c5c5c;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px); 
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  -webkit-backdrop-filter: var(--uwu-glass-blur);
+  backdrop-filter: var(--uwu-glass-blur);
   z-index: 1;
 }
 
@@ -4045,7 +4077,7 @@ details {
 
 #climbingRefreshNotificationSoundContainer button,
 #myNameNotificationSoundContainer button {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--uwu-border);
   padding: 2px 10px;
   border-radius: 10px;
   cursor: pointer;
@@ -4063,7 +4095,7 @@ details {
 }
 
 .update-notification {
-  background-color: #78c8ff69;
+  background-color: rgba(120, 200, 255, 0.41);
   padding: 10px;
   border-radius: 10px;
   margin-bottom: 10px;
@@ -4083,8 +4115,8 @@ details {
   width: 100%;
   border-radius: 10px;
 
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--uwu-bg-panel);
+  border: 1px solid var(--uwu-border);
 
   box-sizing: border-box;
   padding: 5px;
@@ -4107,8 +4139,8 @@ details {
   cursor: not-allowed;
 }
 
-.costume-flex-box div{
-    flex: 0;
+.costume-flex-box div {
+  flex: 0;
 }
 
 #cat-image {
@@ -4132,13 +4164,12 @@ details {
 }
 
 #costume-gallery > div {
-    flex: 1;
+  flex: 1;
 }
 
-
 .costume-gallery-box {
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--uwu-bg-panel);
+  border: 1px solid var(--uwu-border);
   border-radius: 1rem;
   flex: 0 1 250px;
   max-width: 250px;
@@ -4171,6 +4202,7 @@ details {
   justify-content: flex-start;
   margin-top: 1rem;
 }
+
 .costume-flex-item {
   flex: 0 1 calc(33.333% - 1rem);
   box-sizing: border-box;
@@ -4180,6 +4212,7 @@ details {
   margin-bottom: 1rem;
   max-width: 180px;
 }
+
 .costume-style {
   width: 100px;
   height: 150px;
@@ -4208,9 +4241,9 @@ details {
 
 .uwu-slot-select {
   padding: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--uwu-border);
   border-radius: 10px;
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: var(--uwu-bg-panel);
   font-family: "Montserrat", sans-serif;
   font-size: 14px;
   color: black;
@@ -4223,7 +4256,6 @@ details {
   pointer-events: none;
   cursor: not-allowed;
 }
-
 `;
 
 document.head.insertAdjacentHTML(
