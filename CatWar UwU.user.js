@@ -3300,6 +3300,7 @@ const newsPanel =
         <p>— Быстрые стили теперь в "единой функции".</p>
         <p>— Объединение функции склонения в калькуляторах профиля.</p>
         <p>— Унификация CSS стилей.</p>
+        <p>— Небольшая перепись создания выпадающих списков.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: ??.05.26</p>
       </div>
@@ -6100,99 +6101,117 @@ if (targetSettings.test(window.location.href)) {
 
   setupCatchingLogCustomItems();
   // ====================================================================================================================
-  //  . . . СОЗДАНИЕ ВЫПАДАЮЩИХ СПИСКОВ ПРИ ПОМОЩИ ФУНКЦИИ createCustomSelect . . .
+  //  . . . СОЗДАНИЕ ВЫПАДАЮЩИХ СПИСКОВ . . .
   // ====================================================================================================================
   loadSettings();
   // Звуки звуки звуки, вуху.
   const notificationSounds = soundManager.getSoundList();
 
-  createCustomSelect("climbingRefreshNotificationSound", notificationSounds);
-  createCustomSelect("myNameNotificationSound", notificationSounds);
-  createCustomSelect("notificationPMSound", notificationSounds);
-  createCustomSelect("notificationActionEndSound", notificationSounds);
-  createCustomSelect("notificationInMouthSound", notificationSounds);
-  createCustomSelect("notificationInFightModeSound", notificationSounds);
-  createCustomSelect("notificationBlockSound", notificationSounds);
-  createCustomSelect("intervalTimerSound", notificationSounds);
-  // ==============================================================================
-  const howShowOtherCatsList = [
-    { name: "Не отображать", id: "1" },
-    { name: "Компактно", id: "2" },
-    { name: "Целиком", id: "3" },
+  const customSelectsConfig = [
+    { id: "climbingRefreshNotificationSound", options: notificationSounds },
+    { id: "myNameNotificationSound", options: notificationSounds },
+    { id: "notificationPMSound", options: notificationSounds },
+    { id: "notificationActionEndSound", options: notificationSounds },
+    { id: "notificationInMouthSound", options: notificationSounds },
+    { id: "notificationInFightModeSound", options: notificationSounds },
+    { id: "notificationBlockSound", options: notificationSounds },
+    { id: "intervalTimerSound", options: notificationSounds },
+    {
+      id: "showOtherCatsList",
+      options: [
+        { name: "Не отображать", id: "1" },
+        { name: "Компактно", id: "2" },
+        { name: "Целиком", id: "3" },
+      ]
+    },
+    {
+      id: "weatherParticlesAmount",
+      options: [
+        { id: "normal", name: "Много частиц (Стандарт)" },
+        { id: "low", name: "Мало частиц (Производительность)" },
+      ]
+    },
+    {
+      id: "auroraPos",
+      options: [
+        { id: "1", name: "Сверху" },
+        { id: "2", name: "Снизу" },
+      ]
+    },
+    {
+      id: "weatherZIndex",
+      options: [
+        { id: "-1", name: "За блоками" },
+        { id: "0", name: "Стандарт" },
+        { id: "1", name: "Перед блоками" },
+      ]
+    },
+    {
+      id: "settingsTheme",
+      options: [
+        { id: "classic", name: "Классическая" },
+        { id: "dark", name: "Тёмная" },
+        { id: "glass", name: "Стеклянная" },
+      ]
+    },
+    {
+      id: "climbingPanelOrientation",
+      options: [
+        { id: "vertical", name: "Вертикальный" },
+        { id: "horizontal", name: "Горизонтальный" },
+      ]
+    },
+    {
+      id: "clockStyle",
+      options: [
+        { id: "compact", name: "Компактный" },
+        { id: "standard", name: "Стандартный" },
+        { id: "string", name: "Строчный" },
+      ]
+    },
+    {
+      id: "clockPosition",
+      options: [
+        { id: "fly", name: "Свободно" },
+        { id: "tos", name: "В блоке погоды" },
+      ]
+    },
+    {
+      id: "highlightResourcesStyle",
+      options: [
+        { id: "background", name: "Фон / Быстро" },
+        { id: "glow", name: "Свечение / Медленно" },
+      ]
+    },
+    {
+      id: "cleaningLogStyle",
+      options: [
+        { id: "smart", name: "Умный" },
+      ]
+    },
+    {
+      id: "defectsStyle",
+      options: [
+        { id: "default", name: "Стандартный" }
+      ]
+    },
+    {
+      id: "defectsQuality",
+      options: [
+        { id: "low", name: "Низкое/Старое (100x150)" },
+        { id: "high", name: "Высокое/Новое (200x300)" },
+      ]
+    },
+    {
+      id: "climbingPanelInputsStyle",
+      options: [
+        { id: "keyboard", name: "Клавиатура" },
+        { id: "standart", name: "Галочки + Клавиатура" },
+      ]
+    }
   ];
-  createCustomSelect("showOtherCatsList", howShowOtherCatsList);
-  // ==============================================================================
-  const weatherParticlesAmounts =[
-    { id: "normal", name: "Много частиц (Стандарт)" },
-    { id: "low", name: "Мало частиц (Производительность)" },
-  ];
-  createCustomSelect("weatherParticlesAmount", weatherParticlesAmounts);
-  // ==============================================================================
-  const auroraPositions =[
-    { id: "1", name: "Сверху" },
-    { id: "2", name: "Снизу" },
-  ];
-  createCustomSelect("auroraPos", auroraPositions);
-  // ==============================================================================
-  const weatherZIndexes =[
-    { id: "-1", name: "За блоками" },
-    { id: "0", name: "Стандарт" },
-    { id: "1", name: "Перед блоками" },
-  ];
-  createCustomSelect("weatherZIndex", weatherZIndexes);
-  // ==============================================================================
-  const themeOptions = [
-    { id: "classic", name: "Классическая" },
-    { id: "dark", name: "Тёмная" },
-    { id: "glass", name: "Стеклянная" },
-  ];
-  createCustomSelect("settingsTheme", themeOptions);
-  // ==============================================================================
-  const climbingPanelOrientations = [
-    { id: "vertical", name: "Вертикальный" },
-    { id: "horizontal", name: "Горизонтальный" },
-  ];
-  createCustomSelect("climbingPanelOrientation", climbingPanelOrientations);
-  // ==============================================================================
-  const clockStyles = [
-    { id: "compact", name: "Компактный" },
-    { id: "standard", name: "Стандартный" },
-    { id: "string", name: "Строчный" },
-  ];
-  createCustomSelect("clockStyle", clockStyles);
-  // ==============================================================================
-  const clockPositions = [
-    { id: "fly", name: "Свободно" },
-    { id: "tos", name: "В блоке погоды" },
-  ];
-  createCustomSelect("clockPosition", clockPositions);
-  // ==============================================================================
-  const highlightResourcesStyles = [
-    { id: "background", name: "Фон / Быстро" },
-    { id: "glow", name: "Свечение / Медленно" },
-  ];
-  createCustomSelect("highlightResourcesStyle", highlightResourcesStyles);
-  // ==============================================================================
-  const cleaningLogStyles = [
-    { id: "smart", name: "Умный" },
-    // { id: "standart", name: "Стандартный" },
-  ];
-  createCustomSelect("cleaningLogStyle", cleaningLogStyles);
-  // ==============================================================================
-  const defectsStyles = [{ id: "default", name: "Стандартный" }];
-  createCustomSelect("defectsStyle", defectsStyles);
-  // ==============================================================================
-  const defectsQualities = [
-    { id: "low", name: "Низкое/Старое (100x150)" },
-    { id: "high", name: "Высокое/Новое (200x300)" },
-  ];
-  createCustomSelect("defectsQuality", defectsQualities);
-  // ==============================================================================
-  const climbingPanelInputsStyles = [
-    { id: "keyboard", name: "Клавиатура" },
-    { id: "standart", name: "Галочки + Клавиатура" },
-  ];
-  createCustomSelect("climbingPanelInputsStyle", climbingPanelInputsStyles);
+
+  customSelectsConfig.forEach(config => createCustomSelect(config.id, config.options));
   // ====================================================================================================================
   //   . . . СОЗДАНИЕ ВЫПАДАЮЩИХ СПИСКОВ . . .
   // ====================================================================================================================
