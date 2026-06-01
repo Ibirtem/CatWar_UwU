@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.45.0-05.26
+// @version      v1.46.0-06.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -104,7 +104,7 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.45.0";
+const current_uwu_version = "1.46.0";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -129,6 +129,7 @@ const uwuDefaultSettings = {
   userThemeKns: false,
   glassStyle: false,
   hideRelativesByDefault: false,
+  twoColumnParameters: false,
   automaticActionsRedesign: false,
   showOtherCatsList: "2",
   commentsAvatars: false,
@@ -147,6 +148,7 @@ const uwuDefaultSettings = {
   redesignCostumsSettings: false,
   profileMenuRedesign: false,
   blogseaRedesign: false,
+  blogsRedesign: false,
 
   showDefectsEnabled: false,
   defectsStyle: "default",
@@ -286,7 +288,7 @@ const targetCW3 = /^https?:\/\/\w?\.?catwar\.(?:net|su)\/cw3(?:\/)?(?:\?.*)?$/;
 const targetCW3Hunt =
   /^https?:\/\/\w?\.?catwar\.(?:net|su)\/cw3\/jagd(?:\/)?(?:\?.*)?$/;
 const targetCW3Kns =
-  /^https?:\/\/(\w+\.)?catwar\.(net|su)\/cw3\/kns\/?(\?.*)?$/;
+  /^https?:\/\/(?:\w+\.)?catwar\.(?:net|su)\/cw3\/kns\/?(?:[?#].*)?$/i;
 
 const targetSettings = /^https?:\/\/\w?\.?catwar\.(?:net|su)\/settings/;
 const targetMainProfile = /^https?:\/\/\w?\.?catwar\.(?:net|su)\/$/;
@@ -1356,6 +1358,18 @@ const uwusettings =
           </div>
 
           <div>
+            <p>
+              Выстраивает Состояния/Потребности и Навыки в две компактные колонки бок о бок, экономя место по высоте.
+            </p>
+            <input
+              type="checkbox"
+              id="two-column-parameters"
+              data-setting="twoColumnParameters"
+            />
+            <label for="two-column-parameters">Компактные параметры и навыки</label>
+          </div>
+
+          <div>
             <p>Автоматически скрывает блок «Родственные связи» при каждой загрузке игровой... Ого!</p>
             <input
               type="checkbox"
@@ -1429,6 +1443,12 @@ const uwusettings =
             <p>Обновляет внешний вид поиска блогов и добавляет кликабельную сортировку по столбцам.</p>
             <input type="checkbox" id="blogsea-redesign" data-setting="blogseaRedesign" />
             <label for="blogsea-redesign">Редизайн поиска блогов/лент</label>
+          </div>
+
+          <div>
+            <p>Обновляет внешний вид навигации и постов в блогах и лентах, превращая их в аккуратные карточки.</p>
+            <input type="checkbox" id="blogs-redesign" data-setting="blogsRedesign" />
+            <label for="blogs-redesign">Редизайн постов в блогах/лентах</label>
           </div>
 
           <hr id="uwu-hr" class="uwu-hr" />
@@ -1635,424 +1655,7 @@ const uwusettings =
                 id="color-settings-body"
                 class="parameters-color-table--body"
               >
-                <tr>
-                  <th class="parameters-color-table--cell" colspan="5">
-                    Параметры
-                  </th>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Сон</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="dream"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="dream"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="dream"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="dream"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Голод</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="hunger"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="hunger"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="hunger"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="hunger"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Жажда</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="thirst"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="thirst"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="thirst"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="thirst"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Нужда</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="need"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="need"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="need"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="need"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Здоровье</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="health"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="health"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="health"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="health"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Чистота</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="clean"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="clean"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="clean"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="clean"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th class="parameters-color-table--cell" colspan="5">
-                    Навыки
-                  </th>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Запах</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="smell"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="smell"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="smell"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="smell"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Копание</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="dig"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="dig"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="dig"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="dig"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Плавание</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="swim"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="swim"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="swim"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="swim"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">БУ</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="might"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="might"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="might"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="might"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Лазание</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="tree"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="tree"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="tree"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="tree"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell">Зоркость</td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="observ"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="observ"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="observ"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="observ"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th class="parameters-color-table--cell" colspan="5">
-                    Уникальные навыки
-                  </th>
-                </tr>
-                <tr>
-                  <td class="parameters-color-table--cell"></td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="other"
-                      data-color-type="bar-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="other"
-                      data-color-type="bar-to"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="other"
-                      data-color-type="bg-from"
-                    />
-                  </td>
-                  <td class="parameters-color-table--cell">
-                    <input
-                      type="color"
-                      data-param="other"
-                      data-color-type="bg-to"
-                    />
-                  </td>
-                </tr>
+                <!-- JS Вставит строки -->
               </tbody>
             </table>
           </div>
@@ -3680,32 +3283,26 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        🌿 v${current_uwu_version} - Редизайн ссылок в меню профиля, поиска в блогах/лентах 
-        и возможность добавлять свои звуки!
+        🌿 v${current_uwu_version} - Добавлен редизайн Блогов и Ленты, Компактные параметры и навыки,
+         и новые оптимизации скрипта/мода.
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>
-          — Мяу мяу мяу и что вы мне сделаете?
+          — Я забыл что я сюда пишу обычно.
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
-        <p>— Перенос Редизайн племенных отчетов в "Остальные редизайны" для логичности.</p>
-        <p>— И Аватарки в комментариях тоже в "Остальные редизайны".</p>
-        <p>— Категория "Общение" теперь просто стало "Чат Игровой".</p>
-        <p>— Мизерный фикс-поддержка Фаерфокс браузеров полосками в чате и где-то чё-то там ещё.</p>
+        <p>— Дизайны, вау!</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
-        <p>— Будущие кастомные шрифты и цвета ванильного чата переносятся и на 
-        Современный чат (Кроме verdana, он отвратительный. Кто не согласен, тому в глаз.)</p>
-        <p>— Возможно, фикс того, что чаты в редких случаях бывают пустыми.</p>
-        <p>— Небольшое улучшение производительности Лога чистильщика.</p>
-        <p>— Переделаны настройки "Природных эффектов". Неудобные ползунки превращены в выпадающие списки.</p>
-        <p>— Перепись Менеджера звука под новые нужды.</p>
-        <p>— Цвета темы теперь должны адекватно снова ложиться на Ванильный чат (И не только).</p>
-        <p>— Таймер-напоминалка более точный.</p>
+        <p>— Создание кнопок звуков при помощи массивов.</p>
+        <p>— Быстрые стили теперь в "единой функции".</p>
+        <p>— Объединение функции склонения в калькуляторах профиля.</p>
+        <p>— Унификация CSS стилей.</p>
+        <p>— Небольшая перепись создания выпадающих списков.</p>
         <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: 16.05.26</p>
+        <p>Дата выпуска: 01.06.26</p>
       </div>
     </div>
   `;
@@ -3789,19 +3386,43 @@ const manualWeatherPanel =
 // ====================================================================================================================
 //   . . . ГЛАВНЫЙ CSS СТИЛЬ . . .
 // ====================================================================================================================
-// TODO - Унифицировать шрифты, цвета текстов, прозрачность, закруглённость штучек ну кароче всё как надо чтобы не сделать в итоге лабиринт.
 const css_uwu_main = `
+:root {
+  --uwu-bg-panel: rgba(255, 255, 255, 0.03);
+  --uwu-border: rgba(255, 255, 255, 0.1);
+  --uwu-hover-light: rgba(255, 255, 255, 0.15);
+  --uwu-hover-strong: rgba(255, 255, 255, 0.2);
+  --uwu-border-active: rgba(255, 255, 255, 0.3);
+  --uwu-hover-max: rgba(255, 255, 255, 0.4);
+
+  --uwu-glass-blur: blur(16px);
+
+  --uwu-btn-install: #78c8ff87;
+  --uwu-btn-remove: #ff787887;
+  --uwu-tab-active: #abf6ffb0;
+  --uwu-table-border: #383838;
+
+  --uwu-gray-bg-05: rgba(0, 0, 0, 0.15);
+  --uwu-gray-bg-10: rgba(127, 127, 127, 0.1);
+  --uwu-gray-bg-15: rgba(127, 127, 127, 0.15);
+  --uwu-gray-bg-20: rgba(127, 127, 127, 0.2);
+  --uwu-gray-bg-25: rgba(127, 127, 127, 0.25);
+  --uwu-gray-border: rgba(127, 127, 127, 0.2);
+  --uwu-gray-border-hover: rgba(127, 127, 127, 0.3);
+}
+
 #uwu-settings {
-    margin-top: 10px;
-    margin-bottom: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 #uwusettings {
   font-family: "Montserrat", sans-serif;
   margin: 0 auto;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--uwu-border);
 }
+
 .main-settings-container {
   padding: 10px 15px 10px 15px;
 }
@@ -3820,10 +3441,10 @@ const css_uwu_main = `
 }
 
 .main-settings-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 #uwusettings h1,
@@ -3854,34 +3475,37 @@ const css_uwu_main = `
 }
 
 .uwu-hr-head {
-  border: rgba(255, 255, 255, 0.1) solid;
+  border: var(--uwu-border) solid;
   border-radius: 0px;
 }
 
 .uwu-hr {
-  border: rgba(255, 255, 255, 0.1) solid;
+  border: var(--uwu-border) solid;
   border-radius: 15px;
 }
 
 #uwusettings .parameters-color-table,
 #uwusettings .parameters-color-table tr,
 #uwusettings .parameters-color-table td {
-  border: 1px #383838 solid;
+  border: 1px var(--uwu-table-border) solid;
 }
 
 #colorSettingsTable,
 #colorSettingsTable tr,
 #colorSettingsTable td {
-  border: 1px #383838 solid;
+  border: 1px var(--uwu-table-border) solid;
 }
 
 .uwu-table-highlight-Resources,
 #uwu-table-templates {
   margin-top: 5px;
 }
-.uwu-table-highlight-Resources th, .uwu-table-highlight-Resources td,
-#uwu-table-templates th, #uwu-table-templates td {
-  border: 1px solid #383838;
+
+.uwu-table-highlight-Resources th,
+.uwu-table-highlight-Resources td,
+#uwu-table-templates th,
+#uwu-table-templates td {
+  border: 1px solid var(--uwu-table-border);
 }
 
 .uwu-color-picker {
@@ -3929,7 +3553,7 @@ const css_uwu_main = `
 }
 
 #button-container button.active {
-  box-shadow: inset 0 -2px 0 0 #ffffff4d;
+  box-shadow: inset 0 -2px 0 0 rgba(255, 255, 255, 0.3);
   transition: box-shadow 0.4s ease;
 }
 
@@ -3953,9 +3577,9 @@ const css_uwu_main = `
   flex-direction: column;
   align-items: stretch;
   padding: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--uwu-border);
   border-radius: 10px;
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: var(--uwu-bg-panel);
 }
 
 .module-info {
@@ -3992,7 +3616,7 @@ const css_uwu_main = `
 }
 
 .module-container button {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--uwu-border);
   padding: 5px 10px;
   border-radius: 20px;
   cursor: pointer;
@@ -4001,11 +3625,11 @@ const css_uwu_main = `
 }
 
 .install-button {
-  background-color: #78c8ff87 !important;
+  background-color: var(--uwu-btn-install) !important;
 }
 
 .remove-button {
-  background-color: #ff787887 !important;
+  background-color: var(--uwu-btn-remove) !important;
 }
 
 #module-info input[type="checkbox"] {
@@ -4030,12 +3654,12 @@ const css_uwu_main = `
 }
 
 .notification-table {
-    border-collapse: collapse;
+  border-collapse: collapse;
 }
 
 .notification-table td {
-    padding: 5px;
-    vertical-align: middle;
+  padding: 5px;
+  vertical-align: middle;
 }
 
 #notification-volume,
@@ -4048,7 +3672,7 @@ details {
 }
 
 #layout-preview button {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--uwu-border);
   padding: 5px 10px;
   border-radius: 20px;
   cursor: pointer;
@@ -4064,7 +3688,7 @@ details {
 
 #layout-customizer .column {
   width: 200px;
-  border: 1px solid #ffffff1a;
+  border: 1px solid var(--uwu-border);
   border-radius: 10px;
   padding: 5px;
   margin: 0 5px;
@@ -4072,7 +3696,7 @@ details {
 
 #layout-customizer .block {
   border-radius: 10px;
-  background-color: #ffffff08;
+  background-color: var(--uwu-bg-panel);
   padding: 5px;
   margin-bottom: 5px;
 }
@@ -4082,7 +3706,7 @@ details {
   box-sizing: border-box;
 
   border-radius: 10px;
-  background-color: #ffffff08;
+  background-color: var(--uwu-bg-panel);
 }
 
 #uwu-buttonRow1-settings,
@@ -4092,8 +3716,8 @@ details {
 }
 
 #uwu-buttonRow1-settings button,
-#uwu-buttonRow2-settings button  {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+#uwu-buttonRow2-settings button {
+  border: 1px solid var(--uwu-border);
   padding: 2px 10px;
   border-radius: 10px;
   cursor: pointer;
@@ -4102,14 +3726,15 @@ details {
   margin-left: 0px;
 }
 
-#uwu-buttonRow1-settings > div > button.tab-button.active, #uwu-buttonRow2-settings > div > button.table-button.active {
-  background-color: #abf6ffb0;
+#uwu-buttonRow1-settings > div > button.tab-button.active,
+#uwu-buttonRow2-settings > div > button.table-button.active {
+  background-color: var(--uwu-tab-active);
 }
 
 #uwu-buttonRow1-settings > .tab-container,
 #uwu-buttonRow2-settings > .table-container {
   border-radius: 15px;
-  background-color: #54545473;
+  background-color: rgba(84, 84, 84, 0.45);
   margin-right: 5px;
   padding-left: 4px;
   padding-right: 2px;
@@ -4147,15 +3772,15 @@ details {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  backdrop-filter: blur(16px);
+  backdrop-filter: var(--uwu-glass-blur);
   display: flex;
   justify-content: center;
   align-items: center;
   pointer-events: auto;
   cursor: pointer;
 
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--uwu-border);
+  border: 1px solid var(--uwu-border);
   font-size: 2em;
   font-weight: bold;
   color: #ff00ff;
@@ -4173,13 +3798,13 @@ details {
   right: 30px;
   width: 400px;
   height: 400px;
-  backdrop-filter: blur(16px);
+  backdrop-filter: var(--uwu-glass-blur);
   border-radius: 10px;
   display: none;
   pointer-events: auto;
 
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--uwu-bg-panel);
+  border: 1px solid var(--uwu-border);
 
   display: grid;
   place-items: center;
@@ -4190,8 +3815,8 @@ details {
 
 .extended-settings-block {
   border-radius: 10px;
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--uwu-bg-panel);
+  border: 1px solid var(--uwu-border);
   padding: 5px;
   margin-bottom: 8px;
 }
@@ -4206,8 +3831,8 @@ details {
   width: 100%;
   border-radius: 10px;
 
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--uwu-bg-panel);
+  border: 1px solid var(--uwu-border);
 
   padding: 15px;
   display: flex;
@@ -4217,8 +3842,8 @@ details {
 }
 
 #color-picker {
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--uwu-bg-panel);
+  border: 1px solid var(--uwu-border);
 
   margin-top: 10px;
   padding: 15px;
@@ -4246,8 +3871,8 @@ details {
   width: 100%;
   border-radius: 10px;
 
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--uwu-bg-panel);
+  border: 1px solid var(--uwu-border);
 
   padding: 15px;
   margin-top: 20px;
@@ -4271,22 +3896,22 @@ details {
 }
 
 #extended-settings-container::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--uwu-border);
   border-radius: 4px;
 }
 
 #extended-settings-container::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--uwu-border-active);
   border-radius: 4px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: var(--uwu-glass-blur);
+  -webkit-backdrop-filter: var(--uwu-glass-blur);
+  border: 1px solid var(--uwu-border);
   cursor: pointer;
 }
 
 #extended-settings-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--uwu-hover-max);
 }
 
 #button-container {
@@ -4314,13 +3939,13 @@ details {
   cursor: pointer;
   border-radius: 50%;
 
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--uwu-border);
+  border: 1px solid var(--uwu-border);
 }
 
 #extended-settings-button:hover,
 .uwu-button-round:hover {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: var(--uwu-hover-light);
 }
 
 @property --gradient-angle {
@@ -4343,6 +3968,7 @@ details {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -4352,6 +3978,7 @@ details {
   from {
     opacity: 1;
   }
+
   to {
     opacity: 0;
   }
@@ -4363,7 +3990,6 @@ details {
   border-radius: 50%;
   filter: blur(5px);
   pointer-events: none;
-
   animation: fadeIn 6s ease-in-out;
 }
 
@@ -4373,7 +3999,6 @@ details {
   border-radius: 50%;
   filter: blur(40px);
   pointer-events: none;
-
   animation: fadeIn 6s ease-in-out;
 }
 
@@ -4381,6 +4006,7 @@ details {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -4390,6 +4016,7 @@ details {
   from {
     opacity: 1;
   }
+
   to {
     opacity: 0;
   }
@@ -4404,14 +4031,15 @@ details {
   display: inline-block;
 }
 
-.select-selected, .uwu-select-selected {
+.select-selected,
+.uwu-select-selected {
   margin-top: 10px;
   width: fit-content;
   border-radius: 10px;
   color: white;
   background-color: #5c5c5c;
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px); 
+  -webkit-backdrop-filter: var(--uwu-glass-blur);
+  backdrop-filter: var(--uwu-glass-blur);
   padding: 10px;
   cursor: pointer;
 }
@@ -4420,7 +4048,8 @@ details {
   width: fit-content;
 }
 
-.select-items, uwu-select-items {
+.select-items,
+uwu-select-items {
   margin-top: 5px;
   display: none;
   position: absolute;
@@ -4428,9 +4057,9 @@ details {
   width: max-content;
   color: white;
   background-color: #5c5c5c;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px); 
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  -webkit-backdrop-filter: var(--uwu-glass-blur);
+  backdrop-filter: var(--uwu-glass-blur);
   z-index: 1;
 }
 
@@ -4449,7 +4078,7 @@ details {
 
 #climbingRefreshNotificationSoundContainer button,
 #myNameNotificationSoundContainer button {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--uwu-border);
   padding: 2px 10px;
   border-radius: 10px;
   cursor: pointer;
@@ -4467,7 +4096,7 @@ details {
 }
 
 .update-notification {
-  background-color: #78c8ff69;
+  background-color: rgba(120, 200, 255, 0.41);
   padding: 10px;
   border-radius: 10px;
   margin-bottom: 10px;
@@ -4487,8 +4116,8 @@ details {
   width: 100%;
   border-radius: 10px;
 
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--uwu-bg-panel);
+  border: 1px solid var(--uwu-border);
 
   box-sizing: border-box;
   padding: 5px;
@@ -4511,8 +4140,8 @@ details {
   cursor: not-allowed;
 }
 
-.costume-flex-box div{
-    flex: 0;
+.costume-flex-box div {
+  flex: 0;
 }
 
 #cat-image {
@@ -4536,13 +4165,12 @@ details {
 }
 
 #costume-gallery > div {
-    flex: 1;
+  flex: 1;
 }
 
-
 .costume-gallery-box {
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--uwu-bg-panel);
+  border: 1px solid var(--uwu-border);
   border-radius: 1rem;
   flex: 0 1 250px;
   max-width: 250px;
@@ -4575,6 +4203,7 @@ details {
   justify-content: flex-start;
   margin-top: 1rem;
 }
+
 .costume-flex-item {
   flex: 0 1 calc(33.333% - 1rem);
   box-sizing: border-box;
@@ -4584,6 +4213,7 @@ details {
   margin-bottom: 1rem;
   max-width: 180px;
 }
+
 .costume-style {
   width: 100px;
   height: 150px;
@@ -4612,9 +4242,9 @@ details {
 
 .uwu-slot-select {
   padding: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--uwu-border);
   border-radius: 10px;
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: var(--uwu-bg-panel);
   font-family: "Montserrat", sans-serif;
   font-size: 14px;
   color: black;
@@ -4627,7 +4257,6 @@ details {
   pointer-events: none;
   cursor: not-allowed;
 }
-
 `;
 
 document.head.insertAdjacentHTML(
@@ -5095,6 +4724,43 @@ if (targetSettings.test(window.location.href)) {
   if (uwuSettingsElement) {
     uwuSettingsElement.insertAdjacentHTML("beforeend", newsPanel);
   }
+
+  // ========================================================
+  const paramTableBody = document.getElementById("color-settings-body");
+  if (paramTableBody) {
+    const paramsList = [
+      { id: "dream", name: "Сон", group: "Параметры" },
+      { id: "hunger", name: "Голод" },
+      { id: "thirst", name: "Жажда" },
+      { id: "need", name: "Нужда" },
+      { id: "health", name: "Здоровье" },
+      { id: "clean", name: "Чистота" },
+      { id: "smell", name: "Запах", group: "Навыки" },
+      { id: "dig", name: "Копание" },
+      { id: "swim", name: "Плавание" },
+      { id: "might", name: "БУ" },
+      { id: "tree", name: "Лазание" },
+      { id: "observ", name: "Зоркость" },
+      { id: "other", name: "", group: "Уникальные навыки" }
+    ];
+
+    let paramsHTML = "";
+    paramsList.forEach(p => {
+      if (p.group) {
+        paramsHTML += `<tr><th class="parameters-color-table--cell" colspan="5">${p.group}</th></tr>`;
+      }
+      paramsHTML += `
+        <tr>
+          <td class="parameters-color-table--cell">${p.name}</td>
+          <td class="parameters-color-table--cell"><input type="color" data-param="${p.id}" data-color-type="bar-from" /></td>
+          <td class="parameters-color-table--cell"><input type="color" data-param="${p.id}" data-color-type="bar-to" /></td>
+          <td class="parameters-color-table--cell"><input type="color" data-param="${p.id}" data-color-type="bg-from" /></td>
+          <td class="parameters-color-table--cell"><input type="color" data-param="${p.id}" data-color-type="bg-to" /></td>
+        </tr>`;
+    });
+    paramTableBody.innerHTML = paramsHTML;
+  }
+  // ========================================================
 
   loadSettings();
 
@@ -6435,99 +6101,117 @@ if (targetSettings.test(window.location.href)) {
 
   setupCatchingLogCustomItems();
   // ====================================================================================================================
-  //  . . . СОЗДАНИЕ ВЫПАДАЮЩИХ СПИСКОВ ПРИ ПОМОЩИ ФУНКЦИИ createCustomSelect . . .
+  //  . . . СОЗДАНИЕ ВЫПАДАЮЩИХ СПИСКОВ . . .
   // ====================================================================================================================
   loadSettings();
   // Звуки звуки звуки, вуху.
   const notificationSounds = soundManager.getSoundList();
 
-  createCustomSelect("climbingRefreshNotificationSound", notificationSounds);
-  createCustomSelect("myNameNotificationSound", notificationSounds);
-  createCustomSelect("notificationPMSound", notificationSounds);
-  createCustomSelect("notificationActionEndSound", notificationSounds);
-  createCustomSelect("notificationInMouthSound", notificationSounds);
-  createCustomSelect("notificationInFightModeSound", notificationSounds);
-  createCustomSelect("notificationBlockSound", notificationSounds);
-  createCustomSelect("intervalTimerSound", notificationSounds);
-  // ==============================================================================
-  const howShowOtherCatsList = [
-    { name: "Не отображать", id: "1" },
-    { name: "Компактно", id: "2" },
-    { name: "Целиком", id: "3" },
+  const customSelectsConfig = [
+    { id: "climbingRefreshNotificationSound", options: notificationSounds },
+    { id: "myNameNotificationSound", options: notificationSounds },
+    { id: "notificationPMSound", options: notificationSounds },
+    { id: "notificationActionEndSound", options: notificationSounds },
+    { id: "notificationInMouthSound", options: notificationSounds },
+    { id: "notificationInFightModeSound", options: notificationSounds },
+    { id: "notificationBlockSound", options: notificationSounds },
+    { id: "intervalTimerSound", options: notificationSounds },
+    {
+      id: "showOtherCatsList",
+      options: [
+        { name: "Не отображать", id: "1" },
+        { name: "Компактно", id: "2" },
+        { name: "Целиком", id: "3" },
+      ]
+    },
+    {
+      id: "weatherParticlesAmount",
+      options: [
+        { id: "normal", name: "Много частиц (Стандарт)" },
+        { id: "low", name: "Мало частиц (Производительность)" },
+      ]
+    },
+    {
+      id: "auroraPos",
+      options: [
+        { id: "1", name: "Сверху" },
+        { id: "2", name: "Снизу" },
+      ]
+    },
+    {
+      id: "weatherZIndex",
+      options: [
+        { id: "-1", name: "За блоками" },
+        { id: "0", name: "Стандарт" },
+        { id: "1", name: "Перед блоками" },
+      ]
+    },
+    {
+      id: "settingsTheme",
+      options: [
+        { id: "classic", name: "Классическая" },
+        { id: "dark", name: "Тёмная" },
+        { id: "glass", name: "Стеклянная" },
+      ]
+    },
+    {
+      id: "climbingPanelOrientation",
+      options: [
+        { id: "vertical", name: "Вертикальный" },
+        { id: "horizontal", name: "Горизонтальный" },
+      ]
+    },
+    {
+      id: "clockStyle",
+      options: [
+        { id: "compact", name: "Компактный" },
+        { id: "standard", name: "Стандартный" },
+        { id: "string", name: "Строчный" },
+      ]
+    },
+    {
+      id: "clockPosition",
+      options: [
+        { id: "fly", name: "Свободно" },
+        { id: "tos", name: "В блоке погоды" },
+      ]
+    },
+    {
+      id: "highlightResourcesStyle",
+      options: [
+        { id: "background", name: "Фон / Быстро" },
+        { id: "glow", name: "Свечение / Медленно" },
+      ]
+    },
+    {
+      id: "cleaningLogStyle",
+      options: [
+        { id: "smart", name: "Умный" },
+      ]
+    },
+    {
+      id: "defectsStyle",
+      options: [
+        { id: "default", name: "Стандартный" }
+      ]
+    },
+    {
+      id: "defectsQuality",
+      options: [
+        { id: "low", name: "Низкое/Старое (100x150)" },
+        { id: "high", name: "Высокое/Новое (200x300)" },
+      ]
+    },
+    {
+      id: "climbingPanelInputsStyle",
+      options: [
+        { id: "keyboard", name: "Клавиатура" },
+        { id: "standart", name: "Галочки + Клавиатура" },
+      ]
+    }
   ];
-  createCustomSelect("showOtherCatsList", howShowOtherCatsList);
-  // ==============================================================================
-  const weatherParticlesAmounts =[
-    { id: "normal", name: "Много частиц (Стандарт)" },
-    { id: "low", name: "Мало частиц (Производительность)" },
-  ];
-  createCustomSelect("weatherParticlesAmount", weatherParticlesAmounts);
-  // ==============================================================================
-  const auroraPositions =[
-    { id: "1", name: "Сверху" },
-    { id: "2", name: "Снизу" },
-  ];
-  createCustomSelect("auroraPos", auroraPositions);
-  // ==============================================================================
-  const weatherZIndexes =[
-    { id: "-1", name: "За блоками" },
-    { id: "0", name: "Стандарт" },
-    { id: "1", name: "Перед блоками" },
-  ];
-  createCustomSelect("weatherZIndex", weatherZIndexes);
-  // ==============================================================================
-  const themeOptions = [
-    { id: "classic", name: "Классическая" },
-    { id: "dark", name: "Тёмная" },
-    { id: "glass", name: "Стеклянная" },
-  ];
-  createCustomSelect("settingsTheme", themeOptions);
-  // ==============================================================================
-  const climbingPanelOrientations = [
-    { id: "vertical", name: "Вертикальный" },
-    { id: "horizontal", name: "Горизонтальный" },
-  ];
-  createCustomSelect("climbingPanelOrientation", climbingPanelOrientations);
-  // ==============================================================================
-  const clockStyles = [
-    { id: "compact", name: "Компактный" },
-    { id: "standard", name: "Стандартный" },
-    { id: "string", name: "Строчный" },
-  ];
-  createCustomSelect("clockStyle", clockStyles);
-  // ==============================================================================
-  const clockPositions = [
-    { id: "fly", name: "Свободно" },
-    { id: "tos", name: "В блоке погоды" },
-  ];
-  createCustomSelect("clockPosition", clockPositions);
-  // ==============================================================================
-  const highlightResourcesStyles = [
-    { id: "background", name: "Фон / Быстро" },
-    { id: "glow", name: "Свечение / Медленно" },
-  ];
-  createCustomSelect("highlightResourcesStyle", highlightResourcesStyles);
-  // ==============================================================================
-  const cleaningLogStyles = [
-    { id: "smart", name: "Умный" },
-    // { id: "standart", name: "Стандартный" },
-  ];
-  createCustomSelect("cleaningLogStyle", cleaningLogStyles);
-  // ==============================================================================
-  const defectsStyles = [{ id: "default", name: "Стандартный" }];
-  createCustomSelect("defectsStyle", defectsStyles);
-  // ==============================================================================
-  const defectsQualities = [
-    { id: "low", name: "Низкое/Старое (100x150)" },
-    { id: "high", name: "Высокое/Новое (200x300)" },
-  ];
-  createCustomSelect("defectsQuality", defectsQualities);
-  // ==============================================================================
-  const climbingPanelInputsStyles = [
-    { id: "keyboard", name: "Клавиатура" },
-    { id: "standart", name: "Галочки + Клавиатура" },
-  ];
-  createCustomSelect("climbingPanelInputsStyle", climbingPanelInputsStyles);
+
+  customSelectsConfig.forEach(config => createCustomSelect(config.id, config.options));
   // ====================================================================================================================
   //   . . . СОЗДАНИЕ ВЫПАДАЮЩИХ СПИСКОВ . . .
   // ====================================================================================================================
@@ -6792,46 +6476,16 @@ if (targetSettings.test(window.location.href)) {
     container.appendChild(testButton);
   }
 
-  addSoundTestButton(
-    "notificationPMContainer",
-    "notificationPMSound",
-    "notificationPMVolume"
-  );
-  addSoundTestButton(
-    "notificationActionEndContainer",
-    "notificationActionEndSound",
-    "notificationActionEndVolume"
-  );
-  addSoundTestButton(
-    "notificationInMouthContainer",
-    "notificationInMouthSound",
-    "notificationInMouthVolume"
-  );
-  addSoundTestButton(
-    "notificationInFightModeContainer",
-    "notificationInFightModeSound",
-    "notificationInFightModeVolume"
-  );
-  addSoundTestButton(
-    "climbingRefreshNotificationSoundContainer",
-    "climbingRefreshNotificationSound",
-    "climbingRefreshNotificationVolume"
-  );
-  addSoundTestButton(
-    "myNameNotificationSoundContainer",
-    "myNameNotificationSound",
-    "notificationMyNameVolume"
-  );
-  addSoundTestButton(
-    "notificationBlockContainer",
-    "notificationBlockSound",
-    "notificationBlockVolume"
-  );
-  addSoundTestButton(
-    "intervalTimerContainer",
-    "intervalTimerSound",
-    "intervalTimerVolume"
-  );
+  [
+    ["notificationPMContainer", "notificationPMSound", "notificationPMVolume"],
+    ["notificationActionEndContainer", "notificationActionEndSound", "notificationActionEndVolume"],
+    ["notificationInMouthContainer", "notificationInMouthSound", "notificationInMouthVolume"],
+    ["notificationInFightModeContainer", "notificationInFightModeSound", "notificationInFightModeVolume"],
+    ["climbingRefreshNotificationSoundContainer", "climbingRefreshNotificationSound", "climbingRefreshNotificationVolume"],
+    ["myNameNotificationSoundContainer", "myNameNotificationSound", "notificationMyNameVolume"],
+    ["notificationBlockContainer", "notificationBlockSound", "notificationBlockVolume"],
+    ["intervalTimerContainer", "intervalTimerSound", "intervalTimerVolume"]
+  ].forEach(args => addSoundTestButton(...args));
   // ====================================================================================================================
   //  . . . СБРОС ПОЗИЦИИ ЧАСИКОВ . . .
   // ====================================================================================================================
@@ -8892,7 +8546,7 @@ if (targetCW3.test(window.location.href)) {
       }
     });
 
-    let targetTimestamp = null; // Время, когда таймер должен сработать
+    let targetTimestamp = null;
 
     function startTimer() {
       const minutes = parseInt(minutesInput.value) || 0;
@@ -9241,7 +8895,7 @@ if (targetCW3.test(window.location.href)) {
 
     async function fetchInternetTime() {
       const timeProviders = [
-        // Увы, вариант со Сбером ультра рабочий, но требует работы @grant GM_xmlhttpRequest из-за CORS политики,
+        // Вариант со Сбером ультра рабочий, но требует работы @grant GM_xmlhttpRequest из-за CORS политики,
         // но тогда пользователь испугается всяких предупреждений. На будущее оставил,
         // если всё сломается вообще, но потребует потом дработки в духе новой fetchWithGM функции.
 
@@ -9887,75 +9541,6 @@ if (targetCW3.test(window.location.href)) {
       opacity: 0.8,
     });
   }
-  // ====================================================================================================================
-  //   . . . ПРОЦЕНТЫ ПАРАМЕТРОВ . . .
-  // ====================================================================================================================
-  // if (settings.displayParametersPercentages) {
-  //   const parameterTableIds = [
-  //     "dream_table",
-  //     "hunger_table",
-  //     "thirst_table",
-  //     "need_table",
-  //     "health_table",
-  //     "clean_table",
-  //   ];
-
-  //   function updateParameterPercentages(tableId) {
-  //     const table = document.getElementById(tableId);
-  //     if (table) {
-  //       const row = table.querySelector("tbody tr");
-  //       if (!row) {
-  //         console.warn(`Строка не найдена в таблице с ID "${tableId}".`);
-  //         return;
-  //       }
-  //       const greenBar = row.querySelector(
-  //         "td[style*='background-color: green;']"
-  //       );
-  //       const redBar = row.querySelector("td[style*='background-color: red;']");
-  //       if (!greenBar || !redBar) {
-  //         console.warn(`Бары не найдены в строке таблицы с ID "${tableId}".`);
-  //         return;
-  //       }
-  //       const greenBarWidth = parseInt(greenBar.style.width, 10);
-  //       const redBarWidth = parseInt(redBar.style.width, 10);
-  //       const totalWidth = greenBarWidth + redBarWidth;
-  //       let percentage = (greenBarWidth / totalWidth) * 100;
-  //       percentage =
-  //         percentage % 1 !== 0 ? percentage.toFixed(2) : Math.round(percentage);
-
-  //       let percentageCell = row.querySelector(".percentage-cell");
-  //       if (!percentageCell) {
-  //         percentageCell = document.createElement("td");
-  //         percentageCell.classList.add("percentage-cell");
-  //         row.appendChild(percentageCell);
-  //       }
-  //       percentageCell.textContent = `${percentage}%`;
-  //     } else {
-  //       console.warn(`Таблица с ID "${tableId}" не найдена.`);
-  //     }
-  //   }
-
-  //   async function setupTableObservers() {
-  //     for (const tableId of parameterTableIds) {
-  //       const tableSelector = `#${tableId}`;
-  //       const rowSelector = `${tableSelector} tbody tr`;
-  //       const greenBarSelector = `${rowSelector} td[style*='background-color: green;']`;
-  //       const redBarSelector = `${rowSelector} td[style*='background-color: red;']`;
-
-  //       await setupMutationObserver(tableSelector, () =>
-  //         updateParameterPercentages(tableId)
-  //       );
-  //       await setupMutationObserver(greenBarSelector, () =>
-  //         updateParameterPercentages(tableId)
-  //       );
-  //       await setupMutationObserver(redBarSelector, () =>
-  //         updateParameterPercentages(tableId)
-  //       );
-  //     }
-  //   }
-
-  //   window.addEventListener("load", setupTableObservers);
-  // }
 
   // ====================================================================================================================
   //   . . . ИСТОРИЯ ПРОКАЧКИ БУ . . .
@@ -10135,38 +9720,6 @@ if (targetCW3.test(window.location.href)) {
 
     parametersBlock.insertBefore(buttonContainer, parametersBlock.firstChild);
   }
-
-  // const parameters = [
-  //   {
-  //     id: "dream_table",
-  //     name: "Сонливость",
-  //     timePerPixel: 20,
-  //     formula: null,
-  //   },
-  //   {
-  //     id: "hunger_table",
-  //     name: "Голод",
-  //     timePerPixel: null,
-  //     formula: (red) => Math.ceil((red / 150) * 9) * 15,
-  //   },
-  //   { id: "thirst_table", name: "Жажда", timePerPixel: 60, formula: null },
-  //   { id: "need_table", name: "Нужда", timePerPixel: 30, formula: null },
-  //   {
-  //     id: "health_table",
-  //     name: "Здоровье",
-  //     timePerPixel: null,
-  //     formula: null,
-  //   },
-  //   {
-  //     id: "clean_table",
-  //     name: "Чистота",
-  //     timePerPixel: null,
-  //     formula: (red) => {
-  //       red = red % 3 ? red : red - 0.5;
-  //       return ((red - 1) / 1.5) * 100 + 100;
-  //     },
-  //   },
-  // ];
 
   const maxWidthPx = 150;
 
@@ -11400,87 +10953,51 @@ if (targetCW3.test(window.location.href)) {
     return;
   }
 
-  // TODO - Потом переиспользовать callback: function (checked) {}
+  const sharedFastStyleCallback = function (checked) {
+    const styleId = "uwu-fast-style-" + this.key;
+    if (checked) {
+      if (!document.getElementById(styleId)) {
+        const style = document.createElement("style");
+        style.id = styleId;
+        style.innerHTML = this.style;
+        document.head.appendChild(style);
+      }
+    } else {
+      const existingStyle = document.getElementById(styleId);
+      if (existingStyle) {
+        document.head.removeChild(existingStyle);
+      }
+    }
+  };
+
   const checkboxes = [
     {
       label: "Не показывать всплывающее окно 'О коте'",
       key: "hideCatTooltip",
       storageKey: "uwu_fastStyles",
       style: ".cat_tooltip { display: none !important; }",
-      callback: function (checked) {
-        if (checked) {
-          const style = document.createElement("style");
-          style.innerHTML = this.style;
-          document.head.appendChild(style);
-        } else {
-          const styles = document.head.querySelectorAll("style");
-          styles.forEach((style) => {
-            if (style.innerHTML === this.style) {
-              document.head.removeChild(style);
-            }
-          });
-        }
-      },
+      callback: sharedFastStyleCallback,
     },
     {
       label: "Скрыть Игровое поле",
       key: "hideGameField",
       storageKey: "uwu_fastStyles",
       style: "#cages_overflow { visibility: hidden !important; }",
-      callback: function (checked) {
-        if (checked) {
-          const style = document.createElement("style");
-          style.innerHTML = this.style;
-          document.head.appendChild(style);
-        } else {
-          const styles = document.head.querySelectorAll("style");
-          styles.forEach((style) => {
-            if (style.innerHTML === this.style) {
-              document.head.removeChild(style);
-            }
-          });
-        }
-      },
+      callback: sharedFastStyleCallback,
     },
     {
       label: "Скрыть фон Игрового Поля",
       key: "hideGameFieldBackground",
       storageKey: "uwu_fastStyles",
       style: "#cages_div { background-image: none !important; }",
-      callback: function (checked) {
-        if (checked) {
-          const style = document.createElement("style");
-          style.innerHTML = this.style;
-          document.head.appendChild(style);
-        } else {
-          const styles = document.head.querySelectorAll("style");
-          styles.forEach((style) => {
-            if (style.innerHTML === this.style) {
-              document.head.removeChild(style);
-            }
-          });
-        }
-      },
+      callback: sharedFastStyleCallback,
     },
     {
       label: "Скрыть Небо",
       key: "hideSky",
       storageKey: "uwu_fastStyles",
       style: "#tr_sky { display: none !important; }",
-      callback: function (checked) {
-        if (checked) {
-          const style = document.createElement("style");
-          style.innerHTML = this.style;
-          document.head.appendChild(style);
-        } else {
-          const styles = document.head.querySelectorAll("style");
-          styles.forEach((style) => {
-            if (style.innerHTML === this.style) {
-              document.head.removeChild(style);
-            }
-          });
-        }
-      },
+      callback: sharedFastStyleCallback,
     },
     {
       label: "Всегда день/ярко",
@@ -11503,20 +11020,7 @@ if (targetCW3.test(window.location.href)) {
       key: "opaqueCats",
       storageKey: "uwu_fastStyles",
       style: ".cat > div { opacity: 1 !important; }",
-      callback: function (checked) {
-        if (checked) {
-          const style = document.createElement("style");
-          style.innerHTML = this.style;
-          document.head.appendChild(style);
-        } else {
-          const styles = document.head.querySelectorAll("style");
-          styles.forEach((style) => {
-            if (style.innerHTML === this.style) {
-              document.head.removeChild(style);
-            }
-          });
-        }
-      },
+      callback: sharedFastStyleCallback,
     },
   ];
 
@@ -11991,7 +11495,6 @@ if (targetCW3.test(window.location.href)) {
   let fontSize = uwuStorage.getItem("uwu_fontSize");
 
   function applyFonts() {
-    // Создаем элемент <link> для подключения шрифта
     const fontFamily = fontSize?.fontFamilyBody;
     if (fontFamily) {
       const link = document.createElement("link");
@@ -12002,7 +11505,6 @@ if (targetCW3.test(window.location.href)) {
       document.head.appendChild(link);
     }
 
-    // Создаем элемент <style> для применения стилей
     const newFontStyle = document.createElement("style");
     newFontStyle.innerHTML = `
           body {
@@ -12680,6 +12182,44 @@ if (targetCW3.test(window.location.href)) {
   }
 
   // ====================================================================================================================
+  //   . . . КОМПАКТНЫЕ ПАРАМЕТРЫ И НАВЫКИ (В ДВЕ КОЛОНКИ) . . .
+  // ====================================================================================================================
+  if (settings.twoColumnParameters) {
+    const twoColumnParamStyle = document.createElement("style");
+    twoColumnParamStyle.id = "uwu-two-column-parameters-style";
+    twoColumnParamStyle.innerHTML = /* CSS */ `
+      #parameters_skills_block {
+          column-count: 2;
+          column-gap: 15px;
+      }
+
+      #parameters_skills_block > * {
+          break-inside: avoid;
+          page-break-inside: avoid;
+      }
+
+      #parameters_skills_block > div:not(.parameter):not(.skill) {
+          column-span: all;
+          -webkit-column-span: all;
+          width: 100%;
+          margin-bottom: 5px;
+      }
+
+      #parameters_skills_block > h3:nth-of-type(3) {
+          break-before: column;
+          -webkit-column-break-before: always;
+      }
+
+      #parameters_skills_block > h3 {
+          text-align: center;
+          margin-top: 5px;
+          margin-bottom: 5px;
+      }
+    `;
+    document.head.appendChild(twoColumnParamStyle);
+  }
+
+  // ====================================================================================================================
   //   . . . ЛОГ ЧИСТИЛЬЩИКОВ . . .
   // ====================================================================================================================
   if (settings.cleaningLog) {
@@ -12940,10 +12480,17 @@ if (targetCW3.test(window.location.href)) {
     function checkCatStatus(catId) {
       const catTooltip = document
         .querySelector(`#cages > tbody .cat_tooltip a[href="/cat${catId}"]`)
-        .closest(".cat_tooltip");
+        ?.closest(".cat_tooltip");
       if (catTooltip) {
         const statusSpan = catTooltip.querySelector(".online");
         if (statusSpan) {
+          const fontTag = statusSpan.querySelector("font");
+          if (fontTag) {
+            const color = fontTag.getAttribute("color")?.toUpperCase();
+            if (color === "#006400" || color === "#333333") return false;
+            if (color === "#A52A2A") return true;
+          }
+          
           const statusText = statusSpan.textContent
             .replace(/[\[\]]/g, "")
             .trim();
@@ -13255,6 +12802,7 @@ if (targetCW3.test(window.location.href)) {
     }
 
     function processPickupAction(logLines, catName, catId, location) {
+      const catIdentifier = `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`;
       const catPattern = new RegExp(
         `\\[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}\\]`
       );
@@ -13264,7 +12812,7 @@ if (targetCW3.test(window.location.href)) {
       const penultimateSentenceIndex = lastSentenceIndex - 1;
 
       // 2. Проверяем последнее предложение на "Проверен и поднят" с именем кота.
-      const lastSentence = logLines[lastSentenceIndex];
+      const lastSentence = logLines[lastSentenceIndex] || "";
       if (
         lastSentence.includes(`на локации "${location}"`) &&
         lastSentence.includes("Проверен и поднят") &&
@@ -13276,11 +12824,9 @@ if (targetCW3.test(window.location.href)) {
       // 3. Проверяем последнее предложение на "Проверен" с именем кота.
       let lastSentenceChecked = false;
       if (
-        logLines[lastSentenceIndex].includes("Проверен") &&
-        logLines[lastSentenceIndex].includes(
-          `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
-        ) &&
-        logLines[lastSentenceIndex].includes(`на локации "${location}"`)
+        lastSentence.includes("Проверен") &&
+        lastSentence.includes(catIdentifier) &&
+        lastSentence.includes(`на локации "${location}"`)
       ) {
         lastSentenceChecked = true;
       }
@@ -13293,12 +12839,10 @@ if (targetCW3.test(window.location.href)) {
           logLines[penultimateSentenceIndex].includes(
             `на локации "${location}"`
           ) &&
-          !logLines[penultimateSentenceIndex].includes(
-            `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
-          )
+          !logLines[penultimateSentenceIndex].includes(catIdentifier)
         ) {
           const currentCatMatch =
-            logLines[lastSentenceIndex].match(/\[(.*?)\]/);
+            lastSentence.match(/\[(.*?)\]/);
           if (currentCatMatch) {
             // Добавляем имя текущего кота к предпоследнему предложению.
             const existingCatsMatch =
@@ -13320,29 +12864,33 @@ if (targetCW3.test(window.location.href)) {
           }
         } else {
           // 5. Создаем новое предложение "Проверен и поднят".
-          logLines[lastSentenceIndex] = logLines[lastSentenceIndex].replace(
+          logLines[lastSentenceIndex] = lastSentence.replace(
             "Проверен",
             "Проверен и поднят"
           );
         }
+
+        // Увеличиваем счетчик только если кот был успешно проверен и поднят
+        const pickupCounter = document.getElementById(
+          "uwu-cleaningLog-counter-pickup"
+        );
+        pickupCounter.textContent = parseInt(pickupCounter.textContent) + 1;
+
       } else {
         // 6. Если "Проверен" с именем кота нет.
-        if (logLines[lastSentenceIndex].includes("Кот не спит")) {
-          logLines[lastSentenceIndex] = "Вы забыли проверить кота";
-        } else if (
-          !logLines[lastSentenceIndex].includes("Вы забыли проверить кота")
-        ) {
-          logLines.push("Вы забыли проверить кота");
+        const forgotText = `Вы забыли проверить кота ${catIdentifier}`;
+
+        if (lastSentence.includes("Кот не спит") && lastSentence.includes(catIdentifier)) {
+          logLines[lastSentenceIndex] = forgotText;
+        } else if (!lastSentence.includes(forgotText)) {
+          logLines.push(forgotText);
         }
       }
+      
       if (!catNamesAndIds.some((cat) => cat.id === catId)) {
         catNamesAndIds.push({ name: catName, id: catId });
       }
 
-      const pickupCounter = document.getElementById(
-        "uwu-cleaningLog-counter-pickup"
-      );
-      pickupCounter.textContent = parseInt(pickupCounter.textContent) + 1;
       lastDroppedCatInfo = null;
       document
         .getElementById("uwu-cleaningLog-delete-last")
@@ -14921,8 +14469,7 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . СОКРАЩЕНИЕ ЛОГА БОЕВОГО РЕЖИМА . . .
   // ====================================================================================================================
-  // емааааа ужасное решение
-  // TODO - исправить переделать уничтожить пересобрать заамогусить чё за фигню я сделал
+  // TODO - Перепроверить на адекватность решения.
   if (settings.compactFightLog) {
     const compactLogStyle = document.createElement("style");
     compactLogStyle.innerHTML =
@@ -16798,6 +16345,19 @@ if (targetProfile.test(window.location.href)) {
 // ====================================================================================================================
 //   . . . КАЛЬКУЛЯТОР ВОЗРАСТА / ЛУН . . .
 // ====================================================================================================================
+function uwuDeclOfNum(number, titles) {
+  if (!Number.isInteger(number)) {
+    return titles[1]; 
+  }
+  const cases = [2, 0, 1, 1, 1, 2];
+  const intNumber = Math.floor(Math.abs(number));
+  return titles[
+    intNumber % 100 > 4 && intNumber % 100 < 20
+      ? 2
+      : cases[intNumber % 10 < 5 ? intNumber % 10 : 5]
+  ];
+}
+
 function moonCalculator() {
   const months = [
     "января",
@@ -17015,20 +16575,11 @@ function moonCalculator() {
 
   function updateMoonWord(moons) {
     const integerMoons = Math.floor(moons);
-    document.getElementById("moon-word").textContent = declOfNum(integerMoons, [
+    document.getElementById("moon-word").textContent = uwuDeclOfNum(integerMoons, [
       "луна",
       "луны",
       "лун",
     ]);
-  }
-
-  function declOfNum(number, titles) {
-    const cases = [2, 0, 1, 1, 1, 2];
-    return titles[
-      number % 100 > 4 && number % 100 < 20
-        ? 2
-        : cases[number % 10 < 5 ? number % 10 : 5]
-    ];
   }
 }
 // ====================================================================================================================
@@ -17176,7 +16727,7 @@ function setupActivityCalc() {
       activitySettings[catId].hours
     );
     document.querySelector("#goal-progress > ul").innerHTML = `
-      <li>${result.actions} ${declensionOfNumber(result.actions, [
+      <li>${result.actions} ${uwuDeclOfNum(result.actions, [
       "переход",
       "перехода",
       "переходов",
@@ -17364,16 +16915,6 @@ function setupActivityCalc() {
     uwuStorage.setItem("uwu_activity", data);
   }
 
-  function declensionOfNumber(number, titles) {
-    const cases = [2, 0, 1, 1, 1, 2];
-    const intNumber = Math.floor(Math.abs(number));
-    return titles[
-      intNumber % 100 > 4 && intNumber % 100 < 20
-        ? 2
-        : cases[intNumber % 10 < 5 ? intNumber % 10 : 5]
-    ];
-  }
-
   function convertTime(from, value) {
     const factors = {
       ms: 1,
@@ -17400,14 +16941,14 @@ function setupActivityCalc() {
   }
 
   function updateHourWord(hours) {
-    document.getElementById("hour-word").textContent = declensionOfNumber(
+    document.getElementById("hour-word").textContent = uwuDeclOfNum(
       hours,
       ["час", "часа", "часов"]
     );
   }
 
   function updateMinusWord(minusValue) {
-    document.getElementById("minus-word").textContent = declensionOfNumber(
+    document.getElementById("minus-word").textContent = uwuDeclOfNum(
       minusValue,
       ["секунду", "секунды", "секунд"]
     );
@@ -18822,4 +18363,328 @@ if (targetBlogsea.test(window.location.href) && settings.blogseaRedesign) {
     }
 
   setupMutationObserver("#branch", applyBlogseaRedesign, { childList: true, subtree: true });
+}
+
+// ====================================================================================================================
+//   . . . РЕДИЗАЙН БЛОГОВ И ЛЕНТЫ . . .
+// ====================================================================================================================
+if ((targetBlog.test(window.location.href) || targetSniff.test(window.location.href)) && settings.blogsRedesign) {
+  function applyBlogsNavRedesign() {
+    const pageFormDiv = document.querySelector('#page_form > div');
+    if (!pageFormDiv || pageFormDiv.querySelector('.uwu-blogs-header-wrapper')) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentPage = parseInt(urlParams.get('page')) || 1;
+
+    const headerWrapper = document.createElement('div');
+    headerWrapper.className = 'uwu-blogs-header-wrapper';
+
+    const topRow = document.createElement('div');
+    topRow.className = 'uwu-header-top-row';
+
+    const pagContainer = document.createElement('div');
+    pagContainer.className = 'uwu-pagination-container';
+
+    const actionContainer = document.createElement('div');
+    actionContainer.className = 'uwu-action-container';
+
+    const filterContainer = document.createElement('div');
+    filterContainer.className = 'uwu-filter-container';
+
+    const prevSpan = document.getElementById('prev_page_span');
+    const nextSpan = document.getElementById('next_page_span');
+    const prevLink = document.getElementById('prev_page');
+    const nextLink = document.getElementById('next_page');
+    
+    const pageLabel = document.createElement('div');
+    pageLabel.className = 'uwu-page-label';
+    pageLabel.textContent = `Страница ${currentPage}`;
+
+    if (prevLink) {
+        prevLink.innerHTML = '← Назад';
+        prevLink.addEventListener('click', () => {
+            currentPage = Math.max(1, currentPage - 1);
+            pageLabel.textContent = `Страница ${currentPage}`;
+        });
+    }
+    if (nextLink) {
+        nextLink.innerHTML = 'Вперёд →';
+        nextLink.addEventListener('click', () => {
+            currentPage++;
+            pageLabel.textContent = `Страница ${currentPage}`;
+        });
+    }
+
+    if (prevSpan) pagContainer.appendChild(prevSpan);
+    pagContainer.appendChild(pageLabel);
+    if (nextSpan) pagContainer.appendChild(nextSpan);
+
+    const anchors = Array.from(pageFormDiv.querySelectorAll('a'));
+    anchors.forEach(a => {
+        if (a.id === 'prev_page' || a.id === 'next_page') return; 
+        
+        if (a.textContent.includes('Создать')) {
+            a.innerHTML = '✍️ Создать';
+            actionContainer.appendChild(a);
+        } else if (a.textContent.includes('Поиск')) {
+            a.innerHTML = '🔍 Поиск';
+            filterContainer.appendChild(a);
+        } else {
+            filterContainer.appendChild(a);
+        }
+    });
+
+    const notApproved = document.getElementById('notApproved');
+    if (notApproved) {
+        filterContainer.appendChild(notApproved);
+    }
+
+    pageFormDiv.innerHTML = '';
+    
+    topRow.appendChild(pagContainer);
+    if (actionContainer.childNodes.length > 0) {
+        topRow.appendChild(actionContainer);
+    }
+    
+    headerWrapper.appendChild(topRow);
+    if (filterContainer.childNodes.length > 0) {
+        headerWrapper.appendChild(filterContainer);
+    }
+
+    pageFormDiv.appendChild(headerWrapper);
+
+    if (!document.getElementById('uwu-blogs-redesign-styles')) {
+        const style = document.createElement("style");
+        style.id = "uwu-blogs-redesign-styles";
+        style.innerHTML = /* CSS */`
+            .uwu-blogs-header-wrapper {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+
+            .uwu-header-top-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .uwu-pagination-container {
+                display: flex;
+                align-items: center;
+                background: rgba(127, 127, 127, 0.15);
+                border: 1px solid rgba(127, 127, 127, 0.2);
+                border-radius: 12px;
+                padding: 4px;
+            }
+
+            #prev_page_span, #next_page_span, #notApproved {
+                font-size: 0 !important;
+                color: transparent !important;
+                display: inline-flex !important;
+                align-items: center;
+            }
+
+            .uwu-page-label {
+                opacity: 0.8;
+                font-weight: 600;
+                padding: 0 15px;
+                user-select: none;
+            }
+
+            #prev_page, #next_page {
+                background: rgba(127, 127, 127, 0.1);
+                padding: 6px 14px;
+                border-radius: 8px;
+                text-decoration: none !important;
+                font-size: 13px !important;
+                font-weight: normal !important;
+                transition: background-color 0.2s ease, transform 0.2s ease;
+            }
+
+            #prev_page:hover, #next_page:hover {
+                background: rgba(127, 127, 127, 0.25);
+                transform: translateY(-1px);
+            }
+
+            .uwu-action-container a {
+                display: inline-flex;
+                background: rgba(127, 127, 127, 0.2);
+                border: 1px solid rgba(127, 127, 127, 0.3);
+                padding: 8px 16px;
+                border-radius: 12px;
+                text-decoration: none;
+                font-weight: 600;
+                transition: all 0.2s ease;
+            }
+
+            .uwu-action-container a:hover {
+                background: rgba(127, 127, 127, 0.3);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .uwu-filter-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                background: rgba(127, 127, 127, 0.1);
+                padding: 10px;
+                border-radius: 12px;
+                border: 1px solid rgba(127, 127, 127, 0.2);
+            }
+
+            .uwu-filter-container a {
+                background: rgba(127, 127, 127, 0.1);
+                border: 1px solid rgba(127, 127, 127, 0.15);
+                padding: 6px 12px;
+                border-radius: 8px;
+                text-decoration: none;
+                transition: all 0.2s ease;
+            }
+
+            .uwu-filter-container a:hover, 
+            .uwu-filter-container a.active {
+                background: rgba(127, 127, 127, 0.25);
+                border-color: rgba(127, 127, 127, 0.3);
+            }
+            
+            .blog, .comment {
+                background: rgba(127, 127, 127, 0.08);
+                border: 1px solid rgba(127, 127, 127, 0.2);
+                border-radius: 12px;
+                padding: 16px;
+                margin-bottom: 16px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+                transition: transform 0.2s ease, border-color 0.2s ease;
+                position: relative;
+            }
+
+            .blog:hover, .comment:hover {
+                border-color: rgba(127, 127, 127, 0.3);
+            }
+
+            .blog-title, .comment-title {
+                font-size: 17px;
+                font-weight: 600;
+                margin: 0 0 6px 0 !important;
+                line-height: 1.3;
+            }
+
+            .comment-title {
+                font-size: 14px;
+                padding-right: 60px;
+            }
+
+            .blog-title a, .comment-title a {
+                text-decoration: none !important;
+                transition: opacity 0.2s ease;
+            }
+
+            .blog-title a:hover, .comment-title a:hover {
+                opacity: 0.7;
+            }
+
+            .blog-info, .comment-info {
+                font-size: 11px;
+                opacity: 0.6;
+                margin: 0 0 12px 0 !important;
+                padding-bottom: 12px;
+                border-bottom: 1px solid rgba(127, 127, 127, 0.2);
+            }
+
+            .blog-info a, .comment-info a {
+                font-weight: 500;
+                text-decoration: none;
+            }
+
+            .blog-info a:hover, .comment-info a:hover {
+                opacity: 0.8;
+                text-decoration: underline;
+            }
+
+            .blog-tags {
+                font-size: 11px;
+                margin-bottom: 12px !important;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                align-items: center;
+            }
+
+            .blog-tags .tag {
+                background: rgba(127, 127, 127, 0.15);
+                padding: 4px 8px;
+                border-radius: 6px;
+                color: inherit !important;
+                text-decoration: none !important;
+                border: 1px solid transparent;
+                transition: all 0.2s ease;
+            }
+
+            .blog-tags .tag:hover {
+                background: rgba(127, 127, 127, 0.25);
+                border-color: rgba(127, 127, 127, 0.3);
+            }
+
+            .blog > hr.line, .comment > hr.line {
+                display: none !important;
+            }
+
+            .blog-read {
+                margin-top: 12px !important;
+            }
+            
+            .blog-read a {
+                display: inline-block;
+                font-weight: 600;
+                color: inherit !important;
+                background: rgba(127, 127, 127, 0.15);
+                padding: 6px 12px;
+                border-radius: 8px;
+                text-decoration: none !important;
+                transition: background 0.2s ease;
+            }
+
+            .blog-read a:hover {
+                background: rgba(127, 127, 127, 0.25);
+            }
+            
+            .comment p:has(> .comment-delete) {
+                margin: 0;
+            }
+
+            .comment-delete {
+                position: absolute;
+                top: 16px;
+                right: 16px;
+                font-size: 11px;
+                color: inherit !important;
+                background: rgba(127, 127, 127, 0.1);
+                border: 1px solid rgba(127, 127, 127, 0.2);
+                padding: 4px 8px;
+                border-radius: 6px;
+                text-decoration: none !important;
+                opacity: 0.5;
+                transition: all 0.2s ease;
+            }
+            
+            .comment:hover .comment-delete {
+                opacity: 0.8;
+            }
+            
+            .comment-delete:hover {
+                background: rgba(255, 100, 100, 0.2);
+                border-color: rgba(255, 100, 100, 0.4);
+                opacity: 1;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+  }
+
+  setupMutationObserver("#blog-links", applyBlogsNavRedesign, { childList: true, subtree: true });
 }
