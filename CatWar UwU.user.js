@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.46.0-06.26
+// @version      v1.47.0-08.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -17,6 +17,8 @@
 // @grant        GM_getValue
 // @grant        GM_deleteValue
 // @grant        GM_listValues
+// @grant        GM_xmlhttpRequest
+// @connect      *
 // ==/UserScript==
 
 "use strict"; // Делаю вид что крутой.
@@ -104,7 +106,7 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.46.0";
+const current_uwu_version = "1.47.0";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -3283,26 +3285,21 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        🌿 v${current_uwu_version} - Добавлен редизайн Блогов и Ленты, Компактные параметры и навыки,
-         и новые оптимизации скрипта/мода.
+        🌿 v${current_uwu_version} - Починились часы.
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>
-          — Я забыл что я сюда пишу обычно.
+          — ...Никаких вам новых конфеток.
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
-        <p>— Дизайны, вау!</p>
+        <p>— ...</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
-        <p>— Создание кнопок звуков при помощи массивов.</p>
-        <p>— Быстрые стили теперь в "единой функции".</p>
-        <p>— Объединение функции склонения в калькуляторах профиля.</p>
-        <p>— Унификация CSS стилей.</p>
-        <p>— Небольшая перепись создания выпадающих списков.</p>
+        <p>— ...</p>
         <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: 01.06.26</p>
+        <p>Дата выпуска: 06.08.26</p>
       </div>
     </div>
   `;
@@ -8893,47 +8890,95 @@ if (targetCW3.test(window.location.href)) {
       }
     }
 
+    /**
+     * Promisified wrapper for GM_xmlhttpRequest with error and timeout handling.
+     * @param {Object} details - GM_xmlhttpRequest configuration options.
+     * @param {string} details.method - HTTP method (e.g., 'GET', 'HEAD').
+     * @param {string} details.url - Target request URL.
+     * @param {number} [details.timeout=5000] - Request timeout in milliseconds.
+     * @returns {Promise<Object>} Resolves with response object containing responseText/responseHeaders.
+     */
+    function fetchWithGM(details) {
+      return new Promise((resolve, reject) => {
+        if (typeof GM_xmlhttpRequest === "undefined") {
+          reject(new Error("GM_xmlhttpRequest API is unavailable."));
+          return;
+        }
+
+        try {
+          GM_xmlhttpRequest({
+            timeout: 5000,
+            ...details,
+            onload: (response) => {
+              if (response.status >= 200 && response.status < 300) {
+                resolve(response);
+              } else {
+                reject(new Error(`HTTP Error ${response.status}: ${response.statusText}`));
+              }
+            },
+            onerror: (error) => reject(error),
+            ontimeout: () => reject(new Error("Request timed out.")),
+          });
+        } catch (error) {
+          // :3
+          reject(error);
+        }
+      });
+    }
+
+    /**
+     * Fetches current time sequentially from online providers (Google -> Yandex -> Sber).
+     * Updates internal clock state or falls back to system time if all providers fail.
+     * @returns {Promise<void>} Resolves after state update and timer initialization.
+     */
     async function fetchInternetTime() {
       const timeProviders = [
-        // Вариант со Сбером ультра рабочий, но требует работы @grant GM_xmlhttpRequest из-за CORS политики,
-        // но тогда пользователь испугается всяких предупреждений. На будущее оставил,
-        // если всё сломается вообще, но потребует потом дработки в духе новой fetchWithGM функции.
-
-        // {
-        //   name: "Sber",
-        //   buildUrl: (isMoscow) => {
-        //     const tz = isMoscow ? "Europe/Moscow" : "Etc/UTC";
-        //     return `https://smartapp-code.sberdevices.ru/tools/api/now?tz=${tz}`;
-        //   },
-        //   parseResponse: async (response) => {
-        //     const data = await response.json();
-        //     return new Date(data.timestamp);
-        //   },
-        // },
         {
-          name: "timeapi.io",
-          buildUrl: (isMoscow) => {
-            const userTimezone =
-              Intl.DateTimeFormat().resolvedOptions().timeZone;
-            const tz = isMoscow ? "Europe/Moscow" : userTimezone;
-            return `https://timeapi.io/api/Time/current/zone?timeZone=${tz}`;
-          },
-          parseResponse: async (response) => {
-            const data = await response.json();
-            return new Date(data.dateTime);
+          name: "Google",
+          request: async () => {
+            const response = await fetchWithGM({
+              method: "HEAD",
+              url: "https://www.google.com",
+            });
+            const headers = response.responseHeaders || "";
+            const dateMatch = headers.match(/^date:\s*(.+)$/im);
+            if (dateMatch && dateMatch[1]) {
+              const date = new Date(dateMatch[1].trim());
+              if (!isNaN(date.getTime())) {
+                return date;
+              }
+            }
+            throw new Error("Date header missing or invalid in Google response.");
           },
         },
         {
-          name: "worldtimeapi.org",
-          buildUrl: (isMoscow) => {
-            const userTimezone =
-              Intl.DateTimeFormat().resolvedOptions().timeZone;
-            const tz = isMoscow ? "Europe/Moscow" : userTimezone;
-            return `https://worldtimeapi.org/api/timezone/${tz}`;
+          name: "Sber",
+          request: async () => {
+            const tz = settings.clockMoscowTime ? "Europe/Moscow" : "Etc/UTC";
+            const response = await fetchWithGM({
+              method: "GET",
+              url: `https://smartapp-code.sberdevices.ru/tools/api/now?tz=${tz}`,
+            });
+            const data = JSON.parse(response.responseText);
+            const timestamp = data.timestamp || data.time;
+            if (timestamp) {
+              return new Date(timestamp);
+            }
+            throw new Error("Invalid timestamp format in Sber response.");
           },
-          parseResponse: async (response) => {
-            const data = await response.json();
-            return new Date(data.datetime);
+        },
+        {
+          name: "Yandex",
+          request: async () => {
+            const response = await fetchWithGM({
+              method: "GET",
+              url: "https://yandex.ru/time/sync.json?geo=213",
+            });
+            const data = JSON.parse(response.responseText);
+            if (data && typeof data.time === "number") {
+              return new Date(data.time);
+            }
+            throw new Error("Invalid time format in Yandex response.");
           },
         },
       ];
@@ -8941,21 +8986,11 @@ if (targetCW3.test(window.location.href)) {
       try {
         for (const provider of timeProviders) {
           try {
-            const url = provider.buildUrl(settings.clockMoscowTime);
-            const response = await fetch(url);
-            if (!response.ok) {
-              throw new Error(`Response not OK: ${response.status}`);
-            }
-            internetTime = await provider.parseResponse(response);
+            internetTime = await provider.request();
             useInternetTime = true;
             lastSyncTimestamp = Date.now();
-            // console.log(`Время успешно получено от ${provider.name}.`);
             break;
           } catch (error) {
-            // console.warn(
-            //   `Не удалось получить время от ${provider.name}, пробую следующий источник.`,
-            //   error
-            // );
             useInternetTime = false;
           }
         }
@@ -8963,13 +8998,13 @@ if (targetCW3.test(window.location.href)) {
         if (useInternetTime) {
           updateClockWithInternetTime();
         } else {
-          // console.warn(
-          //   "Не удалось получить время от всех онлайн-источников, используется локальное время."
-          // );
-          useInternetTime = false;
           updateClockWithLocalTime();
         }
 
+        startTimer();
+      } catch (globalError) {
+        useInternetTime = false;
+        updateClockWithLocalTime();
         startTimer();
       } finally {
         isFetchingTime = false;
