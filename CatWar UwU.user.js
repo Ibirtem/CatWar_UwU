@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.47.1-08.26
+// @version      v1.48.0-08.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -106,7 +106,7 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.47.1";
+const current_uwu_version = "1.48.0";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -3285,20 +3285,19 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        🌿 v${current_uwu_version} - Починились часы.
+        🌿 v${current_uwu_version} - 
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>
-          — ...Никаких вам новых конфеток.
+          — ...
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
         <p>— ...</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
-        <p>—— v1.47.1</p>
-        <p>—— Чёта там пофиксил чтобы мск время было ок вроде как да.</p>
+        <p>— ...</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <p>Дата выпуска: 07.08.26</p>
       </div>
