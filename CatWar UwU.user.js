@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.47.0-08.26
+// @version      v1.47.1-08.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -106,7 +106,7 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.47.0";
+const current_uwu_version = "1.47.1";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -3297,9 +3297,10 @@ const newsPanel =
         <p>— ...</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
-        <p>— ...</p>
+        <p>—— v1.47.1</p>
+        <p>—— Чёта там пофиксил чтобы мск время было ок вроде как да.</p>
         <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: 06.08.26</p>
+        <p>Дата выпуска: 07.08.26</p>
       </div>
     </div>
   `;
@@ -8835,13 +8836,60 @@ if (targetCW3.test(window.location.href)) {
     const SYNC_COOLDOWN_MS = 3 * 60 * 1000;
     let isFetchingTime = false;
 
+    /**
+     * Formats a Date object into time and date components according to the selected timezone.
+     * 
+     * @param {Date} date - The Date instance to format.
+     * @param {boolean} isMoscow - Whether to force the "Europe/Moscow" timezone.
+     * @returns {{hours: string, minutes: string, seconds: string, day: string, month: string, year: string, dayOfWeek: string, monthName: string}}
+     */
+    function getDateTimeParts(date, isMoscow) {
+      const timeZone = isMoscow ? "Europe/Moscow" : undefined;
+      const formatter = new Intl.DateTimeFormat("ru-RU", {
+        timeZone,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        weekday: "short",
+        hour12: false,
+      });
+
+      const parts = {};
+      formatter.formatToParts(date).forEach(({ type, value }) => {
+        parts[type] = value;
+      });
+
+      const dayOfWeek = parts.weekday ? parts.weekday.charAt(0).toUpperCase() + parts.weekday.slice(1) : "";
+
+      const monthNames = [
+        "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+        "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+      ];
+      const monthIdx = parseInt(parts.month, 10) - 1;
+      const monthName = monthNames[monthIdx] || "";
+
+      return {
+        hours: parts.hour,
+        minutes: parts.minute,
+        seconds: parts.second,
+        day: parts.day,
+        month: parts.month,
+        year: parts.year,
+        dayOfWeek,
+        monthName,
+      };
+    }
+
+    /**
+     * Updates the clock UI elements using the provided time source.
+     * 
+     * @param {Date} [timeSource=new Date()] - The Date object representing current time.
+     */
     function updateClock(timeSource = new Date()) {
-      const hours = String(timeSource.getHours()).padStart(2, "0");
-      const minutes = String(timeSource.getMinutes()).padStart(2, "0");
-      const seconds = String(timeSource.getSeconds()).padStart(2, "0");
-      const day = String(timeSource.getDate()).padStart(2, "0");
-      const month = String(timeSource.getMonth() + 1).padStart(2, "0");
-      const year = String(timeSource.getFullYear());
+      const { hours, minutes, seconds, day, month, year, dayOfWeek, monthName } = getDateTimeParts(timeSource, settings.clockMoscowTime);
 
       timeElement.textContent = `${hours}:${minutes}:${seconds}`;
 
@@ -8851,24 +8899,6 @@ if (targetCW3.test(window.location.href)) {
       ) {
         dateElement.textContent = `${day}.${month}.${year.slice(-2)}`;
       } else if (settings.clockStyle === "standard") {
-        const dayOfWeek = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"][
-          timeSource.getDay()
-        ];
-        const monthNames = [
-          "Январь",
-          "Февраль",
-          "Март",
-          "Апрель",
-          "Май",
-          "Июнь",
-          "Июль",
-          "Август",
-          "Сентябрь",
-          "Октябрь",
-          "Ноябрь",
-          "Декабрь",
-        ];
-        const monthName = monthNames[timeSource.getMonth()];
         dateElement.textContent = `${day} (${dayOfWeek}), ${monthName}, ${year}`;
       }
 
@@ -8885,7 +8915,7 @@ if (targetCW3.test(window.location.href)) {
         if (settings.clockMoscowTime) {
           iconElement.textContent += " MSK";
           iconElement.title =
-            "Не удалось получить точное онлайн время! Используется локальное время устройства, сконвертированное в Московское.";
+            "Не удалось получить точное онлайн время! Используется время устройства в часовом поясе Москва (MSK).";
         }
       }
     }
@@ -9011,25 +9041,21 @@ if (targetCW3.test(window.location.href)) {
       }
     }
 
+    /**
+     * Advances and renders online time by 1 second.
+     */
     function updateClockWithInternetTime() {
       if (internetTime) {
         internetTime.setSeconds(internetTime.getSeconds() + 1);
         updateClock(internetTime);
-        if (settings.clockMoscowTime) {
-          iconElement.textContent = "🌍︎ MSK";
-        }
       }
     }
 
+    /**
+     * Renders local time fallback.
+     */
     function updateClockWithLocalTime() {
-      if (settings.clockMoscowTime) {
-        const now = new Date();
-        const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
-        const moscowTime = new Date(utcTime + 3600000 * 3); // UTC+3
-        updateClock(moscowTime);
-      } else {
-        updateClock();
-      }
+      updateClock(new Date());
     }
 
     function startTimer() {
