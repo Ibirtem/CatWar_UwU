@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.48.0-08.26
+// @version      v2.0.0-09.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -106,7 +106,7 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.48.0";
+const current_uwu_version = "2.0.0";
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
   settingsTheme: "dark",
@@ -133,12 +133,10 @@ const uwuDefaultSettings = {
   hideRelativesByDefault: false,
   twoColumnParameters: false,
   automaticActionsRedesign: false,
-  showOtherCatsList: "2",
   commentsAvatars: false,
 
   chatHeight: "275",
-  newChat: false,
-  addCommaAfterNick: false,
+  showChatId: true,
   reverseChat: false,
   newChatInput: false,
   showChatCharCounter: false,
@@ -187,10 +185,7 @@ const uwuDefaultSettings = {
   showParametersDetails: false,
   showExactSkillsValues: false,
 
-  draggingFightPanel: false,
   compactFightLog: false,
-  fightPanelAdjustableHeight: false,
-  fightPanelHeight: "70",
   fightTeams: false,
   fightTeamsColors: {
     team1: ["#41cd70", "#cd4141"],
@@ -1336,16 +1331,6 @@ const uwusettings =
             <label for="item-list-height">px; Высота инвентаря</label>
           </div>
 
-          <label>Отображать Душевых котов:</label>
-          <div class="custom-select" id="showOtherCatsList">
-            <div class="select-selected">
-              Выберите стиль отображения Душевых котов
-            </div>
-            <div class="select-items">
-              <!-- Опции будут добавлены сюда -->
-            </div>
-          </div>
-
           <div>
             <p>
               Визуальное разделение блока "Информация" на меньшие блоки
@@ -1457,12 +1442,13 @@ const uwusettings =
           <h2>Чат Игровой</h2>
 
           <div>
-            <p>
-              Более функциональный Чат: допись ID отправителя и звуковое
-              уведомление при вашем упоминании.
-            </p>
-            <input type="checkbox" id="new-chat" data-setting="newChat" />
-            <label for="new-chat">Современный Чат</label>
+            <p>Отображает уникальный ID кота рядом с его именем в чате.</p>
+            <input
+              type="checkbox"
+              id="show-chat-id"
+              data-setting="showChatId"
+            />
+            <label for="show-chat-id">Показывать ID в чате</label>
           </div>
 
           <div id="myNameNotificationSoundContainer">
@@ -1503,19 +1489,6 @@ const uwusettings =
               placeholder=". . ."
               data-setting="namesForNotification"
             />
-          </div>
-
-          <div>
-            <p>
-              При клике на имя кота в строку чата будет выставляться его имя с
-              запятой.
-            </p>
-            <input
-              type="checkbox"
-              id="add-comma-after-nick"
-              data-setting="addCommaAfterNick"
-            />
-            <label for="add-comma-after-nick">Обращение с запятой</label>
           </div>
 
           <div>
@@ -1931,18 +1904,6 @@ const uwusettings =
           <h2>Боевой режим</h2>
 
           <div>
-            <p>Позволяет перетаскивать панель Боевого режима за штучку.</p>
-            <input
-              type="checkbox"
-              id="dragging-Fight-Panel"
-              data-setting="draggingFightPanel"
-            />
-            <label for="dragging-Fight-Panel"
-              >Перетаскивание панели Боевого режима</label
-            >
-          </div>
-
-          <div>
             <p>Сокращает и прописывает количество повторяющихся ударов.</p>
             <input
               type="checkbox"
@@ -1950,25 +1911,6 @@ const uwusettings =
               data-setting="compactFightLog"
             />
             <label for="compact-Fight-Log">Компактный боевой лог</label>
-          </div>
-
-          <div>
-            <p>Возможность растягивать высоту панели и её начальная высота.</p>
-            <input
-              type="checkbox"
-              id="fight-Panel-Adjustable-Height"
-              data-setting="fightPanelAdjustableHeight"
-            />
-            <label for="fight-Panel-Adjustable-Height"
-              >Настраиваемая высота панели</label
-            >
-            <input
-              type="text"
-              id="fightPanelHeightField"
-              placeholder=". . ."
-              data-setting="fightPanelHeight"
-            />
-            <label>px; - Начальная высота панели</label>
           </div>
 
           <div>
@@ -3285,21 +3227,30 @@ const newsPanel =
   `
     <div id="news-panel">
       <button id="news-button">
-        🌿 v${current_uwu_version} - 
+        🌿 v${current_uwu_version} - Крупная переделка и патч на новые реали CatWar'а!
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
         <p>
-          — ...
+          — Быстрые ссылки починены, снова вставляются куда надо.
+        </p>
+        <p>
+          — Перепись функций Чата игровой. В силу кодовых оснований, теперь само понятие "Современный чат" не актуально и
+          удалено.
         </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
-        <p>— ...</p>
+        <p>— </p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
-        <p>— ...</p>
+        <p>— Удален прикол с Отображением душевых котов.</p>
+        <p>— Счётчик символов работает и с ванильной строкой.</p>
+        <p>— БР теперь сам много чего умеет, так что тоже подчищено и подчинено для работы с новым дизайном.</p>
+        <p>— Фикс звука ЛС.</p>
+        <p>— Звуковое уведомление о Боевой стойке через Vue.</p>
+        <p>— "Подробнее о параметрах" теперь читают из Vue.</p>
         <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: 07.08.26</p>
+        <p>Дата выпуска: ??.??.26</p>
       </div>
     </div>
   `;
@@ -6113,14 +6064,6 @@ if (targetSettings.test(window.location.href)) {
     { id: "notificationInFightModeSound", options: notificationSounds },
     { id: "notificationBlockSound", options: notificationSounds },
     { id: "intervalTimerSound", options: notificationSounds },
-    {
-      id: "showOtherCatsList",
-      options: [
-        { name: "Не отображать", id: "1" },
-        { name: "Компактно", id: "2" },
-        { name: "Целиком", id: "3" },
-      ]
-    },
     {
       id: "weatherParticlesAmount",
       options: [
@@ -9783,26 +9726,26 @@ if (targetCW3.test(window.location.href)) {
 
   const maxWidthPx = 150;
 
+  /**
+   * Calculates and displays a modal dialog with precise parameter percentages and estimated recovery timers.
+   * Pulls live data directly from the reactive Vue state.
+   */
   function showParameterDetails() {
-    const parameters = [
+    const paramData = getVueData("parameter.data") || {};
+
+    const parametersConfig = [
       {
         id: "dream",
         name: "Бодрость",
-        formula: (redPixels) => {
-          if (redPixels <= 0) return 0;
-
-          const percentageLoss = Math.round(redPixels / 1.5);
+        formula: (percentageLoss) => {
+          if (percentageLoss <= 0) return 0;
           let totalTime = 0;
-
           for (let i = 1; i <= percentageLoss; i++) {
             if (i <= 2) {
-              // Первые два процента добавляют по 20 секунд
               totalTime += 20;
             } else if (i % 2 !== 0) {
-              // Нечётные проценты (3-й, 5-й и т.д.) добавляют 40 секунд
               totalTime += 40;
             } else {
-              // Чётные проценты (4-й, 6-й и т.д.) добавляют 20 секунд
               totalTime += 20;
             }
           }
@@ -9812,94 +9755,73 @@ if (targetCW3.test(window.location.href)) {
       {
         id: "hunger",
         name: "Голод",
-        formula: (percentage) => Math.ceil(((100 - percentage) / 150) * 9) * 15,
+        formula: (percentageLoss) => Math.ceil((percentageLoss / 100) * 9) * 15,
       },
-      { id: "thirst", name: "Жажда", timePerPixel: 60, formula: null },
-      { id: "need", name: "Нужда", timePerPixel: 30, formula: null },
-      {
-        id: "health",
-        name: "Здоровье",
-        formula: null,
-      },
+      { id: "thirst", name: "Жажда", timePerPercent: 90 },
+      { id: "need", name: "Нужда", timePerPercent: 45 },
+      { id: "health", name: "Здоровье" },
       {
         id: "clean",
         name: "Чистота",
-        timePerPixel: null,
-        formula: (redPixels) => {
-          if (redPixels <= 0) return 0;
-          return (200 / 3) * redPixels;
-        },
+        formula: (percentageLoss) => percentageLoss * 100,
       },
     ];
 
     let { catInfoElement, contentContainer } = createCatInfoContainer();
     contentContainer.classList.add("parameter-details-container");
 
-    parameters.forEach(({ id, name, formula, timePerPixel }) => {
-      const parameterElement = document.getElementById(id);
-      if (parameterElement) {
-        const barFill = parameterElement.querySelector(".bar-fill");
-        const barData = parameterElement.querySelector(".bar-data");
+    parametersConfig.forEach(({ id, name, formula, timePerPercent }) => {
+      const rawParam = paramData[id];
+      let percentage = 0;
 
-        if (!barFill || !barData) {
-          console.warn(`Элементы бара не найдены для параметра с ID "${id}".`);
-          return;
-        }
-
-        const percentageString = barData.textContent.match(/\d+%$/);
-        if (!percentageString) {
-          console.warn(
-            `Не удалось извлечь процент из текста для параметра с ID "${id}".`
-          );
-          return;
-        }
-
-        const percentage = parseInt(percentageString[0], 10);
-
-        const effectivePercentage = ["hunger", "thirst", "need"].includes(id)
-          ? 100 - percentage
-          : percentage;
-        const reversePercentage = 100 - effectivePercentage;
-
-        const pixelWidth = (effectivePercentage / 100) * maxWidthPx;
-        const reversePixelWidth = maxWidthPx - pixelWidth;
-
-        let timeInfo = "";
-        let totalTimeSeconds;
-
-        if (formula) {
-          totalTimeSeconds = formula(reversePixelWidth);
-        } else if (timePerPixel) {
-          totalTimeSeconds = reversePixelWidth * timePerPixel;
-        }
-
-        if (totalTimeSeconds !== undefined) {
-          const hours = Math.floor(totalTimeSeconds / 3600);
-          const minutes = Math.floor((totalTimeSeconds % 3600) / 60);
-          const seconds = Math.ceil(totalTimeSeconds % 60);
-
-          if (hours > 0) {
-            timeInfo = ` (> ${hours} ч ${minutes} мин)`;
-          } else if (minutes > 0) {
-            timeInfo = ` (${minutes} мин ${seconds} сек)`;
-          } else {
-            timeInfo = ` (${seconds} сек)`;
-          }
-        }
-
-        const detailLine = document.createElement("p");
-        detailLine.innerHTML = `<strong>${name}:</strong> <span style="color: #00cc00;">${effectivePercentage}%</span> / <span style="color: red;">${reversePercentage}%</span>`;
-        detailLine.style.marginBottom = "0";
-        contentContainer.appendChild(detailLine);
-
-        if (timeInfo) {
-          const detailLineTime = document.createElement("p");
-          detailLineTime.innerHTML = `≈${timeInfo}`;
-          detailLineTime.style.marginTop = "0";
-          contentContainer.appendChild(detailLineTime);
-        }
+      if (rawParam && typeof rawParam.barWidth === "number") {
+        percentage = rawParam.barWidth;
       } else {
-        console.warn(`Параметр с ID "${id}" не найден.`);
+        // Fallback to DOM if Vue state is unavailable
+        const el = document.getElementById(id);
+        const text = el?.querySelector(".bar-data")?.textContent || "";
+        const match = text.match(/(\d+)%/);
+        percentage = match ? parseInt(match[1], 10) : 0;
+      }
+
+      const effectivePercentage = ["hunger", "thirst", "need"].includes(id)
+        ? 100 - percentage
+        : percentage;
+      const reversePercentage = 100 - effectivePercentage;
+
+      let timeInfo = "";
+      let totalTimeSeconds;
+
+      if (formula) {
+        totalTimeSeconds = formula(reversePercentage);
+      } else if (timePerPercent) {
+        totalTimeSeconds = reversePercentage * timePerPercent;
+      }
+
+      if (totalTimeSeconds !== undefined && reversePercentage > 0) {
+        const hours = Math.floor(totalTimeSeconds / 3600);
+        const minutes = Math.floor((totalTimeSeconds % 3600) / 60);
+        const seconds = Math.ceil(totalTimeSeconds % 60);
+
+        if (hours > 0) {
+          timeInfo = ` (> ${hours} ч ${minutes} мин)`;
+        } else if (minutes > 0) {
+          timeInfo = ` (${minutes} мин ${seconds} сек)`;
+        } else {
+          timeInfo = ` (${seconds} сек)`;
+        }
+      }
+
+      const detailLine = document.createElement("p");
+      detailLine.innerHTML = `<strong>${name}:</strong> <span style="color: #00cc00;">${effectivePercentage}%</span> / <span style="color: red;">${reversePercentage}%</span>`;
+      detailLine.style.marginBottom = "0";
+      contentContainer.appendChild(detailLine);
+
+      if (timeInfo) {
+        const detailLineTime = document.createElement("p");
+        detailLineTime.innerHTML = `≈${timeInfo}`;
+        detailLineTime.style.marginTop = "0";
+        contentContainer.appendChild(detailLineTime);
       }
     });
 
@@ -11155,54 +11077,54 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . БЫСТРЫЕ ССЫЛКИ В ИГРОВОЙ . . .
   // ====================================================================================================================
-  const quickLinks = {
-    quickLink1: {
-      href: "/settings",
-      text: "Настройки",
-    },
-    quickLink2: {
-      href: "/ls?id=0",
-      text: "Памятка",
-    },
-    quickLink3: {
-      href: "/blogs",
-      text: "Блоги",
-    },
-    quickLink4: {
-      href: "/sniff",
-      text: "Лента",
-    },
-  };
+  /**
+   * Injects configured default and custom quick links into the native navigation bar.
+   *
+   * @returns {void}
+   */
+  function setupQuickLinks() {
+    const navElement = document.querySelector(".game-topbar-nav");
+    if (!navElement || navElement.querySelector(".uwu-quick-link")) return;
 
-  const spanElement = document.querySelector("span.small");
+    const quickLinksConfig = {
+      quickLink1: { href: "/settings", text: "Настройки" },
+      quickLink2: { href: "/ls?id=0", text: "Памятка" },
+      quickLink3: { href: "/blogs", text: "Блоги" },
+      quickLink4: { href: "/sniff", text: "Лента" },
+    };
 
-  Object.entries(quickLinks).forEach(([key, link]) => {
-    if (settings[key]) {
-      const newLink = document.createElement("a");
-      newLink.href = link.href;
-      newLink.textContent = link.text;
+    const linksToAppend = [];
 
-      const pipe = document.createTextNode(" | ");
-      spanElement.appendChild(pipe);
-      spanElement.appendChild(newLink);
+    Object.entries(quickLinksConfig).forEach(([key, link]) => {
+      if (settings[key]) {
+        linksToAppend.push(link);
+      }
+    });
+
+    if (settings.userQuickLinks) {
+      settings.userQuickLinks
+        .split(",")
+        .map((entry) => entry.trim())
+        .filter(Boolean)
+        .forEach((userLink) => {
+          const [href, ...labelParts] = userLink.split(" ");
+          const text = labelParts.join(" ").trim();
+          if (href && text) {
+            linksToAppend.push({ href, text });
+          }
+        });
     }
-  });
 
-  if (settings.userQuickLinks) {
-    const userLinksArray = settings.userQuickLinks.split(", ");
-
-    userLinksArray.forEach((userLink) => {
-      const [href, text] = userLink.trim().split(" ");
-
-      const newLink = document.createElement("a");
-      newLink.href = href;
-      newLink.textContent = text;
-
-      const pipe = document.createTextNode(" | ");
-      spanElement.appendChild(pipe);
-      spanElement.appendChild(newLink);
+    linksToAppend.forEach(({ href, text }) => {
+      const linkEl = document.createElement("a");
+      linkEl.href = href;
+      linkEl.textContent = text;
+      linkEl.classList.add("uwu-quick-link");
+      navElement.appendChild(linkEl);
     });
   }
+
+  setupSingleCallback(".game-topbar-nav", setupQuickLinks);
   // ====================================================================================================================
   //  . . . ПОДСВЕТКА РЕСУРСОВ . . .
   // ====================================================================================================================
@@ -11648,58 +11570,6 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   if (settings.customLayout) {
     // ==================================================================
-    function prependOtherCatsListContent() {
-      const otherCatsList = document.querySelector(".other_cats_list");
-      const smallContainer = document.querySelector(".small");
-
-      if (!otherCatsList || !smallContainer) return;
-
-      const catsListContent = otherCatsList.innerHTML;
-
-      switch (settings.showOtherCatsList) {
-        case "1":
-          break;
-        case "2":
-          const clickableBlockHTML =
-            '<span style="display: inline; cursor: pointer;"><a href="#" style="display: inline; pointer-events: none;">Душевые коты</a></span>';
-          smallContainer.insertAdjacentHTML(
-            "afterbegin",
-            clickableBlockHTML + " || "
-          );
-
-          const clickableBlock = smallContainer.firstChild;
-
-          const catsListContainer = document.createElement("span");
-          catsListContainer.id = "catsListContainer";
-          catsListContainer.innerHTML = ": " + catsListContent;
-          catsListContainer.style.display = "none";
-          smallContainer.insertBefore(
-            catsListContainer,
-            smallContainer.firstChild.nextSibling
-          );
-
-          clickableBlock.addEventListener("click", (event) => {
-            event.preventDefault();
-            if (catsListContainer.style.display === "none") {
-              catsListContainer.style.display = "inline";
-            } else {
-              catsListContainer.style.display = "none";
-            }
-          });
-          break;
-        case "3":
-          smallContainer.insertAdjacentHTML(
-            "afterbegin",
-            catsListContent + " || "
-          );
-          break;
-        default:
-          break;
-      }
-    }
-
-    setupSingleCallback(".other_cats_list", prependOtherCatsListContent);
-    // ==================================================================
     function applyLayoutSettings() {
       const savedSettings = uwuStorage.getItem("uwu_layoutSettings");
       if (savedSettings) {
@@ -11871,23 +11741,8 @@ if (targetCW3.test(window.location.href)) {
         flex-wrap: wrap;
       }
 
-      #location {
-        visibility: visible;
-        position: fixed;
-        right: 0px;
-        top: 0px;
-        font-size: 1.5rem;
-        background-color: ${theme?.blocksColor};
-        z-index: 1;
-      }
-
-      .small {
-        width: fit-content;
-        position: relative;
-        left: 0px;
-        top: 0px;
-        font-size: ${fontSize?.fontSizeSmall || 16}px;
-        z-index: 1;
+      .game-topbar {
+        max-width: 100% !important;
       }
 
       body {
@@ -13476,37 +13331,43 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . ЛИЧНЫЕ СООБЩЕНИЯ . . .
   // ====================================================================================================================
-  let previousCount = 0;
+  /**
+   * Observes the private message navigation link for the unread message counter badge.
+   * Triggers an audio alert when the unread count increases.
+   */
+  function initPmNotification() {
+    const lsLink = document.querySelector(".game-topbar-nav a[href='/ls']");
+    if (!lsLink) return;
+
+    let previousCount = 0;
+
+    const existingBadge = lsLink.querySelector("#newls");
+    if (existingBadge) {
+      previousCount = parseInt(existingBadge.textContent.replace(/\D/g, ""), 10) || 0;
+    }
+
+    const observer = new MutationObserver(() => {
+      const badge = lsLink.querySelector("#newls");
+      const currentCount = badge ? parseInt(badge.textContent.replace(/\D/g, ""), 10) || 0 : 0;
+
+      if (currentCount > previousCount) {
+        soundManager.playSound(
+          settings.notificationPMSound,
+          settings.notificationPMVolume
+        );
+      }
+      previousCount = currentCount;
+    });
+
+    observer.observe(lsLink, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+  }
 
   if (settings.notificationPM) {
-    const newlsElement = document.getElementById("newls");
-    if (newlsElement) {
-      const observer = new MutationObserver(handleNewlsChange);
-      observer.observe(newlsElement, {
-        characterData: true,
-        subtree: true,
-      });
-    }
-
-    function handleNewlsChange(mutations) {
-      if (mutations.length > 0) {
-        const currentText = newlsElement.textContent;
-        const currentCount = parseInt(
-          currentText.match(/\(\d+\)/)?.[0].slice(1, -1) || 0,
-          10
-        );
-
-        if (!isNaN(currentCount) && currentCount > previousCount) {
-          soundManager.playSound(
-            settings.notificationPMSound,
-            settings.notificationPMVolume
-          );
-          previousCount = currentCount;
-        } else if (!isNaN(currentCount)) {
-          previousCount = currentCount;
-        }
-      }
-    }
+    setupSingleCallback(".game-topbar-nav a[href='/ls']", initPmNotification);
   }
 
   // ====================================================================================================================
@@ -13700,53 +13561,94 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . ВВЕЛИ В БОЕВУЮ СТОЙКУ . . .
   // ====================================================================================================================
-  if (settings.notificationInFightMode) {
+  /**
+   * Observes history updates to detect incoming attacks.
+   */
+  function initFightModeNotification() {
     const attackRegex = /в боевую стойку, поскольку на меня напал/;
-    let previousHistory = "";
 
-    const updateHistory = () => {
-      const istElement = document.getElementById("ist");
-      const currentHistory = istElement.innerHTML;
+    watchVueData(
+      "cat.history",
+      (newHistory, oldHistory) => {
+        if (typeof newHistory !== "string" || !oldHistory || typeof oldHistory !== "string") {
+          return;
+        }
 
-      if (currentHistory !== previousHistory) {
-        previousHistory = currentHistory;
+        if (newHistory === oldHistory) return;
 
-        const entries = currentHistory.split(".");
-        const lastEntry = entries[entries.length - 2];
+        let addedChunk = "";
 
-        if (lastEntry !== undefined && attackRegex.test(lastEntry)) {
+        if (newHistory.startsWith(oldHistory)) {
+          addedChunk = newHistory.slice(oldHistory.length);
+        } else {
+          const sentences = newHistory.trim().split(".").filter(Boolean);
+          addedChunk = sentences.length > 0 ? sentences[sentences.length - 1] : "";
+        }
+
+        if (attackRegex.test(addedChunk)) {
           soundManager.playSound(
             settings.notificationInFightModeSound,
             settings.notificationInFightModeVolume
           );
         }
-      }
-    };
-
-    const historyBlock = document.getElementById("history_block");
-    const observer = new MutationObserver(() => {
-      updateHistory();
-    });
-
-    const config = {
-      childList: true,
-      subtree: true,
-      characterData: true,
-    };
-    observer.observe(historyBlock, config);
+      },
+      { deep: false, immediate: false }
+    );
   }
+
+  if (settings.notificationInFightMode) {
+    initFightModeNotification();
+  }
+
   // ====================================================================================================================
   // мяу мяу мяу мяу мяу мяу мяу мяу мяу мяу мяу мяу
   // ====================================================================================================================
-  //   . . . СОВРЕМЕННЫЙ (НОВЫЙ) ЧАТ . . .
+  //   . . . УЛУЧШЕНИЯ НАТИВНОГО ЧАТА . . .
   // ====================================================================================================================
 
-  if (settings.newChat) {
-    const chatRanksCache = new Map();
-    const processedMessageIds = new Set();
+  /**
+   * Manages native chat enhancements: injects timestamps, ranks, IDs,
+   * highlights mentions, audio alerts and maybe more idk.
+   */
+  function initChatEnhancements() {
+    const chatMsg = document.getElementById("chat_msg");
+    if (!chatMsg) return;
 
+    const chatRanksCache = new Map();
+    const chatMsgMeta = new Map();
+
+    // Message metadata from Vue
+    watchVueData(
+      "chat.messages",
+      (messages) => {
+        if (!Array.isArray(messages)) return;
+        messages.forEach((msg) => {
+          if (msg && msg.id) {
+            chatMsgMeta.set(String(msg.id), msg);
+          }
+        });
+      },
+      { deep: true, immediate: true }
+    );
+
+    /**
+     * Safely escapes special regular expression characters in a string.
+     *
+     * @param {string} string - The input text to escape.
+     * @returns {string} Escaped string safe for RegExp constructor.
+     */
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    /**
+     * Asynchronously fetches and sets the cat's rank inside the message element.
+     *
+     * @param {string} catId - Target cat profile ID.
+     * @param {HTMLElement} rankElement - Container where the rank should be injected.
+     */
     function updateChatRankAsync(catId, rankElement) {
-      if (!rankElement || catId === ". . .") return;
+      if (!rankElement || !catId || catId === ". . .") return;
 
       if (chatRanksCache.has(catId)) {
         rankElement.innerHTML = chatRanksCache.get(catId);
@@ -13755,327 +13657,176 @@ if (targetCW3.test(window.location.href)) {
 
       setTimeout(() => {
         try {
-          const profileLink = document.querySelector(
-            `.cat_tooltip a[href="/cat${catId}"]`,
-          );
+          const profileLink = document.querySelector(`.cat_tooltip a[href="/cat${catId}"]`);
           if (profileLink) {
             const tooltip = profileLink.closest(".cat_tooltip");
-            const rankNodes = tooltip.querySelectorAll("div > small > i");
+            const rankNode = tooltip?.querySelector("small > i");
+            const rankText = rankNode?.textContent?.trim();
 
-            if (rankNodes.length > 0) {
-              const actualRankNode = rankNodes[rankNodes.length - 1];
-              const rankTextContent = actualRankNode.textContent.trim();
-
-              if (rankTextContent !== "") {
-                const rankHtml = ` <small><i>(${rankTextContent})</i></small> `;
-                chatRanksCache.set(catId, rankHtml);
-                rankElement.innerHTML = rankHtml;
-              } else {
-                chatRanksCache.set(catId, "");
-              }
-            } else {
-              chatRanksCache.set(catId, "");
+            if (rankText) {
+              const rankHtml = ` <small><i>(${rankText})</i></small>`;
+              chatRanksCache.set(catId, rankHtml);
+              rankElement.innerHTML = rankHtml;
+              return;
             }
-          } else {
-            rankElement.innerHTML = "";
           }
-        } catch (error) {
-          console.error(`UwU | Error fetching rank for cat ${catId}:`, error);
+          // Do not permanently cache empty results so future renders can resolve it
+        } catch (err) {
+          console.error(`UwU | Rank resolution error for cat ${catId}:`, err);
         }
-      }, 0);
+      }, 150);
     }
 
-    const chatForm = document.getElementById("chat_form");
-    
-    if (chatForm) {
-      const newChatContainer = document.createElement("div");
-      newChatContainer.id = "uwu_chat_msg";
-      chatForm.parentNode.insertBefore(newChatContainer, chatForm.nextSibling);
-
     /**
-     * Single event delegation for the entire chat container.
-     */
-    newChatContainer.addEventListener("click", function (event) {
-      try {
-        const target = event.target;
-
-        const nickElement = target.closest(".nick");
-        if (nickElement) {
-          event.preventDefault();
-          
-          const textArea = document.querySelector("textarea#text, textarea#text-hide, input#text");
-          if (!textArea) return;
-          
-          let nick = nickElement.textContent;
-          if (settings.addCommaAfterNick) nick += ", ";
-          
-          textArea.value += nick;
-          textArea.focus();
-          return;
-        }
-
-        const reportButton = target.closest(".msg_report");
-        if (reportButton) {
-          event.preventDefault();
-
-          try {
-            const chatContext = getVueData("chat");
-            if (chatContext && typeof chatContext.report === "function") {
-              chatContext.report({ target: reportButton });
-            } else {
-              console.error(
-                "UwU | chat.report function is missing in Vue state. Unable to report message.",
-              );
-            }
-          } catch (error) {
-            console.error("UwU | Error invoking report function:", error);
-          }
-          return;
-        }
-      } catch (error) {
-        console.error("UwU | Chat click delegation error:", error);
-      }
-    });
-
-    /**
-     * Analyzes the message text for user-defined notification names.
+     * Processes message node and injects configured enhancements.
      *
-     * @param {string} text - The raw HTML message text.
-     * @returns {{text: string, isMentioned: boolean}} Processed text with highlighted mentions and a trigger flag.
+     * @param {HTMLElement} msgNode - The root message element (usually a <span> wrapping the <table>).
+     * @param {boolean} [allowSound=true] - Whether to allow sound notifications (false during initial load).
      */
-    function processMentions(text) {
-      let processedText = text;
+    function enhanceMessage(msgNode, allowSound = true) {
+      if (msgNode.dataset.uwuEnhanced) return;
+      msgNode.dataset.uwuEnhanced = "true";
+
+      const chatText = msgNode.querySelector(".chat_text");
+      const nickEl = msgNode.querySelector(".nick");
+      const reportLink = msgNode.querySelector(".msg_report");
+      const profileLink = msgNode.querySelector('.profile_actions_cell a[href^="/cat"]');
+
+      if (!chatText || !nickEl) return;
+
+      const msgId = reportLink?.dataset?.id;
+      const catId = profileLink ? profileLink.getAttribute("href").replace("/cat", "") : null;
+      const textSpan = chatText.querySelector("span:not(.uwu-chat-time)");
+
+      // 1. Notification for climbing numbers integration
+      const meta = msgId ? chatMsgMeta.get(String(msgId)) : null;
+      const isNotification =
+        meta?.textTransformation === "italic" ||
+        (textSpan && textSpan.textContent.trim().startsWith("[") && textSpan.textContent.trim().endsWith("]"));
+
+      if (isNotification) {
+        nickEl.classList.add("is-notification");
+      }
+
+      // 2. Time
+      if (settings.showChatTime) {
+        let timeStr = "";
+        if (meta && meta.time) {
+          const d = new Date(meta.time * 1000);
+          timeStr = `[${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}] `;
+        } else {
+          const now = new Date();
+          timeStr = `[${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}] `;
+        }
+
+        const timeSpan = document.createElement("span");
+        timeSpan.className = "uwu-chat-time";
+        timeSpan.textContent = timeStr;
+        chatText.prepend(timeSpan);
+      }
+
+      // 3. Cat ID
+      if (settings.showChatId && catId) {
+        const idSpan = document.createElement("i");
+        idSpan.className = "uwu-chat-id";
+        idSpan.textContent = ` [${catId}]`;
+        nickEl.after(idSpan);
+      }
+
+      // 4. Ranks
+      if (settings.showChatRanks && catId) {
+        const rankSpan = document.createElement("span");
+        rankSpan.className = "uwu-chat-rank";
+        nickEl.after(rankSpan);
+        updateChatRankAsync(catId, rankSpan);
+      }
+
+      // 5. Custom mention highlighting & Sound trigger
       let isMentioned = false;
 
-      try {
-        if (settings.namesForNotification) {
-          const names = settings.namesForNotification
-            .trim()
-            .split(/\s*,\s*/)
-            .filter((name) => name);
+      if (textSpan && settings.namesForNotification) {
+        const rawText = textSpan.innerHTML;
+        const names = settings.namesForNotification
+          .split(",")
+          .map((n) => n.trim())
+          .filter(Boolean);
 
-          names.forEach((name) => {
-            const regex = new RegExp(
-              `(^|\\s|[.,!?])(${name})(?=$|\\s|[.,!?])`,
-              "gi",
-            );
-            processedText = processedText.replace(regex, (match, p1, p2) => {
-              isMentioned = true;
-              return `${p1}<span class="myname">${p2}</span>`;
-            });
-          });
-        }
+        let replacedText = rawText;
+        names.forEach((name) => {
+          const safePattern = escapeRegExp(name);
+          const regex = new RegExp(`(^|\\s|[.,!?])(${safePattern})(?=$|\\s|[.,!?])`, "gi");
+          if (regex.test(replacedText)) {
+            isMentioned = true;
+            replacedText = replacedText.replace(regex, `$1<span class="myname">$2</span>`);
+          }
+        });
 
-        if (!isMentioned && text.includes('class="myname"')) {
-          isMentioned = true;
-        }
-      } catch (error) {
-        console.error("UwU | Error processing mentions:", error);
-      }
-
-      return { text: processedText, isMentioned };
-    }
-
-    /**
-     * Extracts and formats CSS styles for chat text and nicknames.
-     * Handles custom fonts and inline colors, respecting user theme settings.
-     * 
-     * @param {Object} msgData - The message payload.
-     * @returns {{textStyle: string, nickStyle: string}}
-     */
-    function getChatStyles(msgData) {
-      let textStyle = "";
-      let nickStyle = msgData.textTransformation === 'italic' ? 'font-style: italic; ' : '';
-
-      if (msgData.font) {
-        const cleanFont = msgData.font.replace(/['"]/g, '').trim();
-        if (cleanFont.toLowerCase() !== 'verdana') {
-          textStyle += `font-family: '${cleanFont}'; `;
-          nickStyle += `font-family: '${cleanFont}'; `;
+        if (isMentioned) {
+          textSpan.innerHTML = replacedText;
         }
       }
 
-      const isVanillaColor = !msgData.color || 
-                             msgData.color.toLowerCase() === '#111111' || 
-                             msgData.color.replace(/\s/g, '') === 'rgb(17,17,17)';
-
-      if (!isVanillaColor && !settings.disableCustomChatColors) {
-        textStyle += `color: ${msgData.color}; `;
-        nickStyle += `color: ${msgData.color}; `;
-      } else if (settings.userTheme && theme?.textColor) {
-        textStyle += `color: ${theme.textColor}; `;
-        nickStyle += `color: ${theme.textColor}; `;
+      if (!isMentioned && chatText.querySelector(".myname")) {
+        isMentioned = true;
       }
 
-      return { textStyle, nickStyle };
-    }
-
-    /**
-     * Determines if a message is a system notification (e.g., italic or wrapped in brackets).
-     *
-     * @param {Object} msgData - The message payload.
-     * @returns {boolean}
-     */
-    function isChatNotification(msgData) {
-      return (
-        msgData.textTransformation === "italic" ||
-        (msgData.text &&
-          msgData.text.trim().startsWith("[") &&
-          msgData.text.trim().endsWith("]"))
-      );
-    }
-
-    /**
-     * Formats the message timestamp into a readable HTML string.
-     *
-     * @param {number} [timeSeconds] - Unix timestamp of the message.
-     * @returns {string} Formatted time string or empty string.
-     */
-    function formatChatTime(timeSeconds) {
-      if (!settings.showChatTime || !timeSeconds) return "";
-      const date = new Date(timeSeconds * 1000);
-      const hours = String(date.getHours()).padStart(2, "0");
-      const minutes = String(date.getMinutes()).padStart(2, "0");
-      return `<span class="uwu-chat-time">[${hours}:${minutes}]</span> `;
-    }
-
-    /**
-     * Transforms the raw Vue message payload into an injected HTML string.
-     *
-     * @param {Object} msgData - The message payload from 'chat.messages'.
-     * @param {number} msgData.id - Unique message identifier.
-     * @param {string} msgData.text - Message content.
-     * @param {number} [msgData.volume] - Notification volume (0-10).
-     * @param {number} msgData.cat - Sender's profile ID.
-     * @param {string} msgData.login - Sender's nickname.
-     * @param {number} [msgData.time] - Unix timestamp of the message (server-side).
-     * @param {string} [msgData.textTransformation] - Optional CSS modifier (e.g., 'italic').
-     * @param {string}[msgData.font] - Custom font for the message.
-     * @returns {{html: string, rankSpanId: string, catId: string|number}}
-     */
-    function buildMessageHTML(msgData) {
-      const { text, isMentioned } = processMentions(msgData.text);
-
-      if (isMentioned) {
+      if (isMentioned && allowSound) {
         soundManager.playSound(
           settings.myNameNotificationSound,
-          settings.notificationMyNameVolume,
-        );
-      }
-
-      const volumeClass =
-        msgData.volume !== undefined ? `vlm${msgData.volume}` : "vlm5";
-      const { textStyle, nickStyle } = getChatStyles(msgData);
-
-      const nickClass = isChatNotification(msgData)
-        ? "nick is-notification"
-        : "nick";
-      const catId = msgData.cat || ". . .";
-      const nickName = msgData.login || "Неизвестный";
-      const rankSpanId = `uwu-rank-${msgData.id || Date.now()}-${Math.floor(Math.random() * 10000)}`;
-      const timeStr = formatChatTime(msgData.time);
-
-      const html = `
-        <hr>
-        <div id="msg">
-          <div class="chat_text ${volumeClass}">
-            ${timeStr}<span style="${textStyle}">${text}</span> - <b class="${nickClass}" style="${nickStyle}">${nickName}</b><span id="${rankSpanId}"></span> <i>[${catId}]</i>
-          </div>
-          <div style="display: flex; width: 42px; justify-content: flex-end; margin-right: 2px;">
-            <a href="/cat${catId}" title="Перейти в профиль" target="_blank" rel="noopener noreferrer">➝</a>&nbsp;|&nbsp;
-            <a href="#" title="Пожаловаться на нарушение ОПИ" class="msg_report" data-id="${msgData.id}" data-login="${nickName}">X</a>
-          </div>
-        </div>
-      `;
-
-      return { html, rankSpanId, catId };
-    }
-
-    function injectMessageToDOM(msgData) {
-      try {
-        const { html, rankSpanId, catId } = buildMessageHTML(msgData);
-
-        newChatContainer.insertAdjacentHTML("afterbegin", html);
-
-        if (settings.showChatRanks) {
-          updateChatRankAsync(catId, document.getElementById(rankSpanId));
-        }
-      } catch (error) {
-        console.error(
-          `UwU | Message rendering failed for ID ${msgData && msgData.id}:`,
-          error,
+          settings.notificationMyNameVolume
         );
       }
     }
 
-    watchVueData(
-      "chat.messages",
-      (newMessages) => {
-        try {
-          if (!newMessages || !Array.isArray(newMessages)) return;
-
-          const batch = newMessages.filter(
-            (msg) => msg && msg.id && !processedMessageIds.has(msg.id),
-          );
-          if (batch.length === 0) return;
-
-          batch.sort((a, b) => a.id - b.id);
-
-          batch.forEach((msg) => {
-            processedMessageIds.add(msg.id);
-            injectMessageToDOM(msg);
-          });
-
-          // Мы удаляем оригинальные сообщения, чтобы сам CatWar не пытался с ними возиться
-          // (а он это делает ОЧЕНЬ плохо) и не нагружал лишний раз игровую.
-          const originalChat = document.getElementById("chat_msg");
-          if (originalChat && originalChat.innerHTML !== "") {
-            originalChat.innerHTML = "";
+    // Observe native insertions into #chat_msg
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === 1) {
+            if (node.querySelector?.(".chat_text")) {
+              enhanceMessage(node, true);
+            } else if (node.classList?.contains("chat_text")) {
+              const parentMsg = node.closest("span") || node;
+              enhanceMessage(parentMsg, true);
+            }
           }
-        } catch (error) {
-          console.error("UwU | Chat messages watcher error:", error);
-        }
-      },
-      { deep: true, immediate: true },
-    );
+        });
+      });
+    });
 
-    const uwuChatMsg = document.createElement("style");
-    uwuChatMsg.innerHTML = `
-        #uwu_chat_msg {
-          height: ${settings.chatHeight}px;
-          resize: vertical;
-          overflow-y: auto;
-          display: flex;
-          flex-direction: ${settings.reverseChat ? "column-reverse" : "column"};
-        }
+    observer.observe(chatMsg, { childList: true, subtree: true });
 
-        .uwu-chat-time {
-          opacity: 0.5;
-          font-size: 0.85em;
-          margin-right: 4px;
-          font-family: monospace;
-        }
-  
-        #chat_msg {
-          display: none !important; 
-        }
-  
-        #msg {
-          display: flex;
-          justify-content: space-between;
-        }
-
-        #uwu_chat_msg > hr {
-          width: -webkit-fill-available;
-          width: -moz-available;
-        }
-     `;
-    document.head.appendChild(uwuChatMsg);
-      
-    } else {
-      console.warn("UwU | chat_form не найден. Современный чат не будет инициализирован.");
-    }
+    // Process existing messages on load
+    chatMsg.querySelectorAll(".chat_text").forEach((el) => {
+      const parent = el.closest("span") || el;
+      enhanceMessage(parent, false);
+    });
   }
+
+  setupSingleCallback("#chat_msg", initChatEnhancements);
+
+  // Styles
+  const chatEnhanceStyles = document.createElement("style");
+  chatEnhanceStyles.id = "uwu-chat-enhancements";
+  chatEnhanceStyles.innerHTML = `
+    #chat_msg {
+      height: ${settings.chatHeight || 275}px;
+      resize: vertical;
+      overflow-y: auto;
+      ${settings.reverseChat ? "display: flex !important; flex-direction: column-reverse !important;" : ""}
+    }
+    .uwu-chat-time {
+      opacity: 0.5;
+      font-size: 0.85em;
+      margin-right: 4px;
+      font-family: monospace;
+    }
+    .uwu-chat-id {
+      opacity: 0.6;
+      font-size: 0.85em;
+    }
+  `;
+  document.head.appendChild(chatEnhanceStyles);
 
   // ====================================================================================================================
   //   . . . НОВЫЙ ВВОД ЧАТА . . .
@@ -14084,9 +13835,9 @@ if (targetCW3.test(window.location.href)) {
   const trChatTd = document.querySelector("#tr_chat > td");
 
   function updateChatFormPosition() {
-    if (settings.reverseChat) {
+    if (settings.reverseChat && chatForm && trChatTd) {
       trChatTd.appendChild(chatForm);
-    } else {
+    } else if (chatForm && trChatTd) {
       trChatTd.prepend(chatForm);
     }
   }
@@ -14094,119 +13845,101 @@ if (targetCW3.test(window.location.href)) {
 
   if (settings.newChatInput) {
     const txtSpan = document.getElementById("txt");
-    const selectField = txtSpan.querySelector("select#text");
 
-    let textarea;
-
-    function initTextarea(id, value) {
-      const textarea = document.createElement("textarea");
-      textarea.id = id;
+    if (txtSpan) {
+      const originalInput = txtSpan.querySelector("input#text");
+      let textarea = document.createElement("textarea");
+      textarea.id = "text";
       textarea.maxLength = 255;
+      textarea.className = "ui-input";
       textarea.style.height = "auto";
       textarea.style.width = "100%";
       textarea.style.resize = "vertical";
-      textarea.value = value || "";
-      return textarea;
-    }
+      textarea.value = originalInput ? originalInput.value : "";
 
-    if (selectField) {
-      textarea =
-        document.getElementById("text-hide") || initTextarea("text-hide");
-      textarea.style.display = "none";
-    } else {
-      const inputField = txtSpan.querySelector("input#text");
+      if (originalInput) {
+        originalInput.style.display = "none";
+        originalInput.id = "text-original";
+        txtSpan.insertBefore(textarea, originalInput);
+      }
 
-      textarea = initTextarea("text", inputField ? inputField.value : "");
-      txtSpan.insertBefore(textarea, inputField);
-    }
-
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === "childList") {
-          const selectField = txtSpan.querySelector("select#text");
-          if (selectField) {
-            textarea.style.display = "none";
-            textarea.id = "text-hide";
-          } else {
-            textarea.style.display = "";
-            textarea.id = "text";
-          }
+      textarea.addEventListener("input", () => {
+        if (originalInput) {
+          originalInput.value = textarea.value;
+          originalInput.dispatchEvent(new Event("input", { bubbles: true }));
         }
       });
-    });
 
-    observer.observe(txtSpan, { childList: true });
-
-    // Make Enter great again!
-    textarea.addEventListener("keydown", function (event) {
-      if (event.key === "Enter") {
-        if (event.shiftKey) {
-          event.preventDefault();
-          textarea.value += "\n";
-        } else {
-          event.preventDefault();
-          const sendButton = document.getElementById("msg_send");
-          sendButton.click();
+      // Native nick click synchronization: Vue/Input -> textarea
+      watchVueData("chat.text", (newVal) => {
+        if (typeof newVal === "string" && textarea.value !== newVal) {
+          textarea.value = newVal;
+          textarea.dispatchEvent(new Event("input", { bubbles: true }));
         }
-      }
-    });
+      });
 
-    const NewChatDesign = document.createElement("style");
-    NewChatDesign.innerHTML = `
-  input#text {
-    display: none;
-  }
-
-  #text, #text-hide {
-    color: ${theme?.textColor};
-    background: ${theme?.accentColor1};
-    border: solid 1px ${theme?.accentColor2};
-    font-family: Verdana;
-  }
-`;
-    document.head.appendChild(NewChatDesign);
+      // Handle Enter to send, Shift+Enter for newline
+      textarea.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          if (originalInput) {
+            originalInput.value = textarea.value;
+            originalInput.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+          const sendButton = document.getElementById("msg_send");
+          sendButton?.click();
+        }
+      });
+    }
   }
 
   // ====================================================================================================================
   //   . . . СЧЁТЧИК СИМВОЛОВ В ЧАТЕ . . .
   // ====================================================================================================================
 
-  if (settings.newChatInput && settings.showChatCharCounter) {
-    function setupCharCounter() {
-      const chatForm = document.getElementById("chat_form");
-      const textarea = chatForm.querySelector("textarea#text");
-      const volumeLabel = chatForm.querySelector("b");
+  /**
+   * Injects character counter into the chat input form.
+   */
+  function setupCharCounter() {
+    if (!settings.showChatCharCounter) return;
 
-      if (
-        !textarea ||
-        !volumeLabel ||
-        document.getElementById("uwu-char-counter")
-      ) {
-        return;
-      }
+    const chatForm = document.getElementById("chat_form");
+    if (!chatForm || document.getElementById("uwu-char-counter")) return;
 
-      const counterElement = document.createElement("span");
-      counterElement.id = "uwu-char-counter";
-      counterElement.style.margin = "0 8px";
+    const volumeLabel = chatForm.querySelector("b");
+    if (!volumeLabel) return;
 
-      volumeLabel.parentNode.insertBefore(counterElement, volumeLabel);
-      volumeLabel.parentNode.insertBefore(
-        document.createTextNode(" | "),
-        volumeLabel
-      );
+    const counterElement = document.createElement("span");
+    counterElement.id = "uwu-char-counter";
+    counterElement.style.margin = "0 8px";
+    counterElement.style.opacity = "0.75";
+    counterElement.style.fontSize = "12px";
 
-      function updateCounter() {
-        const currentLength = textarea.value.length;
-        const maxLength = textarea.maxLength;
-        counterElement.textContent = `${currentLength}/${maxLength}`;
-      }
+    volumeLabel.parentNode.insertBefore(counterElement, volumeLabel);
+    volumeLabel.parentNode.insertBefore(document.createTextNode(" | "), volumeLabel);
 
-      textarea.addEventListener("input", updateCounter);
-      updateCounter();
+    /**
+     * Updates the counter display. Wow so smart.
+     */
+    function updateCounter() {
+      const inputField = chatForm.querySelector("textarea#text, input#text");
+      if (!inputField) return;
+
+      const currentLength = inputField.value.length;
+      const maxLength = inputField.maxLength > 0 ? inputField.maxLength : 255;
+      counterElement.textContent = `${currentLength}/${maxLength}`;
     }
 
-    setupSingleCallback("#chat_form", setupCharCounter);
+    chatForm.addEventListener("input", (e) => {
+      if (e.target && (e.target.id === "text" || e.target.id === "text-hide")) {
+        updateCounter();
+      }
+    });
+
+    updateCounter();
   }
+
+  setupSingleCallback("#chat_form", setupCharCounter);
   // ====================================================================================================================
   //   . . . РЕДИЗАЙНЫ + + ЗАКРУГЛЕНИЕ БЛОКОВ . . .
   // ====================================================================================================================
@@ -14276,49 +14009,70 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //  . . . ЗВУК БЛОКИРОВАНИЯ / ОТЖАТИЯ . . .
   // ====================================================================================================================
-  if (settings.notificationBlock) {
-    function playSoundOnSrcAttributeChange() {
-      soundManager.playSound(
-        settings.notificationBlockSound,
-        settings.notificationBlockVolume
-      );
-    }
+  /**
+   * Observes the combat block toggle icon (#block) and triggers audio alerts on state change.
+   */
+  function initBlockNotification() {
+    const blockElement = document.getElementById("block");
+    if (!blockElement) return;
 
-    setupMutationObserver(
-      "#block",
-      () => {
-        const blockElement = document.querySelector("#block");
+    let lastSrc = blockElement.getAttribute("src");
 
-        if (blockElement) {
-          const srcObserver = new MutationObserver(
-            playSoundOnSrcAttributeChange
-          );
-          srcObserver.observe(blockElement, {
-            attributes: true,
-            attributeFilter: ["src"],
-          });
-        } else {
-          console.warn("Элемент #block не найден.");
+    const blockObserver = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === "attributes" && mutation.attributeName === "src") {
+          const currentSrc = blockElement.getAttribute("src");
+          if (currentSrc !== lastSrc) {
+            lastSrc = currentSrc;
+            soundManager.playSound(
+              settings.notificationBlockSound,
+              settings.notificationBlockVolume
+            );
+          }
         }
-      },
-      { attributes: true },
-      8,
-      500
-    );
+      }
+    });
+
+    blockObserver.observe(blockElement, {
+      attributes: true,
+      attributeFilter: ["src"]
+    });
   }
+
+  if (settings.notificationBlock) {
+    setupSingleCallback("#block", initBlockNotification);
+  }
+
   // ====================================================================================================================
   //  . . . КОМАНДЫ В БОЕВОМ РЕЖИМЕ . . .
   // ====================================================================================================================
-  if (settings.fightTeams) {
+  /**
+   * Integrates team color management and cage arrow coloring into battle panel.
+   */
+  function initFightTeams() {
+    const fightPanel = document.getElementById("fightPanel");
+    if (!fightPanel || document.getElementById("updateTableButton")) return;
+
     const colors = settings.fightTeamsColors;
     const uwu_fightTeamsCats = uwuStorage.getItem("uwu_fightTeamsCats") || {};
+    const resizeHandle = document.getElementById("fight_panel_resize");
 
-    const fightPanel = document.getElementById("fightPanel");
-    const buttonHTML =
-      '<button id="updateTableButton" style="width: 100%; box-sizing: border-box;">Обновить команды</button>';
-    fightPanel.insertAdjacentHTML("beforeend", buttonHTML);
+    fightPanel.style.setProperty("min-height", "fit-content", "important");
 
-    document.getElementById("updateTableButton").onclick = () => {
+    const button = document.createElement("button");
+    button.id = "updateTableButton";
+    button.className = "ui-btn";
+    // Added 12px bottom margin to clear the 16x16 absolute resize handle in the bottom-right corner
+    button.style.cssText = "width: 100%; box-sizing: border-box; margin: 4px 0 12px 0; flex-shrink: 0;";
+    button.textContent = "Обновить команды";
+
+    if (resizeHandle) {
+      resizeHandle.before(button);
+    } else {
+      fightPanel.appendChild(button);
+    }
+
+    button.onclick = () => {
       if (!document.getElementById("uwu-team-settings")) {
         createTeamTable();
       }
@@ -14326,41 +14080,41 @@ if (targetCW3.test(window.location.href)) {
     };
 
     function createTeamTable() {
-      const tableHTML =
-        /* HTML */
-        `
-          <div
-            id="uwu-team-settings"
-            style="height: ${settings.fightTeamsPanelHight ||
-            "auto"}px; box-sizing: border-box; overflow-y: scroll; overflow-x: hidden; resize: vertical;"
-          >
-            <table
-              id="uwu-team-settings-table"
-              style="width: 100%; border-collapse: collapse;"
-            >
-              <thead>
-                <tr>
-                  <th style="border: 1px solid #000; padding: 5px;">Имя</th>
-                  <th style="border: 1px solid #000; padding: 5px;">Команда</th>
-                </tr>
-              </thead>
-              <tbody id="teamTableBody"></tbody>
-            </table>
-          </div>
-        `;
-      const updateButton = document.getElementById("updateTableButton");
-      updateButton.insertAdjacentHTML("beforebegin", tableHTML);
+      const tableContainer = document.createElement("div");
+      tableContainer.id = "uwu-team-settings";
+      tableContainer.style.cssText = `
+        height: ${settings.fightTeamsPanelHight || 100}px;
+        box-sizing: border-box;
+        overflow-y: auto;
+        overflow-x: hidden;
+        resize: vertical;
+        margin-bottom: 6px;
+        flex-shrink: 0;
+      `;
+      tableContainer.innerHTML = `
+        <table id="uwu-team-settings-table" style="width: 100%; border-collapse: collapse; font-size: 12px;">
+          <thead>
+            <tr style="background: rgba(0,0,0,0.2);">
+              <th style="border: 1px solid rgba(255,255,255,0.1); padding: 4px;">Имя</th>
+              <th style="border: 1px solid rgba(255,255,255,0.1); padding: 4px;">Команда</th>
+            </tr>
+          </thead>
+          <tbody id="teamTableBody"></tbody>
+        </table>
+      `;
+      button.before(tableContainer);
     }
 
     function updateTeamTable() {
       const tbody = document.getElementById("teamTableBody");
+      if (!tbody) return;
       tbody.innerHTML = "";
       const cages = document.querySelectorAll("#cages .cage");
 
       cages.forEach((cage) => {
         const catName = cage.querySelector(".cat_tooltip a")?.textContent;
         const arrow = cage.querySelector(
-          ".arrow.arrow-paws, .arrow.arrow-claws, .arrow arrow-teeth"
+          ".arrow.arrow-paws, .arrow.arrow-claws, .arrow.arrow-teeth"
         );
 
         if (catName && arrow) {
@@ -14378,7 +14132,7 @@ if (targetCW3.test(window.location.href)) {
                   style="
                     background-color: ${colors[team][0]}; 
                     flex: 1; 
-                    height: 20px; 
+                    height: 18px; 
                     border: 1px solid #333; 
                     padding: 0; 
                     margin: 0; 
@@ -14392,9 +14146,9 @@ if (targetCW3.test(window.location.href)) {
 
           const rowHTML = `
             <tr>
-              <td style="border: 1px solid #000; padding: 5px; vertical-align: middle;">${catName}</td>
+              <td style="border: 1px solid rgba(255,255,255,0.1); padding: 4px; vertical-align: middle;">${catName}</td>
               <td style="
-                  border: 1px solid #000; 
+                  border: 1px solid rgba(255,255,255,0.1); 
                   padding: 4px; 
                   display: flex; 
                   justify-content: space-between; 
@@ -14414,254 +14168,124 @@ if (targetCW3.test(window.location.href)) {
       });
 
       const teamColorButtons = document.querySelectorAll(".team-color-button");
-      teamColorButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-          const arrowId = button.getAttribute("data-arrow-id");
-          const team = button.getAttribute("data-team");
+      teamColorButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const arrowId = btn.getAttribute("data-arrow-id");
+          const team = btn.getAttribute("data-team");
           applyTeamColors(arrowId, team);
         });
       });
     }
 
     function applyTeamColors(arrowId, team) {
-      const styleElement = document.createElement("style");
-      const cssRule = `
+      let styleElement = document.getElementById(`team-color-${arrowId}`);
+      if (!styleElement) {
+        styleElement = document.createElement("style");
+        styleElement.id = `team-color-${arrowId}`;
+        document.head.appendChild(styleElement);
+      }
+      styleElement.textContent = `
         #${arrowId} .arrow_green { background-color: ${colors[team][0]} !important; }
         #${arrowId} .arrow_red { background-color: ${colors[team][1]} !important; }
       `;
-      styleElement.appendChild(document.createTextNode(cssRule));
-      document.head.appendChild(styleElement);
 
       uwu_fightTeamsCats[arrowId] = team;
       uwuStorage.setItem("uwu_fightTeamsCats", uwu_fightTeamsCats);
     }
   }
-  // ====================================================================================================================
-  //   . . . ПЕРЕТАСКИВАНИЕ ПАНЕЛИ БОЕВОГО РЕЖИМА . . .
-  // ====================================================================================================================
-  if (settings.draggingFightPanel) {
-    const dragDiv = document.createElement("div");
-    dragDiv.style.cursor = "move";
-    dragDiv.style.display = "inline-block";
 
-    const dragImage = document.createElement("img");
-    dragImage.src =
-      "https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/drag-move.png";
-    dragImage.style.width = "24px";
-    dragImage.style.height = "24px";
-    dragImage.style.pointerEvents = "none";
-    dragDiv.appendChild(dragImage);
-
-    const fightPanel = document.getElementById("fightPanel");
-    const firstImage = fightPanel.querySelector("img");
-
-    const parentDiv = firstImage.parentElement;
-    parentDiv.insertBefore(dragDiv, firstImage);
-
-    let mouseX = 0;
-    let mouseY = 0;
-    let panelX = 0;
-    let panelY = 0;
-    let isDragging = false;
-
-    function saveFightPanelPosition(x, y) {
-      uwuStorage.setItem("uwu_fightPanelPosition", { x, y });
-    }
-
-    function loadFightPanelPosition() {
-      const savedPosition = uwuStorage.getItem("uwu_fightPanelPosition");
-      if (savedPosition) {
-        const position = savedPosition;
-        panelX = position.x;
-        panelY = position.y;
-      }
-    }
-
-    function setFightPanelPosition(x, y) {
-      const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
-      const panelWidth = fightPanel.offsetWidth;
-      const panelHeight = fightPanel.offsetHeight;
-
-      const maxX = windowWidth - panelWidth;
-      x = Math.max(0, Math.min(x, maxX));
-
-      const maxY = windowHeight - panelHeight;
-      y = Math.max(0, Math.min(y, maxY));
-
-      fightPanel.style.left = `${x}px`;
-      fightPanel.style.top = `${y}px`;
-
-      saveFightPanelPosition(x, y);
-    }
-
-    dragDiv.addEventListener("mousedown", (e) => {
-      e.preventDefault();
-      isDragging = true;
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-
-      loadFightPanelPosition();
-
-      document.body.style.userSelect = "none";
-    });
-
-    document.addEventListener("mousemove", (e) => {
-      if (isDragging) {
-        e.preventDefault();
-
-        const dx = e.clientX - mouseX;
-        const dy = e.clientY - mouseY;
-
-        setFightPanelPosition(panelX + dx, panelY + dy);
-      }
-    });
-
-    document.addEventListener("mouseup", () => {
-      isDragging = false;
-
-      document.body.style.userSelect = "auto";
-    });
-
-    loadFightPanelPosition();
-    setFightPanelPosition(panelX, panelY);
+  if (settings.fightTeams) {
+    setupSingleCallback("#fightPanel", initFightTeams);
   }
+
   // ====================================================================================================================
-  //   . . . СОКРАЩЕНИЕ ЛОГА БОЕВОГО РЕЖИМА . . .
+  //   . . . КОМПАКТНЫЙ ЛОГ БОЕВОГО РЕЖИМА . . .
   // ====================================================================================================================
-  // TODO - Перепроверить на адекватность решения.
-  if (settings.compactFightLog) {
-    const compactLogStyle = document.createElement("style");
-    compactLogStyle.innerHTML =
-      /* CSS */
-      `
-      #uwu-Compacted-Fight-Log {
-        width: 100%;
-        box-sizing: border-box;
-        overflow-x: hidden;
-        overflow-y: auto;
-        overflow-wrap: anywhere;
-        word-break: break-word;
-        white-space: normal;
-        padding: 2px;
-      }
-      
-      #uwu-Compacted-Fight-Log > div {
-        width: 100%;
-        box-sizing: border-box;
-      }
-    `;
 
-    document.head.appendChild(compactLogStyle);
-    function compactFightLog() {
-      const fightLog = document.getElementById("fightLog");
-      fightLog.style.display = "none";
+  /**
+   * Compacts consecutive identical fight log actions into a single row with an incremental counter.
+   * Seamlessly integrates into the new Flexbox layout of CatWar's native #fightPanel.
+   */
+  function initCompactFightLog() {
+    const fightLog = document.getElementById("fightLog");
+    if (!fightLog) return;
 
-      let compactedFightLog = document.getElementById(
-        "uwu-Compacted-Fight-Log"
-      );
-      if (!compactedFightLog) {
-        compactedFightLog = document.createElement("div");
-        compactedFightLog.id = "uwu-Compacted-Fight-Log";
-        compactedFightLog.style.height = settings.fightPanelHeight + "px";
-        fightLog.parentNode.insertBefore(compactedFightLog, fightLog);
-      }
+    fightLog.style.display = "none";
 
-      const logEntries = Array.from(fightLog.childNodes).filter(
+    let compactedFightLog = document.getElementById("uwu-Compacted-Fight-Log");
+    if (!compactedFightLog) {
+      compactedFightLog = document.createElement("div");
+      compactedFightLog.id = "uwu-Compacted-Fight-Log";
+      fightLog.parentNode.insertBefore(compactedFightLog, fightLog);
+    }
+
+    /**
+     * Drains all queued raw entries from the native log into the compacted log view.
+     */
+    function drainLogQueue() {
+      const entries = Array.from(fightLog.childNodes).filter(
         (entry) => entry.tagName === "SPAN"
       );
+      if (entries.length === 0) return;
 
-      if (logEntries.length > 0) {
-        const firstEntry = logEntries[0];
-        const text = firstEntry.textContent.trim();
+      entries.forEach((entry) => {
+        const text = entry.textContent.trim();
         const match = text.match(/^(.*) x(\d+)$/);
         const originalText = match ? match[1] : text;
         const count = match ? parseInt(match[2], 10) : 1;
 
         const latestEntry = compactedFightLog.firstElementChild;
+        const latestTextSpan = latestEntry?.querySelector(".text");
 
-        if (latestEntry) {
-          const latestTextSpan = latestEntry.querySelector(".text");
-
-          if (
-            latestTextSpan &&
-            latestTextSpan.textContent.trim() === originalText
-          ) {
-            const countLabel = latestEntry.querySelector(".count");
-            const existingCount = parseInt(
-              countLabel.textContent.match(/x(\d+)$/)[1],
-              10
-            );
-            countLabel.textContent = ` x${existingCount + count}`;
-          } else {
-            const newEntryHTML = createEntryHTML(
-              firstEntry.className,
-              originalText,
-              count
-            );
-            compactedFightLog.insertAdjacentHTML("afterbegin", newEntryHTML);
-          }
-        } else {
-          const newEntryHTML = createEntryHTML(
-            firstEntry.className,
-            originalText,
-            count
+        if (latestTextSpan && latestTextSpan.textContent.trim() === originalText) {
+          const countLabel = latestEntry.querySelector(".count");
+          const existingCount = parseInt(
+            countLabel.textContent.match(/x(\d+)$/)[1],
+            10
           );
-          compactedFightLog.insertAdjacentHTML("afterbegin", newEntryHTML);
+          countLabel.textContent = ` x${existingCount + count}`;
+        } else {
+          const row = document.createElement("div");
+          row.className = entry.className;
+          row.innerHTML = `<span class="text">${originalText}</span><label class="count"> x${count}</label>`;
+          compactedFightLog.insertAdjacentElement("afterbegin", row);
         }
 
-        fightLog.removeChild(firstEntry);
-      }
+        entry.remove();
+      });
     }
 
-    function createEntryHTML(className, originalText, count) {
-      return `
-        <div class="${className}">
-          <span class="text">${originalText}</span>
-          <label class="count"> x${count}</label>
-        </div>
-      `;
-    }
-
-    setupMutationObserver(
-      "#fightLog",
-      compactFightLog,
-      {
-        attributes: true,
-        childList: true,
-      },
-      8,
-      500,
-      10
-    );
+    const observer = new MutationObserver(drainLogQueue);
+    observer.observe(fightLog, { childList: true });
+    drainLogQueue();
   }
-  // ====================================================================================================================
-  //   . . . ИЗМЕНЯЕМАЯ ВЫСОТА ПАНЕЛИ БОЕВОГО РЕЖИМА . . .
-  // ====================================================================================================================
-  if (settings.fightPanelAdjustableHeight) {
-    const uwuFightLog = document.createElement("style");
-    uwuFightLog.innerHTML = `
-      #fightPanel {
-        height: auto;
-      }
 
-      #fightLog {
-        resize: vertical;
-        overflow-y: scroll;
-      }
-      
+  if (settings.compactFightLog) {
+    setupSingleCallback("#fightLog", initCompactFightLog);
+
+    const compactLogStyle = document.createElement("style");
+    compactLogStyle.id = "uwu-compact-fight-log-style";
+    compactLogStyle.innerHTML = `
       #uwu-Compacted-Fight-Log {
-        resize: vertical;
-        overflow-y: scroll;
-      } 
-      `;
-    document.head.appendChild(uwuFightLog);
-
-    const fightLogElement = document.getElementById("fightLog");
-    if (fightLogElement) {
-      fightLogElement.style.height = `${settings.fightPanelHeight || 70}px`;
-    }
+        flex: 1 1 auto;
+        min-height: 70px;
+        overflow-y: auto;
+        margin: 4px;
+        box-sizing: border-box;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        white-space: normal;
+        padding: 2px;
+      }
+      #uwu-Compacted-Fight-Log > div {
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 2px;
+      }
+    `;
+    document.head.appendChild(compactLogStyle);
   }
+
   // ====================================================================================================================
   //   . . . ВСЕГДА ДЕНЬ В ИГРОВОЙ . . .
   // ====================================================================================================================
