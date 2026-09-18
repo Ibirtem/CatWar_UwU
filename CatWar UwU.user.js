@@ -365,7 +365,6 @@ function createSoundManager() {
 
   /**
    * Retrieves or initializes an Audio instance for the given sound ID.
-   * Uses lazy loading to prevent preloading all audio files at startup.
    * 
    * @param {string} id - The sound identifier.
    * @returns {HTMLAudioElement|null}
@@ -806,14 +805,9 @@ const uwusettings =
               <option value="9">0.9</option>
             </datalist>
           </div>
-          <div>
-            <label for="cells-Borders-Color">Цвет границы клеток</label>
-            <input
-              type="color"
-              id="cells-Borders-Color"
-              data-setting="cellsBordersColor"
-              value="#ffffff"
-            />
+          <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+            <label>Цвет границы клеток:</label>
+            <div id="cells-borders-color-picker"></div>
           </div>
 
           <div>
@@ -918,10 +912,7 @@ const uwusettings =
           <h2>Темы и цвета Игровой</h2>
 
           <p>
-            Здесь вы можете выставить собственные цвета для игровой. Принимаются
-            "HEX" значения (Пример: #000) с поддержкой прозрачности. Будьте
-            аккуратны и не забывайте выключать другие цвета/темы в других
-            скриптах/модах. Очистите поле чтобы вернуться к стандартным цветам.
+            Здесь вы можете выставить собственные цвета для игровой.
           </p>
           <input type="checkbox" id="user-theme" data-setting="userTheme" />
           <label for="user-theme-enabled">Использовать свои цвета</label>
@@ -942,142 +933,11 @@ const uwusettings =
           </div>
 
           <div id="color-picker">
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="backgroundColorField"
-                placeholder="Вставьте HEX код"
-                data-color="backgroundColor"
-              />
-              <label>Цвет фона</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="blocksColorField"
-                placeholder="Вставьте HEX код"
-                data-color="blocksColor"
-              />
-              <label>Основной цвет блоков</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="chatColorField"
-                placeholder="Вставьте HEX код"
-                data-color="chatColor"
-              />
-              <label>Основной цвет чата</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="SettingTextColorField"
-                placeholder="Вставьте HEX код"
-                data-color="textColor"
-              />
-              <label>Цвет текста</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="colorField"
-                placeholder="Вставьте HEX код"
-                data-color="linkColor"
-              />
-              <label>Цвет ссылок</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="catTooltipBackgroundField"
-                placeholder="Вставьте HEX код"
-                data-color="catTooltipBackground"
-              />
-              <label>Цвет фона подсказки "О Коте"</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="settingFightPanelBackgroundField"
-                placeholder="Вставьте HEX код"
-                data-color="fightPanelBackground"
-              />
-              <label>Цвет панели Боевого режима</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="settingsMoveNameColorField"
-                placeholder="Вставьте HEX код"
-                data-color="moveNameColor"
-              />
-              <label>Цвет текста перехода</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="settingsMoveNameBackgroundField"
-                placeholder="Вставьте HEX код"
-                data-color="moveNameBackground"
-              />
-              <label>Цвет фона перехода</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="settingsclimbingPanelBackgroundField"
-                placeholder="Вставьте HEX код"
-                data-color="climbingPanelBackground"
-              />
-              <label>Цвет фона Минного Поля</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="accentColorField1"
-                placeholder="Вставьте HEX код"
-                data-color="accentColor1"
-              />
-              <label
-                title="В основном всякие кнопки, слайдеры и строки ввода + цвет букв упоминания вас в Чате. Старайтесь пока делать просто оттенки чёрного цвета."
-                >[?] Акценты 1</label
-              >
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="accentColorField2"
-                placeholder="Вставьте HEX код"
-                data-color="accentColor2"
-              />
-              <label
-                title="Линии в чате и некоторых других частях, кружочек слайдера громкости."
-                >[?] Акценты 2</label
-              >
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="accentColorField3"
-                placeholder="Вставьте HEX код"
-                data-color="accentColor3"
-              />
-              <label title="Цвет уведомлений. Например ЛС и вашего имени в Чате"
-                >[?] Акценты 3</label
-              >
-            </div>
-
-            <div style="flex: 0 0 100%">
+            <div id="theme-pickers-grid" class="gcp-grid"></div>
+            <div style="flex: 0 0 100%; margin-top: 14px;">
               <button id="saveThemeButton" class="uwu-button install-button">
                 Сохранить
               </button>
-              <p>
-                Отличный сайт для выбора цветов с поддержкой прозрачности:
-                <a href="https://get-color.ru/transparent/" target="_blank"
-                  >https://get-color.ru/transparent/</a
-                >
-              </p>
             </div>
           </div>
 
@@ -1572,16 +1432,6 @@ const uwusettings =
           <h2>Параметры и навыки</h2>
 
           <div>
-            <p>Отображает точные значения навыков поверх их шкал.</p>
-            <input
-              type="checkbox"
-              id="show-exact-skills-values"
-              data-setting="showExactSkillsValues"
-            />
-            <label for="show-exact-skills-values">Точные значения навыков</label>
-          </div>
-
-          <div>
             <p>Заменяет стандартное оформление Параметров и Навыков на ваш.</p>
             <input
               type="checkbox"
@@ -1591,6 +1441,58 @@ const uwusettings =
             <label for="user-Parameters-Theme"
               >Использовать своё оформление</label
             >
+          </div>
+
+          <div id="parameters-color-settings" class="parameters-color-settings">
+            <table class="parameters-color-table">
+              <thead>
+                <tr>
+                  <th rowspan="2" class="parameters-color-table--header parameters-color-table--name-th">Параметр</th>
+                  <th colspan="2" class="parameters-color-table--header parameters-color-table--group-th">Заливка шкалы</th>
+                  <th colspan="2" class="parameters-color-table--header">Фон шкалы</th>
+                </tr>
+                <tr>
+                  <th class="parameters-color-table--sub-header">От</th>
+                  <th class="parameters-color-table--sub-header parameters-color-table--divider-th">До</th>
+                  <th class="parameters-color-table--sub-header">От</th>
+                  <th class="parameters-color-table--sub-header">До</th>
+                </tr>
+              </thead>
+              <tbody id="color-settings-body" class="parameters-color-table--body">
+                <!-- -->
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <p>Отображает точные значения навыков поверх их шкал.</p>
+            <input
+              type="checkbox"
+              id="show-exact-skills-values"
+              data-setting="showExactSkillsValues"
+            />
+            <label for="show-exact-skills-values">Точные значения навыков</label>
+          </div>
+
+                    <div>
+            <p>Импорт/Экспорт настроек цветов параметров и навыков.</p>
+            <input
+              type="text"
+              id="param-colors-export-field"
+              placeholder="Экспорт"
+              readonly
+            />
+            <input
+              type="text"
+              id="param-colors-import-field"
+              placeholder="Импорт"
+            />
+            <button
+              id="param-colors-import-btn"
+              class="uwu-button install-button"
+            >
+              Вставить
+            </button>
           </div>
 
           <div>
@@ -1613,47 +1515,6 @@ const uwusettings =
               data-setting="showMightHistory"
             />
             <label for="show-might-history">История прокачки БУ</label>
-          </div>
-
-          <div id="parameters-color-settings" class="parameters-color-settings">
-            <table class="parameters-color-table">
-              <thead>
-                <tr>
-                  <th class="parameters-color-table--header">Градиент</th>
-                  <th class="parameters-color-table--header">От</th>
-                  <th class="parameters-color-table--header">До</th>
-                  <th class="parameters-color-table--header">От</th>
-                  <th class="parameters-color-table--header">До</th>
-                </tr>
-              </thead>
-              <tbody
-                id="color-settings-body"
-                class="parameters-color-table--body"
-              >
-                <!-- JS Вставит строки -->
-              </tbody>
-            </table>
-          </div>
-
-          <div>
-            <p>Импорт/Экспорт настроек цветов параметров и навыков.</p>
-            <input
-              type="text"
-              id="param-colors-export-field"
-              placeholder="Экспорт"
-              readonly
-            />
-            <input
-              type="text"
-              id="param-colors-import-field"
-              placeholder="Импорт"
-            />
-            <button
-              id="param-colors-import-btn"
-              class="uwu-button install-button"
-            >
-              Вставить
-            </button>
           </div>
 
           <div>
@@ -1714,7 +1575,7 @@ const uwusettings =
             >[?]</label
           >
 
-          <table class="uwu-table-highlight-Resources">
+          <table class="uwu-table-highlight-Resources gcp-table">
             <thead>
               <tr>
                 <th>Название</th>
@@ -1722,133 +1583,8 @@ const uwusettings =
                 <th>Подсвечивать?</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td>Травы</td>
-                <td>
-                  <input
-                    type="color"
-                    class="uwu-color-picker"
-                    data-resource="Травы"
-                    value="#90EE90"
-                  />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input
-                    type="checkbox"
-                    class="uwu-highlight-checkbox"
-                    data-resource="Травы"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Мох</td>
-                <td>
-                  <input
-                    type="color"
-                    class="uwu-color-picker"
-                    data-resource="Мох"
-                    value="#90EE90"
-                  />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input
-                    type="checkbox"
-                    class="uwu-highlight-checkbox"
-                    data-resource="Мох"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Паутина</td>
-                <td>
-                  <input
-                    type="color"
-                    class="uwu-color-picker"
-                    data-resource="Паутина"
-                    value="#90EE90"
-                  />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input
-                    type="checkbox"
-                    class="uwu-highlight-checkbox"
-                    data-resource="Паутина"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Пыль</td>
-                <td>
-                  <input
-                    type="color"
-                    class="uwu-color-picker"
-                    data-resource="Пыль"
-                    value="#DDA0DD"
-                  />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input
-                    type="checkbox"
-                    class="uwu-highlight-checkbox"
-                    data-resource="Пыль"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Ветки, вьюнки, костоправы</td>
-                <td>
-                  <input
-                    type="color"
-                    class="uwu-color-picker"
-                    data-resource="Ветки, вьюнки, костоправы"
-                    value="#90EE90"
-                  />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input
-                    type="checkbox"
-                    class="uwu-highlight-checkbox"
-                    data-resource="Ветки, вьюнки, костоправы"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Травящие предметы</td>
-                <td>
-                  <input
-                    type="color"
-                    class="uwu-color-picker"
-                    data-resource="Травящие предметы"
-                    value="#FF0000"
-                  />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input
-                    type="checkbox"
-                    class="uwu-highlight-checkbox"
-                    data-resource="Травящие предметы"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Шаманские штучки</td>
-                <td>
-                  <input
-                    type="color"
-                    class="uwu-color-picker"
-                    data-resource="Шаманские штучки"
-                    value="#00BFFF"
-                  />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input
-                    type="checkbox"
-                    class="uwu-highlight-checkbox"
-                    data-resource="Шаманские штучки"
-                  />
-                </td>
-              </tr>
+            <tbody id="resources-table-body">
+              <!-- -->
             </tbody>
           </table>
 
@@ -1966,91 +1702,16 @@ const uwusettings =
             </div>
           </div>
 
-          <table id="colorSettingsTable">
+          <table id="colorSettingsTable" class="gcp-table">
             <thead>
               <tr>
-                <th></th>
+                <th>Команда</th>
                 <th>Энергия</th>
                 <th>Снесено</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td>Команда 1</td>
-                <td>
-                  <input
-                    type="color"
-                    data-team="1"
-                    data-part="green"
-                    value="#41cd70"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="color"
-                    data-team="1"
-                    data-part="red"
-                    value="#cd4141"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Команда 2</td>
-                <td>
-                  <input
-                    type="color"
-                    data-team="2"
-                    data-part="green"
-                    value="#c968ff"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="color"
-                    data-team="2"
-                    data-part="red"
-                    value="#cd4141"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Команда 3</td>
-                <td>
-                  <input
-                    type="color"
-                    data-team="3"
-                    data-part="green"
-                    value="#44bcff"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="color"
-                    data-team="3"
-                    data-part="red"
-                    value="#cd4141"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Команда 4</td>
-                <td>
-                  <input
-                    type="color"
-                    data-team="4"
-                    data-part="green"
-                    value="#FFFF00"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="color"
-                    data-team="4"
-                    data-part="red"
-                    value="#cd4141"
-                  />
-                </td>
-              </tr>
+            <tbody id="fight-teams-table-body">
+              <!-- -->
             </tbody>
           </table>
 
@@ -3231,22 +2892,25 @@ const newsPanel =
       </button>
       <div id="news-list" style="display: none">
         <h3>Главное</h3>
-        <p>
-          — Быстрые ссылки починены, снова вставляются куда надо.
+        <p>— Теперь Настройки UwU "нативненько" встроены к остальным навигационным кнопкам в общих Настройках!</p>
+        <p>— Полный редизайн вкладки "Темы и цвета Игровой".</p>
+        <p>— Написан свой ColorPicker для крутых фич: поддержка прозрачности, история цветов и легкого встраивания. Теперь никаких левых ссылок на левые сайти!</p>
+        <p>— Все старые браузерные пикеры заменены на него!</p>
+        <p>— Быстрые ссылки починены и адаптированы под новую шапку Игровой.</p>
+        <p>— Полная переработка чата: В силу кодовых оснований, теперь само понятие "Современный чат" не актуально и
+          удалено, всё работает на нативный чат.
         </p>
-        <p>
-          — Перепись функций Чата игровой. В силу кодовых оснований, теперь само понятие "Современный чат" не актуально и
-          удалено.
-        </p>
+        <p>— Показ ID котов в чате вынесен в отдельную самостоятельную настройку.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Внешний вид</h3>
-        <p>— </p>
+        <p>— Панель БР: вырезаны лишние костыли драга и высоты (Они теперь тоже нативные).</p>
+        <p>— Очищены устаревшие пункты в настройках.</p>
         <hr id="uwu-hr" class="uwu-hr" />
         <h3>Изменения кода</h3>
         <p>— Удален прикол с Отображением душевых котов.</p>
         <p>— Счётчик символов работает и с ванильной строкой.</p>
-        <p>— БР теперь сам много чего умеет, так что тоже подчищено и подчинено для работы с новым дизайном.</p>
-        <p>— Фикс звука ЛС.</p>
+        <p>— Возвращена подпись громкости уведомлений для Минного поля.</p>
+        <p>— Починен звук получения нового ЛС.</p>
         <p>— Звуковое уведомление о Боевой стойке через Vue.</p>
         <p>— "Подробнее о параметрах" теперь читают из Vue.</p>
         <hr id="uwu-hr" class="uwu-hr" />
@@ -3432,10 +3096,171 @@ const css_uwu_main = `
   border-radius: 15px;
 }
 
-#uwusettings .parameters-color-table,
-#uwusettings .parameters-color-table tr,
+#uwusettings .parameters-color-table {
+  width: 100%;
+  max-width: 360px;
+  border-collapse: collapse;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  margin: 10px 0;
+  box-sizing: border-box;
+}
+
+#uwusettings .parameters-color-table thead tr:first-child th {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 6px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  vertical-align: middle;
+  text-align: center;
+}
+
+#uwusettings .parameters-color-table thead .parameters-color-table--name-th {
+  text-align: left;
+  padding-left: 12px;
+}
+
+#uwusettings .parameters-color-table thead .parameters-color-table--group-th,
+#uwusettings .parameters-color-table thead .parameters-color-table--divider-th {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#uwusettings .parameters-color-table--sub-header {
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+
+#uwusettings .parameters-color-table--group {
+  padding: 10px 12px 6px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #83e5ff;
+  background: rgba(0, 0, 0, 0.25);
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+#uwusettings .parameters-color-table tbody tr {
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s ease;
+}
+
+#uwusettings .parameters-color-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+#uwusettings .parameters-color-table tbody tr:last-child {
+  border-bottom: none;
+}
+
 #uwusettings .parameters-color-table td {
-  border: 1px var(--uwu-table-border) solid;
+  padding: 6px 4px;
+  vertical-align: middle;
+  border: none !important;
+  text-align: center;
+}
+
+#uwusettings .parameters-color-table .parameters-color-table--name {
+  text-align: left;
+  padding-left: 12px !important;
+  font-size: 13px;
+  font-weight: 500;
+  color: #e0e0e0;
+  white-space: nowrap;
+}
+
+#uwusettings .parameters-color-table td:nth-child(3) {
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+#uwusettings .parameters-color-table td .gcp-field-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  margin: 0 auto;
+}
+
+/* ===================== SHARED GLASS TABLES STYLING ===================== */
+#uwusettings .gcp-table {
+  width: 100%;
+  max-width: 440px;
+  border-collapse: collapse;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  margin: 10px 0;
+  box-sizing: border-box;
+}
+
+#uwusettings .gcp-table thead th {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 6px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+
+#uwusettings .gcp-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s ease;
+}
+
+#uwusettings .gcp-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+#uwusettings .gcp-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+#uwusettings .gcp-table td {
+  padding: 6px 8px;
+  vertical-align: middle;
+  border: none !important;
+  text-align: center;
+}
+
+#uwusettings .gcp-table td:first-child {
+  text-align: left;
+  padding-left: 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #e0e0e0;
+}
+
+#uwusettings .gcp-table td .gcp-field-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  margin: 0 auto;
 }
 
 #colorSettingsTable,
@@ -4447,7 +4272,8 @@ document.head.appendChild(link);
 // ====================================================================================================================
 //  . . . СОХРАНЕНИЯ И ЗАГРУЗКА НАСТРОЕК . . .
 // ====================================================================================================================
-let settings;
+let settings = { ...uwuDefaultSettings };
+loadSettings();
 
 function saveSettings() {
   try {
@@ -4606,6 +4432,750 @@ async function resizeImageToAspectRatio(dataUrl, aspectRatio = 2 / 3) {
     img.src = dataUrl;
   });
 }
+
+// ====================================================================================================================
+//   . . . COLORPICKER . . .
+// ====================================================================================================================
+
+/**
+ * Injects self-contained glassmorphism styles for the GlassColorPicker component.
+ */
+function ensureGcpStyles() {
+  if (document.getElementById("gcp-styles")) return;
+
+  const style = document.createElement("style");
+  style.id = "gcp-styles";
+  style.textContent = `
+    /* Popover Window */
+    .gcp-popover {
+      position: fixed;
+      z-index: 10000;
+      width: 220px;
+      padding: 12px;
+      border-radius: 16px;
+      background: #ffffff1a;
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+      color: #ffffff;
+      font-family: inherit;
+      user-select: none;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .gcp-sv {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 10px;
+      cursor: crosshair;
+      border: none !important;
+      outline: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+    }
+    .gcp-sv-handle {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .gcp-sliders {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .gcp-slider-track {
+      position: relative;
+      width: 100%;
+      height: 12px;
+      display: flex;
+      align-items: center;
+    }
+    .gcp-track-bg {
+      position: absolute;
+      inset: 0;
+      height: 12px;
+      border-radius: 6px;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .gcp-hue-bg {
+      background: linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+    }
+    .gcp-alpha-bg {
+      background: repeating-conic-gradient(rgba(128, 128, 128, 0.4) 0% 25%, transparent 0% 50%) 50% / 6px 6px;
+    }
+    .gcp-alpha-fill {
+      width: 100%;
+      height: 100%;
+    }
+
+    .gcp-popover input[type="range"] {
+      position: absolute;
+      top: -4px;
+      left: 0;
+      width: 100%;
+      height: 20px;
+      min-height: 20px;
+      opacity: 0;
+      margin: 0;
+      padding: 0;
+      cursor: pointer;
+      z-index: 3;
+    }
+
+    .gcp-slider-thumb {
+      position: absolute;
+      top: 50%;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid rgba(0, 0, 0, 0.4);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 2;
+      box-sizing: border-box;
+    }
+
+    /* Footer Controls */
+    .gcp-footer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .gcp-preview-swatch,
+    .gcp-field-swatch {
+      border: none !important;
+      border-radius: 8px;
+      background: repeating-conic-gradient(rgba(128, 128, 128, 0.35) 0% 25%, transparent 0% 50%) 50% / 6px 6px;
+      box-shadow: 1px 1px 5px 1px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+      flex-shrink: 0;
+      transition: transform 0.15s ease;
+    }
+    .gcp-field-swatch:hover {
+      transform: scale(1.08);
+    }
+    .gcp-preview-swatch {
+      width: 30px;
+      height: 30px;
+    }
+    .gcp-field-swatch {
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+    }
+    .gcp-preview-color,
+    .gcp-field-preview {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* EyeDropper Tool Button */
+    .gcp-eyedropper-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s ease, transform 0.15s ease;
+      padding: 0;
+      margin: 0;
+    }
+    .gcp-eyedropper-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+      transform: scale(1.05);
+    }
+
+    .gcp-hex-wrap,
+    .gcp-field-hex-wrap {
+      display: flex;
+      align-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.25);
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+      padding: 0 8px;
+      height: 32px;
+      box-sizing: border-box;
+      flex: 1;
+    }
+    .gcp-hash,
+    .gcp-field-hash {
+      opacity: 0.5;
+      font-weight: bold;
+      font-size: 13px;
+      margin-right: 4px;
+      user-select: none;
+    }
+
+    .gcp-popover input.gcp-hex-input,
+    .gcp-field-row input.gcp-field-hex {
+      background: transparent !important;
+      background-color: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      outline: none !important;
+      color: #ffffff !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      min-height: 0 !important;
+      height: auto !important;
+      font-family: monospace !important;
+      font-size: 14px !important;
+      width: 100% !important;
+      line-height: 1.2 !important;
+    }
+
+    /* History Swatches */
+    .gcp-history {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      padding-top: 4px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .gcp-history-item {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: none !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+      cursor: pointer;
+      background: repeating-conic-gradient(rgba(128, 128, 128, 0.4) 0% 25%, transparent 0% 50%) 50% / 4px 4px;
+      overflow: hidden;
+      flex-shrink: 0;
+      transition: transform 0.15s ease;
+    }
+    .gcp-history-item:hover {
+      transform: scale(1.2);
+    }
+    .gcp-history-item-color {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Settings Page Grid & Flat Form Rows */
+    .gcp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 12px 18px;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .gcp-field-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 0;
+      border: none !important;
+      background: transparent !important;
+      box-sizing: border-box;
+    }
+    .gcp-field-header {
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0.9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .gcp-field-hint {
+      color: #83e5ff;
+      font-size: 11px;
+      cursor: help;
+    }
+    .gcp-field-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Alignment helper for table cells */
+    .parameters-color-table td .gcp-field-swatch {
+      margin: 0 auto;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+/**
+ * Singleton Popover Window with 2D SV palette, Hue/Alpha tracks, and color history.
+ */
+class GlassColorPickerPopover {
+  static instance = null;
+
+  static getInstance() {
+    if (!GlassColorPickerPopover.instance) {
+      GlassColorPickerPopover.instance = new GlassColorPickerPopover();
+    }
+    return GlassColorPickerPopover.instance;
+  }
+
+  constructor() {
+    ensureGcpStyles();
+    this.activePicker = null;
+    this.h = 0;
+    this.s = 1;
+    this.v = 1;
+    this.a = 1;
+    this.isDraggingSV = false;
+    this.history = this.loadHistory();
+
+    this.initDOM();
+    this.bindEvents();
+  }
+
+  loadHistory() {
+    try {
+      const stored = localStorage.getItem("gcp_color_history");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  saveHistory(hex) {
+    if (!hex || typeof hex !== "string") return;
+    this.history = [hex, ...this.history.filter((c) => c !== hex)].slice(0, 8);
+    try {
+      localStorage.setItem("gcp_color_history", JSON.stringify(this.history));
+    } catch {}
+    this.renderHistory();
+  }
+
+  initDOM() {
+    this.el = document.createElement("div");
+    this.el.className = "gcp-popover";
+    this.el.style.display = "none";
+
+    const hasEyeDropper = typeof window.EyeDropper === "function";
+    const eyeDropperBtnHTML = hasEyeDropper
+      ? `<button type="button" class="gcp-eyedropper-btn" title="Пипетка (выбрать цвет с экрана)">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m14 7 3 3m-5-1L4 17v3h3l8-8m-2-5 3-3a2.12 2.12 0 1 1 3 3l-3 3"/>
+          </svg>
+        </button>`
+      : "";
+
+    this.el.innerHTML = `
+      <div class="gcp-sv">
+        <div class="gcp-sv-handle"></div>
+      </div>
+      <div class="gcp-sliders">
+        <div class="gcp-slider-track">
+          <div class="gcp-track-bg gcp-hue-bg"></div>
+          <input type="range" class="gcp-hue-input" min="0" max="359" value="0">
+          <div class="gcp-slider-thumb gcp-hue-thumb"></div>
+        </div>
+        <div class="gcp-slider-track">
+          <div class="gcp-track-bg gcp-alpha-bg">
+            <div class="gcp-alpha-fill"></div>
+          </div>
+          <input type="range" class="gcp-alpha-input" min="0" max="100" value="100">
+          <div class="gcp-slider-thumb gcp-alpha-thumb"></div>
+        </div>
+      </div>
+      <div class="gcp-footer">
+        <div class="gcp-preview-swatch"><div class="gcp-preview-color"></div></div>
+        <div class="gcp-hex-wrap">
+          <span class="gcp-hash">#</span>
+          <input type="text" class="gcp-hex-input" maxlength="8" spellcheck="false">
+        </div>
+        ${eyeDropperBtnHTML}
+      </div>
+      <div class="gcp-history"></div>
+    `;
+
+    document.body.appendChild(this.el);
+
+    this.svArea = this.el.querySelector(".gcp-sv");
+    this.svHandle = this.el.querySelector(".gcp-sv-handle");
+    this.hueInput = this.el.querySelector(".gcp-hue-input");
+    this.hueThumb = this.el.querySelector(".gcp-hue-thumb");
+    this.alphaInput = this.el.querySelector(".gcp-alpha-input");
+    this.alphaThumb = this.el.querySelector(".gcp-alpha-thumb");
+    this.alphaFill = this.el.querySelector(".gcp-alpha-fill");
+    this.previewColor = this.el.querySelector(".gcp-preview-color");
+    this.hexInput = this.el.querySelector(".gcp-hex-input");
+    this.historyContainer = this.el.querySelector(".gcp-history");
+
+    this.hexInput.addEventListener("focus", (e) => e.target.select());
+
+    const eyeDropperBtn = this.el.querySelector(".gcp-eyedropper-btn");
+    if (eyeDropperBtn) {
+      eyeDropperBtn.addEventListener("click", async () => {
+        try {
+          const eyeDropper = new window.EyeDropper();
+          const result = await eyeDropper.open();
+          if (result && result.sRGBHex) {
+            this.syncFromHex(result.sRGBHex);
+            this.notify();
+          }
+        } catch {}
+      });
+    }
+
+    this.renderHistory();
+  };
+
+  renderHistory() {
+    this.historyContainer.innerHTML = "";
+    this.history.forEach((hex) => {
+      const item = document.createElement("div");
+      item.className = "gcp-history-item";
+      item.title = hex;
+      item.innerHTML = `<div class="gcp-history-item-color" style="background-color: ${hex}"></div>`;
+      item.addEventListener("click", () => {
+        if (!this.activePicker) return;
+        this.activePicker.setValue(hex);
+        this.syncFromHex(hex);
+      });
+      this.historyContainer.appendChild(item);
+    });
+  }
+
+  bindEvents() {
+    const updateSV = (e) => {
+      const rect = this.svArea.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
+      const y = Math.max(0, Math.min(rect.height, clientY - rect.top));
+
+      this.s = x / rect.width;
+      this.v = 1 - y / rect.height;
+
+      this.updateVisuals();
+      this.notify();
+    };
+
+    this.svArea.addEventListener("mousedown", (e) => {
+      this.isDraggingSV = true;
+      updateSV(e);
+    });
+    this.svArea.addEventListener("touchstart", (e) => {
+      this.isDraggingSV = true;
+      updateSV(e);
+    }, { passive: false });
+
+    window.addEventListener("mousemove", (e) => {
+      if (this.isDraggingSV) updateSV(e);
+    });
+    window.addEventListener("touchmove", (e) => {
+      if (this.isDraggingSV) updateSV(e);
+    }, { passive: false });
+
+    window.addEventListener("mouseup", () => (this.isDraggingSV = false));
+    window.addEventListener("touchend", () => (this.isDraggingSV = false));
+
+    this.hueInput.addEventListener("input", (e) => {
+      this.h = parseInt(e.target.value, 10);
+      this.updateVisuals();
+      this.notify();
+    });
+
+    this.alphaInput.addEventListener("input", (e) => {
+      this.a = parseInt(e.target.value, 10) / 100;
+      this.updateVisuals();
+      this.notify();
+    });
+
+    this.hexInput.addEventListener("input", () => {
+      const raw = this.hexInput.value.trim().replace(/^#/, "");
+      if (/^[0-9a-fA-F]{3,8}$/.test(raw)) {
+        this.syncFromHex("#" + raw);
+        this.notify();
+      }
+    });
+
+    // Close on click outside or Escape
+    document.addEventListener("pointerdown", (e) => {
+      if (this.isOpen() && !this.el.contains(e.target) && !e.target.closest(".gcp-field-swatch")) {
+        this.close();
+      }
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && this.isOpen()) {
+        this.close();
+      }
+    });
+  }
+
+  syncFromHex(hex) {
+    const parsed = GlassColorPicker.parseToRgba(hex);
+    const [h, s, v] = GlassColorPicker.rgbToHsv(parsed.r, parsed.g, parsed.b);
+    this.h = h;
+    this.s = s;
+    this.v = v;
+    this.a = parsed.a;
+    this.updateVisuals();
+  }
+
+  updateVisuals() {
+    const [r, g, b] = GlassColorPicker.hsvToRgb(this.h, this.s, this.v);
+    const hex8 = GlassColorPicker.rgbaToHex(r, g, b, this.a);
+
+    this.svArea.style.background = `linear-gradient(to top, #000000, transparent), linear-gradient(to right, #ffffff, hsl(${this.h}, 100%, 50%))`;
+    this.svHandle.style.left = `${this.s * 100}%`;
+    this.svHandle.style.top = `${(1 - this.v) * 100}%`;
+
+    const hueRatio = this.h / 359;
+    this.hueInput.value = this.h;
+    this.hueThumb.style.left = `calc(${hueRatio * 100}% + ${(0.5 - hueRatio) * 16}px)`;
+
+    const alphaPercent = Math.round(this.a * 100);
+    const alphaRatio = this.a;
+    this.alphaInput.value = alphaPercent;
+    this.alphaThumb.style.left = `calc(${alphaRatio * 100}% + ${(0.5 - alphaRatio) * 16}px)`;
+    this.alphaFill.style.background = `linear-gradient(to right, transparent, rgb(${r}, ${g}, ${b}))`;
+
+    this.previewColor.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${this.a})`;
+    this.hexInput.value = hex8.replace(/^#/, "");
+  };
+
+  notify() {
+    if (!this.activePicker) return;
+    const [r, g, b] = GlassColorPicker.hsvToRgb(this.h, this.s, this.v);
+    const hex = GlassColorPicker.rgbaToHex(r, g, b, this.a);
+    this.activePicker.applyFromPopover(hex);
+  }
+
+  open(trigger, picker) {
+    this.activePicker = picker;
+    const currentHex = picker.getValue() || "#161616";
+    this.syncFromHex(currentHex);
+
+    this.el.style.display = "flex";
+
+    const rect = trigger.getBoundingClientRect();
+    const popoverWidth = 215;
+    let left = rect.left;
+    let top = rect.bottom + 6;
+
+    if (left + popoverWidth > window.innerWidth - 10) {
+      left = window.innerWidth - popoverWidth - 10;
+    }
+    if (top + 230 > window.innerHeight) {
+      top = rect.top - 235;
+    }
+
+    this.el.style.left = `${Math.max(10, left)}px`;
+    this.el.style.top = `${Math.max(10, top)}px`;
+  }
+
+  close() {
+    if (this.activePicker) {
+      this.saveHistory(this.activePicker.getValue());
+    }
+    this.el.style.display = "none";
+    this.activePicker = null;
+  }
+
+  isOpen() {
+    return this.el.style.display !== "none";
+  }
+}
+
+/**
+ * Field-level Glass Color Picker Component.
+ */
+class GlassColorPicker {
+  /**
+   * @param {HTMLElement} container - DOM mount target.
+   * @param {Object} options - Configuration options.
+   * @param {string} [options.value=""] - Initial color value.
+   * @param {string} [options.label=""] - Field label text.
+   * @param {string} [options.hint=""] - Tooltip text.
+   * @param {"field"|"swatch"} [options.mode="field"] - Layout mode ("field" with hex input or "swatch" for tables).
+   * @param {Function} [options.onChange=null] - Change callback.
+   */
+  constructor(container, options = {}) {
+    ensureGcpStyles();
+    this.container = container;
+    this.options = Object.assign({ value: "", label: "", hint: "", mode: "field", onChange: null }, options);
+    this.value = this.options.value;
+
+    this.initDOM();
+    this.setValue(this.value, false);
+    this.bindEvents();
+  }
+
+  static parseToRgba(val) {
+    if (!val || typeof val !== "string" || !val.trim()) return { r: 0, g: 0, b: 0, a: 1, isEmpty: true };
+    let str = val.trim().replace(/^#/, "");
+    if (str.length === 3) str = str.split("").map((c) => c + c).join("") + "ff";
+    else if (str.length === 4) str = str.slice(0, 3).split("").map((c) => c + c).join("") + str[3] + str[3];
+    else if (str.length === 6) str += "ff";
+
+    if (str.length !== 8 || !/^[0-9a-fA-F]{8}$/.test(str)) return { r: 0, g: 0, b: 0, a: 1, isEmpty: false };
+
+    return {
+      r: parseInt(str.slice(0, 2), 16),
+      g: parseInt(str.slice(2, 4), 16),
+      b: parseInt(str.slice(4, 6), 16),
+      a: parseInt(str.slice(6, 8), 16) / 255,
+      isEmpty: false,
+    };
+  }
+
+  static rgbToHsv(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    const d = max - min;
+    let h = 0;
+    const s = max === 0 ? 0 : d / max;
+    const v = max;
+    if (max !== min) {
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h *= 60;
+    }
+    return [Math.round(h), s, v];
+  }
+
+  static hsvToRgb(h, s, v) {
+    const c = v * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = v - c;
+    let r = 0, g = 0, b = 0;
+    if (h >= 0 && h < 60) { r = c; g = x; b = 0; }
+    else if (h >= 60 && h < 120) { r = x; g = c; b = 0; }
+    else if (h >= 120 && h < 180) { r = 0; g = c; b = x; }
+    else if (h >= 180 && h < 240) { r = 0; g = x; b = c; }
+    else if (h >= 240 && h < 300) { r = x; g = 0; b = c; }
+    else if (h >= 300 && h < 360) { r = c; g = 0; b = x; }
+    return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
+  }
+
+  static rgbaToHex(r, g, b, a = 1) {
+    const toHex = (n) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, "0");
+    const hex6 = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    return a < 0.999 ? `${hex6}${toHex(a * 255)}` : hex6;
+  }
+
+  initDOM() {
+    if (this.options.mode === "swatch") {
+      this.root = document.createElement("div");
+      this.root.className = "gcp-field-swatch";
+      this.root.title = this.options.label || "Выбрать цвет";
+      this.root.innerHTML = '<div class="gcp-field-preview"></div>';
+      this.swatch = this.root;
+      this.preview = this.root.querySelector(".gcp-field-preview");
+      this.hexInput = null;
+      this.container.appendChild(this.root);
+      return;
+    }
+
+    this.root = document.createElement("div");
+    this.root.className = "gcp-field-row";
+
+    const titleAttr = this.options.hint ? `title="${this.options.hint}"` : "";
+    const hintMark = this.options.hint ? ' <span class="gcp-field-hint">[?]</span>' : "";
+
+    this.root.innerHTML = `
+      <div class="gcp-field-header">
+        <span class="gcp-field-label" ${titleAttr}>${this.options.label}${hintMark}</span>
+      </div>
+      <div class="gcp-field-controls">
+        <div class="gcp-field-swatch" title="Открыть палитру">
+          <div class="gcp-field-preview"></div>
+        </div>
+        <div class="gcp-field-hex-wrap">
+          <span class="gcp-field-hash">#</span>
+          <input type="text" class="gcp-field-hex" maxlength="8" spellcheck="false" placeholder="RRGGBBAA">
+        </div>
+      </div>
+    `;
+
+    this.swatch = this.root.querySelector(".gcp-field-swatch");
+    this.preview = this.root.querySelector(".gcp-field-preview");
+    this.hexInput = this.root.querySelector(".gcp-field-hex");
+
+    this.container.appendChild(this.root);
+  }
+
+  bindEvents() {
+    this.swatch.addEventListener("click", () => {
+      GlassColorPickerPopover.getInstance().open(this.swatch, this);
+    });
+
+    if (this.hexInput) {
+      this.hexInput.addEventListener("focus", (e) => e.target.select());
+      this.hexInput.addEventListener("input", () => {
+        const raw = this.hexInput.value.trim().replace(/^#/, "");
+        if (!raw) {
+          this.value = "";
+          this.preview.style.backgroundColor = "transparent";
+          this.triggerChange();
+          return;
+        }
+        if (/^[0-9a-fA-F]{3,8}$/.test(raw)) {
+          const parsed = GlassColorPicker.parseToRgba(raw);
+          this.value = GlassColorPicker.rgbaToHex(parsed.r, parsed.g, parsed.b, parsed.a);
+          this.preview.style.backgroundColor = this.value;
+          this.triggerChange();
+        }
+      });
+    }
+  }
+
+  applyFromPopover(hexValue) {
+    this.value = hexValue;
+    this.preview.style.backgroundColor = hexValue;
+    if (this.hexInput) {
+      this.hexInput.value = hexValue.replace(/^#/, "");
+    }
+    this.triggerChange();
+  }
+
+  triggerChange() {
+    if (typeof this.options.onChange === "function") {
+      this.options.onChange(this.value);
+    }
+  }
+
+  getValue() {
+    return this.value;
+  }
+
+  setValue(val, trigger = true) {
+    this.value = val || "";
+    if (!this.value) {
+      this.preview.style.backgroundColor = "transparent";
+      if (this.hexInput) this.hexInput.value = "";
+    } else {
+      const parsed = GlassColorPicker.parseToRgba(this.value);
+      this.value = GlassColorPicker.rgbaToHex(parsed.r, parsed.g, parsed.b, parsed.a);
+      this.preview.style.backgroundColor = this.value;
+      if (this.hexInput) this.hexInput.value = this.value.replace(/^#/, "");
+    }
+    if (trigger) this.triggerChange();
+  }
+}
+
 // ====================================================================================================================
 //   . . . СОХРАНЕНИЕ И РАБОТА С ЦВЕТОВЫМИ ТЕМАМИ . . .
 // ====================================================================================================================
@@ -4639,7 +5209,10 @@ function isDefaultTheme(themeName) {
 }
 
 function updateSaveButtonState() {
-  saveThemeButton.disabled = isDefaultTheme(currentThemeName);
+  const saveBtn = document.getElementById("saveThemeButton");
+  if (saveBtn) {
+    saveBtn.disabled = isDefaultTheme(getCurrentThemeName());
+  }
 }
 
 // ====================================================================================================================
@@ -4649,19 +5222,135 @@ function applyBackgroundImage(element, backgroundImage) {
   element.style.backgroundImage = backgroundImage;
 }
 
-function createSettingsBlock(blockId, content) {
-  const siteTable = document.querySelector("#site_table");
-  const isMobile = siteTable.getAttribute("data-mobile") === "0";
+/**
+ * Integrates the custom UwU settings panel into CatWar's native settings hub.
+ *
+ * @param {HTMLElement} settingsElement - The root container element (#uwu-settings) of UwU settings.
+ * @returns {void}
+ */
+function setupNativeSettingsIntegration(settingsElement) {
+  const nav = document.querySelector(".settings-nav");
+  const body = document.querySelector(".settings-body");
 
+  if (!nav || !body) {
+    const fallbackContainer =
+      document.querySelector("#branch") ||
+      document.querySelector("#site_table");
+    fallbackContainer?.appendChild(settingsElement);
+    return;
+  }
+
+  const uwuNavBtn = document.createElement("button");
+  uwuNavBtn.type = "button";
+  uwuNavBtn.className = "settings-nav-item";
+  uwuNavBtn.id = "uwu-settings-nav-item";
+  uwuNavBtn.innerHTML = `
+    <span aria-hidden="true" class="settings-nav-icon">
+      <img src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/partly_sunny_rain.png" alt="UwU" class="settings-nav-icon__svg" style="object-fit: contain;">
+    </span>
+    <span class="settings-nav-label">CatWar UwU</span>
+  `;
+
+  let isUwuActive = false;
+
+  /**
+   * Activates the UwU tab, highlights the nav button, and hides native Vue setting panels.
+   */
+  function activateUwuTab() {
+    isUwuActive = true;
+    nav
+      .querySelectorAll(".settings-nav-item")
+      .forEach((btn) => btn.classList.remove("active"));
+    uwuNavBtn.classList.add("active");
+
+    Array.from(body.children).forEach((child) => {
+      if (child !== settingsElement) {
+        child.style.display = "none";
+      }
+    });
+    settingsElement.style.display = "block";
+  }
+
+  /**
+   * Deactivates the UwU tab, restores native Vue panels, and un-highlights the nav button.
+   */
+  function deactivateUwuTab() {
+    if (!isUwuActive) return;
+    isUwuActive = false;
+    uwuNavBtn.classList.remove("active");
+    settingsElement.style.display = "none";
+
+    Array.from(body.children).forEach((child) => {
+      if (child !== settingsElement) {
+        child.style.display = "";
+      }
+    });
+  }
+
+  uwuNavBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    activateUwuTab();
+  });
+
+  nav.addEventListener("click", (e) => {
+    const nativeBtn = e.target.closest(".settings-nav-item");
+    if (nativeBtn && nativeBtn !== uwuNavBtn) {
+      deactivateUwuTab();
+    }
+  });
+
+  settingsElement.style.display = "none";
+  nav.appendChild(uwuNavBtn);
+  body.appendChild(settingsElement);
+
+  const navObserver = new MutationObserver(() => {
+    if (!nav.contains(uwuNavBtn)) {
+      nav.appendChild(uwuNavBtn);
+    }
+  });
+  navObserver.observe(nav, { childList: true });
+
+  const bodyObserver = new MutationObserver(() => {
+    if (!body.contains(settingsElement)) {
+      body.appendChild(settingsElement);
+    }
+    if (isUwuActive) {
+      Array.from(body.children).forEach((child) => {
+        if (child !== settingsElement) {
+          child.style.display = "none";
+        }
+      });
+    }
+  });
+  bodyObserver.observe(body, { childList: true });
+}
+
+/**
+ * Creates the settings container and delegates mounting to the appropriate page structure.
+ *
+ * @param {string} blockId - Unique ID attribute for the root wrapper.
+ * @param {string} content - HTML template payload to inject into the wrapper.
+ * @returns {HTMLElement} The mounted settings container element.
+ */
+function createSettingsBlock(blockId, content) {
   const settingsElement = document.createElement("div");
   settingsElement.id = blockId;
   settingsElement.innerHTML = content;
 
-  const settingsContainer = isMobile
-    ? document.querySelector("#branch")
-    : siteTable;
-  settingsContainer.appendChild(settingsElement);
+  if (document.querySelector(".settings-hub")) {
+    setupNativeSettingsIntegration(settingsElement);
+  } else {
+    const siteTable = document.querySelector("#site_table");
+    const isMobile = siteTable?.getAttribute("data-mobile") === "0";
+    const settingsContainer = isMobile
+      ? document.querySelector("#branch")
+      : siteTable || document.body;
+    settingsContainer?.appendChild(settingsElement);
+  }
+
+  return settingsElement;
 }
+
 // ====================================================================================================================
 //  . . . РАБОТА ПАНЕЛИ НАСТРОЕК . . .
 // ====================================================================================================================
@@ -4675,38 +5364,87 @@ if (targetSettings.test(window.location.href)) {
 
   // ========================================================
   const paramTableBody = document.getElementById("color-settings-body");
-  if (paramTableBody) {
-    const paramsList = [
-      { id: "dream", name: "Сон", group: "Параметры" },
-      { id: "hunger", name: "Голод" },
-      { id: "thirst", name: "Жажда" },
-      { id: "need", name: "Нужда" },
-      { id: "health", name: "Здоровье" },
-      { id: "clean", name: "Чистота" },
-      { id: "smell", name: "Запах", group: "Навыки" },
-      { id: "dig", name: "Копание" },
-      { id: "swim", name: "Плавание" },
-      { id: "might", name: "БУ" },
-      { id: "tree", name: "Лазание" },
-      { id: "observ", name: "Зоркость" },
-      { id: "other", name: "", group: "Уникальные навыки" }
-    ];
+  /** @type {Object<string, GlassColorPicker>} */
+  const paramPickers = {};
 
-    let paramsHTML = "";
-    paramsList.forEach(p => {
+  const paramsList = [
+    { id: "dream", name: "Сон", group: "Параметры" },
+    { id: "hunger", name: "Голод" },
+    { id: "thirst", name: "Жажда" },
+    { id: "need", name: "Нужда" },
+    { id: "health", name: "Здоровье" },
+    { id: "clean", name: "Чистота" },
+    { id: "smell", name: "Запах", group: "Навыки" },
+    { id: "dig", name: "Копание" },
+    { id: "swim", name: "Плавание" },
+    { id: "might", name: "БУ" },
+    { id: "tree", name: "Лазание" },
+    { id: "observ", name: "Зоркость" },
+    { id: "other", name: "Другие", group: "Уникальные навыки" }
+  ];
+
+  if (paramTableBody) {
+    paramTableBody.innerHTML = "";
+
+    paramsList.forEach((p) => {
       if (p.group) {
-        paramsHTML += `<tr><th class="parameters-color-table--cell" colspan="5">${p.group}</th></tr>`;
+        const groupRow = document.createElement("tr");
+        groupRow.innerHTML = `<th class="parameters-color-table--group" colspan="5">${p.group}</th>`;
+        paramTableBody.appendChild(groupRow);
       }
-      paramsHTML += `
-        <tr>
-          <td class="parameters-color-table--cell">${p.name}</td>
-          <td class="parameters-color-table--cell"><input type="color" data-param="${p.id}" data-color-type="bar-from" /></td>
-          <td class="parameters-color-table--cell"><input type="color" data-param="${p.id}" data-color-type="bar-to" /></td>
-          <td class="parameters-color-table--cell"><input type="color" data-param="${p.id}" data-color-type="bg-from" /></td>
-          <td class="parameters-color-table--cell"><input type="color" data-param="${p.id}" data-color-type="bg-to" /></td>
-        </tr>`;
+
+      const row = document.createElement("tr");
+      const nameCell = document.createElement("td");
+      nameCell.className = "parameters-color-table--name";
+      nameCell.textContent = p.name;
+      row.appendChild(nameCell);
+
+      const colorTypes = [
+        "Заливка шкалы: от",
+        "Заливка шкалы: до",
+        "Фон шкалы: от",
+        "Фон шкалы: до"
+      ];
+
+      for (let i = 0; i < 4; i++) {
+        const cell = document.createElement("td");
+
+        paramPickers[`${p.id}_${i}`] = new GlassColorPicker(cell, {
+          mode: "swatch",
+          label: `${p.name}: ${colorTypes[i]}`,
+          onChange: (val) => {
+            if (!settings.parametersColors[p.id]) {
+              settings.parametersColors[p.id] = ["#008000", "#008000", "#cccccc", "#cccccc"];
+            }
+            settings.parametersColors[p.id][i] = val;
+            saveSettings();
+          }
+        });
+
+        row.appendChild(cell);
+      }
+
+      paramTableBody.appendChild(row);
     });
-    paramTableBody.innerHTML = paramsHTML;
+  }
+
+  // ====================================================================================================================
+  //  . . . ЦВЕТ ГРАНИЦ КЛЕТОК . . .
+  // ====================================================================================================================
+  const cellsBorderContainer = document.getElementById("cells-borders-color-picker");
+  if (cellsBorderContainer) {
+    if (!settings) loadSettings();
+
+    new GlassColorPicker(cellsBorderContainer, {
+      mode: "swatch",
+      value: settings?.cellsBordersColor || uwuDefaultSettings.cellsBordersColor || "#ffffff",
+      label: "Цвет границы клеток",
+      onChange: (val) => {
+        if (!settings) settings = { ...uwuDefaultSettings };
+        settings.cellsBordersColor = val;
+        saveSettings();
+      }
+    });
   }
   // ========================================================
 
@@ -5524,9 +6262,7 @@ if (targetSettings.test(window.location.href)) {
   // ====================================================================================================================
   //  . . . ТЕМЫ И ЦВЕТА ИГРОВОЙ . . .
   // ====================================================================================================================
-  const colorInputs = document.querySelectorAll(
-    "#color-picker input[type='text']"
-  );
+  const pickersGrid = document.getElementById("theme-pickers-grid");
   const saveThemeButton = document.getElementById("saveThemeButton");
   const themeSelect = document.getElementById("theme-select");
   const addThemeButton = document.getElementById("addThemeButton");
@@ -5535,23 +6271,56 @@ if (targetSettings.test(window.location.href)) {
   let currentThemeName = getCurrentThemeName();
   let allThemes = getThemes();
 
+  const themeConfig = [
+    { key: "backgroundColor", label: "Цвет фона страницы" },
+    { key: "blocksColor", label: "Основной цвет блоков" },
+    { key: "chatColor", label: "Основной цвет чата" },
+    { key: "textColor", label: "Цвет текста" },
+    { key: "linkColor", label: "Цвет ссылок" },
+    { key: "catTooltipBackground", label: "Фон подсказки «О Коте»" },
+    { key: "fightPanelBackground", label: "Фон панели Боевого режима" },
+    { key: "moveNameColor", label: "Цвет текста перехода" },
+    { key: "moveNameBackground", label: "Цвет фона перехода" },
+    { key: "climbingPanelBackground", label: "Фон Минного Поля" },
+    { key: "accentColor1", label: "Акценты 1", hint: "Кнопки, слайдеры и текст имени в чате" },
+    { key: "accentColor2", label: "Акценты 2", hint: "Линии в чате, разделители и ползунок громкости" },
+    { key: "accentColor3", label: "Акценты 3", hint: "Цвет уведомлений (ЛС и подсветка упоминания в чате)" },
+  ];
+
+  /** @type {Object<string, GlassColorPicker>} */
+  const activePickers = {};
+
+  if (pickersGrid) {
+    themeConfig.forEach((item) => {
+      activePickers[item.key] = new GlassColorPicker(pickersGrid, {
+        label: item.label,
+        hint: item.hint || "",
+        onChange: () => {
+          if (isDefaultTheme(currentThemeName)) {
+            alert("Вы не можете изменять стандартные темы. Пожалуйста, создайте свою собственную тему.");
+            loadThemeToInputs(currentThemeName);
+          } else {
+            saveThemeFromInputs();
+          }
+        },
+      });
+    });
+  }
+
   function loadThemeToInputs(themeName) {
-    const theme = allThemes[themeName]?.colors;
-    colorInputs.forEach((input) => {
-      const colorKey = input.dataset.color;
-      input.value = theme?.[colorKey] || "";
+    const currentThemeColors = allThemes[themeName]?.colors || {};
+    themeConfig.forEach(({ key }) => {
+      activePickers[key]?.setValue(currentThemeColors[key] || "", false);
     });
   }
 
   function saveThemeFromInputs() {
     const themeData = { colors: {} };
-    colorInputs.forEach((input) => {
-      const colorKey = input.dataset.color;
-      themeData.colors[colorKey] = input.value;
+    themeConfig.forEach(({ key }) => {
+      themeData.colors[key] = activePickers[key]?.getValue() || "";
     });
     allThemes[currentThemeName] = themeData;
     saveThemes(allThemes);
-    console.log(`Тема "${currentThemeName}" сохранена!`);
   }
 
   function updateThemeSelect() {
@@ -5563,11 +6332,7 @@ if (targetSettings.test(window.location.href)) {
       themeSelect.appendChild(option);
     });
     themeSelect.value = currentThemeName;
-    removeThemeButton.style.display = Object.keys(defaultThemes).includes(
-      currentThemeName
-    )
-      ? "none"
-      : "inline";
+    removeThemeButton.style.display = Object.keys(defaultThemes).includes(currentThemeName) ? "none" : "inline";
   }
 
   themeSelect.addEventListener("change", (event) => {
@@ -5604,29 +6369,15 @@ if (targetSettings.test(window.location.href)) {
 
   saveThemeButton.addEventListener("click", () => {
     if (isDefaultTheme(currentThemeName)) {
-      alert(
-        "Вы не можете изменять стандартные темы. Пожалуйста, создайте свою собственную тему."
-      );
+      alert("Вы не можете изменять стандартные темы. Пожалуйста, создайте свою собственную тему.");
     } else {
       saveThemeFromInputs();
     }
   });
 
-  colorInputs.forEach((input) => {
-    input.addEventListener("input", () => {
-      if (isDefaultTheme(currentThemeName)) {
-        alert(
-          "Вы не можете изменять стандартные темы. Пожалуйста, создайте свою собственную тему."
-        );
-        loadThemeToInputs(currentThemeName);
-      } else {
-        saveThemeFromInputs();
-      }
-    });
-  });
-
   updateThemeSelect();
   loadThemeToInputs(currentThemeName);
+
   // ====================================================================================================================
   //  . . . РАБОТА ЦВЕТОВ НАВЫКОВ И ПАРАМЕТРОВ . . .
   // ====================================================================================================================
@@ -5656,27 +6407,12 @@ if (targetSettings.test(window.location.href)) {
     });
 
   function restoreColorPickers() {
-    for (const paramId in settings.parametersColors) {
-      const colors = settings.parametersColors[paramId];
-
-      const barFromInput = document.querySelector(
-        `#parameters-color-settings input[type="color"][data-param="${paramId}"][data-color-type="bar-from"]`
-      );
-      const barToInput = document.querySelector(
-        `#parameters-color-settings input[type="color"][data-param="${paramId}"][data-color-type="bar-to"]`
-      );
-      const bgFromInput = document.querySelector(
-        `#parameters-color-settings input[type="color"][data-param="${paramId}"][data-color-type="bg-from"]`
-      );
-      const bgToInput = document.querySelector(
-        `#parameters-color-settings input[type="color"][data-param="${paramId}"][data-color-type="bg-to"]`
-      );
-
-      if (barFromInput) barFromInput.value = colors[0];
-      if (barToInput) barToInput.value = colors[1];
-      if (bgFromInput) bgFromInput.value = colors[2];
-      if (bgToInput) bgToInput.value = colors[3];
-    }
+    paramsList.forEach((p) => {
+      const colors = settings.parametersColors[p.id] || ["#008000", "#008000", "#cccccc", "#cccccc"];
+      for (let i = 0; i < 4; i++) {
+        paramPickers[`${p.id}_${i}`]?.setValue(colors[i] || "", false);
+      }
+    });
   }
 
   restoreColorPickers();
@@ -5737,87 +6473,142 @@ if (targetSettings.test(window.location.href)) {
   // ====================================================================================================================
   //  . . . ПОДСВЕТКА РЕСУРСОВ . . .
   // ====================================================================================================================
+  const defaultHighlightResources = [
+    { name: "Травы", color: "#90EE90", highlight: false },
+    { name: "Мох", color: "#90EE90", highlight: false },
+    { name: "Паутина", color: "#90EE90", highlight: false },
+    { name: "Пыль", color: "#DDA0DD", highlight: false },
+    { name: "Ветки, вьюнки, костоправы", color: "#90EE90", highlight: false },
+    { name: "Травящие предметы", color: "#FF0000", highlight: false },
+    { name: "Шаманские штучки", color: "#00BFFF", highlight: false },
+  ];
+
+  const resourcesTableBody = document.getElementById("resources-table-body");
+  /** @type {Object<string, GlassColorPicker>} */
+  const resourcePickers = {};
+
   function saveHighlightSettings() {
-    const highlightResources = [];
-
-    document
-      .querySelectorAll(".uwu-table-highlight-Resources tbody tr")
-      .forEach((row) => {
-        const resourceName =
-          row.querySelector(".uwu-color-picker").dataset.resource;
-        const colorPicker = row.querySelector(".uwu-color-picker");
-        const checkbox = row.querySelector(".uwu-highlight-checkbox");
-
-        const resource = {
-          name: resourceName,
-          color: colorPicker.value,
-          highlight: checkbox.checked,
-        };
-
-        highlightResources.push(resource);
+    const list = [];
+    defaultHighlightResources.forEach((res) => {
+      const checkbox = document.querySelector(`.uwu-highlight-checkbox[data-resource="${res.name}"]`);
+      list.push({
+        name: res.name,
+        color: resourcePickers[res.name]?.getValue() || res.color,
+        highlight: checkbox ? checkbox.checked : false,
       });
-
-    uwuStorage.setItem("uwu_highlightResources", highlightResources);
+    });
+    uwuStorage.setItem("uwu_highlightResources", list);
   }
 
   function restoreHighlightSettings() {
-    const highlightResources = uwuStorage.getItem("uwu_highlightResources");
-
-    if (highlightResources) {
-      highlightResources.forEach((resource) => {
-        const colorPicker = document.querySelector(
-          `.uwu-color-picker[data-resource="${resource.name}"]`
-        );
-        const checkbox = document.querySelector(
-          `.uwu-highlight-checkbox[data-resource="${resource.name}"]`
-        );
-
-        if (colorPicker) colorPicker.value = resource.color;
-        if (checkbox) checkbox.checked = resource.highlight;
-      });
-    }
+    const saved = uwuStorage.getItem("uwu_highlightResources") || defaultHighlightResources;
+    saved.forEach((res) => {
+      resourcePickers[res.name]?.setValue(res.color, false);
+      const checkbox = document.querySelector(`.uwu-highlight-checkbox[data-resource="${res.name}"]`);
+      if (checkbox) checkbox.checked = !!res.highlight;
+    });
   }
 
-  restoreHighlightSettings();
+  if (resourcesTableBody) {
+    resourcesTableBody.innerHTML = "";
 
-  document.querySelectorAll(".uwu-color-picker").forEach((element) => {
-    element.addEventListener("input", saveHighlightSettings);
-  });
+    defaultHighlightResources.forEach((res) => {
+      const row = document.createElement("tr");
 
-  document.querySelectorAll(".uwu-highlight-checkbox").forEach((element) => {
-    element.addEventListener("change", saveHighlightSettings);
-  });
+      const nameCell = document.createElement("td");
+      nameCell.textContent = res.name;
+      row.appendChild(nameCell);
 
-  // ====================================================================================================================
-  //  . . . ЦВЕТА КОМАНДНЫХ БОЁВ . . .
-  // ====================================================================================================================
-  document
-    .querySelectorAll('#colorSettingsTable input[type="color"]')
-    .forEach((element) => {
-      element.addEventListener("change", () => {
-        const team = `team${element.dataset.team}`;
-        const part = element.dataset.part === "green" ? 0 : 1;
-        const colorValue = element.value;
-        settings.fightTeamsColors[team][part] = colorValue;
-        saveSettings();
+      const pickerCell = document.createElement("td");
+      resourcePickers[res.name] = new GlassColorPicker(pickerCell, {
+        mode: "swatch",
+        value: res.color,
+        label: `Цвет ресурса: ${res.name}`,
+        onChange: saveHighlightSettings,
       });
+      row.appendChild(pickerCell);
+
+      const checkCell = document.createElement("td");
+      checkCell.className = "uwu-checkbox-cell";
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = "uwu-highlight-checkbox";
+      checkbox.dataset.resource = res.name;
+      checkbox.addEventListener("change", saveHighlightSettings);
+      checkCell.appendChild(checkbox);
+      row.appendChild(checkCell);
+
+      resourcesTableBody.appendChild(row);
     });
 
-  function restoreColorTeamsPickers() {
-    document
-      .querySelectorAll('#colorSettingsTable input[type="color"]')
-      .forEach((element) => {
-        element.addEventListener("change", () => {
-          const team = `team${element.dataset.team}`;
-          const part = element.dataset.part === "green" ? 0 : 1;
-          const colorValue = element.value;
-          settings.fightTeamsColors[team][part] = colorValue;
-          saveSettings();
-        });
-      });
+    restoreHighlightSettings();
   }
 
-  restoreColorTeamsPickers();
+  // ====================================================================================================================
+  //  . . . ЦВЕТА КОМАНД БОЕВОГО РЕЖИМА . . .
+  // ====================================================================================================================
+  const fightTeamsTableBody = document.getElementById("fight-teams-table-body");
+  /** @type {Object<string, GlassColorPicker>} */
+  const teamPickers = {};
+
+  /**
+   * Restores stored battle team colors into color picker swatches.
+   */
+  function restoreColorTeamsPickers() {
+    [1, 2, 3, 4].forEach((num) => {
+      const teamKey = `team${num}`;
+      const colors = settings.fightTeamsColors?.[teamKey] || ["#41cd70", "#cd4141"];
+      teamPickers[`${num}_green`]?.setValue(colors[0], false);
+      teamPickers[`${num}_red`]?.setValue(colors[1], false);
+    });
+  }
+
+  if (fightTeamsTableBody) {
+    fightTeamsTableBody.innerHTML = "";
+
+    [1, 2, 3, 4].forEach((num) => {
+      const row = document.createElement("tr");
+
+      const nameCell = document.createElement("td");
+      nameCell.textContent = `Команда ${num}`;
+      row.appendChild(nameCell);
+
+      const greenCell = document.createElement("td");
+      teamPickers[`${num}_green`] = new GlassColorPicker(greenCell, {
+        mode: "swatch",
+        value: settings.fightTeamsColors?.[`team${num}`]?.[0] || "#41cd70",
+        label: `Команда ${num}: Энергия`,
+        onChange: (val) => {
+          if (!settings.fightTeamsColors[`team${num}`]) {
+            settings.fightTeamsColors[`team${num}`] = ["#41cd70", "#cd4141"];
+          }
+          settings.fightTeamsColors[`team${num}`][0] = val;
+          saveSettings();
+        },
+      });
+      row.appendChild(greenCell);
+
+      const redCell = document.createElement("td");
+      teamPickers[`${num}_red`] = new GlassColorPicker(redCell, {
+        mode: "swatch",
+        value: settings.fightTeamsColors?.[`team${num}`]?.[1] || "#cd4141",
+        label: `Команда ${num}: Снесено`,
+        onChange: (val) => {
+          if (!settings.fightTeamsColors[`team${num}`]) {
+            settings.fightTeamsColors[`team${num}`] = ["#41cd70", "#cd4141"];
+          }
+          settings.fightTeamsColors[`team${num}`][1] = val;
+          saveSettings();
+        },
+      });
+      row.appendChild(redCell);
+
+      fightTeamsTableBody.appendChild(row);
+    });
+
+    restoreColorTeamsPickers();
+  }
+
   // ====================================================================================================================
   //   . . . СБРОС НАСТРОЕК . . .
   // ====================================================================================================================
@@ -9480,10 +10271,15 @@ if (targetCW3.test(window.location.href)) {
   //  . . . ГРАНИЦЫ ЯЧЕЕК . . . cellsNumbers
   // ====================================================================================================================
   function updateCellsBordersStyle(checked) {
+    if (!settings) loadSettings();
+
     let styleElement = document.getElementById("cellsBordersStyle");
+    const thickness = settings?.cellsBordersThickness || settingsMap?.uwu_settings?.cellsBordersThickness || "1";
+    const color = settings?.cellsBordersColor || uwuDefaultSettings.cellsBordersColor || "#ffffff";
+
     const cellsBordersStyle = `
       .cage {
-        box-shadow: inset 0 0 0 0.${settingsMap.uwu_settings.cellsBordersThickness}px ${settings.cellsBordersColor};
+        box-shadow: inset 0 0 0 0.${thickness}px ${color};
       }
     `;
 
@@ -12163,7 +12959,6 @@ if (targetCW3.test(window.location.href)) {
 
     /**
      * Updates the cleaner log based on new history data.
-     * Data fetching has been moved from DOM (outerHTML) to Vue reactive state.
      *
      * @param {string} newHistory - The new full history string retrieved from Vue.
      */
@@ -13670,7 +14465,6 @@ if (targetCW3.test(window.location.href)) {
               return;
             }
           }
-          // Do not permanently cache empty results so future renders can resolve it
         } catch (err) {
           console.error(`UwU | Rank resolution error for cat ${catId}:`, err);
         }
@@ -13796,7 +14590,6 @@ if (targetCW3.test(window.location.href)) {
 
     observer.observe(chatMsg, { childList: true, subtree: true });
 
-    // Process existing messages on load
     chatMsg.querySelectorAll(".chat_text").forEach((el) => {
       const parent = el.closest("span") || el;
       enhanceMessage(parent, false);
@@ -13870,7 +14663,6 @@ if (targetCW3.test(window.location.href)) {
         }
       });
 
-      // Native nick click synchronization: Vue/Input -> textarea
       watchVueData("chat.text", (newVal) => {
         if (typeof newVal === "string" && textarea.value !== newVal) {
           textarea.value = newVal;
@@ -13878,7 +14670,6 @@ if (targetCW3.test(window.location.href)) {
         }
       });
 
-      // Handle Enter to send, Shift+Enter for newline
       textarea.addEventListener("keydown", function (event) {
         if (event.key === "Enter" && !event.shiftKey) {
           event.preventDefault();
@@ -14062,7 +14853,6 @@ if (targetCW3.test(window.location.href)) {
     const button = document.createElement("button");
     button.id = "updateTableButton";
     button.className = "ui-btn";
-    // Added 12px bottom margin to clear the 16x16 absolute resize handle in the bottom-right corner
     button.style.cssText = "width: 100%; box-sizing: border-box; margin: 4px 0 12px 0; flex-shrink: 0;";
     button.textContent = "Обновить команды";
 
@@ -14204,7 +14994,6 @@ if (targetCW3.test(window.location.href)) {
 
   /**
    * Compacts consecutive identical fight log actions into a single row with an incremental counter.
-   * Seamlessly integrates into the new Flexbox layout of CatWar's native #fightPanel.
    */
   function initCompactFightLog() {
     const fightLog = document.getElementById("fightLog");
