@@ -106,11 +106,16 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "2.0.0";
+/**
+ * @type {string}
+ */
+const current_uwu_version =
+  typeof GM_info !== "undefined" && GM_info?.script?.version
+    ? GM_info.script.version.replace(/^v/i, "")
+    : "?.?.?";
+
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
-  settingsTheme: "dark",
-
   weatherEnabled: false,
   weatherDrops: false,
   weatherParticlesAmount: "normal",
@@ -527,19 +532,19 @@ const uwusettings =
   /* HTML */
   `
     <div id="uwusettings">
-      <div id="uwusettings-header">
-        <div id="uwusettings-header-glass">
-          <div class="main-settings-container">
-            <div id="settingsTheme" class="custom-select">
-              <label for="settingsTheme">Тема настроек:</label>
-              <div class="select-selected">Классическая</div>
-              <div class="select-items">
-                <!-- Опции будут добавлены сюда -->
-              </div>
-            </div>
+      <div id="uwusettings-header" class="uwu-settings-card uwu-header-card">
+        <div class="main-settings-container">
+          <h1>Настройки CatWar UwU</h1>
+          <div class="link-container" style="display: flex; align-items: center;">
+              <button
+                type="button"
+                id="uwu-version-badge"
+                class="uwu-version-badge"
+                title="Что нового в версии v${current_uwu_version}?"
+              >
+                🌿 v${current_uwu_version}
+              </button>
 
-            <h1>Настройки CatWar UwU</h1>
-            <div class="link-container">
               <a
                 href="https://vk.com/catwar_uwu"
                 target="_blank"
@@ -550,8 +555,8 @@ const uwusettings =
                 <img
                   src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/VK_logo.png"
                   alt="VK"
-                  width="40"
-                  height="40"
+                  width="36"
+                  height="36"
                 />
               </a>
               <a
@@ -563,2319 +568,1569 @@ const uwusettings =
                 <img
                   src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/icon_github.png"
                   alt="GitHub"
-                  width="40"
-                  height="40"
+                  width="36"
+                  height="36"
                 />
               </a>
             </div>
-          </div>
+        </div>
 
-          <hr id="uwu-hr" class="uwu-hr-head" />
-          <div id="button-container">
-            <button id="effects-button" class="active">
-              <h2>
-                Природные эффекты
-                <img
-                  src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/partly_sunny_rain.png"
-                  alt="Иконка"
-                  width="24"
-                  height="24"
-                />
-              </h2>
-            </button>
-            <button id="theme-button">
-              <h2>
-                Оформление
-                <img
-                  src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/sparkles.png"
-                  alt="Иконка"
-                  width="24"
-                  height="24"
-                />
-              </h2>
-            </button>
-            <button id="utility-button">
-              <h2>
-                Инструментарий
-                <img
-                  src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/flashlight.png"
-                  alt="Иконка"
-                  width="24"
-                  height="24"
-                />
-              </h2>
-            </button>
-            <button id="modules-button">
-              <h2>
-                Надстройки
-                <img
-                  src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/construction.png"
-                  alt="Иконка"
-                  width="24"
-                  height="24"
-                />
-              </h2>
-            </button>
-            <button id="personal-costumes-button">
-              <h2>
-                Личные костюмы
-                <img
-                  src="https://raw.githubusercontent.com/Arisamiga/CatWar/refs/heads/Personal-Costumes/images/costumes.png"
-                  alt="Иконка"
-                  width="24"
-                  height="24"
-                />
-              </h2>
-            </button>
-          </div>
-          <hr id="uwu-hr" class="uwu-hr-head" />
+        <hr class="uwu-hr" />
+
+        <div id="button-container" class="uwu-header-pills">
+          <button id="effects-button" class="active">
+            <h2>Природные эффекты <img
+                src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/partly_sunny_rain.png" width="20"
+                height="20" /></h2>
+          </button>
+          <button id="theme-button">
+            <h2>Оформление <img src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/sparkles.png" width="20"
+                height="20" /></h2>
+          </button>
+          <button id="utility-button">
+            <h2>Инструментарий <img src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/flashlight.png"
+                width="20" height="20" /></h2>
+          </button>
+          <button id="modules-button">
+            <h2>Надстройки <img src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/construction.png"
+                width="20" height="20" /></h2>
+          </button>
+          <button id="personal-costumes-button">
+            <h2>Личные костюмы <img
+                src="https://raw.githubusercontent.com/Arisamiga/CatWar/refs/heads/Personal-Costumes/images/costumes.png"
+                width="20" height="20" /></h2>
+          </button>
         </div>
       </div>
 
       <div id="uwusettings-main">
         <div id="effects-panel">
-          <h2>Природа и окружение</h2>
 
-          <div>
-            <p>
-              Включает генерацию Динамичной погоды в Игровой, такие как дождь,
-              снегопады или Северные Сияния.
-            </p>
-            <input
-              type="checkbox"
-              id="weather-enabled"
-              data-setting="weatherEnabled"
-            />
-            <label for="weather-enabled">Показывать природные эффекты</label>
-          </div>
+          <!-- ДИНАМИЧЕСКИЕ ОСАДКИ И СТИЛИЗАЦИЯ ПОЛЯ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Динамическая погода и осадки</h3>
+            <hr id="uwu-hr" class="uwu-hr">
 
-          <div>
-            <p>
-              Количество частиц динамичной погоды (снег, дождь). "Мало частиц" повысит производительность на слабых устройствах.
-            </p>
-            <label>Интенсивность осадков:</label>
-            <div class="custom-select" id="weatherParticlesAmount">
-              <div class="select-selected">Много частиц (Стандарт)</div>
-              <div class="select-items">
-                <!-- Опции будут добавлены сюда -->
+            <div class="uwu-settings-card__item">
+              <p>Включает генерацию динамической погоды в Игровой (дождь, снегопады, северные сияния).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="weather-enabled" data-setting="weatherEnabled" />
+                <label for="weather-enabled">Показывать природные эффекты</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Количество частиц осадков. "Мало частиц" повышает производительность на слабых устройствах.</p>
+              <div class="uwu-settings-card__row">
+                <label>Интенсивность осадков:</label>
+                <div class="custom-select" id="weatherParticlesAmount">
+                  <div class="select-selected">Много частиц (Стандарт)</div>
+                  <div class="select-items"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Эффекты всплесков и оседания частиц при падении на нижнюю границу экрана.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="weather-drops" data-setting="weatherDrops" />
+                <label for="weather-drops">Эффекты приземления частиц</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Замена стандартных капель и снежинок на пиксельные текстуры.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="minecraft-style" data-setting="minecraftStyle" />
+                <label for="minecraft-style">Minecraft частицы</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отключает ночное затемнение игрового поля.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="always-day" data-setting="alwaysDay" />
+                <label for="always-day">Всегда день/ярко</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает панель ручного вызова погоды в расширенных настройках (отключает природную генерацию).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="manual-Weather-Panel" data-setting="manualWeatherPanel" />
+                <label for="manual-Weather-Panel">Ручное управление погодой</label>
               </div>
             </div>
           </div>
 
-          <div>
-            <p>
-              Может немного повлиять на производительность из-за возрастания
-              количества частиц на экране.
-            </p>
-            <input
-              type="checkbox"
-              id="weather-drops"
-              data-setting="weatherDrops"
-            />
-            <label for="weather-drops">Эффекты приземления частиц</label>
-          </div>
+          <!-- СЕВЕРНОЕ СИЯНИЕ И НЕБО -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Северное сияние и небо</h3>
+            <hr id="uwu-hr" class="uwu-hr">
 
-          <div>
-            <p>
-              Замена стандартных частиц на знакомые всеми пиксельные частицы.
-            </p>
-            <input
-              type="checkbox"
-              id="minecraft-style"
-              data-setting="minecraftStyle"
-            />
-            <label for="minecraft-style-enabled">Minecraft частицы</label>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Позиционирование эффекта Северного Сияния на экране.</p>
+              <div class="uwu-settings-card__row">
+                <label>Северное Сияние:</label>
+                <div class="custom-select" id="auroraPos">
+                  <div class="select-selected">Сверху</div>
+                  <div class="select-items"></div>
+                </div>
+              </div>
+            </div>
 
-          <div>
-            <p>Убирает затемнение Игрового поля.</p>
-            <input type="checkbox" id="always-day" data-setting="alwaysDay" />
-            <label for="always-day">Всегда день/ярко</label>
-          </div>
-
-          <div>
-            <p>
-              Отображает панель Ручного управления погодой в ⚙️Панели
-              Расширенных Настройках Игровой. Выключает натуральную генерацию
-              погоды.
-            </p>
-            <input
-              type="checkbox"
-              id="manual-Weather-Panel"
-              data-setting="manualWeatherPanel"
-            />
-            <label for="manual-Weather-Panel">Ручное управление погоды</label>
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          
-          <div>
-            <p>Расположение Северного Сияния на экране.</p>
-            <label>Северное Сияние:</label>
-            <div class="custom-select" id="auroraPos">
-              <div class="select-selected">Сверху</div>
-              <div class="select-items">
-                <!-- Опции будут добавлены сюда -->
+            <div class="uwu-settings-card__item">
+              <p>Делает небо шапкой страницы, пряча под Игровую (а также чинит его пропажу при редизайне). На широких
+                мониторах может растягиваться.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="sky-in-the-sky" data-setting="skyInHeader" />
+                <label for="sky-in-the-sky">Небо в небе (небо в шапке)</label>
               </div>
             </div>
           </div>
 
-          <div>
-            <p>
-              Делает небо шапкой страницы, пряча под игровую, а так же по факту
-              чинит его потерю при Редизайне игровой. Будет выглядеть не очень
-              на широкоформатных мониторах из-за растягивания изображения.
-            </p>
-            <input
-              type="checkbox"
-              id="sky-in-the-sky"
-              data-setting="skyInHeader"
-            />
-            <label for="sky-in-the-sky">Небо в небе.</label>
-          </div>
+          <!-- Z-INDEX И СЛОИ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Слои отображения</h3>
+            <hr id="uwu-hr" class="uwu-hr">
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          
-          <div>
-            <p>
-              Z-index Погоды. Позволяет настроить, будут ли эффекты отображаться
-              поверх или позади игровых элементов.
-            </p>
-            <label>Перекрытие элементов:</label>
-            <div class="custom-select" id="weatherZIndex">
-              <div class="select-selected">Стандарт</div>
-              <div class="select-items">
-                <!-- Опции будут добавлены сюда -->
+            <div class="uwu-settings-card__item">
+              <p>Определяет глубину отображения эффектов относительно игровых окон и чата.</p>
+              <div class="uwu-settings-card__row">
+                <label>Перекрытие элементов:</label>
+                <div class="custom-select" id="weatherZIndex">
+                  <div class="select-selected">Стандарт</div>
+                  <div class="select-items"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         <div id="theme-panel">
-          <h2>Поле Игровой</h2>
+          <!-- ПОЛЕ ИГРОВОЙ И ФОНЫ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Поле Игровой и фоны</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>
-              Заменяет все фоны игровых локаций на выбранный вами фон. Помните,
-              что для правильного отображения нужно изображение 1000х1000 px.
-            </p>
-            <input
-              type="checkbox"
-              id="game-Field-background-User"
-              data-setting="gameFieldBackgroundUser"
-            />
-            <label for="game-Field-background-User-enabled"
-              >Статичный фон локации:</label
-            >
-            <input
-              type="text"
-              id="gameFieldSettingImageURLField"
-              placeholder="Вставьте URL"
-              data-setting="gameFieldBackgroundUserImageURL"
-            />
-            <button id="SettingSaveButton1" class="uwu-button install-button">
-              Сохранить
-            </button>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Заменяет все фоны игровых локаций на статичный фон (рекомендуется 1000х1000 px).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="game-Field-background-User" data-setting="gameFieldBackgroundUser" />
+                <label for="game-Field-background-User">Статичный фон локации:</label>
+                <input type="text" id="gameFieldSettingImageURLField" placeholder="Вставьте URL"
+                  data-setting="gameFieldBackgroundUserImageURL" />
+                <button id="SettingSaveButton1" class="uwu-button install-button">Сохранить</button>
+              </div>
+            </div>
 
-          <div>
-            <p>Отрисовывает границы клеток Игрового поля.</p>
-            <input
-              type="checkbox"
-              id="cells-Borders"
-              data-setting="cellsBorders"
-            />
-            <label for="cells-Borders">Границы клеток</label>
-          </div>
-          <p>Толщина/Яркость границ</p>
-          <div id="step-slider">
-            <input
-              type="range"
-              min="1"
-              max="9"
-              value="1"
-              id="cells-Borders-Thickness"
-              class="uwu-range-slider"
-              list="ThicknessStep"
-              data-setting="cellsBordersThickness"
-            />
-            <datalist id="ThicknessStep">
-              <option value="1">0.1</option>
-              <option value="5">0.5</option>
-              <option value="9">0.9</option>
-            </datalist>
-          </div>
-          <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
-            <label>Цвет границы клеток:</label>
-            <div id="cells-borders-color-picker"></div>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Отрисовывает границы клеток игрового поля с выбором толщины и цвета.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="cells-Borders" data-setting="cellsBorders" />
+                <label for="cells-Borders">Границы клеток</label>
+              </div>
+              <div class="uwu-settings-card__row" style="margin-top: 4px;">
+                <label>Толщина / яркость:</label>
+                <div id="step-slider" style="flex: 0 1 180px;">
+                  <input type="range" min="1" max="9" value="1" id="cells-Borders-Thickness" list="ThicknessStep"
+                    data-setting="cellsBordersThickness" />
+                  <datalist id="ThicknessStep">
+                    <option value="1">0.1</option>
+                    <option value="5">0.5</option>
+                    <option value="9">0.9</option>
+                  </datalist>
+                </div>
+                <label style="margin-left: 10px;">Цвет:</label>
+                <div id="cells-borders-color-picker"></div>
+              </div>
+            </div>
 
-          <div>
-            <p>Обозначает клетки Игрового поля числами.</p>
-            <input
-              type="checkbox"
-              id="cells-Numbers"
-              data-setting="cellsNumbers"
-            />
-            <label for="cells-Numbers">Нумерация клеток</label>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Обозначает клетки игрового поля числовыми индексами.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="cells-Numbers" data-setting="cellsNumbers" />
+                <label for="cells-Numbers">Нумерация клеток</label>
+              </div>
+            </div>
 
-          <div>
-            <p>
-              Ставит на страницу фон, повторяющий фон Игровой локации, а так же
-              размывает и затемняет его.
-            </p>
-            <input
-              type="checkbox"
-              id="background-repeat"
-              data-setting="backgroundRepeat"
-            />
-            <label for="weather-enabled">Фон страницы из локации</label>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Ставит на страницу фон, повторяющий локацию Игровой (с размытием и затемнением).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="background-repeat" data-setting="backgroundRepeat" />
+                <label for="background-repeat">Фон страницы из локации</label>
+              </div>
+            </div>
 
-          <div>
-            <p>Ставит на страницу фон из предоставленной ссылки.</p>
-            <input
-              type="checkbox"
-              id="background-user"
-              data-setting="backgroundUser"
-            />
-            <label for="background-user-enabled">Свой фон страницы:</label>
-            <input
-              type="text"
-              id="SettingImageURLField"
-              placeholder="Вставьте URL"
-              data-setting="backgroundUserImageURL"
-            />
-            <button id="SettingSaveButton1" class="uwu-button install-button">
-              Сохранить
-            </button>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Устанавливает пользовательское фоновое изображение на всю страницу.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="background-user" data-setting="backgroundUser" />
+                <label for="background-user">Свой фон страницы:</label>
+                <input type="text" id="SettingImageURLField" placeholder="Вставьте URL"
+                  data-setting="backgroundUserImageURL" />
+                <button id="SettingSaveButton1" class="uwu-button install-button">Сохранить</button>
+              </div>
+            </div>
 
-          <div>
-            <p>
-              Позволяет быстро сменять полезные стили в ⚙️Панели Расширенных
-              настроек в Игровой.
-            </p>
-            <input type="checkbox" id="fast-Styles" data-setting="fastStyles" />
-            <label for="fast-Styles">Быстрые стили</label>
-            <label
-              id="uwu-what-this"
-              title="
-            — Не показывать всплывающее окно 'О коте'
-            — Скрыть Игровое поле
-            — Скрыть фон Игрового Поля
-            — Скрыть Небо
-            — Всегда день/ярко
-            — Границы клеток
-            "
-              >[?]</label
-            >
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Дефекты</h2>
-
-          <div>
-            <p>Добавляет котам иконки их дефектов (раны, грязь и т.д.).</p>
-            <input
-              type="checkbox"
-              id="show-defects-enabled"
-              data-setting="showDefectsEnabled"
-            />
-            <label for="show-defects-enabled">Показывать иконки дефектов</label>
-          </div>
-
-          <div>
-            <p>Выберите стиль отображения иконок дефектов.</p>
-            <label>Стиль иконок:</label>
-            <div class="custom-select" id="defectsStyle">
-              <div class="select-selected">Стандартный</div>
-              <div class="select-items">
-                <!-- Опции будут добавлены сюда -->
+            <div class="uwu-settings-card__item">
+              <p>Панель быстрого переключения полезных визуальных стилей в расширенном меню Игровой.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="fast-Styles" data-setting="fastStyles" />
+                <label for="fast-Styles">Быстрые стили</label>
+                <label id="uwu-what-this"
+                  title="— Не показывать всплывающее окно 'О коте'&#10;— Скрыть Игровое поле&#10;— Скрыть фон Игрового Поля&#10;— Скрыть Небо&#10;— Всегда день/ярко&#10;— Границы клеток">[?]</label>
               </div>
             </div>
           </div>
 
-          <div>
-            <p>Выберите качество иконок дефектов.</p>
-            <label>Качество иконок:</label>
-            <div class="custom-select" id="defectsQuality">
-              <div class="select-selected">Высокое/Новое</div>
-              <div class="select-items">
-                <!-- Опции будут добавлены сюда -->
+          <!-- ДЕФЕКТЫ ПЕРСОНАЖЕЙ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Дефекты персонажей</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает визуальные маркеры дефектов (раны, переломы, кашель, грязь и т.д.).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-defects-enabled" data-setting="showDefectsEnabled" />
+                <label for="show-defects-enabled">Показывать иконки дефектов</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Стиль отображения иконок дефектов на котах.</p>
+              <div class="uwu-settings-card__row">
+                <label>Стиль:</label>
+                <div class="custom-select" id="defectsStyle">
+                  <div class="select-selected">Стандартный</div>
+                  <div class="select-items"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Разрешение и четкость текстур дефектов.</p>
+              <div class="uwu-settings-card__row">
+                <label>Качество текстур:</label>
+                <div class="custom-select" id="defectsQuality">
+                  <div class="select-selected">Высокое/Новое (200x300)</div>
+                  <div class="select-items"></div>
+                </div>
               </div>
             </div>
           </div>
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Темы и цвета Игровой</h2>
+          <!-- ТЕМЫ И ЦВЕТА ИГРОВОЙ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Темы и цвета Игровой</h3>
+            <hr class="uwu-hr" />
 
-          <p>
-            Здесь вы можете выставить собственные цвета для игровой.
-          </p>
-          <input type="checkbox" id="user-theme" data-setting="userTheme" />
-          <label for="user-theme-enabled">Использовать свои цвета</label>
-
-          <div id="theme-selector" class="uwu-select">
-            <label for="theme-select">Выберите тему:</label>
-            <select id="theme-select" class="uwu-select-selected"></select>
-            <button id="addThemeButton" class="uwu-button install-button">
-              Добавить тему
-            </button>
-            <button
-              id="removeThemeButton"
-              style="display: none;"
-              class="uwu-button remove-button"
-            >
-              Удалить тему
-            </button>
-          </div>
-
-          <div id="color-picker">
-            <div id="theme-pickers-grid" class="gcp-grid"></div>
-            <div style="flex: 0 0 100%; margin-top: 14px;">
-              <button id="saveThemeButton" class="uwu-button install-button">
-                Сохранить
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <p>Применяет вашу тему и на конструктор окрасов.</p>
-            <input
-              type="checkbox"
-              id="user-theme"
-              data-setting="userThemeKns"
-            />
-            <label for="user-theme-enabled">Цвета в конструкторе окрасов</label>
-          </div>
-
-          <div>
-            <p>Добавляет эффект размытия (Blur) заднего фона для основных блоков игровой.</p>
-            <input type="checkbox" id="glass-style" data-setting="glassStyle" />
-            <label for="glass-style">Эффект размытия (стекло)</label>
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Шрифты и текст</h2>
-
-          <div>
-            <p>Кастомная настройка шрифтов в Игровой</p>
-            <input
-              type="checkbox"
-              id="use-User-Fonts"
-              data-setting="useUserFonts"
-            />
-            <label for="use-User-Fonts">Свой шрифт</label>
-          </div>
-
-          <div>
-            <input
-              type="text"
-              id="font-Size-Body"
-              placeholder="14"
-              data-font-size="fontSizeBody"
-            />
-            <label for="font-Size-Body">px; Размер общего шрифт</label>
-          </div>
-
-          <div>
-            <input
-              type="text"
-              id="font-Size-Small"
-              placeholder="12"
-              data-font-size="fontSizeSmall"
-            />
-            <label for="font-Size-Small"
-              >px; Размер шрифта быстрых ссылок</label
-            >
-          </div>
-
-          <div>
-            <input
-              type="text"
-              id="font-Size-Location"
-              placeholder="14"
-              data-font-size="fontSizeLocation"
-            />
-            <label for="font-Size-Location">px; Размер шрифта локации</label>
-          </div>
-
-          <div>
-            <p>
-              Подгрузка шрифта идёт автоматически. Для поиска возможных шрифтов,
-              воспользуйтесь сайтом:
-              <a href="https://fonts.google.com/?lang=ru_Cyrl" target="_blank"
-                >https://fonts.google.com/?lang=ru_Cyrl</a
-              >
-            </p>
-            <input
-              type="text"
-              id="font-Family-Body"
-              placeholder="Verdana"
-              data-font-size="fontFamilyBody"
-            />
-            <label for="font-Family-Body">Название вида шрифта</label>
-          </div>
-
-          <details>
-            <summary
-              style="cursor: pointer; font-size: 16px; font-weight: bold;"
-            >
-              Настройка шрифта громкости сообщений в чате
-            </summary>
-            <div>
-              <input
-                type="text"
-                id="vlm0"
-                placeholder="10"
-                data-font-size="vlm0"
-              />
-              <label for="vlm0">px; Громкость 0 (Самый тихий)</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm1"
-                placeholder="11"
-                data-font-size="vlm1"
-              />
-              <label for="vlm1">px; Громкость 1</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm2"
-                placeholder="11.5"
-                data-font-size="vlm2"
-              />
-              <label for="vlm2">px; Громкость 2</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm3"
-                placeholder="12"
-                data-font-size="vlm3"
-              />
-              <label for="vlm3">px; Громкость 3</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm4"
-                placeholder="12.5"
-                data-font-size="vlm4"
-              />
-              <label for="vlm4">px; Громкость 4</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm5"
-                placeholder="13"
-                data-font-size="vlm5"
-              />
-              <label for="vlm5">px; Громкость 5 (Стандартная громкость)</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm6"
-                placeholder="15"
-                data-font-size="vlm6"
-              />
-              <label for="vlm6">px; Громкость 6</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm7"
-                placeholder="17"
-                data-font-size="vlm7"
-              />
-              <label for="vlm7">px; Громкость 7</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm8"
-                placeholder="19"
-                data-font-size="vlm8"
-              />
-              <label for="vlm8">px; Громкость 8</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm9"
-                placeholder="21"
-                data-font-size="vlm9"
-              />
-              <label for="vlm9">px; Громкость 9</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm10"
-                placeholder="23"
-                data-font-size="vlm10"
-              />
-              <label for="vlm10">px; Громкость 10 (Самая громкая)</label>
-            </div>
-          </details>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Редизайны Игровой</h2>
-
-          <p>
-            Тот самый знаменитный редизайн, но с почти более расширенной
-            кастомизацией.
-          </p>
-          <input
-            type="checkbox"
-            id="custom-layout"
-            data-setting="customLayout"
-          />
-          <label for="custom-layout">Компактный редизайн</label>
-
-          <div id="layout-customizer">
-            <div id="layout-preview">
-              <div class="column left">
-                <!-- Левая колонка -->
-              </div>
-              <div class="column center">
-                <!-- Центральная колонка -->
-                <div class="block center-block">Поле Игровой</div>
-              </div>
-              <div class="column right">
-                <!-- Правая колонка -->
-              </div>
-              <ul id="block-list">
-                <!-- Элементы списка блоков -->
-              </ul>
-            </div>
-            <button id="reset-layout-button" class="uwu-button remove-button">
-              Сбросить
-            </button>
-          </div>
-
-          <div>
-            <input
-              type="text"
-              id="chat-height"
-              placeholder="Вставьте значение"
-              data-setting="chatHeight"
-            />
-            <label for="chat-height">px; Высота Чата</label>
-          </div>
-
-          <div>
-            <input
-              type="text"
-              id="history-height"
-              placeholder="Вставьте значение"
-              data-setting="historyHeight"
-            />
-            <label for="history-height">px; Высота Истории</label>
-          </div>
-
-          <div>
-            <input
-              type="text"
-              id="item-list-height"
-              placeholder="Вставьте значение"
-              data-setting="itemListHeight"
-            />
-            <label for="item-list-height">px; Высота инвентаря</label>
-          </div>
-
-          <div>
-            <p>
-              Визуальное разделение блока "Информация" на меньшие блоки
-              "Параметров, Истории и Родственные связи".
-            </p>
-            <input
-              type="checkbox"
-              id="slice-info-block"
-              data-setting="sliceInfoBlock"
-            />
-            <label for="slice-info-block">Разделить блок Информации</label>
-          </div>
-
-          <div>
-            <p>
-              Выстраивает Состояния/Потребности и Навыки в две компактные колонки бок о бок, экономя место по высоте.
-            </p>
-            <input
-              type="checkbox"
-              id="two-column-parameters"
-              data-setting="twoColumnParameters"
-            />
-            <label for="two-column-parameters">Компактные параметры и навыки</label>
-          </div>
-
-          <div>
-            <p>Автоматически скрывает блок «Родственные связи» при каждой загрузке игровой... Ого!</p>
-            <input
-              type="checkbox"
-              id="hide-relatives-default"
-              data-setting="hideRelativesByDefault"
-            />
-            <label for="hide-relatives-default">Скрывать Родственные связи по умолчанию</label>
-          </div>
-
-          <div>
-            <p>Скругляет края блоков в Игровой.</p>
-            <input
-              type="checkbox"
-              id="edge-trim-blocks"
-              data-setting="edgeTrimBlocks"
-            />
-            <label for="edge-trim-blocks">Скругление блоков</label>
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Остальные редизайны</h2>
-
-          <div>
-            <p>
-              Добавляет изображение костюмов в строки для наглядного отображения
-              и упрощённого поиска. Вы можете вытянуть высоту столбцов за их
-              стрелочки в нижнем правом краю!
-            </p>
-            <input
-              type="checkbox"
-              id="redesign-Costums-Settings"
-              data-setting="redesignCostumsSettings"
-            />
-            <label for="redesign-Costums-Settings"
-              >Редизайн Настройки костюмов</label
-            >
-          </div>
-
-          <div>
-            <p>Обновляет внешний вид страницы «Автоматические племенные действия».</p>
-            <input type="checkbox" id="automatic-actions-redesign" data-setting="automaticActionsRedesign" />
-            <label for="automatic-actions-redesign">Редизайн племенных отчетов</label>
-          </div>
-
-          <div>
-            <p>
-              Превращает текстовые ссылки в меню вашего профиля (Обучение, Блоги, Настройки и т.д.) в удобные кнопки.
-            </p>
-            <input
-              type="checkbox"
-              id="profile-menu-redesign"
-              data-setting="profileMenuRedesign"
-            />
-            <label for="profile-menu-redesign">Редизайн меню профиля</label>
-          </div>
-
-          <div>
-            <p>
-              Добавляет аватар с профиля отправителя на его комментарий в лентах
-              и блогах.
-            </p>
-            <input
-              type="checkbox"
-              id="comments-avatars"
-              data-setting="commentsAvatars"
-            />
-            <label for="comments-avatars">Аватарки в комментариях</label>
-          </div>
-
-          <div>
-            <p>Обновляет внешний вид поиска блогов и добавляет кликабельную сортировку по столбцам.</p>
-            <input type="checkbox" id="blogsea-redesign" data-setting="blogseaRedesign" />
-            <label for="blogsea-redesign">Редизайн поиска блогов/лент</label>
-          </div>
-
-          <div>
-            <p>Обновляет внешний вид навигации и постов в блогах и лентах, превращая их в аккуратные карточки.</p>
-            <input type="checkbox" id="blogs-redesign" data-setting="blogsRedesign" />
-            <label for="blogs-redesign">Редизайн постов в блогах/лентах</label>
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Чат Игровой</h2>
-
-          <div>
-            <p>Отображает уникальный ID кота рядом с его именем в чате.</p>
-            <input
-              type="checkbox"
-              id="show-chat-id"
-              data-setting="showChatId"
-            />
-            <label for="show-chat-id">Показывать ID в чате</label>
-          </div>
-
-          <div id="myNameNotificationSoundContainer">
-            <div class="custom-select" id="myNameNotificationSound">
-              <div class="select-selected">Выберите звук</div>
-              <div class="select-items">
-                <!-- Опции будут добавлены сюда -->
+            <div class="uwu-settings-card__item">
+              <p>Переопределяет цветовую схему игровых блоков, чата, переходов и подсказок.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="user-theme" data-setting="userTheme" />
+                <label for="user-theme">Использовать свои цвета</label>
               </div>
             </div>
 
-            <div id="notification-volume">
-              <p>Громкость</p>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                value="5"
-                class="uwu-range-slider"
-                id="notification-MyName-Volume"
-                list="volumeStep"
-                data-setting="notificationMyNameVolume"
-              />
-              <datalist id="volumeStep">
-                <option value="1">10%</option>
-                <option value="10">100%</option>
-              </datalist>
+            <div class="uwu-settings-card__item">
+              <div id="theme-selector" class="uwu-select"
+                style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <label for="theme-select">Текущая тема:</label>
+                <select id="theme-select" class="uwu-select-selected" style="margin-top: 0;"></select>
+                <button id="addThemeButton" class="uwu-button install-button">Добавить тему</button>
+                <button id="removeThemeButton" style="display: none;" class="uwu-button remove-button">Удалить тему</button>
+              </div>
+            </div>
+
+            <div id="color-picker" style="margin-top: 4px;">
+              <div id="theme-pickers-grid" class="gcp-grid"></div>
+              <div style="flex: 0 0 100%; margin-top: 14px;">
+                <button id="saveThemeButton" class="uwu-button install-button">Сохранить тему</button>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Распространяет выбранную цветовую тему на страницу Конструктора окрасов (КНС).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="user-theme-kns" data-setting="userThemeKns" />
+                <label for="user-theme-kns">Цвета в конструкторе окрасов</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Добавляет матовое размытие (Backdrop Blur) под основными блоками Игровой.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="glass-style" data-setting="glassStyle" />
+                <label for="glass-style">Эффект стекла (Blur)</label>
+              </div>
             </div>
           </div>
 
-          <div>
-            <p>
-              Ваши собственные имена и клички на упоминания в чате. Просто
-              пропишите их через запятую. Пример: Мяу, Мяуич, МяуВкин
-            </p>
-            <input
-              type="text"
-              id="names-For-Notification"
-              placeholder=". . ."
-              data-setting="namesForNotification"
-            />
+          <!-- ШРИФТЫ И ТЕКСТ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Шрифты и текст</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Позволяет настроить сторонний шрифт и точные размеры элементов интерфейса.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="use-User-Fonts" data-setting="useUserFonts" />
+                <label for="use-User-Fonts">Включить кастомные шрифты</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 140px;">Основной шрифт (px):</label>
+                <input type="text" id="font-Size-Body" placeholder="14" data-font-size="fontSizeBody"
+                  style="width: 80px;" />
+              </div>
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 140px;">Быстрые ссылки (px):</label>
+                <input type="text" id="font-Size-Small" placeholder="12" data-font-size="fontSizeSmall"
+                  style="width: 80px;" />
+              </div>
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 140px;">Название локации (px):</label>
+                <input type="text" id="font-Size-Location" placeholder="14" data-font-size="fontSizeLocation"
+                  style="width: 80px;" />
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Название шрифта (загружается с Google Fonts автоматически при наличии кириллицы):</p>
+              <div class="uwu-settings-card__row">
+                <input type="text" id="font-Family-Body" placeholder="Verdana" data-font-size="fontFamilyBody"
+                  style="width: 200px;" />
+                <a href="https://fonts.google.com/?lang=ru_Cyrl" target="_blank" rel="noopener noreferrer"
+                  style="font-size: 12px; text-decoration: underline;">Каталог шрифтов Google</a>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <details class="uwu-details-card">
+                <summary style="cursor: pointer; font-size: 14px; font-weight: 600; padding: 4px 0;">
+                  Размеры шрифтов по громкости сообщений (vlm0 – vlm10)
+                </summary>
+                <div
+                  style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin-top: 10px;">
+                  <div><input type="text" id="vlm0" placeholder="10" data-font-size="vlm0" style="width: 50px;" /> <label
+                      for="vlm0">0 (Шёпот)</label></div>
+                  <div><input type="text" id="vlm1" placeholder="11" data-font-size="vlm1" style="width: 50px;" /> <label
+                      for="vlm1">Громкость 1</label></div>
+                  <div><input type="text" id="vlm2" placeholder="11.5" data-font-size="vlm2" style="width: 50px;" /> <label
+                      for="vlm2">Громкость 2</label></div>
+                  <div><input type="text" id="vlm3" placeholder="12" data-font-size="vlm3" style="width: 50px;" /> <label
+                      for="vlm3">Громкость 3</label></div>
+                  <div><input type="text" id="vlm4" placeholder="12.5" data-font-size="vlm4" style="width: 50px;" /> <label
+                      for="vlm4">Громкость 4</label></div>
+                  <div><input type="text" id="vlm5" placeholder="13" data-font-size="vlm5" style="width: 50px;" /> <label
+                      for="vlm5">5 (Стандарт)</label></div>
+                  <div><input type="text" id="vlm6" placeholder="15" data-font-size="vlm6" style="width: 50px;" /> <label
+                      for="vlm6">Громкость 6</label></div>
+                  <div><input type="text" id="vlm7" placeholder="17" data-font-size="vlm7" style="width: 50px;" /> <label
+                      for="vlm7">Громкость 7</label></div>
+                  <div><input type="text" id="vlm8" placeholder="19" data-font-size="vlm8" style="width: 50px;" /> <label
+                      for="vlm8">Громкость 8</label></div>
+                  <div><input type="text" id="vlm9" placeholder="21" data-font-size="vlm9" style="width: 50px;" /> <label
+                      for="vlm9">Громкость 9</label></div>
+                  <div><input type="text" id="vlm10" placeholder="23" data-font-size="vlm10" style="width: 50px;" /> <label
+                      for="vlm10">10 (Крик)</label></div>
+                </div>
+              </details>
+            </div>
           </div>
 
-          <div>
-            <p>
-              Работает только с "Современным чатом". Отображет чат снизу вверх,
-              а так же смещает окно ввода сообщения под чат.
-            </p>
-            <input
-              type="checkbox"
-              id="reverse-Chat"
-              data-setting="reverseChat"
-            />
-            <label for="reverse-Chat">Инверсия чата</label>
+          <!-- РЕДИЗАЙН ИГРОВОЙ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Редизайн Игровой</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Компактная трёхколоночная сетка интерфейса Игровой с возможностью настройки порядка.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="custom-layout" data-setting="customLayout" />
+                <label for="custom-layout">Компактный редизайн</label>
+              </div>
+            </div>
+
+            <div id="layout-customizer" style="margin: 8px 0;">
+              <div id="layout-preview">
+                <div class="column left"></div>
+                <div class="column center">
+                  <div class="block center-block">Поле Игровой</div>
+                </div>
+                <div class="column right"></div>
+                <ul id="block-list"></ul>
+              </div>
+              <button id="reset-layout-button" class="uwu-button remove-button">Сбросить макет</button>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 140px;">Высота чата (px):</label>
+                <input type="text" id="chat-height" placeholder="275" data-setting="chatHeight" style="width: 90px;" />
+              </div>
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 140px;">Высота истории (px):</label>
+                <input type="text" id="history-height" placeholder="215" data-setting="historyHeight"
+                  style="width: 90px;" />
+              </div>
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 140px;">Высота рта/вещей (px):</label>
+                <input type="text" id="item-list-height" placeholder="180" data-setting="itemListHeight"
+                  style="width: 90px;" />
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Разделяет единую таблицу информации на отдельные независимые блоки.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="slice-info-block" data-setting="sliceInfoBlock" />
+                <label for="slice-info-block">Разделить блок Информации</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Компактное отображение шкал потребностей и навыков в две колонки бок о бок.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="two-column-parameters" data-setting="twoColumnParameters" />
+                <label for="two-column-parameters">Компактные параметры и навыки</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Автоматически скрывает блок «Родственные связи» при входе в Игровую.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="hide-relatives-default" data-setting="hideRelativesByDefault" />
+                <label for="hide-relatives-default">Скрывать Родственные связи по умолчанию</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Скругляет углы основных панелей и блоков Игровой.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="edge-trim-blocks" data-setting="edgeTrimBlocks" />
+                <label for="edge-trim-blocks">Скругление блоков</label>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <p>
-              Более удобная строка ввода сообщений над чатом с возможностью
-              растягивания. Пока что насильно берёт цвета с "Использовать свои
-              цвета".
-            </p>
-            <input
-              type="checkbox"
-              id="new-chat-input"
-              data-setting="newChatInput"
-            />
-            <label for="new-chat-input"
-              >Альтернативная строка ввода сообщений</label
-            >
+          <!-- РЕДИЗАЙНЫ СТРАНИЦ САЙТА -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Редизайны страниц сайта</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Добавляет картинки костюмов в списки для удобного поиска. Высоту списков можно растягивать мышкой за уголок
+                в нижнем правом краю!</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="redesign-Costums-Settings" data-setting="redesignCostumsSettings" />
+                <label for="redesign-Costums-Settings">Редизайн страницы костюмов</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Современные таблицы отчётов автоматических племенных действий.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="automatic-actions-redesign" data-setting="automaticActionsRedesign" />
+                <label for="automatic-actions-redesign">Редизайн племенных отчетов</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Превращает текстовые ссылки меню персонажа (Обучение, Блоги, Настройки) в удобные кнопки.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="profile-menu-redesign" data-setting="profileMenuRedesign" />
+                <label for="profile-menu-redesign">Редизайн меню профиля</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает аватарку кота рядом с его комментарием в блогах и лентах.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="comments-avatars" data-setting="commentsAvatars" />
+                <label for="comments-avatars">Аватарки в комментариях</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Обновленный каталог блогов с кликабельной сортировкой по столбцам таблицы.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="blogsea-redesign" data-setting="blogseaRedesign" />
+                <label for="blogsea-redesign">Редизайн поиска блогов/лент</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Оформление постов и навигации блогов в виде карточек.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="blogs-redesign" data-setting="blogsRedesign" />
+                <label for="blogs-redesign">Редизайн постов в блогах/лентах</label>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <p>Отображает счётчик символов в строке ввода Современного Чата.</p>
-            <input
-              type="checkbox"
-              id="show-chat-char-counter"
-              data-setting="showChatCharCounter"
-            />
-            <label for="show-chat-char-counter"
-              >Показывать счётчик символов в чате</label
-            >
+          <!-- ЧАТ ИГРОВОЙ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Чат Игровой</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает уникальный числовой ID рядом с ником персонажа.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-chat-id" data-setting="showChatId" />
+                <label for="show-chat-id">Показывать ID в чате</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Звуковое уведомление при упоминании вашего ника или псевдонимов в чате:</p>
+              <div id="myNameNotificationSoundContainer" class="uwu-settings-card__row">
+                <div class="custom-select" id="myNameNotificationSound">
+                  <div class="select-selected">Выберите звук</div>
+                  <div class="select-items"></div>
+                </div>
+                <div id="notification-volume" style="display: flex; align-items: center; gap: 8px;">
+                  <label>Громкость:</label>
+                  <input type="range" min="1" max="10" value="5" id="notification-MyName-Volume" list="volumeStep"
+                    data-setting="notificationMyNameVolume" style="width: 100px;" />
+                  <datalist id="volumeStep">
+                    <option value="1">10%</option>
+                    <option value="10">100%</option>
+                  </datalist>
+                </div>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Псевдонимы и клички для упоминаний (через запятую: Кот, Котик, Мяу):</p>
+              <input type="text" id="names-For-Notification" placeholder="Кот, Котик..." data-setting="namesForNotification"
+                style="width: 100%; max-width: 380px;" />
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Инвертирует порядок сообщений (новые снизу) и переносит ввод под чат.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="reverse-Chat" data-setting="reverseChat" />
+                <label for="reverse-Chat">Инверсия чата</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Альтернативное поле ввода с поддержкой растягивания по вертикали.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="new-chat-input" data-setting="newChatInput" />
+                <label for="new-chat-input">Альтернативная строка ввода сообщений</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Индикатор лимита длины текста в строке ввода.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-chat-char-counter" data-setting="showChatCharCounter" />
+                <label for="show-chat-char-counter">Показывать счётчик символов в чате</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает должность кота в скобках после его имени.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-chat-ranks" data-setting="showChatRanks" />
+                <label for="show-chat-ranks">Показывать должности</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Добавляет штамп времени перед текстом сообщения.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-chat-time" data-setting="showChatTime" />
+                <label for="show-chat-time">Показывать время сообщений</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Игнорирует цвета сообщений других игроков, оставляя только их шрифты.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="disable-custom-chat-colors" data-setting="disableCustomChatColors" />
+                <label for="disable-custom-chat-colors">Не красить в кастомные цвета текст чата</label>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <p>Отображает должность персонажа в чате.</p>
-            <input
-              type="checkbox"
-              id="show-chat-ranks"
-              data-setting="showChatRanks"
-            />
-            <label for="show-chat-ranks"
-              >Показывать должности</label
-            >
-          </div>
+          <!-- ПАРАМЕТРЫ И НАВЫКИ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Параметры и навыки</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>Добавляет перед сообщением время его получения.</p>
-            <input
-              type="checkbox"
-              id="show-chat-time"
-              data-setting="showChatTime"
-            />
-            <label for="show-chat-time"
-              >Показывать время сообщений</label
-            >
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Заменяет стандартные градиенты шкал потребностей и умений на собственные.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="user-Parameters-Theme" data-setting="userParametersTheme" />
+                <label for="user-Parameters-Theme">Использовать своё оформление</label>
+              </div>
+            </div>
 
-          <div>
-            <p>
-              Игнорирует кастомные цвета, которые игроки ставят на свои сообщения, оставляя только их шрифт.
-            </p>
-            <input
-              type="checkbox"
-              id="disable-custom-chat-colors"
-              data-setting="disableCustomChatColors"
-            />
-            <label for="disable-custom-chat-colors">Не красить в кастомные цвета текст чата</label>
-          </div>
+            <div id="parameters-color-settings" class="parameters-color-settings">
+              <table class="parameters-color-table">
+                <thead>
+                  <tr>
+                    <th rowspan="2" class="parameters-color-table--header parameters-color-table--name-th">Параметр</th>
+                    <th colspan="2" class="parameters-color-table--header parameters-color-table--group-th">Заливка шкалы
+                    </th>
+                    <th colspan="2" class="parameters-color-table--header">Фон шкалы</th>
+                  </tr>
+                  <tr>
+                    <th class="parameters-color-table--sub-header">От</th>
+                    <th class="parameters-color-table--sub-header parameters-color-table--divider-th">До</th>
+                    <th class="parameters-color-table--sub-header">От</th>
+                    <th class="parameters-color-table--sub-header">До</th>
+                  </tr>
+                </thead>
+                <tbody id="color-settings-body" class="parameters-color-table--body"></tbody>
+              </table>
+            </div>
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Параметры и навыки</h2>
+            <div class="uwu-settings-card__item">
+              <p>Отображает точные числовые значения поверх полосок навыков.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-exact-skills-values" data-setting="showExactSkillsValues" />
+                <label for="show-exact-skills-values">Точные значения навыков</label>
+              </div>
+            </div>
 
-          <div>
-            <p>Заменяет стандартное оформление Параметров и Навыков на ваш.</p>
-            <input
-              type="checkbox"
-              id="user-Parameters-Theme"
-              data-setting="userParametersTheme"
-            />
-            <label for="user-Parameters-Theme"
-              >Использовать своё оформление</label
-            >
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Импорт и экспорт цветовой палитры параметров в формате JSON:</p>
+              <div class="uwu-settings-card__row">
+                <input type="text" id="param-colors-export-field" placeholder="Экспорт" readonly style="width: 140px;" />
+                <input type="text" id="param-colors-import-field" placeholder="Импорт" style="width: 140px;" />
+                <button id="param-colors-import-btn" class="uwu-button install-button">Вставить</button>
+              </div>
+            </div>
 
-          <div id="parameters-color-settings" class="parameters-color-settings">
-            <table class="parameters-color-table">
-              <thead>
-                <tr>
-                  <th rowspan="2" class="parameters-color-table--header parameters-color-table--name-th">Параметр</th>
-                  <th colspan="2" class="parameters-color-table--header parameters-color-table--group-th">Заливка шкалы</th>
-                  <th colspan="2" class="parameters-color-table--header">Фон шкалы</th>
-                </tr>
-                <tr>
-                  <th class="parameters-color-table--sub-header">От</th>
-                  <th class="parameters-color-table--sub-header parameters-color-table--divider-th">До</th>
-                  <th class="parameters-color-table--sub-header">От</th>
-                  <th class="parameters-color-table--sub-header">До</th>
-                </tr>
-              </thead>
-              <tbody id="color-settings-body" class="parameters-color-table--body">
-                <!-- -->
-              </tbody>
-            </table>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Добавляет тень под текст на шкалах для читаемости на светлых темах.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="parameters-Text-Shadow" data-setting="parametersTextShadow" />
+                <label for="parameters-Text-Shadow">Тень текста параметров</label>
+              </div>
+            </div>
 
-          <div>
-            <p>Отображает точные значения навыков поверх их шкал.</p>
-            <input
-              type="checkbox"
-              id="show-exact-skills-values"
-              data-setting="showExactSkillsValues"
-            />
-            <label for="show-exact-skills-values">Точные значения навыков</label>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Журнал истории прироста боевых умений (БУ).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-might-history" data-setting="showMightHistory" />
+                <label for="show-might-history">История прокачки БУ</label>
+              </div>
+            </div>
 
-                    <div>
-            <p>Импорт/Экспорт настроек цветов параметров и навыков.</p>
-            <input
-              type="text"
-              id="param-colors-export-field"
-              placeholder="Экспорт"
-              readonly
-            />
-            <input
-              type="text"
-              id="param-colors-import-field"
-              placeholder="Импорт"
-            />
-            <button
-              id="param-colors-import-btn"
-              class="uwu-button install-button"
-            >
-              Вставить
-            </button>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Накладывает текстурный узор поверх шкал параметров.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="parameters-Background-Image" data-setting="parametersBackgroundImage" />
+                <label for="parameters-Background-Image">Стандартный узор</label>
+              </div>
+            </div>
 
-          <div>
-            <p>Полезно когда светлый текст на светлом фоне.</p>
-            <input
-              type="checkbox"
-              id="parameters-Text-Shadow"
-              data-setting="parametersTextShadow"
-            />
-            <label for="parameters-Text-Shadow"
-              >Тень текста параметров</label
-            >
-          </div>
-
-          <div>
-            <p>Записывает историю изменений Боевых Умений (БУ).</p>
-            <input
-              type="checkbox"
-              id="show-might-history"
-              data-setting="showMightHistory"
-            />
-            <label for="show-might-history">История прокачки БУ</label>
-          </div>
-
-          <div>
-            <p>Накладывает поверх цветов изображение с узорами.</p>
-            <input
-              type="checkbox"
-              id="parameters-Background-Image"
-              data-setting="parametersBackgroundImage"
-            />
-            <label for="parameters-Background-Image">Узоры</label>
-          </div>
-
-          <div>
-            <p>Накладывает поверх уже ваше изображение.</p>
-            <input
-              type="checkbox"
-              id="parameters-User-Background-Image"
-              data-setting="parametersUserBackgroundImage"
-            />
-            <label for="parameters-User-Background-Image">Свои узоры:</label>
-            <input
-              type="text"
-              id="parametersUserBackgroundImageField"
-              placeholder="Вставьте URL"
-              data-setting="parametersUserBackgroundImageURL"
-            />
-            <button id="SettingSaveButton1" class="uwu-button install-button">
-              Сохранить
-            </button>
+            <div class="uwu-settings-card__item">
+              <p>Накладывает пользовательскую текстуру по прямой ссылке.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="parameters-User-Background-Image" data-setting="parametersUserBackgroundImage" />
+                <label for="parameters-User-Background-Image">Свой узор:</label>
+                <input type="text" id="parametersUserBackgroundImageField" placeholder="Вставьте URL"
+                  data-setting="parametersUserBackgroundImageURL" />
+                <button id="SettingSaveButton1" class="uwu-button install-button">Сохранить</button>
+              </div>
+            </div>
           </div>
         </div>
 
         <div id="utility-panel">
-          <h2>Подсветка</h2>
+          <!-- ПОДСВЕТКА РЕСУРСОВ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Подсветка ресурсов</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>Подсвечивает обводкой клетки полезные, и не очень, ресурсы</p>
-            <input
-              type="checkbox"
-              id="highlight-Resources"
-              data-setting="highlightResources"
-            />
-            <label for="highlight-Resources">Подсветка ресурсов</label>
-          </div>
-
-          <label>Стиль подсветки предметов:</label>
-          <div class="custom-select" id="highlightResourcesStyle">
-            <div class="select-selected">
-              Выберите стиль подсветки предметов
-            </div>
-            <div class="select-items">
-              <!-- Опции будут добавлены сюда -->
-            </div>
-          </div>
-          <label
-            id="uwu-what-this"
-            title="Стиль 'Фон' подсвечивает всю клетку и не нагружает Игровую. Стиль 'Свечение' дублирует содержимое ячейки и стилизует его, что может нагружать Игровую."
-            >[?]</label
-          >
-
-          <table class="uwu-table-highlight-Resources gcp-table">
-            <thead>
-              <tr>
-                <th>Название</th>
-                <th>Цвет</th>
-                <th>Подсвечивать?</th>
-              </tr>
-            </thead>
-            <tbody id="resources-table-body">
-              <!-- -->
-            </tbody>
-          </table>
-
-          <hr class="uwu-hr-head" />
-
-          <h2>Шаблоны</h2>
-
-          <div>
-            <p>
-              Позволяет создавать и быстро использовать собственные шаблоны
-              сообщений.
-            </p>
-            <input
-              type="checkbox"
-              id="show-Templates"
-              data-setting="showTemplates"
-            />
-            <label for="show-Templates">Отображать шаблоны</label>
-          </div>
-
-          <table id="uwu-table-templates">
-            <thead>
-              <tr>
-                <th>Сообщения</th>
-                <th>Чаты</th>
-                <th>Блоги и Лента</th>
-                <th>Комментарии</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="uwu-checkbox-cell">
-                  <input type="checkbox" data-setting="templatesInLs" />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input type="checkbox" data-setting="templatesInChats" />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input
-                    type="checkbox"
-                    data-setting="templatesInBlogsAndSniffs"
-                  />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input type="checkbox" data-setting="templatesInComments" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <hr class="uwu-hr-head" />
-
-          <h2>Боевой режим</h2>
-
-          <div>
-            <p>Сокращает и прописывает количество повторяющихся ударов.</p>
-            <input
-              type="checkbox"
-              id="compact-Fight-Log"
-              data-setting="compactFightLog"
-            />
-            <label for="compact-Fight-Log">Компактный боевой лог</label>
-          </div>
-
-          <div>
-            <p>
-              Возможность перекрашивать и создавать команды в Панели Боевого
-              Режима.
-            </p>
-            <input type="checkbox" id="Fight-Teams" data-setting="fightTeams" />
-            <label for="fight-Teams">Команды в Боевом Режиме</label>
-            <input
-              type="text"
-              id="fightTeamsPanelHightField"
-              placeholder=". . ."
-              data-setting="fightTeamsPanelHight"
-            />
-            <label>px; - Начальная высота панели Командного Боя</label>
-          </div>
-
-          <div>
-            <p>
-              Звуковое уведомление при нажатии/отжатии кнопки блокировании
-              удара.
-            </p>
-            <input
-              type="checkbox"
-              id="notification-Block"
-              data-setting="notificationBlock"
-            />
-            <label for="notification-Block">Звук блокирования</label>
-            <div id="notificationBlockSoundContainer">
-              <div class="custom-select" id="notificationBlockSound">
-                <div class="select-selected">Выберите звук</div>
-                <div class="select-items"></div>
-              </div>
-              <div id="notification-volume">
-                <p>Громкость</p>
-                <input
-                  type="range"
-                  min="1"
-                  max="10"
-                  value="5"
-                  class="uwu-range-slider"
-                  id="notificationBlockVolume"
-                  list="volumeStep"
-                  data-setting="notificationBlockVolume"
-                />
-                <datalist id="volumeStep">
-                  <option value="1">10%</option>
-                  <option value="10">100%</option>
-                </datalist>
-              </div>
-              <div id="notificationBlockContainer"></div>
-            </div>
-          </div>
-
-          <table id="colorSettingsTable" class="gcp-table">
-            <thead>
-              <tr>
-                <th>Команда</th>
-                <th>Энергия</th>
-                <th>Снесено</th>
-              </tr>
-            </thead>
-            <tbody id="fight-teams-table-body">
-              <!-- -->
-            </tbody>
-          </table>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Часы</h2>
-
-          <div>
-            <p>Показывать ли часы в Игровой?</p>
-            <input
-              type="checkbox"
-              id="describe-show-clock"
-              data-setting="showClock"
-            />
-            <label for="describe-show-clock">Часы в Игровой</label>
-          </div>
-
-          <label>Стиль часов:</label>
-          <div class="custom-select" id="clockStyle">
-            <div class="select-selected">Выберите стиль часов</div>
-            <div class="select-items">
-              <!-- Опции будут добавлены сюда -->
-            </div>
-          </div>
-
-          <div><!-- Деление --></div>
-
-          <label>Где вставлять часы:</label>
-          <div class="custom-select" id="clockPosition">
-            <div class="select-selected">Выберите положение часов</div>
-            <div class="select-items">
-              <!-- Опции будут добавлены сюда -->
-            </div>
-          </div>
-
-          <div>
-            <input
-              type="checkbox"
-              id="describe-clock-Moscow-Time"
-              data-setting="clockMoscowTime"
-            />
-            <label for="describe-clock-Moscow-Time">Московское время</label>
-          </div>
-
-          <div>
-            <p>Размер шрифта часов</p>
-            <input
-              type="text"
-              id="clock-Font-Size"
-              placeholder=". . ."
-              data-setting="clockFontSize"
-            />
-          </div>
-
-          <div>
-            <button id="resetClockPosition" class="uwu-button remove-button">
-              Сброс позиции часов
-            </button>
-          </div>
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Таймер-напоминалка</h2>
-          <div>
-            <p>
-              Включает перетаскиваемое окно с таймером, который будет циклично
-              воспроизводить звуковой сигнал через заданный интервал времени.
-            </p>
-            <input
-              type="checkbox"
-              id="interval-timer-enabled"
-              data-setting="intervalTimerEnabled"
-            />
-            <label for="interval-timer-enabled"
-              >Включить таймер-напоминалку</label
-            >
-          </div>
-          <div id="intervalTimerContainer">
-            <div class="custom-select" id="intervalTimerSound">
-              <div class="select-selected">Выберите звук</div>
-              <div class="select-items"></div>
-            </div>
-            <div id="notification-volume">
-              <p>Громкость</p>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                value="5"
-                class="uwu-range-slider"
-                id="intervalTimerVolume"
-                list="volumeStep"
-                data-setting="intervalTimerVolume"
-              />
-              <datalist id="volumeStep">
-                <option value="1">10%</option>
-                <option value="10">100%</option>
-              </datalist>
-            </div>
-          </div>
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Рот (инвентарь)</h2>
-          <div>
-            <p>
-              Добавляет чекбокс для блокировки опускания предметов, сохраняя
-              возможность его использовать.
-            </p>
-            <input
-              type="checkbox"
-              id="block-item-drop"
-              data-setting="blockItemDrop"
-            />
-            <label for="block-item-drop">Блокировка опускания предмета</label>
-          </div>
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Охота</h2>
-
-          <div>
-            <p>
-              Дописывает на запахе, во время охоты, приближаетесь вы или
-              отдаляетесь от цели, а так же включает таймер.
-            </p>
-            <input
-              type="checkbox"
-              id="describe-Hunting-Smell"
-              data-setting="describeHuntingSmell"
-            />
-            <label for="describe-Hunting-Smell">Подсказки на запахе</label>
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Джойстики</h2>
-
-          <div>
-            <p>
-              Отображает Виртуальную сенсорную Джойстиковую кнопку для мобильных
-              устройств во время охоты для более удобного управления.
-            </p>
-            <input
-              type="checkbox"
-              id="hunting-Virtual-Joystick"
-              data-setting="huntingVirtualJoystick"
-            />
-            <label for="hunting-Virtual-Joystick"
-              >Виртуальный джойстик для охоты</label
-            >
-            <input
-              type="text"
-              id="sizeHuntingVirtualJoystickField"
-              placeholder=". . ."
-              data-setting="sizeHuntingVirtualJoystick"
-            />
-            <label>px; - Размер Джойстика. Стандартный размер - 150 px;</label>
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>"О котах"</h2>
-
-          <div>
-            <p>
-              Добавляет во всплывающее окно "О коте" кнопку "Подробнее" для
-              просмотра большей полезной информации.
-            </p>
-            <input
-              type="checkbox"
-              id="show-More-Cat-Info"
-              data-setting="showMoreCatInfo"
-            />
-            <label for="show-More-Cat-Info">Больше информации о Коте</label>
-          </div>
-
-          <div>
-            <p>
-              Сокращает и прописывает количество повторяющихся предметов в "О
-              коте".
-            </p>
-            <input
-              type="checkbox"
-              id="compact-Mouth"
-              data-setting="compactMouth"
-            />
-            <label for="compact-Mouth">Компактные инвентари</label>
-          </div>
-
-          <div>
-            <p>
-              Добавляет над собственными параметрами кнопку "Подробнее" для
-              просмотра большей полезной информации.
-            </p>
-            <input
-              type="checkbox"
-              id="show-Parameter-Details"
-              data-setting="showParametersDetails"
-            />
-            <label for="show-Parameter-Details">Подробные параметры</label>
-          </div>
-
-          <div>
-            <p>
-              Показывает дополнительную информацию в профиле кота, например БУ
-              цифрой.
-            </p>
-            <input
-              type="checkbox"
-              id="more-Profile-Info"
-              data-setting="moreProfileInfo"
-            />
-            <label for="more-Profile-Info">Больше информации в профиле</label>
-          </div>
-
-          <div>
-            <p>Добавляет полезные калькуляторы для вычислений в профиля.</p>
-            <input
-              type="checkbox"
-              id="calculators"
-              data-setting="calculators"
-            />
-            <label for="calculators">Калькуляторы активностей и лун.</label>
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Минное поле</h2>
-
-          <div>
-            <p>Включает окно для расчерчивания минного поля в Игровой.</p>
-            <input
-              type="checkbox"
-              id="climbing-panel"
-              data-setting="climbingPanel"
-            />
-            <label for="climbing-panel">Минное поле</label>
-            <p>
-              Здесь вы можете добавить/удалить Вкладки для хранения Таблиц и
-              количество самих таблиц в выбранной вкладке.
-            </p>
-            <h4>Вкладки</h4>
-            <div id="uwu-buttonRow1-settings"></div>
-            <h4>Локации / Таблицы</h4>
-            <div id="uwu-buttonRow2-settings"></div>
-          </div>
-
-          <label>Дизайн окна минного поля:</label>
-          <div class="custom-select" id="climbingPanelOrientation">
-            <div class="select-selected">Вертикальный</div>
-            <div class="select-items">
-              <!-- Опции будут добавлены сюда -->
-            </div>
-          </div>
-
-          <p>
-            Как вводить с клавиатуры: ЛКМ - выбрать клетку. С клавиатуры мины
-            ставятся от "0" до "7". Знак "минус" ( - ) равняется красной клетке,
-            а "равно" ( = ) ставит более яркую клетку, например для переходов,
-            которая не будет очищаться при "Очистить всё поле/таблицу". Два раза
-            ЛКМ на ячейку, чтобы очистить её значение.
-          </p>
-
-          <label>Вид ввода в минное поле:</label>
-          <div class="custom-select" id="climbingPanelInputsStyle">
-            <div class="select-selected">Клавиатура</div>
-            <div class="select-items">
-              <!-- Опции будут добавлены сюда -->
-            </div>
-          </div>
-
-          <div>
-            <p>
-              Дописывает в чате громкость уведомлений числом. В случае с
-              лазательными локациями - количество опасных клеток вокруг вас.
-            </p>
-            <input
-              type="checkbox"
-              id="climbing-Notifications-Numbers"
-              data-setting="climbingNotificationsNumbers"
-            />
-            <label for="climbing-Notifications-Numbers"
-              >Подписывать громкость уведомления</label
-            >
-          </div>
-
-          <div>
-            <p>Звуковое уведомление, когда карта локации обновляется.</p>
-            <input
-              type="checkbox"
-              id="climbing-Refresh-Notification"
-              data-setting="climbingRefreshNotification"
-            />
-            <label for="climbing-Refresh-Notification"
-              >Уведомлять об перестановке</label
-            >
-          </div>
-
-          <div id="climbingRefreshNotificationSoundContainer">
-            <div class="custom-select" id="climbingRefreshNotificationSound">
-              <div class="select-selected">Выберите звук</div>
-              <div class="select-items">
-                <!-- Опции будут добавлены сюда -->
+            <div class="uwu-settings-card__item">
+              <p>Подсвечивает клетки с ценными травами, мхом, предметами и паутиной.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="highlight-Resources" data-setting="highlightResources" />
+                <label for="highlight-Resources">Включить подсветку</label>
               </div>
             </div>
 
-            <div id="notification-volume">
-              <p>Громкость</p>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                value="5"
-                class="uwu-range-slider"
-                id="climbing-Refresh-Notification-Volume"
-                list="volumeStep"
-                data-setting="climbingRefreshNotificationVolume"
-              />
-              <datalist id="volumeStep">
-                <option value="1">10%</option>
-                <option value="10">100%</option>
-              </datalist>
+            <div class="uwu-settings-card__item">
+              <div class="uwu-settings-card__row">
+                <label>Стиль подсветки предметов:</label>
+                <div class="custom-select" id="highlightResourcesStyle">
+                  <div class="select-selected">Выберите стиль подсветки предметов</div>
+                  <div class="select-items"></div>
+                </div>
+                <label id="uwu-what-this"
+                  title="Стиль 'Фон' подсвечивает всю клетку и не нагружает Игровую.&#10;Стиль 'Свечение' дублирует содержимое ячейки и стилизует его, что может снижать FPS на слабых устройствах.">[?]</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item" style="overflow-x: auto;">
+              <table class="uwu-table-highlight-Resources gcp-table">
+                <thead>
+                  <tr>
+                    <th>Название</th>
+                    <th>Цвет</th>
+                    <th>Подсвечивать?</th>
+                  </tr>
+                </thead>
+                <tbody id="resources-table-body"></tbody>
+              </table>
             </div>
           </div>
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>BETA 🚧 Лог чистильщика 🚧 BETA</h2>
+          <!-- ШАБЛОНЫ СООБЩЕНИЙ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Шаблоны сообщений</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>
-              Упрощённое и удобное дублирование блока истории для любителей
-              чистить локации, в котором отображаются только поднятия и
-              опускания котов.
-            </p>
-            <input
-              type="checkbox"
-              id="cleaning-Log"
-              data-setting="cleaningLog"
-            />
-            <label for="cleaning-Log">Включить лог чистильщика</label>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Позволяет сохранять заготовки текстов и быстро вставлять их в формы ввода.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-Templates" data-setting="showTemplates" />
+                <label for="show-Templates">Отображать панель шаблонов</label>
+              </div>
+            </div>
 
-          <label>Вид отображения Лога:</label>
-          <div class="custom-select" id="cleaningLogStyle">
-            <div class="select-selected">Выберите вид Лога</div>
-            <div class="select-items">
-              <!-- Опции будут добавлены сюда -->
+            <div class="uwu-settings-card__item" style="overflow-x: auto;">
+              <table id="uwu-table-templates" class="gcp-table">
+                <thead>
+                  <tr>
+                    <th>Личные сообщения</th>
+                    <th>Чаты</th>
+                    <th>Блоги и Лента</th>
+                    <th>Комментарии</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="uwu-checkbox-cell">
+                      <input type="checkbox" data-setting="templatesInLs" />
+                    </td>
+                    <td class="uwu-checkbox-cell">
+                      <input type="checkbox" data-setting="templatesInChats" />
+                    </td>
+                    <td class="uwu-checkbox-cell">
+                      <input type="checkbox" data-setting="templatesInBlogsAndSniffs" />
+                    </td>
+                    <td class="uwu-checkbox-cell">
+                      <input type="checkbox" data-setting="templatesInComments" />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
-          <label
-            id="uwu-what-this"
-            title="
-      Умный - группирование множественных действий в более удобный, краткий и читаемый вид.
-      Ещё тут был 'стандартный', более привычный старый вид, но его съели росомахи.
-      "
-            >[?]</label
-          >
 
-          <details>
-            <summary
-              style="cursor: pointer; font-size: 16px; font-weight: bold;"
-            >
-              Как работает?
-            </summary>
-            <hr id="uwu-hr" class="uwu-hr" />
-            <p>1. Проверьте кота такими действиями, как:</p>
-            <p>— Потереться нос о нос</p>
-            <p>— Потереться щекой о щёку</p>
-            <p>— Помурлыкать вместе</p>
-            <p>— Обнюхать</p>
-            <p>
-              Вам выведится, можно ли поднять кота. Если он "Проверен", можете
-              смело...
-            </p>
-            <p>2. Поднять кота!</p>
-            <p>
-              Если же кот "Не спит", или перед поднятием вы его не проверили, то
-              Лог просто не запишет его.
-            </p>
-            <p>
-              — Больше настроек, например подсветка надписей или игнорирование
-              статуса кота, будет в будущем!
-            </p>
-            <p>
-              Если вы видите или вам кажется, что логика проверок и объединений,
-              странны и нелогичны, или даже что-то теряется, то можете сообщить
-              о проблеме в группу ВК!
-            </p>
-            <p>3. Попросились отпуститься?</p>
-            <p>
-              — Вы можете удалить из Лога последнего опущенного вами кота
-              кнопкой справа от "Очистить лог" в виде корзинки! Например, если
-              он выпросился погулять и он больше не актуален. Ещё разок!
-              Опускаете кота и он становится целью кнопки "Удалить"!
-            </p>
-            <hr id="uwu-hr" class="uwu-hr" />
-          </details>
+          <!-- БОЕВОЙ РЕЖИМ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Боевой режим</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>
-              При последующих проверках так же будет писаться ID кота. Не
-              добавляет ID к уже существущему тексту в логе.
-            </p>
-            <input
-              type="checkbox"
-              id="cleaning-Log"
-              data-setting="cleaningLogShowID"
-            />
-            <label for="cleaning-Log">Записывать ID</label>
+            <div class="uwu-settings-card__item">
+              <p>Группирует повторяющиеся удары в логе боя и добавляет счётчик (x2, x3...).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="compact-Fight-Log" data-setting="compactFightLog" />
+                <label for="compact-Fight-Log">Компактный боевой лог</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Возможность разделять котов на цветные команды в панели Боевого Режима.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="Fight-Teams" data-setting="fightTeams" />
+                <label for="Fight-Teams">Команды в БР</label>
+                <input type="text" id="fightTeamsPanelHightField" placeholder="100" data-setting="fightTeamsPanelHight"
+                  style="width: 70px; margin-left: 10px;" />
+                <label>px (высота панели)</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Звуковой сигнал при нажатии и отжатии щита блокирования:</p>
+              <div id="notificationBlockSoundContainer" class="uwu-settings-card__row">
+                <input type="checkbox" id="notification-Block" data-setting="notificationBlock" />
+                <label for="notification-Block">Звук блока</label>
+                <div class="custom-select" id="notificationBlockSound">
+                  <div class="select-selected">Выберите звук</div>
+                  <div class="select-items"></div>
+                </div>
+                <div id="notification-volume" style="display: flex; align-items: center; gap: 8px;">
+                  <label>Громкость:</label>
+                  <input type="range" min="1" max="10" value="5" id="notificationBlockVolume" list="volumeStep"
+                    data-setting="notificationBlockVolume" style="width: 100px;" />
+                </div>
+                <div id="notificationBlockContainer"></div>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item" style="overflow-x: auto; margin-top: 4px;">
+              <table id="colorSettingsTable" class="gcp-table">
+                <thead>
+                  <tr>
+                    <th>Команда</th>
+                    <th>Цвет энергии</th>
+                    <th>Цвет снесённого</th>
+                  </tr>
+                </thead>
+                <tbody id="fight-teams-table-body"></tbody>
+              </table>
+            </div>
           </div>
 
-          <div>
-            <input
-              type="text"
-              id="cleaning-Log-Height"
-              placeholder=". . ."
-              data-setting="cleaningLogHeight"
-            />
-            <label>px; - Начальная высота Лога</label>
+          <!-- ЧАСЫ В ИГРОВОЙ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Часы в Игровой</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает часы с синхронизацией точного времени по сети.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="describe-show-clock" data-setting="showClock" />
+                <label for="describe-show-clock">Включить часы</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 130px;">Стиль часов:</label>
+                <div class="custom-select" id="clockStyle">
+                  <div class="select-selected">Выберите стиль</div>
+                  <div class="select-items"></div>
+                </div>
+              </div>
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 130px;">Расположение:</label>
+                <div class="custom-select" id="clockPosition">
+                  <div class="select-selected">Выберите положение</div>
+                  <div class="select-items"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="describe-clock-Moscow-Time" data-setting="clockMoscowTime" />
+                <label for="describe-clock-Moscow-Time">Московское время (MSK)</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 130px;">Размер шрифта (px):</label>
+                <input type="text" id="clock-Font-Size" placeholder="14" data-setting="clockFontSize"
+                  style="width: 70px;" />
+                <button id="resetClockPosition" class="uwu-button remove-button" style="margin-left: 10px;">Сброс позиции
+                  часов</button>
+              </div>
+            </div>
           </div>
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>BETA 🚧 Лог ловли 🚧 BETA</h2>
+          <!-- ТАЙМЕР-НАПОМИНАЛКА -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Таймер-напоминалка</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>
-              Аналогично Логу чистильщика, но для отслеживания результатов
-              ныряния и ловли в ущелье. Группирует последовательные попытки в
-              один блок.
-            </p>
-            <input
-              type="checkbox"
-              id="catching-Log"
-              data-setting="catchingLog"
-            />
-            <label for="catching-Log">Включить лог ловли</label>
+            <div class="uwu-settings-card__item">
+              <p>Циклический перетаскиваемый таймер в Игровой с подачей звукового сигнала по истечении заданного времени.
+              </p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="interval-timer-enabled" data-setting="intervalTimerEnabled" />
+                <label for="interval-timer-enabled">Включить таймер-напоминалку</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <div id="intervalTimerContainer" class="uwu-settings-card__row">
+                <label>Звук таймера:</label>
+                <div class="custom-select" id="intervalTimerSound">
+                  <div class="select-selected">Выберите звук</div>
+                  <div class="select-items"></div>
+                </div>
+                <div id="notification-volume" style="display: flex; align-items: center; gap: 8px;">
+                  <label>Громкость:</label>
+                  <input type="range" min="1" max="10" value="5" id="intervalTimerVolume" list="volumeStep"
+                    data-setting="intervalTimerVolume" style="width: 100px;" />
+                </div>
+              </div>
+            </div>
           </div>
 
-          <details>
-            <summary
-              style="cursor: pointer; font-size: 16px; font-weight: bold;"
-            >
-              Как работает?
-            </summary>
-            <hr id="uwu-hr" class="uwu-hr" />
-            <p>
-              — Лог создаёт отдельные карточки для каждого типа действия
-              (Ныряние, Осмотр).
-            </p>
-            <p>
-              — Карточка считается активной 2 часа с момента последней попытки.
-            </p>
-            <p>
-              — Если вы вернётесь к тому же действию спустя 2 часа, создастся
-              новая карточка, а не дополнится старая.
-            </p>
-            <hr id="uwu-hr" class="uwu-hr" />
-          </details>
+          <!-- РОТ И ИНВЕНТАРЬ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Рот (Инвентарь)</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <input
-              type="text"
-              id="catching-Log-Height"
-              placeholder=". . ."
-              data-setting="catchingLogHeight"
-            />
-            <label>px; - Начальная высота Лога</label>
+            <div class="uwu-settings-card__item">
+              <p>Добавляет чекбокс для предотвращения случайного опускания выбранного предмета из рта.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="block-item-drop" data-setting="blockItemDrop" />
+                <label for="block-item-drop">Блокировка опускания предмета</label>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <p>
-              Здесь вы можете добавить свои собственные названия для предметов
-              по их ID. Каждая запись должна быть на новой строке в формате
-              "ID=Название". Например: <code>3966=Рыбка</code>. Этот список
-              имеет приоритет над встроенным.
-            </p>
-            <textarea
-              id="catching-log-custom-items"
-              rows="10"
-              style="width: 100%"
-              placeholder="3966=Рыба&#10;3967=Рыба побольше"
-            ></textarea>
-            <button
-              id="save-custom-items-btn"
-              class="uwu-button install-button"
-            >
-              Сохранить
-            </button>
-          </div>
-          <div>
-            <p>Импорт/Экспорт вашего списка названий предметов.</p>
-            <input
-              type="text"
-              id="custom-items-export-field"
-              placeholder="Экспорт"
-              readonly
-            />
-            <input
-              type="text"
-              id="custom-items-import-field"
-              placeholder="Импорт"
-            />
-            <button
-              id="custom-items-import-btn"
-              class="uwu-button install-button"
-            >
-              Вставить
-            </button>
+          <!-- ОХОТА И ДЖОЙСТИК -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Охота и джойстик</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает текстовую подсказку (ближе/дальше) и таймер на индикаторе запаха во время охоты.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="describe-Hunting-Smell" data-setting="describeHuntingSmell" />
+                <label for="describe-Hunting-Smell">Подсказки на запахе</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Сенсорный джойстик на экране охоты для удобного перемещения с мобильных устройств.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="hunting-Virtual-Joystick" data-setting="huntingVirtualJoystick" />
+                <label for="hunting-Virtual-Joystick">Виртуальный джойстик</label>
+                <input type="text" id="sizeHuntingVirtualJoystickField" placeholder="150"
+                  data-setting="sizeHuntingVirtualJoystick" style="width: 70px; margin-left: 10px;" />
+                <label>px (диаметр, по умолчанию 150)</label>
+              </div>
+            </div>
           </div>
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Быстрые ссылки</h2>
+          <!-- ИНФОРМАЦИЯ И КАЛЬКУЛЯТОРЫ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Информация о котах и профили</h3>
+            <hr class="uwu-hr" />
 
-          <p>Быстрые ссылки в Игровой.</p>
-          <div>
-            <input type="checkbox" id="quick-Link1" data-setting="quickLink1" />
-            <label for="quick-Link1">Настройки</label>
+            <div class="uwu-settings-card__item">
+              <p>Добавляет кнопку «Подробнее» во всплывающую подсказку «О коте» (дефекты, размер, ID).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-More-Cat-Info" data-setting="showMoreCatInfo" />
+                <label for="show-More-Cat-Info">Больше информации во всплывающем окне</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Группирует одинаковые предметы в инвентаре подсказки «О коте» со счётчиком количества.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="compact-Mouth" data-setting="compactMouth" />
+                <label for="compact-Mouth">Компактный инвентарь чужих котов</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Кнопка «Подробнее» над собственными шкалами с расчётом точного времени восстановления потребностей.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-Parameter-Details" data-setting="showParametersDetails" />
+                <label for="show-Parameter-Details">Подробная статистика параметров</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает уровень боевых умений (БУ) цифрой в профилях персонажей.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="more-Profile-Info" data-setting="moreProfileInfo" />
+                <label for="more-Profile-Info">БУ цифрой в профиле</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Встраивает интерактивные калькуляторы активности и возраста (лун) в профили кошек.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="calculators" data-setting="calculators" />
+                <label for="calculators">Калькуляторы активности и лун</label>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <input type="checkbox" id="quick-Link2" data-setting="quickLink2" />
-            <label for="quick-Link2">Памятка</label>
+          <!-- МИННОЕ ПОЛЕ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Минное поле</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Интерактивная панель для составления и сохранения карт лазательных локаций (минных полей).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="climbing-panel" data-setting="climbingPanel" />
+                <label for="climbing-panel">Включить окно минного поля</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Управление вкладками и сохраненными таблицами локаций:</p>
+              <h4 style="margin: 4px 0;">Вкладки:</h4>
+              <div id="uwu-buttonRow1-settings"></div>
+              <h4 style="margin: 6px 0 4px;">Локации / Таблицы:</h4>
+              <div id="uwu-buttonRow2-settings"></div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 140px;">Ориентация панели:</label>
+                <div class="custom-select" id="climbingPanelOrientation">
+                  <div class="select-selected">Вертикальный</div>
+                  <div class="select-items"></div>
+                </div>
+              </div>
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 140px;">Способ ввода данных:</label>
+                <div class="custom-select" id="climbingPanelInputsStyle">
+                  <div class="select-selected">Клавиатура</div>
+                  <div class="select-items"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <details class="uwu-details-card">
+                <summary style="cursor: pointer; font-weight: 600;">⌨ Как ставить отметки с клавиатуры?</summary>
+                <div style="font-size: 13px; line-height: 1.5; margin-top: 6px; opacity: 0.85;">
+                  • ЛКМ — выбрать клетку.<br>
+                  • Цифры от <b>0</b> до <b>7</b> — поставить число мин.<br>
+                  • Знак минус ( <b>-</b> ) — красная опасная клетка (мина).<br>
+                  • Знак равно ( <b>=</b> ) — яркая клетка (переход, не стирается кнопкой очистки).<br>
+                  • Два клика ЛКМ по ячейке — стереть её значение.
+                </div>
+              </details>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает числовую громкость уведомления в чате (количество мин вокруг кота).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="climbing-Notifications-Numbers" data-setting="climbingNotificationsNumbers" />
+                <label for="climbing-Notifications-Numbers">Подписывать числовую громкость в чате</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Звуковое оповещение при обновлении карты опасных клеток:</p>
+              <div id="climbingRefreshNotificationSoundContainer" class="uwu-settings-card__row">
+                <input type="checkbox" id="climbing-Refresh-Notification" data-setting="climbingRefreshNotification" />
+                <label for="climbing-Refresh-Notification">Звук обновления</label>
+                <div class="custom-select" id="climbingRefreshNotificationSound">
+                  <div class="select-selected">Выберите звук</div>
+                  <div class="select-items"></div>
+                </div>
+                <div id="notification-volume" style="display: flex; align-items: center; gap: 8px;">
+                  <label>Громкость:</label>
+                  <input type="range" min="1" max="10" value="5" id="climbing-Refresh-Notification-Volume" list="volumeStep"
+                    data-setting="climbingRefreshNotificationVolume" style="width: 100px;" />
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <input type="checkbox" id="quick-Link3" data-setting="quickLink3" />
-            <label for="quick-Link3">Блоги</label>
-          </div>
+          <!-- ЛОГИ ЧИСТИЛЬЩИКА И ЛОВЛИ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Логи чистки и ловли (BETA)</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <input type="checkbox" id="quick-Link4" data-setting="quickLink4" />
-            <label for="quick-Link4">Лента</label>
-          </div>
-
-          <div>
-            <p>
-              Ваши ссылки. Вставляете ссылку, пробел и пишите название. Для
-              множества просто пишите через запятую. Пример: https://мяу Котики,
-              https://мяу2 Больше-котиков
-            </p>
-            <input
-              type="text"
-              id="users-quick-Links"
-              placeholder=". . ."
-              data-setting="userQuickLinks"
-            />
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-
-          <h2>Уведомления</h2>
-          <p>Уведомлять звуком, когда:</p>
-
-          <table class="notification-table">
-            <tbody>
-              <tr>
-                <td>
-                  <input
-                    type="checkbox"
-                    id="notification-PM"
-                    data-setting="notificationPM"
-                  />
-                </td>
-                <td>
-                  <div class="custom-select" id="notificationPMSound">
-                    <div class="select-selected">Выберите звук</div>
-                    <div class="select-items"></div>
+            <div class="uwu-settings-card__item">
+              <p>Журнал чистильщика: автоматическая фиксация проверок сна, поднятий и опусканий котов.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="cleaning-Log" data-setting="cleaningLog" />
+                <label for="cleaning-Log">Включить лог чистильщика</label>
+                <div class="custom-select" id="cleaningLogStyle" style="margin-left: 10px;">
+                  <div class="select-selected">Умный</div>
+                  <div class="select-items"></div>
+                </div>
+              </div>
+              <div class="uwu-settings-card__item">
+                <details class="uwu-details-card">
+                  <summary style="cursor: pointer; font-weight: 600;">🐾 Как работает лог чистильщика?</summary>
+                  <div style="font-size: 13px; line-height: 1.45; margin-top: 6px; opacity: 0.85;">
+                    <b>1.</b> Проверьте кота действием («потереться носом», «щекой о щёку», «помурлыкать» или
+                    «обнюхать»).<br>
+                    <b>2.</b> Если кот спит — смело поднимайте, лог запишет его. Если не спит или вы забыли проверить — лог
+                    предупредит об этом.<br>
+                    <b>3.</b> Кнопка с корзинкой рядом с очисткой лога удаляет <i>последнего опущенного кота</i> (например,
+                    если он проснулся и выпросился гулять).
                   </div>
-                </td>
-                <td>
-                  <div class="volume-control">
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
-                      value="5"
-                      class="uwu-range-slider"
-                      id="notificationPMVolume"
-                      list="volumeStep"
-                      data-setting="notificationPMVolume"
-                    />
-                    <datalist id="volumeStep">
-                      <option value="1">10%</option>
-                      <option value="10">100%</option>
-                    </datalist>
-                  </div>
-                </td>
-                <td id="notificationPMContainer"></td>
-                <td><label for="notification-PM">Новое ЛС</label></td>
-              </tr>
-              <tr>
-                <td>
-                  <input
-                    type="checkbox"
-                    id="notification-Action-End"
-                    data-setting="notificationActionEnd"
-                  />
-                </td>
-                <td>
-                  <div class="custom-select" id="notificationActionEndSound">
-                    <div class="select-selected">Выберите звук</div>
-                    <div class="select-items"></div>
-                  </div>
-                </td>
-                <td>
-                  <div class="volume-control">
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
-                      value="5"
-                      class="uwu-range-slider"
-                      id="notificationActionEndVolume"
-                      list="volumeStep"
-                      data-setting="notificationActionEndVolume"
-                    />
-                    <datalist id="volumeStep">
-                      <option value="1">10%</option>
-                      <option value="10">100%</option>
-                    </datalist>
-                  </div>
-                </td>
-                <td id="notificationActionEndContainer"></td>
-                <td>
-                  <label for="notification-Action-End"
-                    >Действие закончилось</label
-                  >
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input
-                    type="checkbox"
-                    id="notification-Action-End-Early"
-                    data-setting="notificationActionEndEarly"
-                  />
-                </td>
-                <td colspan="3"></td>
-                <td>
-                  <label for="notification-Action-End-Early"
-                    >За 3 секунды</label
-                  >
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input
-                    type="checkbox"
-                    id="notification-In-Mouth"
-                    data-setting="notificationInMouth"
-                  />
-                </td>
-                <td>
-                  <div class="custom-select" id="notificationInMouthSound">
-                    <div class="select-selected">Выберите звук</div>
-                    <div class="select-items"></div>
-                  </div>
-                </td>
-                <td>
-                  <div class="volume-control">
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
-                      value="5"
-                      class="uwu-range-slider"
-                      id="notificationInMouthVolume"
-                      list="volumeStep"
-                      data-setting="notificationInMouthVolume"
-                    />
-                    <datalist id="volumeStep">
-                      <option value="1">10%</option>
-                      <option value="10">100%</option>
-                    </datalist>
-                  </div>
-                </td>
-                <td id="notificationInMouthContainer"></td>
-                <td>
-                  <label for="notification-In-Mouth">Кто-то меня поднял</label>
-                </td>
-              </tr>
+                </details>
+              </div>
+              <div class="uwu-settings-card__row" style="margin-top: 4px;">
+                <input type="checkbox" id="cleaning-Log-ShowID" data-setting="cleaningLogShowID" />
+                <label for="cleaning-Log-ShowID">Записывать ID персонажей</label>
+                <input type="text" id="cleaning-Log-Height" placeholder="120" data-setting="cleaningLogHeight"
+                  style="width: 70px; margin-left: 10px;" />
+                <label>px (высота)</label>
+              </div>
+            </div>
 
-              <tr>
-                <td>
-                  <input
-                    type="checkbox"
-                    id="notification-In-Fight-Mode"
-                    data-setting="notificationInFightMode"
-                  />
-                </td>
-                <td>
-                  <div class="custom-select" id="notificationInFightModeSound">
-                    <div class="select-selected">Выберите звук</div>
-                    <div class="select-items"></div>
-                  </div>
-                </td>
-                <td>
-                  <div class="volume-control">
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
-                      value="5"
-                      class="uwu-range-slider"
-                      id="notificationInFightModeVolume"
-                      list="volumeStep"
-                      data-setting="notificationInFightModeVolume"
-                    />
-                    <datalist id="volumeStep">
-                      <option value="1">10%</option>
-                      <option value="10">100%</option>
-                    </datalist>
-                  </div>
-                </td>
-                <td id="notificationInFightModeContainer"></td>
-                <td>
-                  <label for="notification-In-Fight-Mode"
-                    >Ввели в стойку (Т+2/Т+3)</label
-                  >
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <div class="uwu-settings-card__item" style="margin-top: 10px;">
+              <p>Журнал ловли: фиксация попыток ныряния и осмотра расщелин с учётом выловленной добычи.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="catching-Log" data-setting="catchingLog" />
+                <label for="catching-Log">Включить лог ловли</label>
+                <input type="text" id="catching-Log-Height" placeholder="120" data-setting="catchingLogHeight"
+                  style="width: 70px; margin-left: 10px;" />
+                <label>px (высота)</label>
+              </div>
+            </div>
 
-          <div>
-            <p>Дублирует время действий на название браузерной вкладки.</p>
-            <input
-              type="checkbox"
-              id="duplicate-Time-In-Browser-Tab"
-              data-setting="duplicateTimeInBrowserTab"
-            />
-            <label for="duplicate-Time-In-Browser-Tab"
-              >Показывать время действия на вкладке</label
-            >
+            <div class="uwu-settings-card__item">
+              <p>Пользовательские названия предметов по ID (формат: <code>ID=Название</code>, каждое с новой строки):</p>
+              <textarea id="catching-log-custom-items" rows="5" placeholder="3966=Рыба&#10;3967=Большая рыба"
+                class="uwu-textarea-field"></textarea>
+              <div class="uwu-settings-card__row">
+                <button id="save-custom-items-btn" class="uwu-button install-button">Сохранить названия</button>
+                <input type="text" id="custom-items-export-field" placeholder="Экспорт" readonly style="width: 120px;" />
+                <input type="text" id="custom-items-import-field" placeholder="Импорт" style="width: 120px;" />
+                <button id="custom-items-import-btn" class="uwu-button install-button">Вставить</button>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <p>Подсказывает оставшееся время до возможности понюхать.</p>
-            <input
-              type="checkbox"
-              id="show-Hint-When-To-Sniff"
-              data-setting="showHintWhenToSniff"
-            />
-            <label for="show-Hint-When-To-Sniff">Когда нюхать?</label>
+          <!-- БЫСТРЫЕ ССЫЛКИ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Быстрые ссылки в Игровой</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Закреплённые ссылки в верхней строке навигации Игровой:</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="quick-Link1" data-setting="quickLink1" />
+                <label for="quick-Link1">Настройки</label>
+                <input type="checkbox" id="quick-Link2" data-setting="quickLink2" style="margin-left: 10px;" />
+                <label for="quick-Link2">Памятка</label>
+                <input type="checkbox" id="quick-Link3" data-setting="quickLink3" style="margin-left: 10px;" />
+                <label for="quick-Link3">Блоги</label>
+                <input type="checkbox" id="quick-Link4" data-setting="quickLink4" style="margin-left: 10px;" />
+                <label for="quick-Link4">Лента</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Ваши личные ссылки. Вставьте ссылку, пробел и название. Несколько штук пишите через запятую.<br>
+                <i>Пример: https://catwar.net/clan Моё-племя, https://мяу Котики</i>
+              </p>
+              <input type="text" id="users-quick-Links" placeholder="https://... Название" data-setting="userQuickLinks"
+                style="width: 100%; max-width: 480px;" />
+            </div>
           </div>
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Общение</h2>
+          <!-- ЗВУКОВЫЕ УВЕДОМЛЕНИЯ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Звуковые уведомления</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>
-              Позволяет сохранять личные сообщения локально в браузере для
-              офлайн-доступа.
-            </p>
-            <input type="checkbox" id="saving-LS" data-setting="savingLS" />
-            <label for="saving-LS">Сохранение Личных сообщений</label>
+            <div class="uwu-settings-card__item" style="overflow-x: auto;">
+              <table class="notification-table gcp-table">
+                <thead>
+                  <tr>
+                    <th>Вкл</th>
+                    <th>Событие</th>
+                    <th>Мелодия</th>
+                    <th>Громкость</th>
+                    <th>Тест</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="uwu-checkbox-cell">
+                      <input type="checkbox" id="notification-PM" data-setting="notificationPM" />
+                    </td>
+                    <td><label for="notification-PM">Новое личное сообщение (ЛС)</label></td>
+                    <td>
+                      <div class="custom-select" id="notificationPMSound">
+                        <div class="select-selected">Выберите звук</div>
+                        <div class="select-items"></div>
+                      </div>
+                    </td>
+                    <td>
+                      <input type="range" min="1" max="10" value="5" id="notificationPMVolume" list="volumeStep"
+                        data-setting="notificationPMVolume" style="width: 90px;" />
+                    </td>
+                    <td id="notificationPMContainer"></td>
+                  </tr>
+
+                  <tr>
+                    <td class="uwu-checkbox-cell">
+                      <input type="checkbox" id="notification-Action-End" data-setting="notificationActionEnd" />
+                    </td>
+                    <td><label for="notification-Action-End">Завершение длительного действия</label></td>
+                    <td>
+                      <div class="custom-select" id="notificationActionEndSound">
+                        <div class="select-selected">Выберите звук</div>
+                        <div class="select-items"></div>
+                      </div>
+                    </td>
+                    <td>
+                      <input type="range" min="1" max="10" value="5" id="notificationActionEndVolume" list="volumeStep"
+                        data-setting="notificationActionEndVolume" style="width: 90px;" />
+                    </td>
+                    <td id="notificationActionEndContainer"></td>
+                  </tr>
+
+                  <tr>
+                    <td class="uwu-checkbox-cell">
+                      <input type="checkbox" id="notification-Action-End-Early" data-setting="notificationActionEndEarly" />
+                    </td>
+                    <td colspan="4">
+                      <label for="notification-Action-End-Early">Предупреждать заранее (за 3 секунды до конца)</label>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td class="uwu-checkbox-cell">
+                      <input type="checkbox" id="notification-In-Mouth" data-setting="notificationInMouth" />
+                    </td>
+                    <td><label for="notification-In-Mouth">Персонажа взяли в рот</label></td>
+                    <td>
+                      <div class="custom-select" id="notificationInMouthSound">
+                        <div class="select-selected">Выберите звук</div>
+                        <div class="select-items"></div>
+                      </div>
+                    </td>
+                    <td>
+                      <input type="range" min="1" max="10" value="5" id="notificationInMouthVolume" list="volumeStep"
+                        data-setting="notificationInMouthVolume" style="width: 90px;" />
+                    </td>
+                    <td id="notificationInMouthContainer"></td>
+                  </tr>
+
+                  <tr>
+                    <td class="uwu-checkbox-cell">
+                      <input type="checkbox" id="notification-In-Fight-Mode" data-setting="notificationInFightMode" />
+                    </td>
+                    <td><label for="notification-In-Fight-Mode">Ввели в боевую стойку (Т+2 / Т+3)</label></td>
+                    <td>
+                      <div class="custom-select" id="notificationInFightModeSound">
+                        <div class="select-selected">Выберите звук</div>
+                        <div class="select-items"></div>
+                      </div>
+                    </td>
+                    <td>
+                      <input type="range" min="1" max="10" value="5" id="notificationInFightModeVolume" list="volumeStep"
+                        data-setting="notificationInFightModeVolume" style="width: 90px;" />
+                    </td>
+                    <td id="notificationInFightModeContainer"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="uwu-settings-card__item" style="margin-top: 8px;">
+              <p>Дублирует таймер и название текущего действия в заголовок браузерной вкладки.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="duplicate-Time-In-Browser-Tab" data-setting="duplicateTimeInBrowserTab" />
+                <label for="duplicate-Time-In-Browser-Tab">Таймер действия на вкладке</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает подсказку времени перезарядки кнопки «Принюхиваться».</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-Hint-When-To-Sniff" data-setting="showHintWhenToSniff" />
+                <label for="show-Hint-When-To-Sniff">Подсказка: «Когда нюхать?»</label>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <p>
-              Автоматически находит и переносит ваши сохранённые ЛС из
-              подходящих модов и скриптов в хранилище UwU.
-            </p>
-            <button
-              id="import-ls-from-other-mods"
-              class="uwu-button install-button"
-            >
-              Импортировать ЛС из других модов и скриптов
-            </button>
-          </div>
+          <!-- ОБЩЕНИЕ И ЛИЧНЫЕ СООБЩЕНИЯ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Общение и личные сообщения</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>
-              Индивидуальный импорт/экспорт только сохранённых личных сообщений.
-            </p>
-            <input
-              type="text"
-              id="ls-export-field"
-              placeholder="Экспорт ЛС"
-              readonly
-            />
-            <input type="text" id="ls-import-field" placeholder="Импорт ЛС" />
-            <button id="ls-import-btn" class="uwu-button install-button">
-              Вставить
-            </button>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Локальное резервное копирование переписок в браузере для чтения офлайн.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="saving-LS" data-setting="savingLS" />
+                <label for="saving-LS">Сохранение личных сообщений (ЛС)</label>
+              </div>
+            </div>
 
-          <div>
-            <p>
-              Автоматически сохраняет и восстанавливает редактируемый текст
-              блога. Теперь вы не потеряете его случайно.
-            </p>
-            <input
-              type="checkbox"
-              id="restore-Blog-Creation"
-              data-setting="restoreBlogCreation"
-            />
-            <label for="restore-Blog-Creation"
-              >Восстановление содержимого Блога</label
-            >
-          </div>
+            <div class="uwu-settings-card__item">
+              <div class="uwu-settings-card__row">
+                <button id="import-ls-from-other-mods" class="uwu-button install-button">Импортировать ЛС из других
+                  модов</button>
+                <input type="text" id="ls-export-field" placeholder="Экспорт ЛС" readonly style="width: 140px;" />
+                <input type="text" id="ls-import-field" placeholder="Импорт ЛС" style="width: 140px;" />
+                <button id="ls-import-btn" class="uwu-button install-button">Вставить</button>
+              </div>
+            </div>
 
-          <div>
-            <p>Говорит само за себя.</p>
-            <input
-              type="checkbox"
-              id="more-BB-Codes"
-              data-setting="moreBBCodes"
-            />
-            <label for="more-BB-Codes">Дополнительные BB-Коды</label>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Автоматическое сохранение черновика при создании блога во избежание потери текста.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="restore-Blog-Creation" data-setting="restoreBlogCreation" />
+                <label for="restore-Blog-Creation">Восстановление черновика блога</label>
+              </div>
+            </div>
 
-          <div>
-            <p>
-              Позволяет предпросматривать отправляемые сообщения в лентах и
-              блогах.
-            </p>
-            <input
-              type="checkbox"
-              id="comment-Preview"
-              data-setting="commentPreview"
-            />
-            <label for="comment-Preview">Предпросмотр сообщений</label>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Расширенная панель дополнительных BB-кодов в формах редактирования.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="more-BB-Codes" data-setting="moreBBCodes" />
+                <label for="more-BB-Codes">Дополнительные BB-коды</label>
+              </div>
+            </div>
 
-          <div>
-            <p>
-              Позволяет "отвечать" и "цитировать" сообщения в лентах и блогах.
-              При цитировании вы можете выделить кусочек текста на который
-              хотите ответить.
-            </p>
-            <input
-              type="checkbox"
-              id="more-Comment-Buttons"
-              data-setting="moreCommentButtons"
-            />
-            <label for="more-Comment-Buttons"
-              >Кнопки "Отправить" и "Цитировать"</label
-            >
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Интерактивный предпросмотр отправляемых комментариев в лентах и блогах.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="comment-Preview" data-setting="commentPreview" />
+                <label for="comment-Preview">Предпросмотр комментариев</label>
+              </div>
+            </div>
 
-          <div>
-            <p>
-              Оборачивает предпросмотр письма в оболочку, похожую на ту которая
-              во "Входящие".
-            </p>
-            <input
-              type="checkbox"
-              id="ls-Wrap-Preview"
-              data-setting="lsWrapPreview"
-            />
-            <label for="ls-Wrap-Preview">Наглядный предпросмотр письма</label>
+            <div class="uwu-settings-card__item">
+              <p>Быстрые кнопки ответа и цитирования выделенного фрагмента текста в комментариях.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="more-Comment-Buttons" data-setting="moreCommentButtons" />
+                <label for="more-Comment-Buttons">Кнопки «Ответить» и «Цитировать»</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Оформление предпросмотра письма в стиле входящего сообщения.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="ls-Wrap-Preview" data-setting="lsWrapPreview" />
+                <label for="ls-Wrap-Preview">Наглядный предпросмотр письма</label>
+              </div>
+            </div>
           </div>
         </div>
 
         <div id="modules-panel">
-          <h2>Главное</h2>
-          <div>
-            <p>
-              Постоянное отображание Панели Расширенных Настроек в Игровой. Сама
-              по себе пустая.
-            </p>
-            <input
-              type="checkbox"
-              id="extended-settings-Panel"
-              data-setting="extendedSettingsPanel"
-            />
-            <label for="extended-settings-Panel"
-              >⚙️Панель Расширенных Настроек</label
-            >
-          </div>
+          <!-- ОСНОВНЫЕ НАДСТРОЙКИ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Основные надстройки</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>
-              Отображает уведомление в ⚙️Панели Расширенных настроек в Игровой.
-            </p>
-            <input
-              type="checkbox"
-              id="show-Update-Notification"
-              data-setting="showUpdateNotification"
-            />
-            <label for="show-Update-Notification"
-              >Уведомлять об обновлении Скрипта/Мода UwU</label
-            >
-          </div>
-
-          <div>
-            <p>
-              ⚙️Панели Расширенных Настроек не будет так скучно с рандомными
-              фразами.
-            </p>
-            <input
-              type="checkbox"
-              id="show-Splash-Screens"
-              data-setting="showSplashScreens"
-            />
-            <label for="show-Splash-Screens">Показывать Splash надписи.</label>
-          </div>
-
-          <div>
-            <p>
-              Скрывать или отображать расширенные подсказки к настройкам.
-              Привет, я та самая расширенная подсказка. Делает Настройки CatWar
-              UwU очень компактным на вид.
-            </p>
-            <input
-              type="checkbox"
-              id="extended-Hints"
-              data-setting="extendedHints"
-            />
-            <label for="extended-Hints">Расширенные подсказки</label>
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Сборник стилей</h2>
-          <p>Онлайн сборник стилей от Разработчика.</p>
-          <hr id="uwu-hr" class="uwu-hr" />
-          <div id="module-info">
-            <!-- Сюда модули -->
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Пользовательские звуки</h2>
-          <div>
-            <p>
-              Добавляйте собственные звуки по прямым ссылкам (mp3, ogg, wav) для
-              уведомлений.
-            </p>
-            <div
-              id="custom-sounds-container"
-              class="extended-settings-block"
-              style="padding: 10px; margin-top: 10px; width: 100%; box-sizing: border-box"
-            >
-              <div
-                id="custom-sounds-list"
-                style="
-                  display: flex;
-                  flex-direction: column;
-                  gap: 5px;
-                  margin-bottom: 10px;
-                "
-              >
-                <!-- Список звуков будет генерироваться здесь -->
+            <div class="uwu-settings-card__item">
+              <p>Отображает круглую плавающую кнопку для открытия панели расширенных настроек в Игровой.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="extended-settings-Panel" data-setting="extendedSettingsPanel" />
+                <label for="extended-settings-Panel">⚙️ Панель расширенных настроек</label>
               </div>
+            </div>
 
-              <!-- Адаптивный блок добавления (Mobile First) -->
-              <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch">
-                <input
-                  type="text"
-                  id="custom-sound-name"
-                  placeholder="Название (напр. Мяу)"
-                  style="flex: 1 1 100px; margin: 0; width: auto"
-                />
-                <input
-                  type="text"
-                  id="custom-sound-url"
-                  placeholder="URL (https://...)"
-                  style="flex: 3 1 150px; margin: 0; width: auto"
-                />
-                <button
-                  id="add-custom-sound-btn"
-                  class="uwu-button install-button"
-                  style="flex: 1 1 auto; margin: 0; padding: 0 15px; white-space: nowrap"
-                >
-                  Добавить
-                </button>
+            <div class="uwu-settings-card__item">
+              <p>Показывает индикатор и плашку в расширенном меню при выходе новой версии CatWar UwU.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-Update-Notification" data-setting="showUpdateNotification" />
+                <label for="show-Update-Notification">Уведомлять об обновлениях скрипта</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает случайные приветственные Splash-фразы в расширенном меню Игровой.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-Splash-Screens" data-setting="showSplashScreens" />
+                <label for="show-Splash-Screens">Показывать Splash-надписи</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Скрывать или показывать подробные подсказки к настройкам. Привет, я та самая подсказка! Без меня настройки
+                выглядят гораздо компактнее.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="extended-Hints" data-setting="extendedHints" />
+                <label for="extended-Hints">Расширенные подсказки</label>
               </div>
             </div>
           </div>
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Единое Хранилище</h2>
-          <div>
-            <p>
-              Включает синхронизацию скрипта/мода между разными доменами CatWar
-              через хранилище 'monkey плагинов.
-            </p>
-            <p>
-              <b>ВНИМАНИЕ:</b> При первом включении этой опции, ваши текущие
-              локальные настройки и данные с этого сайта (например, catwar.net)
-              будут скопированы в единое хранилище и станут основными.
-              Убедитесь, что вы включаете эту опцию на том сайте, настройки и
-              данные которого хотите сохранить.
-            </p>
-            <input
-              type="checkbox"
-              id="unified-storage"
-              data-setting="unifiedStorage"
-            />
-            <label for="unified-storage"
-              >Использовать единое хранилище (.net & .su)</label
-            >
+          <!-- СБОРНИК СТИЛЕЙ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Сборник стилей</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Онлайн-каталог дополнительных модулей и модификаций интерфейса от разработчика:</p>
+            </div>
+
+            <div id="module-info" class="uwu-modules-grid">
+              <!-- -->
+            </div>
           </div>
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Импорт/Экспорт</h2>
+          <!-- ПОЛЬЗОВАТЕЛЬСКИЕ ЗВУКИ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Пользовательские звуки</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>Импорт/Экспорт всех настроек.</p>
-            <input type="text" id="exportSettings" placeholder="Экспорт" />
-            <input type="text" id="importSettings" placeholder="Импорт" />
-            <button id="importSettingsButton" class="uwu-button install-button">
-              Вставить
-            </button>
+            <div class="uwu-settings-card__item">
+              <p>Добавляйте собственные звуки по прямым ссылкам (mp3, ogg, wav) для использования во всех списках
+                уведомлений.</p>
+              <div id="custom-sounds-container" class="uwu-custom-sounds-box">
+                <div id="custom-sounds-list">
+                  <!-- -->
+                </div>
+
+                <div class="uwu-settings-card__row" style="margin-top: 10px; align-items: stretch;">
+                  <input type="text" id="custom-sound-name" placeholder="Название (напр. Мяу)" style="flex: 1 1 120px;" />
+                  <input type="text" id="custom-sound-url" placeholder="URL аудиофайла (https://...)"
+                    style="flex: 3 1 220px;" />
+                  <button id="add-custom-sound-btn" class="uwu-button install-button"
+                    style="flex: 1 1 auto; padding: 0 16px; white-space: nowrap;">
+                    Добавить звук
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <p>
-              Удаляет все настройки. В очень редких случаях может помочь при
-              проблемных проблемах.
-            </p>
-            <button id="resetAllSaves" class="uwu-button remove-button">
-              Сброс сохранений
-            </button>
+          <!-- ЕДИНОЕ ХРАНИЛИЩЕ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Единое хранилище (.net & .su)</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Включает синхронизацию настроек, тем и карт минного поля между доменами CatWar (.net и .su).</p>
+
+              <div class="uwu-warning-note">
+                <b>ВНИМАНИЕ:</b> При первом включении ваши текущие настройки именно с <u>этого сайта</u> скопируются в общее
+                хранилище и станут главными.<br>
+                Обязательно включайте эту галочку на том домене (например, catwar.net), настройки которого хотите сохранить!
+              </div>
+
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="unified-storage" data-setting="unifiedStorage" />
+                <label for="unified-storage">Использовать единое хранилище (.net & .su)</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- УПРАВЛЕНИЕ ДАННЫМИ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Управление данными</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Полный резервный экспорт и импорт всех настроек скрипта/мода в формате JSON:</p>
+              <div class="uwu-settings-card__row">
+                <input type="text" id="exportSettings" placeholder="Экспорт" readonly style="width: 150px;" />
+                <input type="text" id="importSettings" placeholder="Импорт" style="width: 150px;" />
+                <button id="importSettingsButton" class="uwu-button install-button">Импортировать</button>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item" style="margin-top: 10px;">
+              <p>Удаляет вообще все сохранения и настройки мода UwU (темы, карты минного поля, историю БУ, звуки). В очень
+                редких случаях помогает при багах и проблемных проблемах:</p>
+              <div class="uwu-settings-card__row">
+                <button id="resetAllSaves" class="uwu-button remove-button">Сброс всех сохранений</button>
+              </div>
+            </div>
           </div>
         </div>
 
         <div id="personal-costumes-panel">
-          <h2>Личные костюмы</h2>
-          <p>
-            Здесь вы можете управлять костюмами для всех ваших котов. Костюмы
-            привязываются к конкретному коту.
-          </p>
-          <div>
-            <input
-              type="checkbox"
-              id="personal-costume-panel"
-              data-setting="personalCostumes"
-            />
-            <label for="personal-costume-panel"
-              >⚙️Включить персональные костюмы</label
-            >
-          </div>
-          <p>Добавляет кнопку «Сохранить костюм» при наведении на игрока.</p>
-          <div>
-            <input
-              type="checkbox"
-              id="show-costumes"
-              data-setting="showCostumesButtons"
-            />
-            <label for="show-costumes">Сохранять костюмы других игроков</label>
-          </div>
-          <br />
-          <hr id="uwu-hr" class="uwu-hr" />
+          <!-- НАСТРОЙКИ И СОХРАНЕНИЕ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Личные костюмы</h3>
+            <hr class="uwu-hr" />
 
-          <div class="costume-flex-box disabled">
-            <div class="costumeSettings" style="flex: 2;">
-              <div
-                id="cat-selector-container"
-                style="margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;"
-              >
-                <label>Выберите кота:</label>
-                <div
-                  style="display: flex; gap: 5px; align-items: center; margin-top: 5px;"
-                >
-                  <select
-                    id="current-cat-select"
-                    class="uwu-select-selected"
-                    style="width: 100%; margin: 0;"
-                  ></select>
-                  <button
-                    id="delete-cat-btn"
-                    class="uwu-button remove-button"
-                    title="Удалить этого кота из списка"
-                  >
-                    🗑️
-                  </button>
-                </div>
-
-                <label style="display: block; margin-top: 10px;"
-                  >Выберите позу для редактирования:</label
-                >
-                <select
-                  id="current-pose-select"
-                  class="uwu-select-selected"
-                  style="width: 100%; margin: 5px 0 0 0;"
-                >
-                  <!-- Пу-пу-пу -->
-                </select>
-                <div style="font-size: 0.8em; opacity: 0.6; margin-top: 2px;">
-                  * Позы сохраняются автоматически, когда вы меняете положение в
-                  Игровой.
-                </div>
-              </div>
-
-              <div>
-                <h3>Изменить Костюм:</h3>
-                <div
-                  style="font-size: 0.9em; opacity: 0.8; margin-bottom: 10px;"
-                >
-                  Загрузите изображение (желательно 200x300 или 2:3). Оно будет
-                  подогнано под размер.
-                </div>
-              </div>
-
-              <input
-                type="file"
-                id="costume-file"
-                accept="image/png"
-                class="uwu-button"
-                style="width: 100%; box-sizing: border-box;"
-              />
-              <br />
-
-              <div
-                style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 10px; margin-top: 10px;"
-              >
-                <button
-                  class="uwu-button install-button"
-                  id="changeCostume"
-                  style="flex: 1; white-space: normal; min-width: 120px;"
-                >
-                  Надеть на кота
-                </button>
-
-                <button
-                  class="uwu-button install-button"
-                  id="saveCostumeToNewSlot"
-                  style="flex: 1; white-space: normal; min-width: 120px;"
-                >
-                  Сохранить в библиотеку
-                </button>
+            <div class="uwu-settings-card__item">
+              <p>Здесь вы можете надевать свои уникальные костюмы, которые будут видны вам во время игры (К сожалению,
+                только вам...). Костюмы привязываются персонально к каждому вашему котику!</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="personal-costume-panel" data-setting="personalCostumes" />
+                <label for="personal-costume-panel">⚙️ Включить персональные костюмы</label>
               </div>
             </div>
 
-            <div
-              id="cat-preview-wrapper"
-              style="flex: 1; display: flex; flex-direction: column; align-items: center;"
-            >
-              <div
-                id="cat-image-container"
-                style="width: 100px; height: 150px; position: relative; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;"
-              ></div>
-              <p
-                id="cat-preview-name"
-                style="margin-top: 5px; margin-bottom: 5px; font-weight: bold; text-align: center;"
-              >
-                ...
+            <div class="uwu-settings-card__item">
+              <p>Добавляет «Сохранить костюм» в подсказку при наведении на игрока в Игровой.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-costumes" data-setting="showCostumesButtons" />
+                <label for="show-costumes">Сохранять костюмы других игроков</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- ПРИМЕРОЧНАЯ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Примерочная котика</h3>
+            <hr class="uwu-hr" />
+
+            <div class="costume-flex-box disabled">
+              <div class="costumeSettings" style="flex: 2; min-width: 260px;">
+                <div id="cat-selector-container"
+                  style="margin-bottom: 14px; border-bottom: 1px solid var(--ui-line, rgba(255,255,255,0.1)); padding-bottom: 14px;">
+                  <label style="font-weight: 600;">Выберите кота:</label>
+                  <div style="display: flex; gap: 8px; align-items: center; margin-top: 6px;">
+                    <select id="current-cat-select" class="uwu-select-selected" style="width: 100%; margin: 0;"></select>
+                    <button id="delete-cat-btn" class="uwu-button remove-button"
+                      title="Удалить этого кота из списка скрипта" style="padding: 6px 12px; margin: 0;">
+                      🗑️
+                    </button>
+                  </div>
+
+                  <label style="display: block; margin-top: 12px; font-weight: 600;">Выберите позу для
+                    редактирования:</label>
+                  <select id="current-pose-select" class="uwu-select-selected"
+                    style="width: 100%; margin: 6px 0 0 0;"></select>
+                  <div style="font-size: 12px; opacity: 0.7; margin-top: 6px; line-height: 1.4;">
+                    🐾 <i>Позы сохраняются сами, когда вы меняете положение (сидит, лежит, стоит) в Игровой.</i>
+                  </div>
+                </div>
+
+                <div class="uwu-settings-card__item">
+                  <h4 style="margin: 0; font-size: 15px;">Загрузить свой костюм:</h4>
+                  <p>Выберите PNG-изображение на прозрачном фоне (желательно 200x300 px или соотношение 2:3):</p>
+
+                  <input type="file" id="costume-file" accept="image/png" class="uwu-file-input" />
+
+                  <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+                    <button class="uwu-button install-button" id="changeCostume"
+                      style="flex: 1 1 140px; margin: 0; padding: 8px 12px;">
+                      Надеть на позу
+                    </button>
+
+                    <button class="uwu-button install-button" id="saveCostumeToNewSlot"
+                      style="flex: 1 1 140px; margin: 0; padding: 8px 12px;">
+                      В библиотеку (+)
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div id="cat-preview-wrapper"
+                style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 160px; padding: 10px; background: rgba(0,0,0,0.15); border: 1px solid var(--ui-line, rgba(255,255,255,0.1)); border-radius: 12px;">
+                <div id="cat-image-container"
+                  style="width: 100px; height: 150px; position: relative; border: 1px solid rgba(255,255,255,0.25); border-radius: 10px; overflow: hidden; background: rgba(0,0,0,0.2);">
+                </div>
+                <p id="cat-preview-name" style="margin: 8px 0 6px; font-weight: 700; text-align: center; font-size: 14px;">
+                  ...
+                </p>
+
+                <a class="uwu-button remove-button" id="removeCostume"
+                  style="font-size: 12px; padding: 4px 12px; text-decoration: none; color: inherit; margin: 0; cursor: pointer;"
+                  title="Снять текущий костюм с этой позы кота">
+                  Снять костюм
+                </a>
+              </div>
+            </div>
+
+            <div id="no-cats-warning" class="uwu-warning-note" style="display: none; text-align: center; margin-top: 14px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 16px;">🔍 Котик ещё не обнаружен!</h4>
+              <p style="margin: 0; line-height: 1.5;">
+                Чтобы скрипт увидел вашего персонажа:<br>
+                1. Убедитесь, что галочка «Включить персональные костюмы» стоит.<br>
+                2. Зайдите в <a href="/cw3/" target="_blank" style="text-decoration: underline;">Игровую</a> хотя бы один
+                раз.<br>
+                3. Вернитесь сюда и обновите страничку.
               </p>
-
-              <a
-                class="uwu-button remove-button"
-                id="removeCostume"
-                style="font-size: 0.8em; padding: 2px 10px; text-decoration: none; color: inherit; margin-top: 5px;"
-                title="Снять текущий костюм с этого кота"
-                >Снять костюм</a
-              >
             </div>
           </div>
 
-          <div
-            id="no-cats-warning"
-            style="display: none; background: rgba(255, 100, 100, 0.1); border: 1px solid rgba(255, 100, 100, 0.3); padding: 15px; border-radius: 10px; margin-top: 10px; text-align: center;"
-          >
-            <h3>🔍 Коты не найдены</h3>
-            <p>
-              Чтобы настроить костюм, нужно, чтобы скрипт "увидел" вашего
-              персонажа.
-            </p>
-            <p>
-              1. Убедитесь, что галочка "Включить персональные костюмы" стоит.
-            </p>
-            <p>
-              2. Зайдите в <a href="/cw3/" target="_blank">Игровую</a> хотя бы
-              один раз.
-            </p>
-            <p>3. Вернитесь сюда и обновите страницу.</p>
+          <!-- БИБЛИОТЕКА -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Библиотека костюмов</h3>
+            <hr class="uwu-hr" />
+            <div class="uwu-settings-card__item">
+              <p>Сохранённые наряды, которые можно быстро примерить на любую позу любого вашего кота:</p>
+            </div>
+            <div class="costume-flex-box" id="costume-gallery" style="margin-top: 8px;"></div>
           </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h3>Библиотека костюмов (общая):</h3>
-          <div class="costume-flex-box" id="costume-gallery"></div>
-          <hr id="uwu-hr" class="uwu-hr-head" />
         </div>
       </div>
     </div>
@@ -2886,35 +2141,40 @@ const uwusettings =
 const newsPanel =
   /* HTML */
   `
-    <div id="news-panel">
-      <button id="news-button">
-        🌿 v${current_uwu_version} - Крупная переделка и патч на новые реали CatWar'а!
-      </button>
-      <div id="news-list" style="display: none">
-        <h3>Главное</h3>
-        <p>— Теперь Настройки UwU "нативненько" встроены к остальным навигационным кнопкам в общих Настройках!</p>
-        <p>— Полный редизайн вкладки "Темы и цвета Игровой".</p>
-        <p>— Написан свой ColorPicker для крутых фич: поддержка прозрачности, история цветов и легкого встраивания. Теперь никаких левых ссылок на левые сайти!</p>
-        <p>— Все старые браузерные пикеры заменены на него!</p>
-        <p>— Быстрые ссылки починены и адаптированы под новую шапку Игровой.</p>
-        <p>— Полная переработка чата: В силу кодовых оснований, теперь само понятие "Современный чат" не актуально и
-          удалено, всё работает на нативный чат.
-        </p>
-        <p>— Показ ID котов в чате вынесен в отдельную самостоятельную настройку.</p>
-        <hr id="uwu-hr" class="uwu-hr" />
-        <h3>Внешний вид</h3>
-        <p>— Панель БР: вырезаны лишние костыли драга и высоты (Они теперь тоже нативные).</p>
-        <p>— Очищены устаревшие пункты в настройках.</p>
-        <hr id="uwu-hr" class="uwu-hr" />
-        <h3>Изменения кода</h3>
-        <p>— Удален прикол с Отображением душевых котов.</p>
-        <p>— Счётчик символов работает и с ванильной строкой.</p>
-        <p>— Возвращена подпись громкости уведомлений для Минного поля.</p>
-        <p>— Починен звук получения нового ЛС.</p>
-        <p>— Звуковое уведомление о Боевой стойке через Vue.</p>
-        <p>— "Подробнее о параметрах" теперь читают из Vue.</p>
-        <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: ??.??.26</p>
+    <div id="uwu-news-modal" class="uwu-modal-overlay" style="display: none;">
+      <div class="uwu-modal-card">
+        <div class="uwu-modal-header">
+          <h3>🌿 Обновление v${current_uwu_version}</h3>
+          <button type="button" class="uwu-modal-close" id="uwu-news-modal-close" title="Закрыть (Esc)">✖</button>
+        </div>
+        <hr class="uwu-hr" />
+        <div class="uwu-modal-body">
+          <h4>Главное</h4>
+          <p>— Теперь Настройки UwU "нативненько" встроены к остальным навигационным кнопкам в общих Настройках!</p>
+          <p>— А так же новейшее переоформление Настроек UwU! Надеюсь вам чуточку понравится...</p>
+          <p>— Новости и детали обновления теперь в небольшой кнопочке в Навигационной панели UwU.</p>
+          <p>— Полный редизайн вкладки "Темы и цвета Игровой".</p>
+          <p>— Написан свой ColorPicker для крутых фич: поддержка прозрачности, история цветов и легкого встраивания. Теперь никаких левых ссылок на левые сайты!</p>
+          <p>— Все старые браузерные пикеры заменены на него!</p>
+          <p>— Быстрые ссылки починены и адаптированы под новую шапку Игровой.</p>
+          <p>— Полная переработка чата: В силу кодовых оснований, теперь само понятие "Современный чат" не актуально и удалено, всё работает на нативный чат.</p>
+          <p>— Показ ID котов в чате вынесен в отдельную самостоятельную настройку.</p>
+          <hr class="uwu-hr" />
+          <h4>Внешний вид</h4>
+          <p>— Панель БР: вырезаны лишние костыли драга и высоты (Они теперь тоже нативные).</p>
+          <p>— Очищены устаревшие пункты в настройках.</p>
+          <p>— Удалены все лишние и ненужные темы настроек UwU... Простите, если кто-то пользовался. Но, возможно, в будущем что-то вернётся на кастомайз!</p>
+          <hr class="uwu-hr" />
+          <h4>Изменения кода</h4>
+          <p>— Удален прикол с Отображением душевых котов.</p>
+          <p>— Счётчик символов работает и с ванильной строкой.</p>
+          <p>— Возвращена подпись громкости уведомлений для Минного поля.</p>
+          <p>— Починен звук получения нового ЛС.</p>
+          <p>— Звуковое уведомление о Боевой стойке через Vue.</p>
+          <p>— "Подробнее о параметрах" теперь читают из Vue.</p>
+          <hr class="uwu-hr" />
+          <p class="uwu-modal-date">Дата выпуска: ??.??.26</p>
+        </div>
       </div>
     </div>
   `;
@@ -3023,24 +2283,101 @@ const css_uwu_main = `
   --uwu-gray-border-hover: rgba(127, 127, 127, 0.3);
 }
 
-#uwu-settings {
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
-
 #uwusettings {
   font-family: "Montserrat", sans-serif;
   margin: 0 auto;
   border-radius: 20px;
-  border: 1px solid var(--uwu-border);
+  border: none;
+  background: transparent;
+  color: var(--ui-text, #dddddd);
+}
+
+/* ===================== CARDS ===================== */
+.uwu-settings-card {
+  background: var(--ui-fill, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.1));
+  border-radius: var(--settings-radius, 14px);
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-sizing: border-box;
+}
+
+.uwu-settings-card__title {
+  margin: 0 0 2px 0;
+  font-size: 24px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.85;
+  color: var(--ui-text, #ffffff);
+}
+
+.uwu-settings-card__item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.uwu-settings-card__item p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  opacity: 0.72;
+}
+
+.uwu-settings-card__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ===================== TOGGLE SWITCHES ===================== */
+#uwusettings input[type="checkbox"] {
+  margin-right: 8px;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 36px;
+  height: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  flex-shrink: 0;
+  vertical-align: middle;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#uwusettings input[type="checkbox"]:checked {
+  background-color: var(--ui-accent, #90ff78a8);
+  border-color: var(--ui-accent, #90ff78a8);
+}
+
+#uwusettings input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: left 0.2s ease-in-out;
+}
+
+#uwusettings input[type="checkbox"]:checked::before {
+  left: calc(100% - 17px);
 }
 
 .main-settings-container {
   padding: 10px 15px 10px 15px;
-}
-
-#uwusettings-main {
-  padding: 0px 15px 0px 15px;
 }
 
 #news-panel {
@@ -3092,6 +2429,7 @@ const css_uwu_main = `
 }
 
 .uwu-hr {
+  width: -webkit-fill-available;
   border: var(--uwu-border) solid;
   border-radius: 15px;
 }
@@ -4030,6 +3368,325 @@ uwu-select-items {
   pointer-events: none;
   cursor: not-allowed;
 }
+
+.uwu-header-card {
+  padding: 16px 20px 14px;
+  margin-bottom: 16px;
+  gap: 0;
+}
+
+.uwu-header-card .main-settings-container {
+  padding: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.uwu-header-card .main-settings-container h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.uwu-header-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+}
+
+.uwu-header-pills button {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.uwu-header-pills button h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+}
+
+.uwu-header-pills button:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #ffffff;
+}
+
+.uwu-header-pills button.active {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.uwu-details-card {
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.1));
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 8px 12px;
+}
+
+#uwusettings input[type="text"] {
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.15)) !important;
+  color: var(--ui-text, #ffffff) !important;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+#uwusettings input[type="text"]:focus {
+  border-color: var(--ui-accent, #83e5ff) !important;
+  outline: none;
+}
+
+#uwusettings .uwu-select-selected {
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.15));
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: var(--ui-text, #ffffff);
+}
+
+#uwusettings-header-glass {
+  background: var(--ui-fill, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.1));
+  border-radius: var(--settings-radius, 14px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+}
+
+.uwu-textarea-field {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.15)) !important;
+  color: var(--ui-text, #ffffff) !important;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  resize: vertical;
+  outline: none;
+}
+
+.uwu-textarea-field:focus {
+  border-color: var(--ui-accent, #83e5ff) !important;
+}
+
+#uwusettings .notification-table {
+  width: 100%;
+  max-width: 100%;
+}
+
+#uwusettings .notification-table td {
+  padding: 8px 10px;
+  vertical-align: middle;
+}
+
+.uwu-modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.uwu-custom-sounds-box {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.1));
+  border-radius: 10px;
+  padding: 12px;
+  box-sizing: border-box;
+  margin-top: 6px;
+}
+
+.uwu-warning-note {
+  margin: 6px 0 10px 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  background: rgba(255, 193, 7, 0.08);
+  color: var(--ui-text, #ffffff);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.uwu-file-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.15)) !important;
+  color: var(--ui-text, #ffffff) !important;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  margin-top: 6px;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.uwu-file-input::file-selector-button {
+  background: var(--ui-fill, rgba(255, 255, 255, 0.1));
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.2));
+  border-radius: 6px;
+  color: inherit;
+  padding: 4px 10px;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.uwu-file-input::file-selector-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.costume-gallery-box {
+  background: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.1)) !important;
+  border-radius: 12px !important;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.costume-gallery-box:hover {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.uwu-version-badge {
+  background: var(--ui-fill, rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.15));
+  border-radius: 999px;
+  color: var(--ui-text, #ffffff);
+  padding: 6px 14px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 14px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(8px);
+}
+
+.uwu-version-badge:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.uwu-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  animation: uwuFadeIn 0.2s ease;
+}
+
+.uwu-modal-card {
+  background: rgba(26, 26, 26, 0.95);
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.15));
+  border-radius: 16px;
+  width: 100%;
+  max-width: 580px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  color: var(--ui-text, #ffffff);
+  font-family: "Montserrat", sans-serif;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.uwu-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px 10px;
+}
+
+.uwu-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #83e5ff;
+}
+
+.uwu-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.uwu-modal-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.uwu-modal-body {
+  padding: 0 20px 20px;
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.uwu-modal-body h4 {
+  margin: 12px 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  opacity: 0.9;
+}
+
+.uwu-modal-body p {
+  margin: 4px 0;
+  opacity: 0.8;
+}
+
+.uwu-modal-date {
+  margin-top: 14px !important;
+  font-size: 11px;
+  opacity: 0.5 !important;
+  text-align: right;
+}
+
+@keyframes uwuFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 `;
 
 document.head.insertAdjacentHTML(
@@ -4037,230 +3694,6 @@ document.head.insertAdjacentHTML(
   `<style id="css-uwu-main">${css_uwu_main}</style>`
 );
 
-// ====================================================================================================================
-//   . . . ПРОЗРАЧНЫЙ CSS СТИЛЬ . . .
-// ====================================================================================================================
-// Glassmorphism вперёд Glassmorphism вперёд Glassmorphism вперёд Glassmorphism вперёд Glassmorphism вперёд
-const css_uwu_glass =
-  // css
-  `
-#uwusettings {
-  backdrop-filter: blur(16px);
-  background-color: rgba(255, 255, 255, 0.03);
-}
-
-.uwu-button {
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 8px 15px;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin: 5px;
-  margin-left: 0px;
-  color: #d5d5d5;
-}
-
-.uwu-button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.uwu-range-slider {
-  width: 100%;
-  cursor: pointer;
-  -webkit-appearance: none;
-  background-color: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 10px;
-  height: 10px;
-  outline: none;
-}
-
-.uwu-range-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  cursor: pointer;
-}
-
-.uwu-range-slider::-webkit-slider-thumb {
-  transform: translateY(-35%);
-}
-
-#uwusettings input[type="checkbox"] {
-  margin-right: 8px;
-  appearance: none;
-  transform: translate(-10%, 30%);
-  width: 35px;
-  height: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-}
-
-#uwusettings input[type="checkbox"]:checked {
-  background-color: #90ff78a8;
-}
-
-#uwusettings input[type="checkbox"]:not(:checked) {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-#uwusettings input[type="checkbox"]:before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 4px;
-  transform: translate(-50%, -50%);
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: background-color 0.2s ease-in-out, left 0.2s ease-in-out;
-}
-
-#uwusettings input[type="checkbox"]:checked:before {
-  left: calc(100% - 4px);
-}
-
-#uwusettings input[type="text"] {
-  width: 150px;
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 8px;
-  border-radius: 10px;
-  outline: none;
-  margin: 5px;
-  margin-left: 0px;
-}
-`;
-// ====================================================================================================================
-//   . . . ТЁМНАЯ ТЕМА . . .
-// ====================================================================================================================
-const css_uwu_dark =
-  /* CSS */
-  `
-#uwusettings {
-  background-color: #242424;
-  color: #dddddd;
-}
-
-#uwusettings-header-glass {
-  border-radius: 20px 20px 0px 0px;
-  backdrop-filter: blur(16px) brightness(0.9);
-}
-
-#news-button {
-  color: #dddddd;
-}
-
-.uwu-button {
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 8px 15px;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin: 5px;
-  margin-left: 0px;
-}
-
-.uwu-button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.uwu-range-slider {
-  width: 100%;
-  cursor: pointer;
-  -webkit-appearance: none;
-  background-color: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 10px;
-  height: 10px;
-  outline: none;
-}
-
-.uwu-range-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  cursor: pointer;
-}
-
-.uwu-range-slider::-webkit-slider-thumb {
-  transform: translateY(-35%);
-}
-
-#uwusettings input[type="checkbox"] {
-  margin-right: 8px;
-  appearance: none;
-  transform: translate(-10%, 30%);
-  width: 35px;
-  height: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-}
-
-#uwusettings input[type="checkbox"]:checked {
-  background-color: #90ff78a8;
-}
-
-#uwusettings input[type="checkbox"]:not(:checked) {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-#uwusettings input[type="checkbox"]:before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 4px;
-  transform: translate(-50%, -50%);
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: background-color 0.2s ease-in-out, left 0.2s ease-in-out;
-}
-
-#uwusettings input[type="checkbox"]:checked:before {
-  left: calc(100% - 4px);
-}
-
-#uwusettings input[type="text"] {
-  width: 150px;
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 8px;
-  border-radius: 10px;
-  outline: none;
-  margin: 5px;
-  margin-left: 0px;
-}
-`;
-// ====================================================================================================================
-//   . . . КЛАССИЧЕСКАЯ ТЕМА . . .
-// ====================================================================================================================
-// лол а где
-const css_uwu_classic = `
-
-`;
 // ====================================================================================================================
 //   . . . топовой шрифт кто не согласен тому в глаз 👅👅👅👅👅👅бе бе бе мяу мяу мяу мяу мяу мяу . . .
 // ====================================================================================================================
@@ -5357,10 +4790,45 @@ function createSettingsBlock(blockId, content) {
 if (targetSettings.test(window.location.href)) {
   createSettingsBlock("uwu-settings", uwusettings);
 
-  const uwuSettingsElement = document.getElementById("uwusettings");
-  if (uwuSettingsElement) {
-    uwuSettingsElement.insertAdjacentHTML("beforeend", newsPanel);
+  // ====================================================================================================================
+  //  . . . КНОПКА НОВОСТЕЙ . . .
+  // ====================================================================================================================
+  /**
+   * Initializes the changelog modal dialog and binds open/close interactions.
+   * @returns {void}
+   */
+  function initNewsModal() {
+    if (document.getElementById("uwu-news-modal")) return;
+
+    document.body.insertAdjacentHTML("beforeend", newsPanel);
+
+    const modal = document.getElementById("uwu-news-modal");
+    const openBtn = document.getElementById("uwu-version-badge");
+    const closeBtn = document.getElementById("uwu-news-modal-close");
+
+    const openModal = () => {
+      modal.style.display = "flex";
+    };
+
+    const closeModal = () => {
+      modal.style.display = "none";
+    };
+
+    openBtn?.addEventListener("click", openModal);
+    closeBtn?.addEventListener("click", closeModal);
+
+    modal?.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.style.display === "flex") {
+        closeModal();
+      }
+    });
   }
+
+  initNewsModal();
 
   // ========================================================
   const paramTableBody = document.getElementById("color-settings-body");
@@ -5471,51 +4939,6 @@ if (targetSettings.test(window.location.href)) {
       }
     });
 
-  // ====================================================================================================================
-  //  . . . ТЕМА UWU . . .
-  // ====================================================================================================================
-  function applySettingsTheme(theme) {
-    let css;
-    const settingsBlock = document.getElementById("uwu-settings");
-    const settingsHeader = document.getElementById("uwusettings-header");
-
-    switch (theme) {
-      case "classic":
-        css = css_uwu_classic;
-        break;
-      case "dark":
-        css = css_uwu_dark;
-        const backgroundImageDark = window.getComputedStyle(
-          document.body
-        ).backgroundImage;
-        applyBackgroundImage(settingsHeader, backgroundImageDark);
-        settingsHeader.classList.add("header-rounded-image");
-        break;
-      case "glass":
-        css = css_uwu_glass;
-        const backgroundImageGlass = window.getComputedStyle(
-          document.body
-        ).backgroundImage;
-        applyBackgroundImage(settingsBlock, backgroundImageGlass);
-        settingsBlock.classList.add("main-rounded-image");
-        break;
-      default:
-        css = css_uwu_classic;
-        break;
-    }
-
-    const oldStyle = document.getElementById("css-uwu-theme");
-    if (oldStyle) {
-      oldStyle.remove();
-    }
-
-    document.head.insertAdjacentHTML(
-      "beforeend",
-      `<style id="css-uwu-theme">${css}</style>`
-    );
-  }
-
-  applySettingsTheme(settings.settingsTheme);
   // ====================================================================================================================
   //  . . . ШРИФТ ГРОМКОСТИ ЧАТА . . .
   // ====================================================================================================================
@@ -6878,14 +6301,6 @@ if (targetSettings.test(window.location.href)) {
       ]
     },
     {
-      id: "settingsTheme",
-      options: [
-        { id: "classic", name: "Классическая" },
-        { id: "dark", name: "Тёмная" },
-        { id: "glass", name: "Стеклянная" },
-      ]
-    },
-    {
       id: "climbingPanelOrientation",
       options: [
         { id: "vertical", name: "Вертикальный" },
@@ -7159,23 +6574,6 @@ if (targetSettings.test(window.location.href)) {
 
   renderCustomSoundsList();
 
-  // ====================================================================================================================
-  //  . . . КНОПКА НОВОСТЕЙ . . .
-  // ====================================================================================================================
-  window.addEventListener("load", () => {
-    const newsButton = document.getElementById("news-button");
-    const newsList = document.getElementById("news-list");
-
-    if (newsButton && newsList) {
-      newsButton.addEventListener("click", () => {
-        if (newsList.style.display === "none") {
-          newsList.style.display = "block";
-        } else {
-          newsList.style.display = "none";
-        }
-      });
-    }
-  });
   // ====================================================================================================================
   //   . . . КНОПКА ТЕСТА ЗВУКОВ . . .
   // ====================================================================================================================
@@ -10422,7 +9820,7 @@ if (targetCW3.test(window.location.href)) {
       contentContainer.innerHTML = `
         <h2 style="letter-spacing: 2px; margin-bottom: 15px;">ИСТОРИЯ БУ</h2>
         <div style="max-height: 400px; overflow-y: auto; border-radius: 5px; background: rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05);">
-          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
             <thead>
               <tr style="border-bottom: 2px solid #ffffff1a; opacity: 0.7; position: sticky; top: 0; background: #222; z-index: 1;">
                 <th style="padding: 8px;">Дата</th><th style="padding: 8px;">БУ/Макс</th><th style="padding: 8px;">Прирост</th>
