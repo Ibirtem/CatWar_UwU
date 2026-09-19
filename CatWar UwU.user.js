@@ -2154,10 +2154,9 @@ const newsPanel =
           <p>— А так же новейшее переоформление Настроек UwU! Надеюсь вам чуточку понравится...</p>
           <p>— Новости и детали обновления теперь в небольшой кнопочке в Навигационной панели UwU.</p>
           <p>— Полный редизайн вкладки "Темы и цвета Игровой".</p>
-          <p>— Написан свой ColorPicker для крутых фич: поддержка прозрачности, история цветов и легкого встраивания. Теперь никаких левых ссылок на левые сайты!</p>
-          <p>— Все старые браузерные пикеры заменены на него!</p>
+          <p>— Написан свой ColorPicker для крутых фич: поддержка прозрачности, история цветов и легкого встраивания. Теперь никаких левых ссылок на левые сайты! Все старые браузерные пикеры в моде заменены на него!</p>
           <p>— Быстрые ссылки починены и адаптированы под новую шапку Игровой.</p>
-          <p>— Полная переработка чата: В силу кодовых оснований, теперь само понятие "Современный чат" не актуально и удалено, всё работает на нативный чат.</p>
+          <p>— Переработка чата: В силу кодовых оснований, теперь само понятие "Современный чат" не актуально и удалено, всё работает на нативный чат.</p>
           <p>— Показ ID котов в чате вынесен в отдельную самостоятельную настройку.</p>
           <hr class="uwu-hr" />
           <h4>Внешний вид</h4>
@@ -2172,6 +2171,7 @@ const newsPanel =
           <p>— Починен звук получения нового ЛС.</p>
           <p>— Звуковое уведомление о Боевой стойке через Vue.</p>
           <p>— "Подробнее о параметрах" теперь читают из Vue.</p>
+          <p>— Добавлен Мини генератор погодных частиц. Используется для фона шапки Хедера Настроек UwU.</p>
           <hr class="uwu-hr" />
           <p class="uwu-modal-date">Дата выпуска: ??.??.26</p>
         </div>
@@ -3687,6 +3687,43 @@ uwu-select-items {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+.uwu-header-card {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.uwu-header-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.uwu-header-weather-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.uwu-header-weather-layer canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+}
+
+.uwu-header-weather-layer .firefly {
+  position: absolute !important;
+}
+
+.uwu-header-weather-layer .firefly-glow {
+  position: absolute !important;
+  filter: blur(16px) !important;
+}
 `;
 
 document.head.insertAdjacentHTML(
@@ -4784,11 +4821,317 @@ function createSettingsBlock(blockId, content) {
   return settingsElement;
 }
 
+/**
+ * Asynchronously preloads an array of image resources.
+ *
+ * @param {Array<{url: string, image?: HTMLImageElement}>} imageList - Array of objects with image URLs.
+ * @returns {Promise<void>} Resolves when all images in the list are fully loaded.
+ */
+function preloadWeatherImages(imageList) {
+  return Promise.all(
+    imageList.map(
+      (item) =>
+        new Promise((resolve) => {
+          if (item.image) return resolve();
+          const img = new Image();
+          img.src = item.url;
+          img.onload = () => {
+            item.image = img;
+            resolve();
+          };
+          img.onerror = () => resolve();
+        })
+    )
+  );
+}
+
+/**
+ * Ambient weather background on the settings header card.
+ *
+ * @param {HTMLElement} headerCard - The header container (#uwusettings-header).
+ * @returns {() => void} Teardown callback that stops animation and removes listeners.
+ */
+function initHeaderWeather(headerCard) {
+  if (!headerCard || headerCard.querySelector(".uwu-header-weather-layer")) return () => {};
+
+  const layer = document.createElement("div");
+  layer.className = "uwu-header-weather-layer";
+  headerCard.prepend(layer);
+
+  // 1. Weather Type
+  const allowedWeather = ["rain", "snow", "fireflies"];
+  let weatherType = uwuStorage.getItem("uwu_lastActiveWeather");
+  if (!allowedWeather.includes(weatherType)) {
+    weatherType = allowedWeather[Math.floor(Math.random() * allowedWeather.length)];
+  }
+
+  let animationFrameId = null;
+  let isRunning = false;
+  let isDestroyed = false;
+  let hasScattered = false;
+  let lastTick = performance.now();
+
+  // 2. Lifecycle Engine
+  let tick = () => {};
+
+  const startLoop = () => {
+    if (isRunning || isDestroyed) return;
+    isRunning = true;
+    lastTick = performance.now();
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = requestAnimationFrame(tick);
+  };
+
+  const stopLoop = () => {
+    isRunning = false;
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+  };
+
+  // 3. Fireflies
+  if (weatherType === "fireflies") {
+    const fireflyCount = 4;
+    const fireflies = [];
+
+    for (let i = 0; i < fireflyCount; i++) {
+      const dot = document.createElement("div");
+      dot.className = "firefly";
+      const glow = document.createElement("div");
+      glow.className = "firefly-glow";
+
+      layer.appendChild(dot);
+      layer.appendChild(glow);
+
+      fireflies.push({
+        dot,
+        glow,
+        x: 0,
+        y: 0,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        size: Math.random() * 3 + 4,
+      });
+    }
+
+    tick = () => {
+      if (!isRunning || isDestroyed) return;
+
+      const width = headerCard.clientWidth;
+      const height = headerCard.clientHeight;
+
+      fireflies.forEach((f) => {
+        f.x += f.vx;
+        f.y += f.vy;
+
+        if (f.x < 0 || f.x > width) f.vx *= -1;
+        if (f.y < 0 || f.y > height) f.vy *= -1;
+
+        f.dot.style.left = `${f.x}px`;
+        f.dot.style.top = `${f.y}px`;
+        f.dot.style.width = `${f.size}px`;
+        f.dot.style.height = `${f.size}px`;
+
+        f.glow.style.left = `${f.x - f.size * 2}px`;
+        f.glow.style.top = `${f.y - f.size * 2}px`;
+        f.glow.style.width = `${f.size * 5}px`;
+        f.glow.style.height = `${f.size * 5}px`;
+      });
+
+      animationFrameId = requestAnimationFrame(tick);
+    };
+
+    const scatterFireflies = (w, h) => {
+      fireflies.forEach((f) => {
+        f.x = Math.random() * w;
+        f.y = Math.random() * h;
+      });
+    };
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      if (isDestroyed) return;
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) {
+          if (!hasScattered) {
+            scatterFireflies(width, height);
+            hasScattered = true;
+          }
+          if (!document.hidden) startLoop();
+        } else {
+          stopLoop();
+        }
+      }
+    });
+    resizeObserver.observe(headerCard);
+
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        stopLoop();
+      } else if (headerCard.clientWidth > 0 && headerCard.clientHeight > 0) {
+        startLoop();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      isDestroyed = true;
+      stopLoop();
+      resizeObserver.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      layer.remove();
+    };
+  }
+
+  // 4. Rain & Snow
+  const canvas = document.createElement("canvas");
+  layer.appendChild(canvas);
+  const ctx = canvas.getContext("2d");
+
+  const isPixel = !!settings.minecraftStyle;
+  const pixelRainImages = [
+    { url: "https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/rain1.png" },
+    { url: "https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/rain2.png" },
+  ];
+  const pixelSnowImages = [
+    { url: "https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/snowflake1.png" },
+    { url: "https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/snowflake2.png" },
+  ];
+
+  if (isPixel) {
+    preloadWeatherImages(weatherType === "rain" ? pixelRainImages : pixelSnowImages);
+  }
+
+  const particleCount = weatherType === "rain" ? 12 : 9;
+
+  const createParticle = (spawnAcrossFullHeight = false) => {
+    const width = canvas.width || 300;
+    const height = canvas.height || 120;
+
+    if (weatherType === "rain") {
+      return {
+        x: Math.random() * width,
+        y: spawnAcrossFullHeight ? Math.random() * height : Math.random() * -40 - 10,
+        length: Math.random() * 8 + 14,
+        radiusX: 1.1,
+        speedY: Math.random() * 3 + 7,
+        speedX: Math.random() * 0.3 - 0.15,
+        size: Math.random() * 10 + 16,
+        img: pixelRainImages[Math.floor(Math.random() * pixelRainImages.length)],
+      };
+    }
+
+    return {
+      x: Math.random() * width,
+      y: spawnAcrossFullHeight ? Math.random() * height : Math.random() * -30 - 10,
+      size: isPixel ? Math.random() * 4 + 8 : Math.random() * 2 + 2,
+      speedY: Math.random() * 0.6 + 0.6,
+      speedX: (Math.random() - 0.5) * 0.35,
+      img: pixelSnowImages[Math.floor(Math.random() * pixelSnowImages.length)],
+    };
+  };
+
+  let particles = Array.from({ length: particleCount }, () => createParticle(false));
+
+  tick = (now) => {
+    if (!isRunning || isDestroyed) return;
+
+    const dt = Math.min((now - lastTick) / 1000, 0.1);
+    lastTick = now;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.y += p.speedY * 60 * dt;
+      p.x += p.speedX * 60 * dt;
+
+      if (weatherType === "rain") {
+        if (isPixel && p.img?.image) {
+          const img = p.img.image;
+          const scale = p.size / Math.max(img.width, img.height);
+          ctx.drawImage(img, p.x, p.y, img.width * scale, img.height * scale);
+        } else {
+          ctx.beginPath();
+          ctx.ellipse(p.x, p.y, p.radiusX, p.length, 0, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(165, 195, 230, 0.45)";
+          ctx.fill();
+        }
+
+        if (p.y > canvas.height + 25) {
+          particles[i] = createParticle(false);
+        }
+      } else {
+        if (isPixel && p.img?.image) {
+          const img = p.img.image;
+          ctx.drawImage(img, p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+        } else {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+          ctx.fill();
+        }
+
+        if (p.y > canvas.height + 15) {
+          particles[i] = createParticle(false);
+        }
+      }
+    }
+
+    animationFrameId = requestAnimationFrame(tick);
+  };
+
+  const resizeObserver = new ResizeObserver((entries) => {
+    if (isDestroyed) return;
+    for (const entry of entries) {
+      const { width, height } = entry.contentRect;
+      const w = Math.round(width);
+      const h = Math.round(height);
+
+      if (w > 0 && h > 0) {
+        canvas.width = w;
+        canvas.height = h;
+
+        if (!hasScattered) {
+          particles = Array.from({ length: particleCount }, () => createParticle(true));
+          hasScattered = true;
+        }
+
+        if (!document.hidden) startLoop();
+      } else {
+        stopLoop();
+      }
+    }
+  });
+  resizeObserver.observe(headerCard);
+
+  const onVisibilityChange = () => {
+    if (document.hidden) {
+      stopLoop();
+    } else if (headerCard.clientWidth > 0 && headerCard.clientHeight > 0) {
+      startLoop();
+    }
+  };
+  document.addEventListener("visibilitychange", onVisibilityChange);
+
+  return () => {
+    isDestroyed = true;
+    stopLoop();
+    resizeObserver.disconnect();
+    document.removeEventListener("visibilitychange", onVisibilityChange);
+    layer.remove();
+  };
+}
+
 // ====================================================================================================================
 //  . . . РАБОТА ПАНЕЛИ НАСТРОЕК . . .
 // ====================================================================================================================
 if (targetSettings.test(window.location.href)) {
   createSettingsBlock("uwu-settings", uwusettings);
+
+  const headerCard = document.getElementById("uwusettings-header");
+  if (headerCard) {
+    initHeaderWeather(headerCard);
+  }
 
   // ====================================================================================================================
   //  . . . КНОПКА НОВОСТЕЙ . . .
@@ -14619,16 +14962,18 @@ if (targetCW3.test(window.location.href)) {
     if (settings.weatherEnabled) {
       const match = skyStyle.match(/\/(\d+)\.png/);
       if (match) {
-        const skyNumber = parseInt(match[1]);
+        const skyNumber = parseInt(match[1], 10);
 
         switch (skyNumber) {
           case 2:
           case 4:
             currentWeather = settings.minecraftStyle ? "pixelRain" : "rain";
+            uwuStorage.setItem("uwu_lastActiveWeather", "rain");
             break;
           case 7:
           case 8:
             currentWeather = settings.minecraftStyle ? "pixelSnow" : "snow";
+            uwuStorage.setItem("uwu_lastActiveWeather", "snow");
             break;
           case 22:
             currentWeather = "northernLights";
@@ -15392,6 +15737,7 @@ if (targetCW3.test(window.location.href)) {
       currentHour === "night" &&
       currentSeason === "summer"
     ) {
+      uwuStorage.setItem("uwu_lastActiveWeather", "fireflies");
       if (fireflies.length === 0) {
         for (let i = 0; i < desiredNumberOfFireflies; i++) {
           fireflies.push(generateFirefly());
