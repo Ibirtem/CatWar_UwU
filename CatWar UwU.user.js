@@ -2153,7 +2153,7 @@ const newsPanel =
           <p>— Теперь Настройки UwU "нативненько" встроены к остальным навигационным кнопкам в общих Настройках!</p>
           <p>— А так же новейшее переоформление Настроек UwU! Надеюсь вам чуточку понравится...</p>
           <p>— Новости и детали обновления теперь в небольшой кнопочке в Навигационной панели UwU.</p>
-          <p>— Полный редизайн вкладки "Темы и цвета Игровой".</p>
+          <p>— Полный редизайн карточки "Темы и цвета Игровой".</p>
           <p>— Написан свой ColorPicker для крутых фич: поддержка прозрачности, история цветов и легкого встраивания. Теперь никаких левых ссылок на левые сайты! Все старые браузерные пикеры в моде заменены на него!</p>
           <p>— Быстрые ссылки починены и адаптированы под новую шапку Игровой.</p>
           <p>— Переработка чата: В силу кодовых оснований, теперь само понятие "Современный чат" не актуально и удалено, всё работает на нативный чат.</p>
@@ -3409,7 +3409,7 @@ uwu-select-items {
 
 .uwu-header-pills button h2 {
   margin: 0;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -3713,6 +3713,8 @@ uwu-select-items {
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
   display: block;
 }
 
@@ -4916,8 +4918,8 @@ function initHeaderWeather(headerCard) {
     tick = () => {
       if (!isRunning || isDestroyed) return;
 
-      const width = headerCard.clientWidth;
-      const height = headerCard.clientHeight;
+      const width = layer.clientWidth;
+      const height = layer.clientHeight;
 
       fireflies.forEach((f) => {
         f.x += f.vx;
@@ -4950,10 +4952,12 @@ function initHeaderWeather(headerCard) {
     const resizeObserver = new ResizeObserver((entries) => {
       if (isDestroyed) return;
       for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        if (width > 0 && height > 0) {
+        const w = Math.round(entry.contentRect.width);
+        const h = Math.round(entry.contentRect.height);
+
+        if (w > 0 && h > 0) {
           if (!hasScattered) {
-            scatterFireflies(width, height);
+            scatterFireflies(w, h);
             hasScattered = true;
           }
           if (!document.hidden) startLoop();
@@ -4962,12 +4966,12 @@ function initHeaderWeather(headerCard) {
         }
       }
     });
-    resizeObserver.observe(headerCard);
+    resizeObserver.observe(layer);
 
     const onVisibilityChange = () => {
       if (document.hidden) {
         stopLoop();
-      } else if (headerCard.clientWidth > 0 && headerCard.clientHeight > 0) {
+      } else if (layer.clientWidth > 0 && layer.clientHeight > 0) {
         startLoop();
       }
     };
@@ -5004,8 +5008,8 @@ function initHeaderWeather(headerCard) {
   const particleCount = weatherType === "rain" ? 12 : 9;
 
   const createParticle = (spawnAcrossFullHeight = false) => {
-    const width = canvas.width || 300;
-    const height = canvas.height || 120;
+    const width = canvas.width || layer.clientWidth || 300;
+    const height = canvas.height || layer.clientHeight || 120;
 
     if (weatherType === "rain") {
       return {
@@ -5083,9 +5087,8 @@ function initHeaderWeather(headerCard) {
   const resizeObserver = new ResizeObserver((entries) => {
     if (isDestroyed) return;
     for (const entry of entries) {
-      const { width, height } = entry.contentRect;
-      const w = Math.round(width);
-      const h = Math.round(height);
+      const w = Math.round(entry.contentRect.width);
+      const h = Math.round(entry.contentRect.height);
 
       if (w > 0 && h > 0) {
         canvas.width = w;
@@ -5102,12 +5105,13 @@ function initHeaderWeather(headerCard) {
       }
     }
   });
-  resizeObserver.observe(headerCard);
+
+  resizeObserver.observe(layer);
 
   const onVisibilityChange = () => {
     if (document.hidden) {
       stopLoop();
-    } else if (headerCard.clientWidth > 0 && headerCard.clientHeight > 0) {
+    } else if (layer.clientWidth > 0 && layer.clientHeight > 0) {
       startLoop();
     }
   };
