@@ -140,8 +140,9 @@ const uwuDefaultSettings = {
   automaticActionsRedesign: false,
   commentsAvatars: false,
 
+  newChat: false,
   chatHeight: "275",
-  showChatId: true,
+  showChatId: false,
   reverseChat: false,
   newChatInput: false,
   showChatCharCounter: false,
@@ -948,23 +949,19 @@ const uwusettings =
             <hr class="uwu-hr" />
 
             <div class="uwu-settings-card__item">
-              <p>Компактная трёхколоночная сетка интерфейса Игровой с возможностью настройки порядка.</p>
+              <p>Свободный модульный HUD: позволяет перетаскивать блоки и менять их размеры прямо в Игровой с умным магнетизмом. 
+              Чтобы редактировать Игровую, зайдите в неё и раскройте контекстное окно быстрых настроек UwU, они прямо в навигационной панели Игровой.</p>
               <div class="uwu-settings-card__row">
                 <input type="checkbox" id="custom-layout" data-setting="customLayout" />
-                <label for="custom-layout">Компактный редизайн</label>
+                <label for="custom-layout">Включить Редизайн Игровой</label>
               </div>
             </div>
 
-            <div id="layout-customizer" style="margin: 8px 0;">
-              <div id="layout-preview">
-                <div class="column left"></div>
-                <div class="column center">
-                  <div class="block center-block">Поле Игровой</div>
-                </div>
-                <div class="column right"></div>
-                <ul id="block-list"></ul>
+            <div class="uwu-settings-card__item" style="margin-top: 2px;">
+              <p>Сброс сохранённых координат и размеров всех окон интерфейса к базовым значениям:</p>
+              <div class="uwu-settings-card__row">
+                <button id="reset-hud-layout-btn" class="uwu-button remove-button">Сбросить расположение окон HUD</button>
               </div>
-              <button id="reset-layout-button" class="uwu-button remove-button">Сбросить макет</button>
             </div>
 
             <div class="uwu-settings-card__item">
@@ -985,14 +982,6 @@ const uwusettings =
             </div>
 
             <div class="uwu-settings-card__item">
-              <p>Разделяет единую таблицу информации на отдельные независимые блоки.</p>
-              <div class="uwu-settings-card__row">
-                <input type="checkbox" id="slice-info-block" data-setting="sliceInfoBlock" />
-                <label for="slice-info-block">Разделить блок Информации</label>
-              </div>
-            </div>
-
-            <div class="uwu-settings-card__item">
               <p>Компактное отображение шкал потребностей и навыков в две колонки бок о бок.</p>
               <div class="uwu-settings-card__row">
                 <input type="checkbox" id="two-column-parameters" data-setting="twoColumnParameters" />
@@ -1005,14 +994,6 @@ const uwusettings =
               <div class="uwu-settings-card__row">
                 <input type="checkbox" id="hide-relatives-default" data-setting="hideRelativesByDefault" />
                 <label for="hide-relatives-default">Скрывать Родственные связи по умолчанию</label>
-              </div>
-            </div>
-
-            <div class="uwu-settings-card__item">
-              <p>Скругляет углы основных панелей и блоков Игровой.</p>
-              <div class="uwu-settings-card__row">
-                <input type="checkbox" id="edge-trim-blocks" data-setting="edgeTrimBlocks" />
-                <label for="edge-trim-blocks">Скругление блоков</label>
               </div>
             </div>
           </div>
@@ -1078,10 +1059,72 @@ const uwusettings =
             <hr class="uwu-hr" />
 
             <div class="uwu-settings-card__item">
-              <p>Отображает уникальный числовой ID рядом с ником персонажа.</p>
+              <p>Альтернативное поле ввода с поддержкой растягивания по высоте для больших текстов.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="new-chat-input" data-setting="newChatInput" />
+                <label for="new-chat-input">Альтернативная строка ввода сообщений</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Индикатор лимита длины текста в строке ввода.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-chat-char-counter" data-setting="showChatCharCounter" />
+                <label for="show-chat-char-counter">Показывать счётчик символов в чате</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Игнорирует цвета сообщений других игроков, отображая текст цветом текущей темы оформления (работает для обоих типов чата).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="disable-custom-chat-colors" data-setting="disableCustomChatColors" />
+                <label for="disable-custom-chat-colors">Не красить в кастомные цвета текст чата</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- СОВРЕМЕННЫЙ ЧАТ UWU -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Современный чат UwU</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Собственный улучшенный и расширенный Чат Игровой. <b>Все пункты ниже работают только при включении этой опции:</b></p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="new-chat" data-setting="newChat" />
+                <label for="new-chat">Включить Современный чат</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает ID кота рядом с ником персонажа.</p>
               <div class="uwu-settings-card__row">
                 <input type="checkbox" id="show-chat-id" data-setting="showChatId" />
                 <label for="show-chat-id">Показывать ID в чате</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает должность кота в скобках после его имени.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-chat-ranks" data-setting="showChatRanks" />
+                <label for="show-chat-ranks">Показывать должности</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Добавляет время отправки перед текстом сообщения.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-chat-time" data-setting="showChatTime" />
+                <label for="show-chat-time">Показывать время сообщений</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Инвертирует порядок сообщений (новые снизу) и переносит ввод под чат.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="reverse-Chat" data-setting="reverseChat" />
+                <label for="reverse-Chat">Инверсия чата</label>
               </div>
             </div>
 
@@ -1108,54 +1151,6 @@ const uwusettings =
               <p>Псевдонимы и клички для упоминаний (через запятую: Кот, Котик, Мяу):</p>
               <input type="text" id="names-For-Notification" placeholder="Кот, Котик..." data-setting="namesForNotification"
                 style="width: 100%; max-width: 380px;" />
-            </div>
-
-            <div class="uwu-settings-card__item">
-              <p>Инвертирует порядок сообщений (новые снизу) и переносит ввод под чат.</p>
-              <div class="uwu-settings-card__row">
-                <input type="checkbox" id="reverse-Chat" data-setting="reverseChat" />
-                <label for="reverse-Chat">Инверсия чата</label>
-              </div>
-            </div>
-
-            <div class="uwu-settings-card__item">
-              <p>Альтернативное поле ввода с поддержкой растягивания по вертикали.</p>
-              <div class="uwu-settings-card__row">
-                <input type="checkbox" id="new-chat-input" data-setting="newChatInput" />
-                <label for="new-chat-input">Альтернативная строка ввода сообщений</label>
-              </div>
-            </div>
-
-            <div class="uwu-settings-card__item">
-              <p>Индикатор лимита длины текста в строке ввода.</p>
-              <div class="uwu-settings-card__row">
-                <input type="checkbox" id="show-chat-char-counter" data-setting="showChatCharCounter" />
-                <label for="show-chat-char-counter">Показывать счётчик символов в чате</label>
-              </div>
-            </div>
-
-            <div class="uwu-settings-card__item">
-              <p>Отображает должность кота в скобках после его имени.</p>
-              <div class="uwu-settings-card__row">
-                <input type="checkbox" id="show-chat-ranks" data-setting="showChatRanks" />
-                <label for="show-chat-ranks">Показывать должности</label>
-              </div>
-            </div>
-
-            <div class="uwu-settings-card__item">
-              <p>Добавляет штамп времени перед текстом сообщения.</p>
-              <div class="uwu-settings-card__row">
-                <input type="checkbox" id="show-chat-time" data-setting="showChatTime" />
-                <label for="show-chat-time">Показывать время сообщений</label>
-              </div>
-            </div>
-
-            <div class="uwu-settings-card__item">
-              <p>Игнорирует цвета сообщений других игроков, оставляя только их шрифты.</p>
-              <div class="uwu-settings-card__row">
-                <input type="checkbox" id="disable-custom-chat-colors" data-setting="disableCustomChatColors" />
-                <label for="disable-custom-chat-colors">Не красить в кастомные цвета текст чата</label>
-              </div>
             </div>
           </div>
 
@@ -2154,15 +2149,16 @@ const newsPanel =
           <p>— А так же новейшее переоформление Настроек UwU! Надеюсь вам чуточку понравится...</p>
           <p>— Новости и детали обновления теперь в небольшой кнопочке в Навигационной панели UwU.</p>
           <p>— Полный редизайн карточки "Темы и цвета Игровой".</p>
+          <p>— Полная перепись Редизайна Игровой! Теперь это полноценный модульный HUD-редактор. Теперь можно перетаскивать блоки как угодно, и куда угодно, играясь с их положением как вам вздумается. Включается он кнопкой «Редактировать интерфейс» прямо в выпадающем меню UwU на верхней навигационной панели Игровой.</p>
           <p>— Написан свой ColorPicker для крутых фич: поддержка прозрачности, история цветов и легкого встраивания. Теперь никаких левых ссылок на левые сайты! Все старые браузерные пикеры в моде заменены на него!</p>
           <p>— Быстрые ссылки починены и адаптированы под новую шапку Игровой.</p>
-          <p>— Переработка чата: В силу кодовых оснований, теперь само понятие "Современный чат" не актуально и удалено, всё работает на нативный чат.</p>
           <p>— Показ ID котов в чате вынесен в отдельную самостоятельную настройку.</p>
           <hr class="uwu-hr" />
           <h4>Внешний вид</h4>
           <p>— Панель БР: вырезаны лишние костыли драга и высоты (Они теперь тоже нативные).</p>
           <p>— Очищены устаревшие пункты в настройках.</p>
           <p>— Удалены все лишние и ненужные темы настроек UwU... Простите, если кто-то пользовался. Но, возможно, в будущем что-то вернётся на кастомайз!</p>
+          <p>— Функции Современного чата вынесены в отдельный блок для визуального понимания и удобства.</p>
           <hr class="uwu-hr" />
           <h4>Изменения кода</h4>
           <p>— Удален прикол с Отображением душевых котов.</p>
@@ -2172,6 +2168,7 @@ const newsPanel =
           <p>— Звуковое уведомление о Боевой стойке через Vue.</p>
           <p>— "Подробнее о параметрах" теперь читают из Vue.</p>
           <p>— Добавлен Мини генератор погодных частиц. Используется для фона шапки Хедера Настроек UwU.</p>
+          <p>— Минное поле теперь не застревает под Навигационной панелькой в Игровой.</p>
           <hr class="uwu-hr" />
           <p class="uwu-modal-date">Дата выпуска: ??.??.26</p>
         </div>
@@ -3437,8 +3434,6 @@ uwu-select-items {
 }
 
 #uwusettings input[type="text"] {
-  background: rgba(0, 0, 0, 0.25) !important;
-  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.15)) !important;
   color: var(--ui-text, #ffffff) !important;
   border-radius: 8px;
   padding: 6px 10px;
@@ -3726,6 +3721,332 @@ uwu-select-items {
   position: absolute !important;
   filter: blur(16px) !important;
 }
+
+/* ===================== NAVBAR UWU BUTTON & DROPDOWN ===================== */
+/* ===================== PREMIUM GLASS NAVBAR MENU ===================== */
+.game-topbar-uwu-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--ds-info-text, #ffffff);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  backdrop-filter: blur(8px);
+}
+
+.game-topbar-uwu-btn:hover,
+.game-topbar-uwu-btn.active {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #83e5ff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+.game-topbar-uwu-btn img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.uwu-nav-popover {
+  position: absolute;
+  z-index: 10005;
+  width: 300px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(20, 22, 28, 0.72) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+  animation: uwuPopIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes uwuPopIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.uwu-popover-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.uwu-popover-title-badge {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Splash phrase as subtle italic quote */
+.uwu-popover-splash {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  font-style: italic;
+  opacity: 0.85;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Redesign HUD Action Button */
+.uwu-hud-trigger-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 14px;
+  border-radius: 12px;
+  background: rgba(131, 229, 255, 0.25);
+  border: 1px solid rgba(131, 229, 255, 0.4);
+  color: #ffffff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+.uwu-hud-trigger-btn:hover {
+  background: rgba(131, 229, 255, 0.38);
+  border-color: rgba(131, 229, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+/* Fast Styles with Toggle Switches */
+.uwu-fast-styles-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.uwu-style-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease;
+}
+
+.uwu-style-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* iOS-like compact switch */
+.uwu-switch {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.uwu-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.uwu-switch-slider {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.uwu-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.uwu-switch input:checked + .uwu-switch-slider {
+  background-color: #41cd70;
+  border-color: #41cd70;
+}
+
+.uwu-switch input:checked + .uwu-switch-slider:before {
+  transform: translateX(14px);
+}
+
+/* Collapsible Manual Weather inside popover */
+.uwu-popover-details {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.uwu-popover-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  opacity: 0.8;
+  outline: none;
+}
+
+.uwu-popover-details summary:hover {
+  opacity: 1;
+}
+
+.uwu-footer-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  opacity: 0.7;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 4px 0;
+  transition: opacity 0.2s ease;
+}
+
+.uwu-footer-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* ===================== HUD MODULAR CANVAS & EDITOR ===================== */
+.uwu-hud-canvas {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  min-height: 100vh !important;
+}
+
+.uwu-hud-canvas > tbody {
+  display: block !important;
+  position: relative !important;
+  width: 100% !important;
+  min-height: 100vh !important;
+}
+
+.uwu-hud-block {
+  display: block !important;
+  position: absolute !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+.uwu-hud-toolbar {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(18, 18, 18, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  font-size: 13px;
+  font-family: "Montserrat", sans-serif;
+  user-select: none;
+}
+
+/* Block Drag Overlay & Handles */
+.uwu-hud-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10000;
+  border: 2px dashed #83e5ff;
+  background: rgba(131, 229, 255, 0.08);
+  border-radius: inherit;
+  cursor: move;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 6px;
+  pointer-events: auto !important;
+}
+
+.uwu-hud-overlay-title {
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #83e5ff;
+  pointer-events: none;
+}
+
+.uwu-hud-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #ffffff;
+  border: 2px solid #000000;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+  border-radius: 2px;
+  box-sizing: border-box;
+  z-index: 10001;
+}
+
+.uwu-hud-handle--se { bottom: -6px; right: -6px; cursor: nwse-resize; }
+.uwu-hud-handle--sw { bottom: -6px; left: -6px; cursor: nesw-resize; }
+.uwu-hud-handle--ne { top: -6px; right: -6px; cursor: nesw-resize; }
+.uwu-hud-handle--nw { top: -6px; left: -6px; cursor: nwse-resize; }
+.uwu-hud-handle--e  { top: calc(50% - 6px); right: -6px; cursor: ew-resize; }
+.uwu-hud-handle--s  { bottom: -6px; left: calc(50% - 6px); cursor: ns-resize; }
+
+/* Smart Alignment Guide Lines */
+.uwu-smart-guide {
+  position: absolute;
+  z-index: 99999;
+  background-color: #fc872a;
+  pointer-events: none;
+  display: none;
+}
+.uwu-smart-guide--x { height: 1px; left: 0; right: 0; box-shadow: 0 0 6px #fc872a; }
+.uwu-smart-guide--y { width: 1px; top: 0; bottom: 0; box-shadow: 0 0 6px #fc872a; }
 `;
 
 document.head.insertAdjacentHTML(
@@ -3869,7 +4190,7 @@ function watchVueData(path, callback, options = { deep: true }) {
   }
 
 // ====================================================================================================================
-//   . . . VUE  . . .
+//   . . . РАБОТА С ИЗОБРАЖЕНИЯМИ  . . .
 // ====================================================================================================================
 
 /**
@@ -4726,7 +5047,7 @@ function setupNativeSettingsIntegration(settingsElement) {
   let isUwuActive = false;
 
   /**
-   * Activates the UwU tab, highlights the nav button, and hides native Vue setting panels.
+   * Activates the UwU tab, highlights the nav button, and hides Vue setting panels.
    */
   function activateUwuTab() {
     isUwuActive = true;
@@ -6386,6 +6707,7 @@ if (targetSettings.test(window.location.href)) {
     "uwu_settings",
     "uwu_version",
     "uwu_layoutSettings",
+    "uwu_hud_layout",
     "uwu_climbingPanelState",
     "uwu_moduleStates",
     "uwu_fightPanelPosition",
@@ -6978,6 +7300,7 @@ if (targetSettings.test(window.location.href)) {
     "uwu_settings",
     "uwu_version",
     "uwu_layoutSettings",
+    "uwu_hud_layout",
     "uwu_climbingPanelState",
     "uwu_moduleStates",
     "uwu_fightPanelPosition",
@@ -7143,158 +7466,30 @@ if (targetSettings.test(window.location.href)) {
       subtree: true,
     });
   }
+
   // ====================================================================================================================
-  //  . . . МАКЕТ КАСТОМИЗАЦИИ ИГРОВОЙ . . .
+  //  . . . СБРОС КООРДИНАТ HUD . . .
   // ====================================================================================================================
-  const blockNames = {
-    tr_info: "Информация",
-    tr_tos: "Погода",
-    tr_chat: "Чат",
-    tr_actions: "Действия",
-    tr_mouth: "Во рту",
-    // 'tr_sky': 'Небо',
-  };
-  const leftColumn = document.querySelector("#layout-customizer .column.left");
-  const rightColumn = document.querySelector(
-    "#layout-customizer .column.right"
-  );
 
-  function saveLayoutSettings() {
-    const leftBlocks = Array.from(leftColumn.querySelectorAll(".block")).map(
-      (block) => block.classList[1]
-    );
-    const rightBlocks = Array.from(rightColumn.querySelectorAll(".block")).map(
-      (block) => block.classList[1]
-    );
+  /**
+   * Binds the reset button in the settings panel to clear stored HUD layout coordinates.
+   *
+   * @returns {void}
+   */
+  function initHudSettingsReset() {
+    const resetBtn = document.getElementById("reset-hud-layout-btn");
+    if (!resetBtn) return;
 
-    const layoutSettings = {
-      leftBlocks,
-      rightBlocks,
-    };
-
-    uwuStorage.setItem("uwu_layoutSettings", layoutSettings);
-  }
-
-  function createBlockElement(blockId) {
-    const blockElement = document.createElement("div");
-    blockElement.classList.add("block", blockId);
-
-    const blockName = document.createElement("span");
-    blockName.textContent = blockNames[blockId];
-    blockElement.appendChild(blockName);
-
-    const controlsWrapper = document.createElement("div");
-    controlsWrapper.classList.add("controls");
-
-    if (blockId === "tr_info") {
-      const moveInfoButton = document.createElement("button");
-      moveInfoButton.textContent = "⏪Переместить⏩";
-      moveInfoButton.classList.add("move-info", "install-button");
-      moveInfoButton.addEventListener("click", () => {
-        swapColumns(blockElement);
-        saveLayoutSettings();
-      });
-      controlsWrapper.appendChild(moveInfoButton);
-    } else {
-      const moveUpButton = document.createElement("button");
-      moveUpButton.textContent = "🔼Вверх";
-      moveUpButton.classList.add("move-up", "install-button");
-      moveUpButton.addEventListener("click", () => {
-        const previousBlock = blockElement.previousElementSibling;
-        if (previousBlock) {
-          blockElement.parentNode.insertBefore(blockElement, previousBlock);
-          saveLayoutSettings();
-        }
-      });
-      controlsWrapper.appendChild(moveUpButton);
-
-      const moveDownButton = document.createElement("button");
-      moveDownButton.textContent = "🔽Вниз";
-      moveDownButton.classList.add("move-down", "install-button");
-      moveDownButton.addEventListener("click", () => {
-        const nextBlock = blockElement.nextElementSibling;
-        if (nextBlock) {
-          blockElement.parentNode.insertBefore(nextBlock, blockElement);
-          saveLayoutSettings();
-        }
-      });
-      controlsWrapper.appendChild(moveDownButton);
-    }
-
-    blockElement.appendChild(controlsWrapper);
-    return blockElement;
-  }
-
-  function swapColumns(blockElement) {
-    if (blockElement.parentNode === leftColumn) {
-      const rightColumnBlocks = Array.from(rightColumn.children);
-      rightColumn.innerHTML = "";
-      rightColumn.appendChild(blockElement);
-      rightColumnBlocks.forEach((block) => leftColumn.appendChild(block));
-    } else {
-      const leftColumnBlocks = Array.from(leftColumn.children);
-      leftColumn.innerHTML = "";
-      leftColumn.appendChild(blockElement);
-      leftColumnBlocks.forEach((block) => rightColumn.appendChild(block));
-    }
-    saveLayoutSettings();
-  }
-
-  const resetLayoutButton = document.getElementById("reset-layout-button");
-  resetLayoutButton.addEventListener("click", () => {
-    const confirmReset = confirm(
-      "Вы уверены, что хотите сбросить расположение блоков?"
-    );
-    if (confirmReset) {
-      const defaultSettings = getDefaultLayoutSettings();
-      uwuStorage.setItem("uwu_layoutSettings", defaultSettings);
-      location.reload();
-    }
-  });
-
-  function getDefaultLayoutSettings() {
-    return {
-      leftBlocks: ["tr_info"],
-      rightBlocks: ["tr_tos", "tr_chat", "tr_actions", "tr_mouth"],
-    };
-  }
-
-  function loadLayoutSettings() {
-    try {
-      const savedSettings = uwuStorage.getItem("uwu_layoutSettings");
-      if (savedSettings) {
-        const { leftBlocks, rightBlocks } = savedSettings;
-
-        leftColumn.innerHTML = "";
-        rightColumn.innerHTML = "";
-
-        leftBlocks.forEach((blockId) => {
-          const blockElement = createBlockElement(blockId);
-          leftColumn.appendChild(blockElement);
-        });
-
-        rightBlocks.forEach((blockId) => {
-          const blockElement = createBlockElement(blockId);
-          rightColumn.appendChild(blockElement);
-        });
-      } else {
-        const defaultSettings = getDefaultLayoutSettings();
-        uwuStorage.setItem("uwu_layoutSettings", defaultSettings);
-
-        defaultSettings.leftBlocks.forEach((blockId) => {
-          leftColumn.appendChild(createBlockElement(blockId));
-        });
-
-        defaultSettings.rightBlocks.forEach((blockId) => {
-          rightColumn.appendChild(createBlockElement(blockId));
-        });
+    resetBtn.addEventListener("click", () => {
+      if (confirm("Вы уверены, что хотите сбросить расположение и размеры всех окон интерфейса к значениям по умолчанию?")) {
+        uwuStorage.removeItem("uwu_hud_layout");
+        alert("Расположение окон интерфейса сброшено к исходному виду.");
       }
-    } catch (error) {
-      console.error("Ошибка при загрузке настроек макета:", error);
-    }
+    });
   }
 
-  loadLayoutSettings();
+  initHudSettingsReset();
+
   // ====================================================================================================================
   //  . . . РЕДАКТОР ВКЛАДОК И ТАБЛИЦ МИННОГО ПОЛЯ . . .
   // ====================================================================================================================
@@ -8027,7 +8222,13 @@ if (targetCW3.test(window.location.href)) {
         background: black;
       } 
 
-      #tr_actions > td, #tr_mouth > td, #location, .small {
+      #tr_actions > td, 
+      #tr_mouth > td, 
+      #location, 
+      .small,
+      #parameter.uwu-tile-block,
+      #history.uwu-tile-block,
+      #family.uwu-tile-block {
         background-color: ${theme?.blocksColor || ""};
       }
 
@@ -8169,13 +8370,21 @@ if (targetCW3.test(window.location.href)) {
   //   . . . КОРРЕКЦИЯ ЦВЕТОВ И ШРИФТОВ ВАНИЛЬНОГО ЧАТА . . .
   // ====================================================================================================================
   function applyVanillaChatFixes() {
-    if (!settings.userTheme && !settings.disableCustomChatColors && !settings.useUserFonts) return;
+    if (
+      !settings.userTheme &&
+      !settings.disableCustomChatColors &&
+      !settings.useUserFonts
+    )
+      return;
 
     const style = document.createElement("style");
     style.id = "uwu-vanilla-chat-fixes";
     let css = "";
-    
-    const textColor = (settings.userTheme && theme && theme.textColor) ? theme.textColor : "inherit";
+
+    const textColor =
+      settings.userTheme && theme && theme.textColor
+        ? theme.textColor
+        : "inherit";
 
     if (settings.disableCustomChatColors) {
       css += `
@@ -8329,102 +8538,199 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //  . . . РАСШИРЕННЫЕ НАСТРОЙКИ . . .
   // ====================================================================================================================
-  const extendedSettingsButtonElement = document.createElement("div");
-  extendedSettingsButtonElement.innerHTML = extendedSettingsButton;
-  mainContainerElement.appendChild(extendedSettingsButtonElement);
+  /**
+   * Injects the UwU dropdown trigger button into CatWar's top navbar.
+   *
+   * @returns {void}
+   */
+  function setupNavbarUwUMenu() {
+    const nav = document.querySelector(".game-topbar-nav");
+    if (!nav || document.getElementById("uwu-navbar-btn")) return;
 
-  const panel = extendedSettingsButtonElement.querySelector(
-    "#uwu-extended-settings"
-  );
-  const extendedSettingsContainer = extendedSettingsButtonElement.querySelector(
-    "#extended-settings-container"
-  );
-  const button = extendedSettingsButtonElement.querySelector(
-    "#extended-settings-button"
-  );
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.id = "uwu-navbar-btn";
+    btn.className = "game-topbar-uwu-btn";
+    btn.title = "Меню CatWar UwU";
+    btn.innerHTML = `
+      <img src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/partly_sunny_rain.png" alt="UwU" />
+      <span>UwU ▾</span>
+    `;
 
-  extendedSettingsContainer.style.display = "none";
+    const popover = document.createElement("div");
+    popover.id = "uwu-nav-popover";
+    popover.className = "uwu-nav-popover";
+    popover.style.display = "none";
 
-  const shouldShowPanel = () => {
-    return (
-      settings.extendedSettingsPanel ||
-      settings.showSplashScreens ||
-      settings.showUpdateNotification ||
-      settings.manualWeatherPanel ||
-      settings.fastStyles
-    );
-  };
+    popover.innerHTML = /* HTML */ 
+    `
+      <div class="uwu-popover-header">
+        <div class="uwu-popover-title-badge">
+          <img src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/partly_sunny_rain.png" width="16" height="16" />
+          <span>CatWar UwU</span>
+        </div>
+        <span style="font-size: 11px; opacity: 0.5;">v${current_uwu_version}</span>
+      </div>
 
-  if (shouldShowPanel()) {
-    panel.style.display = "block";
-  } else {
-    panel.style.display = "none";
+      <div id="splash-screen-panel" style="display: none;"></div>
+
+      <label class="uwu-style-row" style="background: rgba(255,255,255,0.06); padding: 7px 10px; border-radius: 10px;">
+        <span style="font-weight: 600;">Редизайн интерфейса</span>
+        <div class="uwu-switch">
+          <input type="checkbox" id="uwu-toggle-layout-switch" ${settings.customLayout ? "checked" : ""}>
+          <span class="uwu-switch-slider"></span>
+        </div>
+      </label>
+
+      <button type="button" id="uwu-start-hud-btn" class="uwu-hud-trigger-btn"
+        ${!settings.customLayout ? "disabled style='opacity: 0.45; cursor: not-allowed;'" : ""}
+        title="${!settings.customLayout ? "Сначала включите редизайн интерфейса выше" : "Настроить положение и размер окон"}">
+        📐 Редактировать интерфейс
+      </button>
+
+      <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.6; margin-top: 2px;">
+        Быстрые стили
+      </div>
+      <div id="uwu-popover-fast-styles" class="uwu-fast-styles-box"></div>
+
+      <!-- Isolated slot for manual weather controls -->
+      <div id="uwu-popover-weather-container" style="display: none;"></div>
+
+      <a href="/settings" target="_blank" class="uwu-footer-link">
+        ⚙️ Все настройки мода →
+      </a>
+    `;
+
+    const fastStylesBox = popover.querySelector("#uwu-popover-fast-styles");
+    const manager = getFastStylesManager();
+
+    manager.items.forEach((item) => {
+      const row = document.createElement("label");
+      row.className = "uwu-style-row";
+
+      const spanLabel = document.createElement("span");
+      spanLabel.textContent = item.label;
+
+      const switchWrap = document.createElement("div");
+      switchWrap.className = "uwu-switch";
+
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.checked = manager.getState(item);
+
+      const slider = document.createElement("span");
+      slider.className = "uwu-switch-slider";
+
+      input.addEventListener("change", () => {
+        manager.set(item.key, input.checked);
+      });
+
+      switchWrap.appendChild(input);
+      switchWrap.appendChild(slider);
+
+      row.appendChild(spanLabel);
+      row.appendChild(switchWrap);
+      fastStylesBox.appendChild(row);
+    });
+
+    const layoutToggle = popover.querySelector("#uwu-toggle-layout-switch");
+    const hudEditBtn = popover.querySelector("#uwu-start-hud-btn");
+
+    layoutToggle.addEventListener("change", () => {
+      settings.customLayout = layoutToggle.checked;
+      saveSettings();
+      location.reload();
+    });
+
+    hudEditBtn.addEventListener("click", () => {
+      if (!settings.customLayout) return;
+
+      popover.style.display = "none";
+      btn.classList.remove("active");
+
+      if (
+        window.uwuHudEditor &&
+        typeof window.uwuHudEditor.startEditMode === "function"
+      ) {
+        window.uwuHudEditor.startEditMode();
+      }
+    });
+
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isHidden = popover.style.display === "none";
+      popover.style.display = isHidden ? "flex" : "none";
+      btn.classList.toggle("active", isHidden);
+      if (isHidden) btn.classList.remove("new-update");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!popover.contains(e.target) && e.target !== btn) {
+        popover.style.display = "none";
+        btn.classList.remove("active");
+      }
+    });
+
+    nav.appendChild(btn);
+    document.body.appendChild(popover);
+
+    initManualWeatherPanel();
+
+    const updatePopoverPos = () => {
+      const rect = btn.getBoundingClientRect();
+      popover.style.top = `${rect.bottom + 8}px`;
+      popover.style.left = `${Math.max(10, rect.left)}px`;
+    };
+    btn.addEventListener("click", updatePopoverPos);
+    window.addEventListener("resize", updatePopoverPos);
   }
 
-  button.addEventListener("click", () => {
-    extendedSettingsContainer.style.display =
-      extendedSettingsContainer.style.display === "none" ? "block" : "none";
+  setupSingleCallback(".game-topbar-nav", setupNavbarUwUMenu);
 
-    button.classList.remove("new-update");
-  });
   // ====================================================================================================================
   //  . . . СПЛЕШ СКРИН . . .
   // ====================================================================================================================
   if (settings.showSplashScreens) {
-    const randomPhraseBlock = document.createElement("div");
-    const splashPanel = extendedSettingsButtonElement.querySelector(
-      "#splash-screen-panel"
-    );
-    randomPhraseBlock.classList.add("random-phrase-block");
-    splashPanel.appendChild(randomPhraseBlock);
-
     function loadRandomPhrase(url) {
+      const splashPanel = document.getElementById("splash-screen-panel");
+      if (!splashPanel) return;
+
       fetch(url)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(`Ошибка загрузки: ${response.status}`);
-          }
-          return response.text();
-        })
+        .then((res) => (res.ok ? res.text() : Promise.reject(res.status)))
         .then((text) => {
           const phrases = text.split("\n").filter((line) => line.trim() !== "");
           const randomIndex = Math.floor(Math.random() * phrases.length);
-          randomPhraseBlock.innerHTML = parseColorCodes(phrases[randomIndex]);
+          splashPanel.innerHTML = `<p class="uwu-popover-splash">${parseColorCodes(phrases[randomIndex])}</p>`;
+          splashPanel.style.display = "block";
         })
-        .catch((error) => {
-          console.error("Ошибка при загрузке случайной фразы:", error);
-          randomPhraseBlock.textContent = "Не удалось загрузить фразу :(";
-        });
-    }
-
-    function parseColorCodes(text) {
-      const colorMap = {
-        "&0": "</span>", // - Сброс -
-        "&1": "<span style='color: blue;'>", // Синий
-        "&2": "<span style='color: green;'>", // Зеленый
-        "&3": "<span style='color: aqua;'>", // Бирюзовый
-        "&4": "<span style='color: red;'>", // Красный
-        "&5": "<span style='color: #dc00dc;'>", // Фиолетовый
-        "&6": "<span style='color: gold;'>", // Золотой
-        "&7": "<span style='color: pink;'>", // Розовый
-        "&8": "<span style='color: white;'>", // Белый
-        "&9": "<span style='color: black;'>", // Черный
-      };
-
-      text = "<b>" + text;
-
-      for (const code in colorMap) {
-        text = text.replace(new RegExp(code, "g"), colorMap[code]);
-      }
-
-      return text;
+        .catch((err) => console.warn("UwU | Ошибка загрузки сплэша:", err));
     }
 
     window.addEventListener("load", () => {
       loadRandomPhrase(
-        "https://raw.githubusercontent.com/Ibirtem/CatWar/main/texts/text.txt"
+        "https://raw.githubusercontent.com/Ibirtem/CatWar/main/texts/text.txt",
       );
     });
+  }
+
+  function parseColorCodes(text) {
+    const colorMap = {
+      "&0": "</span>", // - Сброс -
+      "&1": "<span style='color: blue;'>", // Синий
+      "&2": "<span style='color: green;'>", // Зеленый
+      "&3": "<span style='color: aqua;'>", // Бирюзовый
+      "&4": "<span style='color: red;'>", // Красный
+      "&5": "<span style='color: #dc00dc;'>", // Фиолетовый
+      "&6": "<span style='color: gold;'>", // Золотой
+      "&7": "<span style='color: pink;'>", // Розовый
+      "&8": "<span style='color: white;'>", // Белый
+      "&9": "<span style='color: black;'>", // Черный
+    };
+    text = "<b>" + text;
+    for (const code in colorMap) {
+      text = text.replace(new RegExp(code, "g"), colorMap[code]);
+    }
+    return text;
   }
   // ====================================================================================================================
   //  . . . ПЕРСОНАЛЬНЫЕ КОСТЮМЫ . . .
@@ -8439,7 +8745,7 @@ if (targetCW3.test(window.location.href)) {
         if (!items.cats) return;
 
         let styleElement = document.getElementById(
-          "uwu-personal-costume-style"
+          "uwu-personal-costume-style",
         );
         if (!styleElement) {
           styleElement = document.createElement("style");
@@ -8538,7 +8844,7 @@ if (targetCW3.test(window.location.href)) {
         },
         { childList: true, subtree: true },
         10,
-        500
+        500,
       );
 
       setupMutationObserver(
@@ -8546,7 +8852,7 @@ if (targetCW3.test(window.location.href)) {
         () => {
           setTimeout(checkMyPose, 100);
         },
-        { childList: true, subtree: true, characterData: true }
+        { childList: true, subtree: true, characterData: true },
       );
     }
   }
@@ -8618,7 +8924,7 @@ if (targetCW3.test(window.location.href)) {
                 <button class="uwu-button install-button" data-costume-idx="${idx}">Сохранить</button>
               </div>
             </div>
-          `
+          `,
             )
             .join("")}
         </div>
@@ -8631,7 +8937,7 @@ if (targetCW3.test(window.location.href)) {
         btn.addEventListener("click", async (e) => {
           const idx = parseInt(btn.getAttribute("data-costume-idx"), 10);
           const select = contentContainer.querySelector(
-            `select[data-costume-idx="${idx}"]`
+            `select[data-costume-idx="${idx}"]`,
           );
           const slotChoice = select.value;
           contentContainer.style.pointerEvents = "none";
@@ -8725,7 +9031,7 @@ if (targetCW3.test(window.location.href)) {
         createLockCheckbox();
         changePutButtonState();
       },
-      { attributes: true, attributeFilter: ["style"] }
+      { attributes: true, attributeFilter: ["style"] },
     );
 
     createLockCheckbox();
@@ -8733,19 +9039,18 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //  . . . УВЕДОМЛЕНИЕ ОБ ОБНОВЛЕНИИ . . .
   // ====================================================================================================================
+  /**
+   * Highlights the navbar UwU menu button when a new script version is detected.
+   *
+   * @param {string} oldVersion - Previous stored version string.
+   * @returns {void}
+   */
   function showUpdateNotification(oldVersion) {
-    const panel = document.getElementById("extended-settings-container");
-    const notificationBlock = document.createElement("div");
-    notificationBlock.classList.add("update-notification");
-    notificationBlock.innerHTML = `
-          <p>Скрипт/Мод UwU был обновлен с версии v${
-            oldVersion || "неизвестной"
-          } до версии v${current_uwu_version}!</p>
-          <p>Можете посетить <a href="https://catwar.net/settings" target="_blank">Настройки</a> для ознакомления с изменениями.</p>
-        `;
-    panel.appendChild(notificationBlock);
-    const button = extendedSettingsButtonElement.querySelector("button");
-    button.classList.add("new-update");
+    const btn = document.getElementById("uwu-navbar-btn");
+    if (btn) {
+      btn.classList.add("new-update");
+      btn.title = `CatWar UwU обновлен: v${oldVersion || "???"} → v${current_uwu_version}`;
+    }
   }
 
   window.addEventListener("load", () => {
@@ -8765,34 +9070,51 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //  . . . РУЧНОЕ УПРАВЛЕНИЕ ПОГОДОЙ . . .
   // ====================================================================================================================
-  if (settings.manualWeatherPanel) {
-    const panel = extendedSettingsButtonElement.querySelector(
-      "#extended-settings-container"
-    );
-    panel.innerHTML += manualWeatherPanel;
+  /**
+   * Injects manual weather controls into the navbar popover container.
+   * Binds manual triggers for auroras and firefly effects.
+   *
+   * @returns {void}
+   */
+  function initManualWeatherPanel() {
+    if (!settings.manualWeatherPanel) return;
+
+    const container = document.getElementById("uwu-popover-weather-container");
+    if (!container) return;
+
+    container.innerHTML = `
+      <details class="uwu-popover-details">
+        <summary>🌦️ Ручное управление погодой</summary>
+        <div id="manual-weather-inner" style="margin-top: 8px;">
+          ${manualWeatherPanel}
+        </div>
+      </details>
+    `;
+    container.style.display = "block";
 
     const manualAuroraOffButton = document.getElementById("manualAurora-Off");
     const manualAuroraBButton = document.getElementById("manualAurora-B");
     const manualAuroraGButton = document.getElementById("manualAurora-G");
-
     const fireflyOnButton = document.getElementById("manualFirefly-On");
 
-    manualAuroraOffButton.addEventListener("click", () => {
-      for (const auroraElement of auroras) {
-        removeAurora(auroraElement);
+    manualAuroraOffButton?.addEventListener("click", () => {
+      if (typeof auroras !== "undefined") {
+        for (const auroraElement of auroras) {
+          removeAurora(auroraElement);
+        }
       }
     });
 
-    manualAuroraBButton.addEventListener("click", () => {
-      createAurora("blue");
+    manualAuroraBButton?.addEventListener("click", () => {
+      if (typeof createAurora === "function") createAurora("blue");
     });
 
-    manualAuroraGButton.addEventListener("click", () => {
-      createAurora("green");
+    manualAuroraGButton?.addEventListener("click", () => {
+      if (typeof createAurora === "function") createAurora("green");
     });
 
-    fireflyOnButton.addEventListener("click", () => {
-      toggleFireflies();
+    fireflyOnButton?.addEventListener("click", () => {
+      if (typeof toggleFireflies === "function") toggleFireflies();
     });
   }
 
@@ -9039,8 +9361,8 @@ if (targetCW3.test(window.location.href)) {
       startStopBtn.classList.remove("install-button");
       startStopBtn.classList.add("remove-button");
 
-      targetTimestamp = Date.now() + (totalSeconds * 1000);
-      
+      targetTimestamp = Date.now() + totalSeconds * 1000;
+
       updateDisplay();
 
       timerId = setInterval(() => {
@@ -9049,13 +9371,13 @@ if (targetCW3.test(window.location.href)) {
 
         if (diff <= 0) {
           playSound();
-          
-          targetTimestamp = now + (totalSeconds * 1000);
+
+          targetTimestamp = now + totalSeconds * 1000;
           remainingSeconds = totalSeconds;
         } else {
           remainingSeconds = Math.ceil(diff / 1000);
         }
-        
+
         updateDisplay();
       }, 200);
 
@@ -9084,11 +9406,11 @@ if (targetCW3.test(window.location.href)) {
 
     function updateDisplay() {
       let displaySecs = isRunning ? remainingSeconds : 0;
-      
+
       const mins = Math.floor(displaySecs / 60);
       const secs = displaySecs % 60;
       const timeString = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-      
+
       countdownDisplay.textContent = timeString;
       headerCountdown.textContent = timeString;
     }
@@ -9096,7 +9418,7 @@ if (targetCW3.test(window.location.href)) {
     function playSound() {
       soundManager.playSound(
         settings.intervalTimerSound,
-        settings.intervalTimerVolume
+        settings.intervalTimerVolume,
       );
     }
 
@@ -9316,7 +9638,7 @@ if (targetCW3.test(window.location.href)) {
 
     /**
      * Formats a Date object into time and date components according to the selected timezone.
-     * 
+     *
      * @param {Date} date - The Date instance to format.
      * @param {boolean} isMoscow - Whether to force the "Europe/Moscow" timezone.
      * @returns {{hours: string, minutes: string, seconds: string, day: string, month: string, year: string, dayOfWeek: string, monthName: string}}
@@ -9340,11 +9662,23 @@ if (targetCW3.test(window.location.href)) {
         parts[type] = value;
       });
 
-      const dayOfWeek = parts.weekday ? parts.weekday.charAt(0).toUpperCase() + parts.weekday.slice(1) : "";
+      const dayOfWeek = parts.weekday
+        ? parts.weekday.charAt(0).toUpperCase() + parts.weekday.slice(1)
+        : "";
 
       const monthNames = [
-        "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-        "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+        "Январь",
+        "Февраль",
+        "Март",
+        "Апрель",
+        "Май",
+        "Июнь",
+        "Июль",
+        "Август",
+        "Сентябрь",
+        "Октябрь",
+        "Ноябрь",
+        "Декабрь",
       ];
       const monthIdx = parseInt(parts.month, 10) - 1;
       const monthName = monthNames[monthIdx] || "";
@@ -9363,11 +9697,20 @@ if (targetCW3.test(window.location.href)) {
 
     /**
      * Updates the clock UI elements using the provided time source.
-     * 
+     *
      * @param {Date} [timeSource=new Date()] - The Date object representing current time.
      */
     function updateClock(timeSource = new Date()) {
-      const { hours, minutes, seconds, day, month, year, dayOfWeek, monthName } = getDateTimeParts(timeSource, settings.clockMoscowTime);
+      const {
+        hours,
+        minutes,
+        seconds,
+        day,
+        month,
+        year,
+        dayOfWeek,
+        monthName,
+      } = getDateTimeParts(timeSource, settings.clockMoscowTime);
 
       timeElement.textContent = `${hours}:${minutes}:${seconds}`;
 
@@ -9421,7 +9764,11 @@ if (targetCW3.test(window.location.href)) {
               if (response.status >= 200 && response.status < 300) {
                 resolve(response);
               } else {
-                reject(new Error(`HTTP Error ${response.status}: ${response.statusText}`));
+                reject(
+                  new Error(
+                    `HTTP Error ${response.status}: ${response.statusText}`,
+                  ),
+                );
               }
             },
             onerror: (error) => reject(error),
@@ -9456,7 +9803,9 @@ if (targetCW3.test(window.location.href)) {
                 return date;
               }
             }
-            throw new Error("Date header missing or invalid in Google response.");
+            throw new Error(
+              "Date header missing or invalid in Google response.",
+            );
           },
         },
         {
@@ -9628,7 +9977,7 @@ if (targetCW3.test(window.location.href)) {
 
     document.addEventListener(
       "visibilitychange",
-      handleFocusOrVisibilityChange
+      handleFocusOrVisibilityChange,
     );
     window.addEventListener("focus", handleFocusOrVisibilityChange);
 
@@ -9677,13 +10026,13 @@ if (targetCW3.test(window.location.href)) {
         !catTooltip.querySelector(".save-costume-button")
       ) {
         const costumeDivs = catElement.querySelectorAll(
-          "div[data-v-59afe5e8]:not(.first)"
+          "div[data-v-59afe5e8]:not(.first)",
         );
 
         const matchingCostumes = Array.from(costumeDivs).filter((div) =>
           div.style.backgroundImage
             .slice(5, -2)
-            .startsWith("/cw3/cats/0/costume/")
+            .startsWith("/cw3/cats/0/costume/"),
         );
 
         if (matchingCostumes.length > 0) {
@@ -9692,7 +10041,7 @@ if (targetCW3.test(window.location.href)) {
           saveCostume.classList.add("save-costume-button");
           saveCostume.addEventListener("click", () => {
             const costumeImages = matchingCostumes.map((costume) =>
-              costume.style.backgroundImage.slice(5, -2)
+              costume.style.backgroundImage.slice(5, -2),
             );
             createCostumeSavePopup(costumeImages);
           });
@@ -9716,7 +10065,7 @@ if (targetCW3.test(window.location.href)) {
       newMouth.classList.add("mouth", "uwu-sorted");
       originalMouth.parentNode.insertBefore(
         newMouth,
-        originalMouth.nextSibling
+        originalMouth.nextSibling,
       );
 
       originalMouth.style.display = "none";
@@ -9924,7 +10273,7 @@ if (targetCW3.test(window.location.href)) {
       .style.backgroundImage.slice(5, -2);
 
     const defectElements = Array.from(
-      cat.querySelectorAll(".d > div:not(.first)")
+      cat.querySelectorAll(".d > div:not(.first)"),
     );
 
     const uniqueDefects = new Set();
@@ -9984,7 +10333,7 @@ if (targetCW3.test(window.location.href)) {
           defectLine.appendChild(defectNameSpan);
           defectLine.insertAdjacentHTML(
             "beforeend",
-            ` (${defect.level} стадия, ${defectState})`
+            ` (${defect.level} стадия, ${defectState})`,
           );
 
           defectsContainer.appendChild(defectLine);
@@ -10019,8 +10368,14 @@ if (targetCW3.test(window.location.href)) {
     if (!settings) loadSettings();
 
     let styleElement = document.getElementById("cellsBordersStyle");
-    const thickness = settings?.cellsBordersThickness || settingsMap?.uwu_settings?.cellsBordersThickness || "1";
-    const color = settings?.cellsBordersColor || uwuDefaultSettings.cellsBordersColor || "#ffffff";
+    const thickness =
+      settings?.cellsBordersThickness ||
+      settingsMap?.uwu_settings?.cellsBordersThickness ||
+      "1";
+    const color =
+      settings?.cellsBordersColor ||
+      uwuDefaultSettings.cellsBordersColor ||
+      "#ffffff";
 
     const cellsBordersStyle = `
       .cage {
@@ -10092,16 +10447,21 @@ if (targetCW3.test(window.location.href)) {
   if (settings.showMightHistory) {
     const updateMightHistory = (newVal) => {
       if (!newVal || !newVal.tooltip) return;
-      
+
       const match = newVal.tooltip.match(/\((\d+)\/([^\)]+)\)/);
       if (!match) return;
-      
+
       const currentVal = parseInt(match[1], 10);
       const currentMaxRaw = match[2].trim();
-      const currentMax = isNaN(parseInt(currentMaxRaw, 10)) ? null : parseInt(currentMaxRaw, 10);
-      
+      const currentMax = isNaN(parseInt(currentMaxRaw, 10))
+        ? null
+        : parseInt(currentMaxRaw, 10);
+
       const rawHistoryData = uwuStorage.getItem("uwu_mightHistory");
-      let historyData = (rawHistoryData && typeof rawHistoryData === "object" && !Array.isArray(rawHistoryData))
+      let historyData =
+        rawHistoryData &&
+        typeof rawHistoryData === "object" &&
+        !Array.isArray(rawHistoryData)
           ? rawHistoryData
           : { logs: [] };
 
@@ -10113,20 +10473,29 @@ if (targetCW3.test(window.location.href)) {
         const now = new Date();
         historyData.lastVal = currentVal;
         historyData.lastMax = currentMax;
-        historyData.logs = [{
-          val: currentVal,
-          max: currentMaxRaw,
-          diff: "Старт",
-          time: `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-        }];
+        historyData.logs = [
+          {
+            val: currentVal,
+            max: currentMaxRaw,
+            diff: "Старт",
+            time: `${String(now.getDate()).padStart(2, "0")}.${String(now.getMonth() + 1).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`,
+          },
+        ];
         uwuStorage.setItem("uwu_mightHistory", historyData);
         return;
       }
 
-      if (historyData.lastVal !== currentVal || historyData.lastMax !== currentMax) {
+      if (
+        historyData.lastVal !== currentVal ||
+        historyData.lastMax !== currentMax
+      ) {
         let diff = 0;
-        if (typeof currentMax === 'number' && typeof historyData.lastMax === 'number' && currentMax > historyData.lastMax) {
-          diff = (historyData.lastMax - historyData.lastVal) + currentVal;
+        if (
+          typeof currentMax === "number" &&
+          typeof historyData.lastMax === "number" &&
+          currentMax > historyData.lastMax
+        ) {
+          diff = historyData.lastMax - historyData.lastVal + currentVal;
         } else {
           diff = currentVal - historyData.lastVal;
         }
@@ -10137,7 +10506,7 @@ if (targetCW3.test(window.location.href)) {
             val: currentVal,
             max: currentMaxRaw,
             diff: diff > 0 ? `+${diff}` : diff,
-            time: `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+            time: `${String(now.getDate()).padStart(2, "0")}.${String(now.getMonth() + 1).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`,
           });
 
           if (historyData.logs.length > 100) historyData.logs.pop();
@@ -10151,15 +10520,18 @@ if (targetCW3.test(window.location.href)) {
 
     const showMightHistoryModal = () => {
       let { catInfoElement, contentContainer } = createCatInfoContainer();
-      
+
       const rawHistoryData = uwuStorage.getItem("uwu_mightHistory");
-      const logs = (rawHistoryData && Array.isArray(rawHistoryData.logs)) ? rawHistoryData.logs : [];
-      
+      const logs =
+        rawHistoryData && Array.isArray(rawHistoryData.logs)
+          ? rawHistoryData.logs
+          : [];
+
       catInfoElement.style.width = "350px";
       contentContainer.style.paddingBottom = "10px";
 
       const escape = (str) => {
-        const div = document.createElement('div');
+        const div = document.createElement("div");
         div.textContent = str;
         return div.innerHTML;
       };
@@ -10174,46 +10546,65 @@ if (targetCW3.test(window.location.href)) {
               </tr>
             </thead>
             <tbody>
-              ${logs.length ? logs.map(l => `
+              ${
+                logs.length
+                  ? logs
+                      .map(
+                        (l) => `
                 <tr style="border-bottom: 1px solid #ffffff05;">
                   <td style="padding: 6px; opacity: 0.8;">${escape(l.time)}</td>
                   <td style="padding: 6px;"><b>${escape(l.val)}</b><small>/${escape(l.max)}</small></td>
-                  <td style="padding: 6px; color: ${l.diff.toString().includes('+') ? '#41cd70' : (l.diff === 'Старт' ? '#83e5ff' : '#cd4141')}; font-weight: bold;">${escape(l.diff)}</td>
+                  <td style="padding: 6px; color: ${l.diff.toString().includes("+") ? "#41cd70" : l.diff === "Старт" ? "#83e5ff" : "#cd4141"}; font-weight: bold;">${escape(l.diff)}</td>
                 </tr>
-              `).join('') : '<tr><td colspan="3" style="padding: 20px; opacity: 0.5; text-align: center;">Истории пока нет...</td></tr>'}
+              `,
+                      )
+                      .join("")
+                  : '<tr><td colspan="3" style="padding: 20px; opacity: 0.5; text-align: center;">Истории пока нет...</td></tr>'
+              }
             </tbody>
           </table>
         </div>
         <div style="margin-top: 20px; display: flex; justify-content: center; width: 100%;">
-             ${logs.length ? '<button type="button" class="uwu-reset-might-btn uwu-button remove-button" style="padding: 5px 15px; font-size: 12px; cursor: pointer;">Очистить историю</button>' : ''}
+             ${logs.length ? '<button type="button" class="uwu-reset-might-btn uwu-button remove-button" style="padding: 5px 15px; font-size: 12px; cursor: pointer;">Очистить историю</button>' : ""}
         </div>
       `;
 
-      const resetBtn = contentContainer.querySelector('.uwu-reset-might-btn');
+      const resetBtn = contentContainer.querySelector(".uwu-reset-might-btn");
       if (resetBtn) {
-        resetBtn.addEventListener('click', (e) => {
-          if (confirm("Удалить все записи? Текущие значения станут новой точкой отсчета.")) {
-            const currentData = getVueData('parameter.data.might');
+        resetBtn.addEventListener("click", (e) => {
+          if (
+            confirm(
+              "Удалить все записи? Текущие значения станут новой точкой отсчета.",
+            )
+          ) {
+            const currentData = getVueData("parameter.data.might");
             const match = currentData?.tooltip?.match(/\((\d+)\/([^\)]+)\)/);
-            
+
             if (match) {
               const cVal = parseInt(match[1], 10);
               const cMaxRaw = match[2].trim();
-              const cMax = isNaN(parseInt(cMaxRaw, 10)) ? null : parseInt(cMaxRaw, 10);
+              const cMax = isNaN(parseInt(cMaxRaw, 10))
+                ? null
+                : parseInt(cMaxRaw, 10);
               const now = new Date();
 
-              uwuStorage.setItem("uwu_mightHistory", { 
-                lastVal: cVal, 
-                lastMax: cMax, 
-                logs: [{
-                  val: cVal, max: cMaxRaw, diff: "Старт",
-                  time: `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-                }] 
+              uwuStorage.setItem("uwu_mightHistory", {
+                lastVal: cVal,
+                lastMax: cMax,
+                logs: [
+                  {
+                    val: cVal,
+                    max: cMaxRaw,
+                    diff: "Старт",
+                    time: `${String(now.getDate()).padStart(2, "0")}.${String(now.getMonth() + 1).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`,
+                  },
+                ],
               });
             } else {
               uwuStorage.removeItem("uwu_mightHistory");
             }
-            if (globalContainer.contains(catInfoElement)) globalContainer.removeChild(catInfoElement);
+            if (globalContainer.contains(catInfoElement))
+              globalContainer.removeChild(catInfoElement);
           }
         });
       }
@@ -10222,23 +10613,27 @@ if (targetCW3.test(window.location.href)) {
     };
 
     setupSingleCallback("#parameters_skills_block", () => {
-      const parent = document.getElementById('parameters_skills_block');
-      if (!parent || document.getElementById('uwu-open-might-history')) return;
+      const parent = document.getElementById("parameters_skills_block");
+      if (!parent || document.getElementById("uwu-open-might-history")) return;
 
-      const btnLink = document.createElement('div');
-      btnLink.style.cssText = 'text-align: center; margin-top: 5px;';
+      const btnLink = document.createElement("div");
+      btnLink.style.cssText = "text-align: center; margin-top: 5px;";
       btnLink.innerHTML = `<a href="#" id="uwu-open-might-history" style="font-size: 11px; opacity: 0.6; text-decoration: underline; color: inherit;">История прокачки БУ</a>`;
       parent.appendChild(btnLink);
 
-      document.getElementById('uwu-open-might-history').onclick = (e) => {
+      document.getElementById("uwu-open-might-history").onclick = (e) => {
         e.preventDefault();
         showMightHistoryModal();
       };
     });
 
-    watchVueData('parameter.data.might', (newVal) => {
-      updateMightHistory(newVal);
-    }, { deep: true, immediate: true });
+    watchVueData(
+      "parameter.data.might",
+      (newVal) => {
+        updateMightHistory(newVal);
+      },
+      { deep: true, immediate: true },
+    );
   }
 
   // ====================================================================================================================
@@ -10378,24 +10773,36 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   if (settings.showExactSkillsValues) {
     const updateExactSkills = () => {
-      const paramData = getVueData('parameter.data');
+      const paramData = getVueData("parameter.data");
       if (!paramData) return;
 
-      const skills = ['smell', 'dig', 'swim', 'might', 'tree', 'observ', 'heal', 'power', 'pet_faith'];
+      const skills = [
+        "smell",
+        "dig",
+        "swim",
+        "might",
+        "tree",
+        "observ",
+        "heal",
+        "power",
+        "pet_faith",
+      ];
 
-      skills.forEach(skillId => {
+      skills.forEach((skillId) => {
         const skillInfo = paramData[skillId];
         if (skillInfo && skillInfo.tooltip && !skillInfo.isHidden) {
           const skillElement = document.getElementById(skillId);
           if (skillElement) {
-            const bar = skillElement.querySelector('.bar');
+            const bar = skillElement.querySelector(".bar");
             if (bar) {
-              let barData = bar.querySelector('.bar-data') || (() => {
-                const el = document.createElement('div');
-                el.className = 'bar-data';
-                bar.appendChild(el);
-                return el;
-              })();
+              let barData =
+                bar.querySelector(".bar-data") ||
+                (() => {
+                  const el = document.createElement("div");
+                  el.className = "bar-data";
+                  bar.appendChild(el);
+                  return el;
+                })();
 
               const match = skillInfo.tooltip.match(/\((.*?)\)/);
               const newValue = match ? match[1] : skillInfo.tooltip;
@@ -10409,7 +10816,10 @@ if (targetCW3.test(window.location.href)) {
       });
     };
 
-    watchVueData('parameter.data', updateExactSkills, { deep: true, immediate: true });
+    watchVueData("parameter.data", updateExactSkills, {
+      deep: true,
+      immediate: true,
+    });
 
     const css_skillsBarData = document.createElement("style");
     css_skillsBarData.innerHTML = `
@@ -10443,7 +10853,7 @@ if (targetCW3.test(window.location.href)) {
           .vlm${i} > .nick.is-notification:after {
             content: " [${i}]";
           }
-        `
+        `,
       ).join("");
 
       const styleElement = document.createElement("style");
@@ -10478,7 +10888,7 @@ if (targetCW3.test(window.location.href)) {
             if (!lastPlayedEntry || !refreshRegex.test(lastPlayedEntry)) {
               soundManager.playSound(
                 settings.climbingRefreshNotificationSound,
-                settings.climbingRefreshNotificationVolume
+                settings.climbingRefreshNotificationVolume,
               );
             }
           }
@@ -10585,7 +10995,7 @@ if (targetCW3.test(window.location.href)) {
     function transferColors() {
       const transferCheckbox = document.getElementById("uwu-transferCheckbox");
       let styleTag = document.getElementById(
-        "uwu-climbing-panel-dynamic-styles"
+        "uwu-climbing-panel-dynamic-styles",
       );
 
       if (!styleTag) {
@@ -10600,7 +11010,7 @@ if (targetCW3.test(window.location.href)) {
       }
 
       const climbingPanelCells = Array.from(
-        document.querySelectorAll("#uwu-climbingPanel td")
+        document.querySelectorAll("#uwu-climbingPanel td"),
       );
 
       let newCssRules = "";
@@ -10620,7 +11030,7 @@ if (targetCW3.test(window.location.href)) {
 
     function clearColors() {
       const styleTag = document.getElementById(
-        "uwu-climbing-panel-dynamic-styles"
+        "uwu-climbing-panel-dynamic-styles",
       );
       if (styleTag) {
         styleTag.innerHTML = "";
@@ -10741,7 +11151,7 @@ if (targetCW3.test(window.location.href)) {
       const globalContainer = document.getElementById("uwu-global-container");
       globalContainer.insertAdjacentHTML(
         "beforeend",
-        uwuClimbingPanelContainer
+        uwuClimbingPanelContainer,
       );
 
       const transferCheckbox = document.getElementById("uwu-transferCheckbox");
@@ -10771,7 +11181,7 @@ if (targetCW3.test(window.location.href)) {
 
     function updateInputButtonsStyle() {
       const inputButtons = document.querySelectorAll(
-        "#uwu-inputButtons button"
+        "#uwu-inputButtons button",
       );
       inputButtons.forEach((button) => {
         button.classList.toggle("active", button.value === activeInputValue);
@@ -10901,7 +11311,7 @@ if (targetCW3.test(window.location.href)) {
             }
 
             tableButton.addEventListener("click", () =>
-              this.switchTable(index)
+              this.switchTable(index),
             );
 
             const tableContainer = document.createElement("div");
@@ -11015,10 +11425,10 @@ if (targetCW3.test(window.location.href)) {
 
     const climbingMainPanel = document.getElementById("uwu-climbingMainPanel");
     const climbingPanelButton = document.getElementById(
-      "uwu-climbingPanelButton"
+      "uwu-climbingPanelButton",
     );
     const climbingPanelContainer = document.getElementById(
-      "uwu-climbingPanelContainer"
+      "uwu-climbingPanelContainer",
     );
     const transferCheckbox = document.getElementById("uwu-transferCheckbox");
 
@@ -11047,7 +11457,7 @@ if (targetCW3.test(window.location.href)) {
         const touch = e.changedTouches[0];
         const moveDistance = Math.sqrt(
           Math.pow(touch.clientX - touchStartX, 2) +
-            Math.pow(touch.clientY - touchStartY, 2)
+            Math.pow(touch.clientY - touchStartY, 2),
         );
 
         if (
@@ -11176,14 +11586,14 @@ if (targetCW3.test(window.location.href)) {
     setTimeout(loadClimbingPanelStatus, 10);
 
     const climbingPanelContent = document.getElementById(
-      "uwu-climbingPanelContent"
+      "uwu-climbingPanelContent",
     );
     const buttonContainer = document.getElementById("uwu-buttonContainer");
     const inputButtonsContainer = document.getElementById("uwu-inputButtons");
     const buttonRow1 = document.getElementById("uwu-buttonRow1");
     const buttonRow2 = document.getElementById("uwu-buttonRow2");
     const functionButtonsContainer = document.getElementById(
-      "uwu-functionButtonsContainer"
+      "uwu-functionButtonsContainer",
     );
     const tableContainer = document.getElementById("uwu-tableContainer");
     const clearTableButton = document.getElementById("button-clear-table");
@@ -11233,7 +11643,7 @@ if (targetCW3.test(window.location.href)) {
       }
 
       #uwu-climbingMainPanel {
-        z-index: 2;
+        z-index: 1600;
         pointer-events: auto;
         width: 260px;
         position: absolute;
@@ -11468,153 +11878,142 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . БЫСТРЫЕ СТИЛИ . . .
   // ====================================================================================================================
-  const settingsContainer = document.getElementById(
-    "extended-settings-container"
-  );
-  if (!settingsContainer) {
-    console.error("Контейнер #extended-settings-container не найден");
-    return;
-  }
+  /**
+   * Retrieves the singleton instance of the Fast Styles Manager.
+   *
+   * @returns {{
+   *   items: Array<{ key: string, label: string, apply: (on: boolean) => void }>,
+   *   init: () => void,
+   *   set: (key: string, value: boolean) => void,
+   *   getStylesMap: () => Record<string, boolean>
+   * }}
+   */
+  function getFastStylesManager() {
+    if (window.__uwuFastStylesManager) {
+      return window.__uwuFastStylesManager;
+    }
 
-  const sharedFastStyleCallback = function (checked) {
-    const styleId = "uwu-fast-style-" + this.key;
-    if (checked) {
-      if (!document.getElementById(styleId)) {
-        const style = document.createElement("style");
-        style.id = styleId;
-        style.innerHTML = this.style;
-        document.head.appendChild(style);
-      }
-    } else {
-      const existingStyle = document.getElementById(styleId);
-      if (existingStyle) {
-        document.head.removeChild(existingStyle);
+    function toggleCss(key, css, enable) {
+      const styleId = `uwu-fast-style-${key}`;
+      const existing = document.getElementById(styleId);
+      if (enable) {
+        if (!existing) {
+          const style = document.createElement("style");
+          style.id = styleId;
+          style.textContent = css;
+          document.head.appendChild(style);
+        }
+      } else {
+        existing?.remove();
       }
     }
-  };
 
-  const checkboxes = [
-    {
-      label: "Не показывать всплывающее окно 'О коте'",
-      key: "hideCatTooltip",
-      storageKey: "uwu_fastStyles",
-      style: ".cat_tooltip { display: none !important; }",
-      callback: sharedFastStyleCallback,
-    },
-    {
-      label: "Скрыть Игровое поле",
-      key: "hideGameField",
-      storageKey: "uwu_fastStyles",
-      style: "#cages_overflow { visibility: hidden !important; }",
-      callback: sharedFastStyleCallback,
-    },
-    {
-      label: "Скрыть фон Игрового Поля",
-      key: "hideGameFieldBackground",
-      storageKey: "uwu_fastStyles",
-      style: "#cages_div { background-image: none !important; }",
-      callback: sharedFastStyleCallback,
-    },
-    {
-      label: "Скрыть Небо",
-      key: "hideSky",
-      storageKey: "uwu_fastStyles",
-      style: "#tr_sky { display: none !important; }",
-      callback: sharedFastStyleCallback,
-    },
-    {
-      label: "Всегда день/ярко",
-      key: "alwaysDay",
-      storageKey: "uwu_settings",
-      callback: function (checked) {
-        updateAlwaysDayStyle(checked);
+    const items = [
+      {
+        key: "hideCatTooltip",
+        storage: "uwu_fastStyles",
+        label: "Не показывать окно 'О коте'",
+        apply: (on) =>
+          toggleCss(
+            "hideCatTooltip",
+            ".cat_tooltip { display: none !important; }",
+            on,
+          ),
       },
-    },
-    {
-      label: "Границы клеток",
-      key: "cellsBorders",
-      storageKey: "uwu_settings",
-      callback: function (checked) {
-        updateCellsBordersStyle(checked);
+      {
+        key: "hideGameField",
+        storage: "uwu_fastStyles",
+        label: "Скрыть Игровое поле",
+        apply: (on) =>
+          toggleCss(
+            "hideGameField",
+            "#cages_overflow { visibility: hidden !important; }",
+            on,
+          ),
       },
-    },
-    {
-      label: "Непрозрачные коты",
-      key: "opaqueCats",
-      storageKey: "uwu_fastStyles",
-      style: ".cat > div { opacity: 1 !important; }",
-      callback: sharedFastStyleCallback,
-    },
-  ];
+      {
+        key: "hideGameFieldBackground",
+        storage: "uwu_fastStyles",
+        label: "Скрыть фон локации",
+        apply: (on) =>
+          toggleCss(
+            "hideGameFieldBackground",
+            "#cages_div { background-image: none !important; }",
+            on,
+          ),
+      },
+      {
+        key: "hideSky",
+        storage: "uwu_fastStyles",
+        label: "Скрыть Небо",
+        apply: (on) =>
+          toggleCss("hideSky", "#tr_sky { display: none !important; }", on),
+      },
+      {
+        key: "alwaysDay",
+        storage: "uwu_settings",
+        label: "Всегда день/ярко",
+        apply: (on) => {
+          if (typeof updateAlwaysDayStyle === "function")
+            updateAlwaysDayStyle(on);
+        },
+      },
+      {
+        key: "cellsBorders",
+        storage: "uwu_settings",
+        label: "Границы клеток",
+        apply: (on) => {
+          if (typeof updateCellsBordersStyle === "function")
+            updateCellsBordersStyle(on);
+        },
+      },
+      {
+        key: "opaqueCats",
+        storage: "uwu_fastStyles",
+        label: "Непрозрачные коты",
+        apply: (on) =>
+          toggleCss("opaqueCats", ".cat > div { opacity: 1 !important; }", on),
+      },
+    ];
 
-  const loadSettings = (storageKey) => {
-    const savedSettings = uwuStorage.getItem(storageKey);
-    return savedSettings ? savedSettings : {};
-  };
-
-  const saveSettings = (storageKey, settings) => {
-    uwuStorage.setItem(storageKey, settings);
-  };
-
-  const settingsMap = {
-    uwu_fastStyles: loadSettings("uwu_fastStyles"),
-    uwu_settings: loadSettings("uwu_settings"),
-  };
-
-  const applyStyles = () => {
-    checkboxes.forEach((checkbox) => {
-      if (settingsMap[checkbox.storageKey][checkbox.key] === true) {
-        checkbox.callback.call(checkbox, true);
+    function getState(item) {
+      if (item.storage === "uwu_settings") {
+        return !!settings[item.key];
       }
-    });
-  };
+      const fastMap = uwuStorage.getItem("uwu_fastStyles") || {};
+      return !!fastMap[item.key];
+    }
 
-  if (settings.fastStyles) {
-    const settingsDiv = document.createElement("div");
-    settingsDiv.id = "fast-Styles-container";
-    settingsDiv.classList.add("extended-settings-block");
+    function set(key, value) {
+      const item = items.find((i) => i.key === key);
+      if (!item) return;
 
-    checkboxes.forEach((checkbox) => {
-      const label = document.createElement("div");
-      const input = document.createElement("input");
-      input.type = "checkbox";
-      input.name = checkbox.key;
-
-      const storedValue = settingsMap[checkbox.storageKey][checkbox.key];
-      if (storedValue === true) {
-        input.checked = true;
-        checkbox.callback.call(checkbox, true);
+      if (item.storage === "uwu_settings") {
+        settings[key] = value;
+        saveSettings();
+      } else {
+        const fastMap = uwuStorage.getItem("uwu_fastStyles") || {};
+        fastMap[key] = value;
+        uwuStorage.setItem("uwu_fastStyles", fastMap);
       }
 
-      input.addEventListener("change", function () {
-        settingsMap[checkbox.storageKey][checkbox.key] = this.checked;
-        saveSettings(checkbox.storageKey, settingsMap[checkbox.storageKey]);
-        checkbox.callback.call(checkbox, this.checked);
+      item.apply(value);
+    }
+
+    function init() {
+      items.forEach((item) => {
+        if (getState(item)) {
+          item.apply(true);
+        }
       });
+    }
 
-      label.appendChild(input);
-      label.appendChild(document.createTextNode(checkbox.label));
-      settingsDiv.appendChild(label);
-    });
-
-    settingsContainer.appendChild(settingsDiv);
-
-    const style = document.createElement("style");
-    style.innerHTML = `
-      .extended-settings-block {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .extended-settings-block div {
-        display: flex;
-       align-items: center;
-      }
-    `;
-    document.head.appendChild(style);
-  } else {
-    applyStyles();
+    window.__uwuFastStylesManager = { items, init, set, getState };
+    return window.__uwuFastStylesManager;
   }
+
+  getFastStylesManager().init();
+
   // ====================================================================================================================
   //   . . . БЫСТРЫЕ ССЫЛКИ В ИГРОВОЙ . . .
   // ====================================================================================================================
@@ -11778,7 +12177,7 @@ if (targetCW3.test(window.location.href)) {
         if (!style) return;
 
         const oldHighlights = cageItem.querySelectorAll(
-          "style.uwu_itemHighlight"
+          "style.uwu_itemHighlight",
         );
         oldHighlights.forEach((oldHighlight) => oldHighlight.remove());
 
@@ -11798,20 +12197,20 @@ if (targetCW3.test(window.location.href)) {
             items.forEach((itemName) => {
               const backgroundImages =
                 style.match(
-                  /url\("things\/(.*?)\.png"\) (\d+)% (\d+)% no-repeat/g
+                  /url\("things\/(.*?)\.png"\) (\d+)% (\d+)% no-repeat/g,
                 ) || [];
 
               backgroundImages.forEach((backgroundImage) => {
                 if (backgroundImage.includes(`things/${itemName}.png`)) {
                   const positionMatch = backgroundImage.match(
-                    /(url\("things\/(.*?)\.png"\)) (\d+)% (\d+)% no-repeat/
+                    /(url\("things\/(.*?)\.png"\)) (\d+)% (\d+)% no-repeat/,
                   );
                   const imageUrl = positionMatch ? positionMatch[1] : "";
                   const positionX = positionMatch ? positionMatch[3] : "0";
                   const positionY = positionMatch ? positionMatch[4] : "0";
 
                   highlightedItems.push(
-                    `${imageUrl} ${positionX}% ${positionY}% no-repeat`
+                    `${imageUrl} ${positionX}% ${positionY}% no-repeat`,
                   );
                 }
               });
@@ -11923,7 +12322,7 @@ if (targetCW3.test(window.location.href)) {
       { attributes: true, attributeFilter: ["style"] },
       8,
       500,
-      10
+      10,
     );
   }
 
@@ -12023,7 +12422,7 @@ if (targetCW3.test(window.location.href)) {
       const link = document.createElement("link");
       link.rel = "stylesheet";
       link.href = `https://fonts.googleapis.com/css?family=${encodeURIComponent(
-        fontFamily
+        fontFamily,
       )}`;
       document.head.appendChild(link);
     }
@@ -12096,6 +12495,45 @@ if (targetCW3.test(window.location.href)) {
     applyFonts();
   }
   // ====================================================================================================================
+  //   . . . АВТОСОХРАНЕНИЕ РЕСАЙЗА ЧАТА . . .
+  // ====================================================================================================================
+
+  /**
+   * Observes user-driven resizing on whichever chat container is active
+   * (#uwu_chat_msg if modern chat is mounted, otherwise native #chat_msg)
+   * and updated height to script settings.
+   *
+   * @returns {void}
+   */
+  function initChatAutoResizePersistence() {
+    const chatContainer = document.getElementById("uwu_chat_msg") || document.getElementById("chat_msg");
+    if (!chatContainer) return;
+
+    let lastHeight = chatContainer.offsetHeight;
+    let saveTimeout = null;
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const newHeight = Math.round(entry.contentRect.height);
+        if (newHeight > 60 && Math.abs(newHeight - lastHeight) > 2) {
+          lastHeight = newHeight;
+          document.documentElement.style.setProperty("--uwu-chat-height", `${newHeight}px`);
+
+          clearTimeout(saveTimeout);
+          saveTimeout = setTimeout(() => {
+            settings.chatHeight = String(newHeight);
+            saveSettings();
+          }, 300);
+        }
+      }
+    });
+
+    observer.observe(chatContainer);
+  }
+
+  setupSingleCallback("#tr_chat", initChatAutoResizePersistence);
+
+  // ====================================================================================================================
   //   . . . СКРЫТИЕ РОДСТВЕННЫХ СВЯЗЕЙ . . .
   // ====================================================================================================================
   if (settings.hideRelativesByDefault) {
@@ -12106,271 +12544,1403 @@ if (targetCW3.test(window.location.href)) {
       }
     });
   }
+
   // ====================================================================================================================
   //   . . . РЕДИЗАЙН ИГРОВОЙ . . .
   // ====================================================================================================================
-  if (settings.customLayout) {
-    // ==================================================================
-    function applyLayoutSettings() {
-      const savedSettings = uwuStorage.getItem("uwu_layoutSettings");
-      if (savedSettings) {
-        const { leftBlocks, rightBlocks } = savedSettings;
+  /**
+   * Manages the dynamic stylesheet for the custom HUD layout.
+   */
+  const uwuCustomLayoutCssManager = {
+    styleId: "uwu-custom-layout-style",
 
-        const mainTable = document.getElementById("main_table");
-        const tbody = mainTable.getElementsByTagName("tbody")[0];
-        const blocks = Array.from(tbody.children);
+    /**
+     * Generates and injects the layout CSS rules using centralized CSS variables
+     * for gaps and tile slot dimensions.
+     *
+     * @returns {void}
+     */
+    enable() {
+      if (document.getElementById(this.styleId)) return;
 
-        resetBlockStyles(tbody);
+      const style = document.createElement("style");
+      style.id = this.styleId;
+      style.textContent = `
+        /* === FIXES AND RESETS CATWAR VANILLA CSS STYLES === */
+        html {
+          overflow-y: scroll;
+        }
 
-        const gridAreaTemplate = generateGridTemplate(leftBlocks, rightBlocks);
+        h2 {
+          margin: 4px 0 6px 0;
+        }
 
-        // console.log(gridAreaTemplate);
+        #app > div.game-topbar {
+          margin: 0;
+        }
 
-        tbody.style.display = "grid";
-        tbody.style.gridTemplateAreas = gridAreaTemplate;
-        tbody.style.gridTemplateColumns = "1fr auto 1fr";
-        tbody.style.gridTemplateRows = generateGridRowStyles(
-          leftBlocks,
-          rightBlocks
-        );
+        #chat_form {
+          margin: 0;
+        }
 
-        blocks.forEach((block) => {
-          if (block.id) {
-            block.style.gridArea = block.id;
-          }
-        });
-      }
+        #tr_chat > td {
+          padding: 8px;
+          border-radius: var(--uwu-tile-rb, 8px);
+        }
+
+        #tr_actions > td,
+        #tr_tos > td,
+        #act {
+          box-shadow: unset !important;
+        }
+
+        #tr_tos > td {
+          background-color: unset !important;
+        }
+
+        /* ===================== BOUNDS ===================== */
+        #app {
+          min-height: 100dvh;
+          height: 100dvh;
+          width: 100% !important;
+          max-width: unset !important;
+          margin: 0 !important;
+          display: block !important;
+        }
+
+        .game-topbar {
+          max-width: 100% !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
+        }
+
+        body {
+          overflow-y: scroll;
+          overflow-x: auto;
+        }
+
+        #app > br {
+          display: none !important;
+        }
+
+        /* ===================== FLEX-TILE DOCK CONTAINER ===================== */
+        #main_table {
+          width: 100%;
+          max-width: unset;
+          border-spacing: 0;
+          margin: 0;
+          background: transparent !important;
+        }
+
+        #main_table > tbody {
+          display: flex;
+          flex-direction: row;
+          align-items: flex-start;
+          gap: var(--uwu-tile-gap, 8px);
+          width: 100%;
+          margin: 0;
+          padding: var(--uwu-tile-gap, 8px);
+          box-sizing: border-box;
+        }
+
+        /* Dock Zones (Left & Right columns) */
+        .uwu-dock-zone {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+          align-content: flex-start;
+          gap: var(--uwu-tile-gap, 8px);
+          box-sizing: border-box;
+          min-width: 220px;
+        }
+
+        #uwu-dock-left {
+          flex: var(--uwu-left-grow, 5) 1 0px !important;
+          width: auto !important;
+        }
+
+        #uwu-dock-right {
+          flex: var(--uwu-right-grow, 5) 1 0px !important;
+          width: auto !important;
+        }
+
+        .uwu-tile-w-grip {
+          position: absolute;
+          top: 8px;
+          right: -3px;
+          bottom: 8px;
+          width: 7px;
+          cursor: ew-resize;
+          background: rgba(131, 229, 255, 0.3);
+          border-radius: 4px;
+          z-index: 10003;
+          transition: background 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .uwu-tile-w-grip:hover,
+        .uwu-tile-w-grip.active {
+          background: #83e5ff;
+          box-shadow: 0 0 8px #83e5ff;
+        }
+
+        .uwu-dock-zone--empty {
+          display: none;
+        }
+
+        .uwu-dock-center {
+          flex: 0 0 1000px !important;
+          width: 1000px !important;
+          max-width: 1000px !important;
+          box-sizing: border-box !important;
+        }
+
+        .uwu-dock-center,
+        #tr_field {
+          flex: 0 0 1000px;
+          width: 1000px;
+          height: 1000px;
+        }
+
+        #black_points.in-topbar {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          margin: 0 8px 0 auto;
+          padding: 2px 8px;
+          background: transparent;
+          font-size: 13px;
+          white-space: nowrap;
+        }
+
+        #cages_overflow,
+        #cages_div,
+        #cages {
+          width: 1000px;
+          height: 1000px;
+        }
+
+        .uwu-tile-block {
+          display: block !important;
+          position: relative !important;
+          box-sizing: border-box !important;
+        }
+
+        .uwu-tile-block > td {
+          display: block;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        .uwu-tile--w100 { width: 100%; }
+        .uwu-tile--w50  { width: calc(50% - (var(--uwu-tile-gap, 8px) / 2)); }
+        .uwu-tile--w33  { width: calc(33.333% - (var(--uwu-tile-gap, 8px) * 2 / 3)); }
+
+        /* Internal widget scrollbars */
+        #tr_chat.uwu-tile-block {
+          height: auto !important;
+        }
+
+        /* ===================== CHAT CONTAINER LAYOUT ===================== */
+        #chat_msg,
+        #uwu_chat_msg {
+          height: var(--uwu-chat-height, 275px);
+          resize: vertical;
+          overflow-y: auto;
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box !important;
+        }
+
+        #uwu_chat_msg {
+          display: flex;
+        }
+
+        #tr_chat:has(#uwu_chat_msg) #chat_msg {
+          display: none !important;
+        }
+
+        #chat_msg .chat_text {
+          width: auto !important;
+          max-width: 100% !important;
+          display: inline-block !important;
+          box-sizing: border-box !important;
+        }
+
+        #chat_msg table {
+          width: 100% !important;
+          table-layout: auto !important;
+        }
+
+        #chat_msg .profile_actions_cell {
+          width: 1% !important;
+          white-space: nowrap !important;
+          vertical-align: top !important;
+        }
+
+        .uwu-chat-msg-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          width: 100%;
+          box-sizing: border-box;
+        }
+
+        .uwu-chat-actions {
+          display: flex;
+          width: 44px;
+          justify-content: flex-end;
+          flex-shrink: 0;
+          margin-right: 2px;
+          user-select: none;
+        }
+
+        .uwu-chat-time {
+          opacity: 0.5;
+          font-size: 0.85em;
+          margin-right: 4px;
+          font-family: monospace;
+        }
+
+        .uwu-chat-id {
+          opacity: 0.6;
+          font-size: 0.85em;
+        }
+
+        #uwu_chat_msg > hr {
+          width: 100%;
+          margin: 5px 0;
+          border: none;
+          border-top: 1px solid var(--uwu-border, rgba(255, 255, 255, 0.1));
+        }
+
+        #uwu_chat_msg .chat_text {
+          padding: 0;
+        }
+
+        #history_block {
+          height: var(--uwu-history-height, 215px);
+          resize: vertical;
+          overflow-y: auto;
+          box-sizing: border-box;
+        }
+
+        #itemList {
+          max-height: var(--uwu-items-height, 180px);
+          overflow-y: auto;
+          display: flex;
+          flex-wrap: wrap;
+          box-sizing: border-box;
+        }
+
+        #family { display: block !important; overflow-y: auto !important; }
+
+        /* ===================== EDIT MODE UI & DROPZONES ===================== */
+        .uwu-editing .uwu-dock-zone--empty {
+          display: flex !important;
+          width: 140px !important;
+          min-height: 300px;
+          border: 2px dashed rgba(131, 229, 255, 0.35);
+          border-radius: 12px;
+          align-items: center;
+          justify-content: center;
+          background: rgba(131, 229, 255, 0.04);
+        }
+
+        .uwu-editing .uwu-dock-zone--empty:after {
+          content: "Перетащите сюда";
+          font-size: 12px;
+          opacity: 0.5;
+          text-align: center;
+          pointer-events: none;
+        }
+
+        .uwu-drop-placeholder {
+          box-sizing: border-box;
+          border: 2px dashed #41cd70;
+          background: rgba(65, 205, 112, 0.12);
+          transition: width 0.2s cubic-bezier(0.2, 0, 0, 1),
+                      height 0.18s ease;
+          pointer-events: none;
+          border-radius: var(--uwu-tile-rb, 8px);
+        }
+
+        .uwu-editing .uwu-tile-block {
+          transition: width 0.2s cubic-bezier(0.2, 0, 0, 1),
+                      transform 0.18s cubic-bezier(0.2, 0, 0, 1),
+                      opacity 0.15s ease !important;
+        }
+
+        .uwu-tile-overlay {
+          position: absolute;
+          inset: 0;
+          z-index: 10000;
+          border: 2px dashed #83e5ff;
+          background: rgba(131, 229, 255, 0.08);
+          box-sizing: border-box;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          padding: 6px 8px;
+          cursor: grab;
+          pointer-events: auto !important;
+        }
+
+        .uwu-tile-overlay:active {
+          cursor: grabbing;
+        }
+
+        .uwu-tile-title-tag {
+          background: rgba(0, 0, 0, 0.8);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 6px;
+          padding: 2px 8px;
+          font-size: 11px;
+          font-weight: 700;
+          color: #83e5ff;
+          pointer-events: none;
+        }
+
+        .uwu-tile-mode-btn {
+          background: rgba(0, 0, 0, 0.8);
+          border: 1px solid rgba(131, 229, 255, 0.4);
+          border-radius: 6px;
+          padding: 2px 7px;
+          font-size: 11px;
+          font-weight: 700;
+          color: #ffffff;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+
+        .uwu-tile-mode-btn:hover {
+          background: #83e5ff;
+          color: #000000;
+        }
+
+        .uwu-tile-h-grip {
+          position: absolute;
+          bottom: 10px;
+          left: 10px;
+          right: 10px;
+          height: 6px;
+          cursor: ns-resize;
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 999px;
+          transition: all 0.2s ease;
+          z-index: 10002;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .uwu-tile-h-grip::after {
+          content: "";
+          width: 34px;
+          height: 2px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.5);
+          transition: background-color 0.2s ease;
+        }
+
+        .uwu-tile-h-grip:hover,
+        .uwu-tile-h-grip.active {
+          background: #83e5ff;
+          box-shadow: 0 0 10px #83e5ff;
+        }
+
+        .uwu-tile-h-grip:hover::after,
+        .uwu-tile-h-grip.active::after {
+          background: #000000;
+        }
+
+        .uwu-zone-splitter {
+          width: 6px;
+          cursor: ew-resize;
+          background: rgba(255, 255, 255, 0.15);
+          border-radius: 3px;
+          align-self: stretch;
+          min-height: 400px;
+          transition: background-color 0.2s;
+          user-select: none;
+          flex-shrink: 0;
+        }
+
+        .uwu-zone-splitter:hover,
+        .uwu-zone-splitter.active {
+          background: #83e5ff;
+          box-shadow: 0 0 8px #83e5ff;
+        }
+
+        #block_deys {
+          flex-wrap: wrap;
+        }
+        #block_deys > #deys {
+          width: auto !important;
+        }
+
+        #deys_mit {
+          width: auto !important;
+        }
+
+        .uwu-drag-ghost {
+          position: fixed !important;
+          pointer-events: none !important;
+          z-index: 1000000 !important;
+          opacity: 0.88 !important;
+          box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), 0 0 0 2px #83e5ff !important;
+          transform: scale(1.02) rotate(1deg) !important;
+          will-change: left, top;
+          cursor: grabbing !important;
+        }
+
+        #tr_info {
+          display: none !important;
+        }
+
+        #tr_actions.uwu-tile-block,
+        #tr_mouth.uwu-tile-block,
+        #parameter.uwu-tile-block,
+        #history.uwu-tile-block,
+        #family.uwu-tile-block {
+          padding: 8px;
+          height: auto !important;
+          border-radius: var(--uwu-tile-rb, 8px);
+        }
+
+        #tr_chat.uwu-tile-block,
+        #tos {
+          border-radius: var(--uwu-tile-rb, 8px);
+        }
+
+        #parameter.uwu-tile-block,
+        #history.uwu-tile-block,
+        #family.uwu-tile-block {
+          background-color: var(--cw3-page-bg, rgba(var(--ds-info-rgb, 255, 255, 255), 0.55));
+        }
+      `;
+      document.head.appendChild(style);
+    },
+
+    /**
+     * Removes the custom layout stylesheet from document head.
+     *
+     * @returns {void}
+     */
+    disable() {
+      document.getElementById(this.styleId)?.remove();
+    },
+  };
+
+  /**
+   * @typedef {Object} TileSlot
+   * @property {string} id - Block DOM identifier (e.g. "tr_chat", "parameter").
+   * @property {number} [widthRatio=100] - Quantized percentage width (20 to 100, step 10).
+   * @property {string} [widthMode="100%"] - Legacy string representation of slot width.
+   * @property {number} height - Block height in pixels.
+   */
+
+  /**
+   * @typedef {Object} HudLayoutState
+   * @property {number} [leftGrow=5] - Fluid flex-grow proportion for the left dock column.
+   * @property {number} [rightGrow=5] - Fluid flex-grow proportion for the right dock column.
+   * @property {number} [leftWidth=420] - Fallback pixel width for left column.
+   * @property {number} [rightWidth=460] - Fallback pixel width for right column.
+   * @property {number} gap - Inter-tile and column gap in pixels.
+   * @property {number} radius - Border radius applied to tile cards in pixels.
+   * @property {TileSlot[]} left - Ordered slots positioned in the left dock zone.
+   * @property {TileSlot[]} right - Ordered slots positioned in the right dock zone.
+   */
+
+  /**
+   * Modular Flex-Tile Layout Engine.
+   * Features:
+   * - Native proportional column scaling (flex-grow) across browser zoom levels.
+   * - 10% quantized slot resizing with live preview.
+   * - Automatic 50/50 side-by-side row splitting upon edge drop.
+   * - Extraction of docked tiles back into full-width rows.
+   */
+  window.uwuHudEditor = (() => {
+    const BLOCK_NAMES = {
+      tr_field: "Поле Игровой (1000x1000)",
+      tr_chat: "Чат",
+      tr_actions: "Действия",
+      tr_mouth: "Рот (Инвентарь)",
+      parameter: "Персонаж (Параметры)",
+      history: "История",
+      family: "Родственные связи",
+      tr_tos: "Погода и Время",
+    };
+
+    let isEditMode = false;
+
+    /**
+     * Generates the classic default layout (Field center, Info left, Chat/Actions/Mouth/Tos right).
+     *
+     * @returns {HudLayoutState}
+     */
+    function getDefaultLayout() {
+      return {
+        leftWidth: 420,
+        rightWidth: 460,
+        gap: 10,
+        radius: 10,
+        left: [
+          { id: "parameter", widthMode: "100%", height: 0 },
+          { id: "history", widthMode: "100%", height: 0 },
+          { id: "family", widthMode: "100%", height: 0 },
+        ],
+        right: [
+          { id: "tr_tos", widthMode: "100%", height: 42 },
+          { id: "tr_chat", widthMode: "100%", height: 320 },
+          { id: "tr_actions", widthMode: "100%", height: 210 },
+          { id: "tr_mouth", widthMode: "100%", height: 180 },
+        ],
+      };
     }
 
-    function generateGridRowStyles(leftBlocks, rightBlocks) {
-      const numRows = Math.max(leftBlocks.length, rightBlocks.length);
-      let rowStyles = [];
+    /**
+     * Retrieves saved layout from storage or returns the default configuration.
+     *
+     * @returns {HudLayoutState}
+     */
+    function getLayout() {
+      const saved = uwuStorage.getItem("uwu_hud_layout");
+      if (saved && Array.isArray(saved.left) && Array.isArray(saved.right)) {
+        saved.gap = typeof saved.gap === "number" && !isNaN(saved.gap) ? Math.max(0, saved.gap) : 8;
+        saved.radius = typeof saved.radius === "number" && !isNaN(saved.radius) ? Math.max(0, saved.radius) : 8;
 
-      for (let i = 0; i < numRows; i++) {
-        let rowHeight = "auto";
-        rowStyles.push(rowHeight);
+        const expandLegacyInfo = (slots) => {
+          const result = [];
+          slots.forEach((slot) => {
+            if (slot.id === "tr_info") {
+              result.push({ id: "parameter", widthMode: slot.widthMode || "100%", height: 0 });
+              result.push({ id: "history", widthMode: slot.widthMode || "100%", height: 0 });
+              result.push({ id: "family", widthMode: slot.widthMode || "100%", height: 0 });
+            } else {
+              result.push(slot);
+            }
+          });
+          return result;
+        };
+
+        saved.left = expandLegacyInfo(saved.left);
+        saved.right = expandLegacyInfo(saved.right);
+        return saved;
       }
-
-      const rowStylesString = rowStyles.join(" ");
-      return rowStylesString;
+      return getDefaultLayout();
     }
 
-    function generateGridTemplate(leftBlocks, rightBlocks) {
-      const numRows = Math.max(leftBlocks.length, rightBlocks.length);
-      let template = "";
-      let lastLeftBlockId = "";
-      let lastRightBlockId = "";
-      let isFirstRow = true;
+    /**
+     * Ensures Left, Center, and Right Dock Zones exist inside tbody.
+     *
+     * @param {HTMLTableSectionElement} tbody - Target table body.
+     * @returns {{ leftZone: HTMLElement, centerZone: HTMLElement, rightZone: HTMLElement }}
+     */
+    function ensureDockZones(tbody) {
+      let lz = document.getElementById("uwu-dock-left");
+      let cz = document.getElementById("uwu-dock-center");
+      let rz = document.getElementById("uwu-dock-right");
 
-      for (let i = 0; i < numRows; i++) {
-        const leftBlockId = leftBlocks[i] || lastLeftBlockId;
-        const rightBlockId = rightBlocks[i] || lastRightBlockId;
+      if (!cz) {
+        cz = document.createElement("div");
+        cz.id = "uwu-dock-center";
+        cz.className = "uwu-dock-center";
+        const field = document.getElementById("tr_field");
+        if (field) cz.appendChild(field);
+      }
 
-        if (isFirstRow) {
-          template += `"${leftBlockId} tr_field ${rightBlockId}" `;
-          isFirstRow = false;
+      if (!lz) {
+        lz = document.createElement("div");
+        lz.id = "uwu-dock-left";
+        lz.className = "uwu-dock-zone";
+      }
+
+      if (!rz) {
+        rz = document.createElement("div");
+        rz.id = "uwu-dock-right";
+        rz.className = "uwu-dock-zone";
+      }
+
+      if (tbody.firstChild !== lz) {
+        tbody.prepend(lz);
+        lz.after(cz);
+        cz.after(rz);
+      }
+
+      return { leftZone: lz, centerZone: cz, rightZone: rz };
+    }
+
+    /**
+     * Reads the actual computed border-radius from a block or its main inner <td> element.
+     *
+     * @param {HTMLElement} el - Block element (typically <tr>).
+     * @returns {string} Computed border-radius string (e.g., "10px" or "0px").
+     */
+    function getEffectiveBorderRadius(el) {
+      const target = el.querySelector("td") || el;
+      const radius = getComputedStyle(target).borderRadius;
+      return radius && radius !== "0px" ? radius : "0px";
+    }
+
+    /** List of tile block IDs that manage their height automatically based on game context. */
+    const AUTO_HEIGHT_TILES = [
+      "tr_chat",
+      "tr_actions",
+      "tr_mouth",
+      "tr_tos",
+      "parameter",
+      "history",
+      "family",
+    ];
+
+    /**
+     * Applies layout configuration to DOM elements.
+     *
+     * @returns {void}
+     */
+    function applyLayout() {
+      if (!settings.customLayout) return;
+
+      uwuCustomLayoutCssManager.enable();
+      const tbody = document.querySelector("#main_table > tbody");
+      if (!tbody) return;
+
+      const layout = getLayout();
+      const gap = typeof layout.gap === "number" ? layout.gap : 8;
+      const radius = typeof layout.radius === "number" ? layout.radius : 8;
+
+      let leftGrow = typeof layout.leftGrow === "number" ? layout.leftGrow : null;
+      let rightGrow = typeof layout.rightGrow === "number" ? layout.rightGrow : null;
+
+      if (leftGrow === null || rightGrow === null) {
+        const lPx = typeof layout.leftWidth === "number" ? layout.leftWidth : 420;
+        const rPx = typeof layout.rightWidth === "number" ? layout.rightWidth : 460;
+        const total = lPx + rPx;
+        leftGrow = Number(((lPx / total) * 10).toFixed(2));
+        rightGrow = Number((10 - leftGrow).toFixed(2));
+      }
+
+      document.documentElement.style.setProperty("--uwu-tile-gap", `${gap}px`);
+      document.documentElement.style.setProperty("--uwu-tile-rb", `${radius}px`);
+      document.documentElement.style.setProperty("--uwu-left-grow", String(leftGrow));
+      document.documentElement.style.setProperty("--uwu-right-grow", String(rightGrow));
+      document.documentElement.style.setProperty("--uwu-chat-height", `${settings.chatHeight || 275}px`);
+      document.documentElement.style.setProperty("--uwu-history-height", `${settings.historyHeight || 215}px`);
+      document.documentElement.style.setProperty("--uwu-items-height", `${settings.itemListHeight || 180}px`);
+
+      const { leftZone, centerZone, rightZone } = ensureDockZones(tbody);
+
+      leftZone.style.width = "";
+      rightZone.style.width = "";
+      leftZone.style.flex = `${leftGrow} 1 0px`;
+      rightZone.style.flex = `${rightGrow} 1 0px`;
+
+      leftZone.classList.toggle("uwu-dock-zone--empty", layout.left.length === 0);
+      rightZone.classList.toggle("uwu-dock-zone--empty", layout.right.length === 0);
+
+      const applySlot = (slot, zoneEl) => {
+        const el = document.getElementById(slot.id);
+        if (!el) return;
+
+        el.classList.add("uwu-tile-block");
+        const ratio = getSlotWidthRatio(slot);
+        applySlotWidth(el, ratio);
+        el.dataset.widthRatio = String(ratio);
+
+        if (!AUTO_HEIGHT_TILES.includes(slot.id) && typeof slot.height === "number" && slot.height > 0) {
+          el.style.height = `${slot.height}px`;
         } else {
-          template += `"${
-            leftBlockId === lastLeftBlockId ? "." : leftBlockId
-          } . ${rightBlockId === lastRightBlockId ? "." : rightBlockId}" `;
+          el.style.height = "";
         }
 
-        if (leftBlockId) {
-          lastLeftBlockId = leftBlockId;
-        }
-        if (rightBlockId) {
-          lastRightBlockId = rightBlockId;
-        }
-      }
+        zoneEl.appendChild(el);
+      };
 
-      return template;
+      layout.left.forEach((slot) => applySlot(slot, leftZone));
+      layout.right.forEach((slot) => applySlot(slot, rightZone));
     }
 
-    function resetBlockStyles(parent) {
-      const blocks = parent.querySelectorAll("tr > *");
-      blocks.forEach((block) => {
-        block.style.gridArea = "";
+    /**
+     * Cycles block slot width mode: 100% -> 50% -> 33% -> 100%.
+     *
+     * @param {TileSlot} slot - Block slot state object.
+     * @param {HTMLElement} blockEl - Target DOM block element.
+     * @param {HTMLElement} btnEl - Mode toggle button element.
+     */
+    function cycleWidthMode(slot, blockEl, btnEl) {
+      if (slot.widthMode === "100%") slot.widthMode = "50%";
+      else if (slot.widthMode === "50%") slot.widthMode = "33%";
+      else slot.widthMode = "100%";
+
+      blockEl.classList.remove(
+        "uwu-tile--w100",
+        "uwu-tile--w50",
+        "uwu-tile--w33",
+      );
+      if (slot.widthMode === "50%") blockEl.classList.add("uwu-tile--w50");
+      else if (slot.widthMode === "33%") blockEl.classList.add("uwu-tile--w33");
+      else blockEl.classList.add("uwu-tile--w100");
+
+      btnEl.textContent = slot.widthMode;
+    }
+
+    /**
+     * Enters the interactive tile editor mode and sets up modular editor components.
+     *
+     * @returns {void}
+     */
+    function startEditMode() {
+      if (isEditMode) return;
+      isEditMode = true;
+
+      applyLayout();
+      document.body.classList.add("uwu-editing");
+
+      const layout = getLayout();
+      const leftZone = document.getElementById("uwu-dock-left");
+      const rightZone = document.getElementById("uwu-dock-right");
+      const centerZone = document.getElementById("uwu-dock-center");
+
+      const toolbar = createEditorToolbar(layout, {
+        onSave: () => stopEditMode(true),
+        onCancel: () => stopEditMode(false),
+        onReset: () => {
+          if (confirm("Сбросить раскладку к классическому стандарту?")) {
+            uwuStorage.removeItem("uwu_hud_layout");
+            applyLayout();
+            stopEditMode(false);
+          }
+        },
+      });
+      document.body.appendChild(toolbar);
+
+      createZoneSplitters(centerZone, leftZone, rightZone, (leftGrow, rightGrow) => {
+        layout.leftGrow = leftGrow;
+        layout.rightGrow = rightGrow;
+      });
+
+      const allSlots = [...layout.left, ...layout.right];
+      allSlots.forEach((slot) => {
+        const blockEl = document.getElementById(slot.id);
+        if (!blockEl) return;
+
+        const overlay = createTileOverlay(slot, blockEl);
+        bindSmoothTileDrag(blockEl, overlay, leftZone, rightZone);
+        blockEl.appendChild(overlay);
       });
     }
 
-    // Больше фикс стилей.
-    const fixStyle = document.createElement("style");
-    fixStyle.innerHTML =
-      /* CSS */
-      `
-      #main_table {
-        width: 100%;
-        max-width: unset;
-        height: 100%;
-
-        background: none;
-        border-spacing: 0px !important;
-        margin-top: 0px !important;
+    /**
+     * Normalizes and quantizes a tile slot width ratio to 10% steps within [20, 100].
+     * Provides backwards compatibility with legacy 'widthMode' string values.
+     *
+     * @param {TileSlot} slot - Target slot data model.
+     * @returns {number} Width ratio percentage (20 to 100, step 10).
+     */
+    function getSlotWidthRatio(slot) {
+      if (typeof slot.widthRatio === "number" && !isNaN(slot.widthRatio)) {
+        return Math.max(20, Math.min(100, Math.round(slot.widthRatio / 10) * 10));
       }
-
-      #app > br {
-        display: none;
-      }
-
-      #app {
-        width: 100%;
-        height: 100%;
-        display: flex !important;
-        flex-direction: column;
-        gap: 5px;
-      }
-      
-      #chat_msg, #cws_chat_msg {
-        height: ${settings.chatHeight}px;
-        width: auto;
-      }
-
-      #history_block > div { 
-        visibility: hidden; 
-      }
-
-      #history_block {
-        display: block;
-        height: ${settings.historyHeight}px; 
-        overflow-y: auto;
-        resize: vertical;
-      }
-
-      #family { 
-        display: block;
-        overflow-y: auto;
-        resize: vertical;
-      }
-
-      .infos {
-        width: auto;
-      }
-
-      #cages_overflow {
-        background: black;
-      }
-
-      .chat_text {
-        width: auto !important;
-        overflow-wrap: anywhere;
-      }
-
-      #chat_form {
-        margin: unset;
-        margin: 5px;
-      }
-
-      #volume {
-        margin: 5px;
-      }
-
-      #app > p:last-of-type {
-        position: fixed;
-        bottom: 0px;
-        margin: 8px;
-      }
-
-      h2 {
-        margin-top: 5px;
-        margin-bottom: 10px;
-      }
-
-      #itemList {
-        overflow-y: auto;
-        max-height: ${settings.itemListHeight || 180}px;
-        display: flex;
-        flex-wrap: wrap;
-      }
-
-      .game-topbar {
-        max-width: 100% !important;
-      }
-
-      body {
-        overflow-y: scroll;
-      }
-
-      #tr_chat, #tr_actions > td, #tr_mouth > td, #location, .small, #info_main > tbody > tr > td {
-        padding: 5px !important;
-      }
-
-      #tr_chat > td {
-        display: contents;
-      }
-
-      #chat_msg, #cws_chat_msg {
-        height: ${theme?.chatHeight}px;
-        resize: vertical;
-      }
-
-      #tr_field, #tr_info {
-        height: 10px;
-      }
-
-      #newchat, #newls {
-        background-color: transparent;
-      }
-
-      .other_cats_list {
-        display: none;
-      }
-
-      #deys {
-        width: auto !important;
-      }
-      
-      #block_deys {
-        flex-wrap: wrap;
-        justify-content: space-between;
-      }
-
-      #deys_mit {
-        width: min-content !important;
-      }
-      
-      #mit { 
-        width: auto !important;
-      }
-    `;
-    document.head.appendChild(fixStyle);
-    applyLayoutSettings();
-
-    const paragraph = document.querySelector("#app > p > b");
-    paragraph.textContent = "ТБ:";
-
-    function applyLayoutSettingsForInfoMain() {
-      const infoMainTable = document.getElementById("info_main");
-      if (!infoMainTable) {
-        return;
-      }
-
-      const tableRow = infoMainTable.querySelector("tr");
-      if (!tableRow) {
-        return;
-      }
-
-      const tds = tableRow.getElementsByTagName("td");
-      if (tds.length < 3) {
-        return;
-      }
-
-      for (const td of tds) {
-        td.style.gridArea = "";
-      }
-
-      tableRow.style.display = "grid";
-      // хахахах поглядите на смешного строчного
-      tableRow.style.gridTemplateAreas = `"parameter"
-                                          "history"
-                                          "family"`;
-
-      tds[0].style.gridArea = "family";
-      tds[1].style.gridArea = "history";
-      tds[2].style.gridArea = "parameter";
+      if (slot.widthMode === "50%") return 50;
+      if (slot.widthMode === "33%") return 30;
+      return 100;
     }
 
-    applyLayoutSettingsForInfoMain();
+    /**
+     * Calculates and applies inline width with exact gap deduction to prevent flex-wrapping.
+     * Formula: P% - (gap * (1 - P / 100))
+     *
+     * @param {HTMLElement} element - DOM element to size.
+     * @param {number} ratio - Width percentage ratio (20 to 100).
+     * @returns {void}
+     */
+    function applySlotWidth(element, ratio) {
+      const normalized = Math.max(20, Math.min(100, Math.round(ratio / 10) * 10));
+      if (normalized >= 100) {
+        element.style.width = "100%";
+      } else {
+        const gapMultiplier = (1 - normalized / 100).toFixed(2);
+        element.style.width = `calc(${normalized}% - (var(--uwu-tile-gap, 8px) * ${gapMultiplier}))`;
+      }
+    }
+
+    /**
+     * Creates and binds the top HUD editor toolbar.
+     *
+     * @param {HudLayoutState} layout - Current layout configuration state.
+     * @param {Object} actions - Action callbacks for toolbar buttons.
+     * @param {() => void} actions.onSave - Triggered when saving changes.
+     * @param {() => void} actions.onCancel - Triggered when discarding changes.
+     * @param {() => void} actions.onReset - Triggered when resetting layout to default.
+     * @returns {HTMLElement} The constructed toolbar DOM element.
+     */
+    function createEditorToolbar(layout, { onSave, onCancel, onReset }) {
+      const toolbar = document.createElement("div");
+      toolbar.id = "uwu-hud-toolbar";
+      toolbar.className = "uwu-hud-toolbar";
+
+      const currentGap = typeof layout.gap === "number" ? layout.gap : 8;
+      const currentRadius = typeof layout.radius === "number" ? layout.radius : 8;
+
+      toolbar.innerHTML = `
+        <span>🛠️ <b>Редактор слотов</b></span>
+        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; margin-left: 4px; user-select: none;">
+          Отступы:
+          <input type="number" id="uwu-hud-gap-input" min="0" max="40" value="${currentGap}" style="width: 46px; padding: 2px 4px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; text-align: center; font: inherit;"> px
+        </label>
+        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; margin-left: 6px; user-select: none;">
+          Скругление:
+          <input type="number" id="uwu-hud-radius-input" min="0" max="40" value="${currentRadius}" style="width: 46px; padding: 2px 4px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; text-align: center; font: inherit;"> px
+        </label>
+        <button type="button" id="uwu-hud-reset-btn" class="uwu-button remove-button" style="padding: 4px 10px;">↺ Сброс</button>
+        <button type="button" id="uwu-hud-save-btn" class="uwu-button install-button" style="padding: 4px 12px; font-weight: bold;">💾 Сохранить</button>
+        <button type="button" id="uwu-hud-cancel-btn" class="uwu-button" style="padding: 4px 10px; opacity: 0.8;">✖ Отмена</button>
+      `;
+
+      toolbar.querySelector("#uwu-hud-gap-input").addEventListener("input", (e) => {
+        const raw = parseInt(e.target.value, 10);
+        const val = isNaN(raw) ? 0 : Math.max(0, raw);
+        document.documentElement.style.setProperty("--uwu-tile-gap", `${val}px`);
+        layout.gap = val;
+      });
+
+      toolbar.querySelector("#uwu-hud-radius-input").addEventListener("input", (e) => {
+        const raw = parseInt(e.target.value, 10);
+        const val = isNaN(raw) ? 0 : Math.max(0, raw);
+        document.documentElement.style.setProperty("--uwu-tile-rb", `${val}px`);
+        layout.radius = val;
+      });
+
+      toolbar.querySelector("#uwu-hud-save-btn").onclick = onSave;
+      toolbar.querySelector("#uwu-hud-cancel-btn").onclick = onCancel;
+      toolbar.querySelector("#uwu-hud-reset-btn").onclick = onReset;
+
+      return toolbar;
+    }
+
+    /**
+     * Builds interactive column width splitters placed adjacent to the center game field.
+     *
+     * @param {HTMLElement} centerZone - Center field container element.
+     * @param {HTMLElement} leftZone - Left dock column element.
+     * @param {HTMLElement} rightZone - Right dock column element.
+     * @param {(isLeft: boolean, newWidth: number) => void} onResize - Callback invoked with new column width.
+     * @returns {HTMLElement[]} List of created splitter elements.
+     */
+    function createZoneSplitters(centerZone, leftZone, rightZone, onResize) {
+      const createSplitter = () => {
+        const sp = document.createElement("div");
+        sp.className = "uwu-zone-splitter";
+        sp.title = "Потяните влево/вправо для перераспределения пропорций колонок";
+
+        sp.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          sp.classList.add("active");
+
+          const startX = e.clientX;
+          const initLeftW = leftZone.offsetWidth;
+          const initRightW = rightZone.offsetWidth;
+          const totalAvailableWidth = initLeftW + initRightW;
+
+          const onMove = (moveEvent) => {
+            const deltaX = moveEvent.clientX - startX;
+            const currentLeft = Math.max(200, initLeftW + deltaX);
+            const currentRight = Math.max(200, initRightW - deltaX);
+            const total = currentLeft + currentRight;
+
+            const leftGrow = Number(((currentLeft / total) * 10).toFixed(2));
+            const rightGrow = Number((10 - leftGrow).toFixed(2));
+
+            document.documentElement.style.setProperty("--uwu-left-grow", String(leftGrow));
+            document.documentElement.style.setProperty("--uwu-right-grow", String(rightGrow));
+
+            leftZone.style.flex = `${leftGrow} 1 0px`;
+            rightZone.style.flex = `${rightGrow} 1 0px`;
+
+            onResize(leftGrow, rightGrow);
+          };
+
+          const onUp = () => {
+            sp.classList.remove("active");
+            window.removeEventListener("mousemove", onMove);
+            window.removeEventListener("mouseup", onUp);
+          };
+
+          window.addEventListener("mousemove", onMove);
+          window.addEventListener("mouseup", onUp);
+        });
+
+        return sp;
+      };
+
+      const leftSplitter = createSplitter();
+      const rightSplitter = createSplitter();
+
+      centerZone.before(leftSplitter);
+      centerZone.after(rightSplitter);
+
+      return [leftSplitter, rightSplitter];
+    }
+
+    /**
+     * Calculates the target drop zone and adjacent sibling node from pointer coordinates.
+     *
+     * @param {number} clientX - Pointer X coordinate.
+     * @param {number} clientY - Pointer Y coordinate.
+     * @param {HTMLElement} leftZone - Left column container.
+     * @param {HTMLElement} rightZone - Right column container.
+     * @param {HTMLElement} draggedEl - The block currently being moved.
+     * @param {HTMLElement} placeholder - Active layout placeholder indicator.
+     * @returns {{ zone: HTMLElement, beforeSibling: HTMLElement|null, dockType: "left"|"right"|"vertical-before"|"vertical-after", targetSibling: HTMLElement|null }|null}
+    */
+    function findDropTarget(clientX, clientY, leftZone, rightZone, draggedEl, placeholder) {
+      const hoveredEl = document.elementFromPoint(clientX, clientY);
+      const zone = hoveredEl?.closest(".uwu-dock-zone");
+
+      if (!zone || (zone !== leftZone && zone !== rightZone)) {
+        return null;
+      }
+
+      const siblings = Array.from(zone.children).filter(
+        (child) =>
+          child.classList.contains("uwu-tile-block") &&
+          child !== draggedEl &&
+          child !== placeholder
+      );
+
+      let beforeSibling = null;
+      let dockType = "vertical-after";
+      let targetSibling = null;
+
+      for (const child of siblings) {
+        const cRect = child.getBoundingClientRect();
+        const isInVerticalRange = clientY >= cRect.top && clientY <= cRect.bottom;
+
+        if (isInVerticalRange) {
+          targetSibling = child;
+          const relX = (clientX - cRect.left) / cRect.width;
+          const relY = (clientY - cRect.top) / cRect.height;
+
+          if (relY < 0.25) {
+            dockType = "vertical-before";
+            beforeSibling = child;
+          } else if (relY > 0.75) {
+            dockType = "vertical-after";
+            beforeSibling = child.nextElementSibling;
+          } else if (relX < 0.25) {
+            dockType = "left";
+            beforeSibling = child;
+          } else if (relX > 0.75) {
+            dockType = "right";
+            beforeSibling = child.nextElementSibling;
+          } else {
+            if (relY < 0.5) {
+              dockType = "vertical-before";
+              beforeSibling = child;
+            } else {
+              dockType = "vertical-after";
+              beforeSibling = child.nextElementSibling;
+            }
+          }
+          break;
+        } else if (clientY < cRect.top) {
+          dockType = "vertical-before";
+          beforeSibling = child;
+          break;
+        }
+      }
+
+      return { zone, beforeSibling, dockType, targetSibling };
+    }
+
+    /**
+     * Generates an interactive shield overlay with 10% width step grip and height resize controls.
+     *
+     * @param {TileSlot} slot - Layout slot model.
+     * @param {HTMLElement} blockEl - Target tile DOM element.
+     * @returns {HTMLElement} The created overlay container.
+     */
+    function createTileOverlay(slot, blockEl) {
+      const overlay = document.createElement("div");
+      overlay.className = "uwu-tile-overlay";
+      overlay.dataset.blockId = slot.id;
+
+      const currentRatio = getSlotWidthRatio(slot);
+      blockEl.dataset.widthRatio = String(currentRatio);
+
+      const hasHeightGrip = ![
+        "tr_actions",
+        "tr_mouth",
+        "tr_tos",
+        "parameter",
+        "history",
+        "family",
+      ].includes(slot.id);
+
+      overlay.innerHTML = `
+        <span class="uwu-tile-title-tag">${BLOCK_NAMES[slot.id] || slot.id}</span>
+        <button type="button" class="uwu-tile-mode-btn" title="Клик: быстрое переключение">${currentRatio}%</button>
+        <div class="uwu-tile-w-grip" title="Потяните по горизонтали (шаг 10%)"></div>
+        ${hasHeightGrip ? '<div class="uwu-tile-h-grip" title="Потяните для изменения высоты"></div>' : ""}
+      `;
+
+      const modeBtn = overlay.querySelector(".uwu-tile-mode-btn");
+      modeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const cycle = [100, 50, 30];
+        const cur = parseInt(blockEl.dataset.widthRatio || "100", 10);
+        const nextIdx = (cycle.indexOf(cur) + 1) % cycle.length;
+        const nextRatio = cycle[nextIdx] || 100;
+
+        applySlotWidth(blockEl, nextRatio);
+        blockEl.dataset.widthRatio = String(nextRatio);
+        modeBtn.textContent = `${nextRatio}%`;
+        slot.widthRatio = nextRatio;
+        slot.widthMode = `${nextRatio}%`;
+      });
+
+      const wGrip = overlay.querySelector(".uwu-tile-w-grip");
+      wGrip.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        wGrip.classList.add("active");
+
+        const startX = e.clientX;
+        const parentZone = blockEl.parentElement;
+        const zoneWidth = parentZone.clientWidth;
+        const initW = blockEl.offsetWidth;
+
+        const onMove = (me) => {
+          const deltaX = me.clientX - startX;
+          const rawPercent = ((initW + deltaX) / zoneWidth) * 100;
+          const snapped = Math.max(20, Math.min(100, Math.round(rawPercent / 10) * 10));
+
+          applySlotWidth(blockEl, snapped);
+          blockEl.dataset.widthRatio = String(snapped);
+          modeBtn.textContent = `${snapped}%`;
+          slot.widthRatio = snapped;
+          slot.widthMode = `${snapped}%`;
+        };
+
+        const onUp = () => {
+          wGrip.classList.remove("active");
+          window.removeEventListener("mousemove", onMove);
+          window.removeEventListener("mouseup", onUp);
+        };
+
+        window.addEventListener("mousemove", onMove);
+        window.addEventListener("mouseup", onUp);
+      });
+
+      const hGrip = overlay.querySelector(".uwu-tile-h-grip");
+      if (hGrip) {
+        hGrip.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          hGrip.classList.add("active");
+
+          const startY = e.clientY;
+          const isChat = slot.id === "tr_chat";
+          const chatMsgEl = isChat
+            ? (document.getElementById("uwu_chat_msg") || document.getElementById("chat_msg"))
+            : null;
+          const initH = isChat && chatMsgEl ? chatMsgEl.offsetHeight : blockEl.offsetHeight;
+
+          const onMove = (me) => {
+            const newH = Math.max(80, initH + (me.clientY - startY));
+            if (isChat && chatMsgEl) {
+              chatMsgEl.style.height = `${newH}px`;
+              document.documentElement.style.setProperty("--uwu-chat-height", `${newH}px`);
+              settings.chatHeight = String(newH);
+            } else {
+              blockEl.style.height = `${newH}px`;
+              slot.height = newH;
+            }
+          };
+
+          const onUp = () => {
+            hGrip.classList.remove("active");
+            if (isChat) saveSettings();
+            window.removeEventListener("mousemove", onMove);
+            window.removeEventListener("mouseup", onUp);
+          };
+
+          window.addEventListener("mousemove", onMove);
+          window.addEventListener("mouseup", onUp);
+        });
+      }
+
+      return overlay;
+    }
+
+    /**
+     * Binds pointer drag interaction to a tile block.
+     *
+     * @param {HTMLElement} blockEl - The tile element to be dragged.
+     * @param {HTMLElement} overlay - Grab handle overlay on the tile.
+     * @param {HTMLElement} leftZone - Left column container.
+     * @param {HTMLElement} rightZone - Right column container.
+     * @returns {void}
+     */
+    function bindSmoothTileDrag(blockEl, overlay, leftZone, rightZone) {
+      overlay.addEventListener("mousedown", (e) => {
+        if (
+          e.target.classList.contains("uwu-tile-mode-btn") ||
+          e.target.classList.contains("uwu-tile-h-grip") ||
+          e.target.classList.contains("uwu-tile-w-grip")
+        ) {
+          return;
+        }
+        e.preventDefault();
+
+        const rect = blockEl.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        const offsetY = e.clientY - rect.top;
+
+        let formerPartner = null;
+        if (parseInt(blockEl.dataset.widthRatio || "100", 10) <= 50) {
+          const prev = blockEl.previousElementSibling;
+          const next = blockEl.nextElementSibling;
+          if (prev && prev.classList.contains("uwu-tile-block") && parseInt(prev.dataset.widthRatio || "100", 10) <= 50) {
+            formerPartner = prev;
+          } else if (next && next.classList.contains("uwu-tile-block") && parseInt(next.dataset.widthRatio || "100", 10) <= 50) {
+            formerPartner = next;
+          }
+        }
+
+        if (formerPartner) {
+          applySlotWidth(formerPartner, 100);
+          formerPartner.dataset.widthRatio = "100";
+          const partnerBtn = formerPartner.querySelector(".uwu-tile-mode-btn");
+          if (partnerBtn) partnerBtn.textContent = "100%";
+        }
+
+        const ghost = blockEl.cloneNode(true);
+        ghost.classList.add("uwu-drag-ghost");
+        ghost.querySelectorAll(".uwu-tile-overlay").forEach((o) => o.remove());
+        ghost.style.width = `${rect.width}px`;
+        ghost.style.height = `${rect.height}px`;
+        ghost.style.left = `${rect.left}px`;
+        ghost.style.top = `${rect.top}px`;
+        document.body.appendChild(ghost);
+
+        const placeholder = document.createElement("div");
+        placeholder.className = "uwu-drop-placeholder";
+        applySlotWidth(placeholder, 100);
+        placeholder.style.height = `${blockEl.offsetHeight}px`;
+
+        blockEl.before(placeholder);
+        blockEl.style.setProperty("display", "none", "important");
+
+        let currentDropTarget = null;
+        let activeDockSibling = null;
+
+        const restoreSiblingWidth = (sibling) => {
+          if (!sibling) return;
+          const originalRatio = parseInt(sibling.dataset.widthRatio || "100", 10);
+          applySlotWidth(sibling, originalRatio);
+        };
+
+        const onMouseMove = (me) => {
+          ghost.style.left = `${me.clientX - offsetX}px`;
+          ghost.style.top = `${me.clientY - offsetY}px`;
+
+          const target = findDropTarget(me.clientX, me.clientY, leftZone, rightZone, blockEl, placeholder);
+          currentDropTarget = target;
+
+          if (!target) {
+            if (activeDockSibling) {
+              restoreSiblingWidth(activeDockSibling);
+              activeDockSibling = null;
+            }
+            return;
+          }
+
+          const isSideDock = (target.dockType === "left" || target.dockType === "right") && target.targetSibling;
+
+          if (isSideDock) {
+            const sibling = target.targetSibling;
+
+            if (activeDockSibling && activeDockSibling !== sibling) {
+              restoreSiblingWidth(activeDockSibling);
+            }
+
+            activeDockSibling = sibling;
+
+            applySlotWidth(sibling, 50);
+            applySlotWidth(placeholder, 50);
+            placeholder.style.height = `${sibling.offsetHeight}px`;
+
+            if (target.dockType === "left") {
+              if (placeholder.nextElementSibling !== sibling) {
+                sibling.before(placeholder);
+              }
+            } else {
+              if (placeholder.previousElementSibling !== sibling) {
+                sibling.after(placeholder);
+              }
+            }
+          } else {
+            if (activeDockSibling) {
+              restoreSiblingWidth(activeDockSibling);
+              activeDockSibling = null;
+            }
+
+            applySlotWidth(placeholder, 100);
+            placeholder.style.height = `${blockEl.offsetHeight}px`;
+
+            if (target.beforeSibling) {
+              if (placeholder.nextElementSibling !== target.beforeSibling) {
+                target.beforeSibling.before(placeholder);
+              }
+            } else if (target.zone.lastElementChild !== placeholder) {
+              target.zone.appendChild(placeholder);
+            }
+          }
+        };
+
+        const onMouseUp = () => {
+          window.removeEventListener("mousemove", onMouseMove);
+          window.removeEventListener("mouseup", onMouseUp);
+
+          placeholder.before(blockEl);
+          placeholder.remove();
+          ghost.remove();
+          blockEl.style.removeProperty("display");
+
+          const isSideDock = currentDropTarget &&
+            (currentDropTarget.dockType === "left" || currentDropTarget.dockType === "right") &&
+            currentDropTarget.targetSibling;
+
+          if (isSideDock) {
+            const targetSibling = currentDropTarget.targetSibling;
+            if (targetSibling && targetSibling !== blockEl) {
+              applySlotWidth(blockEl, 50);
+              applySlotWidth(targetSibling, 50);
+              blockEl.dataset.widthRatio = "50";
+              targetSibling.dataset.widthRatio = "50";
+
+              const updateBtn = (el) => {
+                const btn = el.querySelector(".uwu-tile-mode-btn");
+                if (btn) btn.textContent = "50%";
+              };
+              updateBtn(blockEl);
+              updateBtn(targetSibling);
+            }
+          } else {
+            applySlotWidth(blockEl, 100);
+            blockEl.dataset.widthRatio = "100";
+            const modeBtn = blockEl.querySelector(".uwu-tile-mode-btn");
+            if (modeBtn) modeBtn.textContent = "100%";
+
+            if (activeDockSibling) {
+              restoreSiblingWidth(activeDockSibling);
+            }
+          }
+
+          activeDockSibling = null;
+          currentDropTarget = null;
+
+          leftZone.classList.toggle("uwu-dock-zone--empty", leftZone.querySelectorAll(".uwu-tile-block").length === 0);
+          rightZone.classList.toggle("uwu-dock-zone--empty", rightZone.querySelectorAll(".uwu-tile-block").length === 0);
+        };
+
+        window.addEventListener("mousemove", onMouseMove);
+        window.addEventListener("mouseup", onMouseUp);
+      });
+    }
+
+    /**
+     * Exits Edit Mode and optionally persists layout order and heights.
+     *
+     * @param {boolean} [save=true] - Whether to save current changes.
+     * @returns {void}
+     */
+    function stopEditMode(save = true) {
+      isEditMode = false;
+      document.body.classList.remove("uwu-editing");
+
+      const rawGap = parseInt(document.getElementById("uwu-hud-gap-input")?.value, 10);
+      const gapVal = isNaN(rawGap) ? 8 : Math.max(0, rawGap);
+
+      const rawRadius = parseInt(document.getElementById("uwu-hud-radius-input")?.value, 10);
+      const radiusVal = isNaN(rawRadius) ? 8 : Math.max(0, rawRadius);
+
+      document.getElementById("uwu-hud-toolbar")?.remove();
+      document.querySelectorAll(".uwu-tile-overlay").forEach((o) => o.remove());
+      document.querySelectorAll(".uwu-zone-splitter").forEach((s) => s.remove());
+      document.querySelector(".uwu-drop-placeholder")?.remove();
+
+      if (save) {
+        const lz = document.getElementById("uwu-dock-left");
+        const rz = document.getElementById("uwu-dock-right");
+
+        const lGrow = parseFloat(document.documentElement.style.getPropertyValue("--uwu-left-grow")) || 5;
+        const rGrow = parseFloat(document.documentElement.style.getPropertyValue("--uwu-right-grow")) || 5;
+
+        const collectSlots = (zone) => {
+          if (!zone) return [];
+          return Array.from(zone.children)
+            .filter((el) => el.classList.contains("uwu-tile-block"))
+            .map((el) => {
+              const ratio = parseInt(el.dataset.widthRatio || "100", 10);
+              return {
+                id: el.id,
+                widthRatio: ratio,
+                widthMode: `${ratio}%`,
+                height: el.offsetHeight,
+              };
+            });
+        };
+
+        const finalLayout = {
+          leftGrow: lGrow,
+          rightGrow: rGrow,
+          leftWidth: lz ? lz.offsetWidth : 420,
+          rightWidth: rz ? rz.offsetWidth : 460,
+          gap: gapVal,
+          radius: radiusVal,
+          left: collectSlots(lz),
+          right: collectSlots(rz),
+        };
+
+        uwuStorage.setItem("uwu_hud_layout", finalLayout);
+        applyLayout();
+      } else {
+        applyLayout();
+      }
+    }
+
+    return {
+      startEditMode,
+      stopEditMode,
+      applyLayout,
+    };
+  })();
+
+  if (targetCW3.test(window.location.href) && settings.customLayout) {
+    setupSingleCallback("#main_table", () => {
+      window.uwuHudEditor.applyLayout();
+    });
   }
+
+  /**
+   * Relocates and condenses the Dark Points (ТБ) counter into the topbar.
+   *
+   * @returns {void}
+   */
+  function initTopbarDarkPoints() {
+    const bp = document.getElementById("black_points");
+    const locationEl = document.querySelector(".game-location");
+    if (!bp || !locationEl || bp.classList.contains("in-topbar")) return;
+
+    const count = bp.querySelector("#black")?.textContent || "0";
+    bp.className = "in-topbar";
+    bp.innerHTML = `<b>ТБ:</b> <span id="black">${count}</span>`;
+    locationEl.before(bp);
+  }
+
+  setupSingleCallback(".game-topbar", initTopbarDarkPoints);
 
   // ====================================================================================================================
   //   . . . ПОДСКАЗЫВАТЬ ОСТАВШЕЕСЯ ВРЕМЯ ДО НЮХА . . .
@@ -12486,7 +14056,7 @@ if (targetCW3.test(window.location.href)) {
                   updateVisualTimerDisplay();
                   smellTimerInterval = setInterval(
                     updateVisualTimerDisplay,
-                    1000
+                    1000,
                   );
                   saveVisualTimerState();
                   return;
@@ -12527,7 +14097,7 @@ if (targetCW3.test(window.location.href)) {
         } catch (e) {
           console.error(
             "Ошибка разбора сохраненного состояния визуального таймера:",
-            e
+            e,
           );
           uwuStorage.removeItem(visualTimerStateKey);
         }
@@ -12560,7 +14130,7 @@ if (targetCW3.test(window.location.href)) {
 
       const htmlContent = errorElement.innerHTML;
       const smellCooldownMatch = htmlContent.match(
-        /Следующее обнюхивание будет доступно через (.*?)(\.|<br|$)/
+        /Следующее обнюхивание будет доступно через (.*?)(\.|<br|$)/,
       );
       const cooldownExpiredMatch = htmlContent.includes("Час уже прошёл");
 
@@ -12594,7 +14164,7 @@ if (targetCW3.test(window.location.href)) {
       if (smallElement && !document.getElementById("uwu_sniff_timer")) {
         smallElement.insertAdjacentHTML(
           "beforeend",
-          '<span id="uwu_sniff_timer" value="0"></span>'
+          '<span id="uwu_sniff_timer" value="0"></span>',
         );
       }
     }
@@ -12609,7 +14179,7 @@ if (targetCW3.test(window.location.href)) {
         subtree: true,
       },
       8,
-      500
+      500,
     );
 
     setupMutationObserver(
@@ -12621,7 +14191,7 @@ if (targetCW3.test(window.location.href)) {
         characterData: true,
       },
       8,
-      500
+      500,
     );
 
     setupMutationObserver(
@@ -12633,7 +14203,7 @@ if (targetCW3.test(window.location.href)) {
         characterData: true,
       },
       8,
-      500
+      500,
     );
   }
 
@@ -12906,7 +14476,7 @@ if (targetCW3.test(window.location.href)) {
     function addCatLinksToLog(log, catNamesAndIds) {
       let logWithLinks = log;
       const nameToIdMap = new Map(
-        catNamesAndIds.map((cat) => [cat.name, cat.id])
+        catNamesAndIds.map((cat) => [cat.name, cat.id]),
       );
 
       logWithLinks = logWithLinks.replace(/\[([^\]]+)\]/g, (match, content) => {
@@ -12917,7 +14487,7 @@ if (targetCW3.test(window.location.href)) {
           if (id) {
             return nameWithId.replace(
               name,
-              `<a href="/cat${id}" target="_blank">${name}</a>`
+              `<a href="/cat${id}" target="_blank">${name}</a>`,
             );
           }
           return nameWithId;
@@ -12945,7 +14515,7 @@ if (targetCW3.test(window.location.href)) {
             if (color === "#006400" || color === "#333333") return false;
             if (color === "#A52A2A") return true;
           }
-          
+
           const statusText = statusSpan.textContent
             .replace(/[\[\]]/g, "")
             .trim();
@@ -12973,7 +14543,7 @@ if (targetCW3.test(window.location.href)) {
           const catId = extractCatId(action);
           const actionText = action.replace(
             /<a href="\/cat\d+">([^<]+)<\/a>/,
-            `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
+            `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`,
           );
           if (relevantAction.type === "action") {
             cleaningLogBuffer += `${actionText} на локации "${location}". `;
@@ -12988,7 +14558,7 @@ if (targetCW3.test(window.location.href)) {
           }
           cleaningLogContent.innerHTML = addCatLinksToLog(
             cleaningLogBuffer,
-            catNamesAndIds
+            catNamesAndIds,
           );
           return;
         }
@@ -13034,7 +14604,7 @@ if (targetCW3.test(window.location.href)) {
           }
           cleaningLogContent.innerHTML = addCatLinksToLog(
             cleaningLogBuffer,
-            catNamesAndIds
+            catNamesAndIds,
           );
           return;
         }
@@ -13050,7 +14620,7 @@ if (targetCW3.test(window.location.href)) {
           logLines.join(". ") + (logLines.length > 0 ? "." : "");
         cleaningLogContent.innerHTML = addCatLinksToLog(
           cleaningLogBuffer,
-          catNamesAndIds
+          catNamesAndIds,
         );
       }
 
@@ -13083,7 +14653,7 @@ if (targetCW3.test(window.location.href)) {
               catsInGroup = catsInGroup.filter((c) => c !== catIdentifier);
               logLines[i] = line.replace(
                 /\[([^\]]+)\]/,
-                `[${catsInGroup.join(", ")}]`
+                `[${catsInGroup.join(", ")}]`,
               );
             } else {
               logLines.splice(i, 1);
@@ -13108,7 +14678,7 @@ if (targetCW3.test(window.location.href)) {
                 catsInGroup = catsInGroup.filter((c) => c !== catIdentifier);
                 logLines[i] = line.replace(
                   /\[([^\]]+)\]/,
-                  `[${catsInGroup.join(", ")}]`
+                  `[${catsInGroup.join(", ")}]`,
                 );
               } else {
                 logLines.splice(i, 1);
@@ -13125,20 +14695,20 @@ if (targetCW3.test(window.location.href)) {
           logLines.join(". ") + (logLines.length > 0 ? "." : "");
 
         const pickupCounter = document.getElementById(
-          "uwu-cleaningLog-counter-pickup"
+          "uwu-cleaningLog-counter-pickup",
         );
         const putdownCounter = document.getElementById(
-          "uwu-cleaningLog-counter-putdown"
+          "uwu-cleaningLog-counter-putdown",
         );
         pickupCounter.textContent = parseInt(pickupCounter.textContent) - 1;
         putdownCounter.textContent = parseInt(putdownCounter.textContent) - 1;
 
         const cleaningLogContent = document.getElementById(
-          "uwu-cleaningLog-content"
+          "uwu-cleaningLog-content",
         );
         cleaningLogContent.innerHTML = addCatLinksToLog(
           cleaningLogBuffer,
-          catNamesAndIds
+          catNamesAndIds,
         );
 
         uwuStorage.setItem("uwu_cleaningLogSmart", {
@@ -13176,13 +14746,13 @@ if (targetCW3.test(window.location.href)) {
         logLines.push(
           `Проверен [${catName}${
             settings.cleaningLogShowID ? ` ${catId}` : ""
-          }] на локации "${location}"`
+          }] на локации "${location}"`,
         );
       } else {
         logLines.push(
           `Кот не спит [${catName}${
             settings.cleaningLogShowID ? ` ${catId}` : ""
-          }]`
+          }]`,
         );
       }
       if (!catNamesAndIds.some((cat) => cat.id === catId)) {
@@ -13196,7 +14766,7 @@ if (targetCW3.test(window.location.href)) {
 
     function processPutdownAction(logLines, catName, catId, location) {
       const catPattern = new RegExp(
-        `\\[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}\\]`
+        `\\[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}\\]`,
       );
 
       // 1. Ищем последнее и предпоследнее предложения.
@@ -13232,14 +14802,14 @@ if (targetCW3.test(window.location.href)) {
       ) {
         logLines[lastSentenceIndex] = lastSentence.replace(
           /]/,
-          `, ${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
+          `, ${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`,
         );
       } else {
         // 4. Если нет, добавляем новое предложение с "Опущен".
         logLines.push(
           `Опущен [${catName}${
             settings.cleaningLogShowID ? ` ${catId}` : ""
-          }] на локации "${location}"`
+          }] на локации "${location}"`,
         );
       }
       if (!catNamesAndIds.some((cat) => cat.id === catId)) {
@@ -13247,7 +14817,7 @@ if (targetCW3.test(window.location.href)) {
       }
 
       const putdownCounter = document.getElementById(
-        "uwu-cleaningLog-counter-putdown"
+        "uwu-cleaningLog-counter-putdown",
       );
       putdownCounter.textContent = parseInt(putdownCounter.textContent) + 1;
       lastDroppedCatInfo = { catName, catId };
@@ -13259,7 +14829,7 @@ if (targetCW3.test(window.location.href)) {
     function processPickupAction(logLines, catName, catId, location) {
       const catIdentifier = `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`;
       const catPattern = new RegExp(
-        `\\[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}\\]`
+        `\\[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}\\]`,
       );
 
       // 1. Ищем последнее и предпоследнее предложения.
@@ -13292,12 +14862,11 @@ if (targetCW3.test(window.location.href)) {
           penultimateSentenceIndex >= 0 &&
           logLines[penultimateSentenceIndex].includes("Проверен и поднят") &&
           logLines[penultimateSentenceIndex].includes(
-            `на локации "${location}"`
+            `на локации "${location}"`,
           ) &&
           !logLines[penultimateSentenceIndex].includes(catIdentifier)
         ) {
-          const currentCatMatch =
-            lastSentence.match(/\[(.*?)\]/);
+          const currentCatMatch = lastSentence.match(/\[(.*?)\]/);
           if (currentCatMatch) {
             // Добавляем имя текущего кота к предпоследнему предложению.
             const existingCatsMatch =
@@ -13321,27 +14890,29 @@ if (targetCW3.test(window.location.href)) {
           // 5. Создаем новое предложение "Проверен и поднят".
           logLines[lastSentenceIndex] = lastSentence.replace(
             "Проверен",
-            "Проверен и поднят"
+            "Проверен и поднят",
           );
         }
 
         // Увеличиваем счетчик только если кот был успешно проверен и поднят
         const pickupCounter = document.getElementById(
-          "uwu-cleaningLog-counter-pickup"
+          "uwu-cleaningLog-counter-pickup",
         );
         pickupCounter.textContent = parseInt(pickupCounter.textContent) + 1;
-
       } else {
         // 6. Если "Проверен" с именем кота нет.
         const forgotText = `Вы забыли проверить кота ${catIdentifier}`;
 
-        if (lastSentence.includes("Кот не спит") && lastSentence.includes(catIdentifier)) {
+        if (
+          lastSentence.includes("Кот не спит") &&
+          lastSentence.includes(catIdentifier)
+        ) {
           logLines[lastSentenceIndex] = forgotText;
         } else if (!lastSentence.includes(forgotText)) {
           logLines.push(forgotText);
         }
       }
-      
+
       if (!catNamesAndIds.some((cat) => cat.id === catId)) {
         catNamesAndIds.push({ name: catName, id: catId });
       }
@@ -13367,7 +14938,7 @@ if (targetCW3.test(window.location.href)) {
           logLines.join(". ") + (logLines.length > 0 ? "." : "");
         cleaningLogContent.innerHTML = addCatLinksToLog(
           cleaningLogBuffer,
-          catNamesAndIds
+          catNamesAndIds,
         );
       }
       lastDroppedCatInfo = null;
@@ -13382,11 +14953,15 @@ if (targetCW3.test(window.location.href)) {
         createCleaningLogBlock(historyBlock);
       }
 
-      watchVueData('cat.history', (newHistory) => {
-        if (newHistory) {
-          cleaningLogUpdate(newHistory);
-        }
-      }, { deep: false, immediate: true });
+      watchVueData(
+        "cat.history",
+        (newHistory) => {
+          if (newHistory) {
+            cleaningLogUpdate(newHistory);
+          }
+        },
+        { deep: false, immediate: true },
+      );
     });
 
     const cleaningLogStyle = document.createElement("style");
@@ -13482,7 +15057,7 @@ if (targetCW3.test(window.location.href)) {
 
       if (lastSession && lastSession.type === catchingState.actionType) {
         const indexToRemove = lastSession.summary.findIndex(
-          (c) => c.itemId === itemId && c.time === time
+          (c) => c.itemId === itemId && c.time === time,
         );
 
         if (indexToRemove > -1) {
@@ -13623,11 +15198,11 @@ if (targetCW3.test(window.location.href)) {
 
         const startTime = new Date(session.startTime).toLocaleTimeString(
           "ru-RU",
-          { hour: "2-digit", minute: "2-digit" }
+          { hour: "2-digit", minute: "2-digit" },
         );
         const lastTime = new Date(session.lastActionTime).toLocaleTimeString(
           "ru-RU",
-          { hour: "2-digit", minute: "2-digit" }
+          { hour: "2-digit", minute: "2-digit" },
         );
 
         const verb =
@@ -13832,7 +15407,7 @@ if (targetCW3.test(window.location.href)) {
 
       const toggleButton = document.getElementById("uwu-catchingLog-toggle");
       const contentWrapper = document.getElementById(
-        "uwu-catchingLog-content-wrapper"
+        "uwu-catchingLog-content-wrapper",
       );
 
       if (logStates.catching) {
@@ -13883,17 +15458,20 @@ if (targetCW3.test(window.location.href)) {
 
     const existingBadge = lsLink.querySelector("#newls");
     if (existingBadge) {
-      previousCount = parseInt(existingBadge.textContent.replace(/\D/g, ""), 10) || 0;
+      previousCount =
+        parseInt(existingBadge.textContent.replace(/\D/g, ""), 10) || 0;
     }
 
     const observer = new MutationObserver(() => {
       const badge = lsLink.querySelector("#newls");
-      const currentCount = badge ? parseInt(badge.textContent.replace(/\D/g, ""), 10) || 0 : 0;
+      const currentCount = badge
+        ? parseInt(badge.textContent.replace(/\D/g, ""), 10) || 0
+        : 0;
 
       if (currentCount > previousCount) {
         soundManager.playSound(
           settings.notificationPMSound,
-          settings.notificationPMVolume
+          settings.notificationPMVolume,
         );
       }
       previousCount = currentCount;
@@ -13916,7 +15494,7 @@ if (targetCW3.test(window.location.href)) {
 
   /**
    * @class ActionState
-   * @description Parses and normalizes raw action strings from Vue. 
+   * @description Parses and normalizes raw action strings from Vue.
    */
   const ActionState = {
     isActive: false,
@@ -13945,8 +15523,10 @@ if (targetCW3.test(window.location.href)) {
         }
 
         this.isActive = true;
-        
-        const timeMatch = actionMess.match(/(?:(\d+)\s*ч\s*)?(?:(\d+)\s*мин\s*)?(\d+)\s*с/);
+
+        const timeMatch = actionMess.match(
+          /(?:(\d+)\s*ч\s*)?(?:(\d+)\s*мин\s*)?(\d+)\s*с/,
+        );
         if (timeMatch) {
           const h = parseInt(timeMatch[1] || 0, 10);
           const m = parseInt(timeMatch[2] || 0, 10);
@@ -13957,16 +15537,21 @@ if (targetCW3.test(window.location.href)) {
 
         if (actionMessTemplate && actionMessTemplate.includes("&&")) {
           let cleanAction = actionMessTemplate.replace("&&", "").trim();
-          if (cleanAction.endsWith('.')) cleanAction = cleanAction.slice(0, -1).trim();
+          if (cleanAction.endsWith("."))
+            cleanAction = cleanAction.slice(0, -1).trim();
           this.actionName = cleanAction;
         } else {
-          const actionTextMatch = actionMess.match(/^(.+?)\s+(\d+\s*(?:ч\s*)?\d+\s*мин\s*\d+\s*с|\d+\s*мин\s*\d+\s*с|\d+\s*с)\.\s*(Отменить)?$/);
-          this.actionName = actionTextMatch ? actionTextMatch[1].trim() : actionMess;
+          const actionTextMatch = actionMess.match(
+            /^(.+?)\s+(\d+\s*(?:ч\s*)?\d+\s*мин\s*\d+\s*с|\d+\s*мин\s*\d+\s*с|\d+\s*с)\.\s*(Отменить)?$/,
+          );
+          this.actionName = actionTextMatch
+            ? actionTextMatch[1].trim()
+            : actionMess;
         }
       } catch (error) {
         console.error("UwU | ActionState parse error:", error);
       }
-    }
+    },
   };
 
   /**
@@ -13975,7 +15560,7 @@ if (targetCW3.test(window.location.href)) {
    */
   const BrowserTabManager = {
     baseTitle: "Игровая / CatWar",
-    
+
     update() {
       if (!settings.duplicateTimeInBrowserTab) return;
 
@@ -13998,12 +15583,12 @@ if (targetCW3.test(window.location.href)) {
       } catch (error) {
         console.error("UwU | BrowserTabManager update error:", error);
       }
-    }
+    },
   };
 
   /**
    * @class ActionSoundManager
-   * @description Handles audio alerts for action completion. 
+   * @description Handles audio alerts for action completion.
    */
   const ActionSoundManager = {
     actionStartTime: null,
@@ -14011,7 +15596,11 @@ if (targetCW3.test(window.location.href)) {
     wasActive: false,
 
     update() {
-      if (!settings.notificationActionEnd && !settings.notificationActionEndEarly) return;
+      if (
+        !settings.notificationActionEnd &&
+        !settings.notificationActionEndEarly
+      )
+        return;
 
       try {
         const isCurrentlyActive = ActionState.isActive;
@@ -14023,19 +15612,35 @@ if (targetCW3.test(window.location.href)) {
           this.wasActive = true;
         }
 
-        if (isCurrentlyActive && settings.notificationActionEndEarly && !this.earlyNotified) {
+        if (
+          isCurrentlyActive &&
+          settings.notificationActionEndEarly &&
+          !this.earlyNotified
+        ) {
           if (secs <= 3 && secs > 0) {
-            soundManager.playSound(settings.notificationActionEndSound, settings.notificationActionEndVolume);
+            soundManager.playSound(
+              settings.notificationActionEndSound,
+              settings.notificationActionEndVolume,
+            );
             this.earlyNotified = true;
           }
         }
 
         if (!isCurrentlyActive && this.wasActive) {
           const actionEndTime = Date.now();
-          const actionDuration = this.actionStartTime ? (actionEndTime - this.actionStartTime) : 0;
+          const actionDuration = this.actionStartTime
+            ? actionEndTime - this.actionStartTime
+            : 0;
 
-          if (actionDuration >= 6000 && !this.earlyNotified && settings.notificationActionEnd) {
-            soundManager.playSound(settings.notificationActionEndSound, settings.notificationActionEndVolume);
+          if (
+            actionDuration >= 6000 &&
+            !this.earlyNotified &&
+            settings.notificationActionEnd
+          ) {
+            soundManager.playSound(
+              settings.notificationActionEndSound,
+              settings.notificationActionEndVolume,
+            );
           }
 
           this.actionStartTime = null;
@@ -14044,9 +15649,9 @@ if (targetCW3.test(window.location.href)) {
         }
       } catch (error) {
         console.error("UwU | ActionSoundManager update error:", error);
-        this.wasActive = false; 
+        this.wasActive = false;
       }
-    }
+    },
   };
 
   /**
@@ -14063,37 +15668,44 @@ if (targetCW3.test(window.location.href)) {
         const isCurrentlyPickedUp = ActionState.isPickedUp;
 
         if (isCurrentlyPickedUp && !this.wasPickedUp) {
-          soundManager.playSound(settings.notificationInMouthSound, settings.notificationInMouthVolume);
+          soundManager.playSound(
+            settings.notificationInMouthSound,
+            settings.notificationInMouthVolume,
+          );
         }
 
         this.wasPickedUp = isCurrentlyPickedUp;
       } catch (error) {
         console.error("UwU | InMouthSoundManager update error:", error);
       }
-    }
+    },
   };
 
   /**
    * @class MainActionObserver
-   * @description The single subscriber to the Vue reactivity system. 
-   * Broadcasts state changes to all managers safely.
+   * @description The single subscriber to the Vue reactivity system.
+   * Broadcasts state changes to all managers.
    */
   const MainActionObserver = {
     init() {
-      watchVueData('cat.actionMess', (newMess) => {
-        try {
-          const template = getVueData('cat.actionMessTemplate') || "";
-          
-          ActionState.parse(newMess, template);
+      watchVueData(
+        "cat.actionMess",
+        (newMess) => {
+          try {
+            const template = getVueData("cat.actionMessTemplate") || "";
 
-          BrowserTabManager.update();
-          ActionSoundManager.update();
-          InMouthSoundManager.update();
-        } catch (error) {
-          console.error("UwU | MainActionObserver watcher error:", error);
-        }
-      }, { deep: false, immediate: true }); 
-    }
+            ActionState.parse(newMess, template);
+
+            BrowserTabManager.update();
+            ActionSoundManager.update();
+            InMouthSoundManager.update();
+          } catch (error) {
+            console.error("UwU | MainActionObserver watcher error:", error);
+          }
+        },
+        { deep: false, immediate: true },
+      );
+    },
   };
 
   MainActionObserver.init();
@@ -14110,7 +15722,11 @@ if (targetCW3.test(window.location.href)) {
     watchVueData(
       "cat.history",
       (newHistory, oldHistory) => {
-        if (typeof newHistory !== "string" || !oldHistory || typeof oldHistory !== "string") {
+        if (
+          typeof newHistory !== "string" ||
+          !oldHistory ||
+          typeof oldHistory !== "string"
+        ) {
           return;
         }
 
@@ -14122,17 +15738,18 @@ if (targetCW3.test(window.location.href)) {
           addedChunk = newHistory.slice(oldHistory.length);
         } else {
           const sentences = newHistory.trim().split(".").filter(Boolean);
-          addedChunk = sentences.length > 0 ? sentences[sentences.length - 1] : "";
+          addedChunk =
+            sentences.length > 0 ? sentences[sentences.length - 1] : "";
         }
 
         if (attackRegex.test(addedChunk)) {
           soundManager.playSound(
             settings.notificationInFightModeSound,
-            settings.notificationInFightModeVolume
+            settings.notificationInFightModeVolume,
           );
         }
       },
-      { deep: false, immediate: false }
+      { deep: false, immediate: false },
     );
   }
 
@@ -14143,298 +15760,441 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   // мяу мяу мяу мяу мяу мяу мяу мяу мяу мяу мяу мяу
   // ====================================================================================================================
-  //   . . . УЛУЧШЕНИЯ НАТИВНОГО ЧАТА . . .
+  //   . . . РАСШИРЕННЫЙ ЧАТ UWU . . .
   // ====================================================================================================================
-
   /**
-   * Manages native chat enhancements: injects timestamps, ranks, IDs,
-   * highlights mentions, audio alerts and maybe more idk.
+   * Injects CSS rules to ensure vanilla chat text and fonts.
+   *
+   * @returns {void}
    */
-  function initChatEnhancements() {
-    const chatMsg = document.getElementById("chat_msg");
-    if (!chatMsg) return;
-
-    const chatRanksCache = new Map();
-    const chatMsgMeta = new Map();
-
-    // Message metadata from Vue
-    watchVueData(
-      "chat.messages",
-      (messages) => {
-        if (!Array.isArray(messages)) return;
-        messages.forEach((msg) => {
-          if (msg && msg.id) {
-            chatMsgMeta.set(String(msg.id), msg);
-          }
-        });
-      },
-      { deep: true, immediate: true }
-    );
-
-    /**
-     * Safely escapes special regular expression characters in a string.
-     *
-     * @param {string} string - The input text to escape.
-     * @returns {string} Escaped string safe for RegExp constructor.
-     */
-    function escapeRegExp(string) {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  function applyVanillaChatStyles() {
+    if (!settings.userTheme && !settings.disableCustomChatColors && !settings.useUserFonts) {
+      return;
     }
 
-    /**
-     * Asynchronously fetches and sets the cat's rank inside the message element.
-     *
-     * @param {string} catId - Target cat profile ID.
-     * @param {HTMLElement} rankElement - Container where the rank should be injected.
-     */
-    function updateChatRankAsync(catId, rankElement) {
-      if (!rankElement || !catId || catId === ". . .") return;
+    let style = document.getElementById("uwu-vanilla-chat-styles");
+    if (!style) {
+      style = document.createElement("style");
+      style.id = "uwu-vanilla-chat-styles";
+      document.head.appendChild(style);
+    }
 
-      if (chatRanksCache.has(catId)) {
-        rankElement.innerHTML = chatRanksCache.get(catId);
+    const textColor = settings.userTheme && theme?.textColor ? theme.textColor : "inherit";
+    let css = "";
+
+    if (settings.disableCustomChatColors) {
+      css += `
+        #chat_msg [style*="color" i],
+        #chat_msg font[color] {
+          color: ${textColor} !important;
+        }
+      `;
+    } else if (settings.userTheme) {
+      css += `
+        #chat_msg [style*="rgb(17, 17, 17)" i],
+        #chat_msg [style*="rgb(17,17,17)" i],
+        #chat_msg [style*="#111111" i] {
+          color: ${textColor} !important;
+        }
+      `;
+    }
+
+    if (settings.useUserFonts) {
+      css += `
+        #chat_msg [style*="verdana" i] {
+          font-family: inherit !important;
+        }
+      `;
+    }
+
+    style.textContent = css;
+  }
+
+  applyVanillaChatStyles();
+
+  /**
+   * Generating inline CSS font and color styles for messages.
+   */
+  const ChatStyleFormatter = {
+    /**
+     * Formats typography and color definitions according to message payload and user theme settings.
+     *
+     * @param {Object} msgData - Raw message data from Vue.
+     * @returns {{ textStyle: string, nickStyle: string }}
+     */
+    getStyles(msgData) {
+      let textStyle = "";
+      let nickStyle = msgData.textTransformation === "italic" ? "font-style: italic; " : "";
+
+      if (msgData.font) {
+        const cleanFont = msgData.font.replace(/['"]/g, "").trim();
+        if (cleanFont.toLowerCase() !== "verdana") {
+          textStyle += `font-family: '${cleanFont}'; `;
+          nickStyle += `font-family: '${cleanFont}'; `;
+        }
+      }
+
+      const isVanillaColor =
+        !msgData.color ||
+        msgData.color.toLowerCase() === "#111111" ||
+        msgData.color.replace(/\s/g, "") === "rgb(17,17,17)";
+
+      if (!isVanillaColor && !settings.disableCustomChatColors) {
+        textStyle += `color: ${msgData.color}; `;
+        nickStyle += `color: ${msgData.color}; `;
+      } else if (settings.userTheme && theme?.textColor) {
+        textStyle += `color: ${theme.textColor}; `;
+        nickStyle += `color: ${theme.textColor}; `;
+      }
+
+      return { textStyle, nickStyle };
+    },
+  };
+
+  /**
+   * Service responsible for detecting mentions and highlighting names in text.
+   */
+  const ChatMentionProcessor = {
+    /**
+     * Scans text for user-configured nicknames, wraps matches in highlighting tags,
+     * and triggers notification sound if mentioned.
+     *
+     * @param {string} text - Message text.
+     * @returns {{ text: string, isMentioned: boolean }}
+     */
+    process(text) {
+      let processedText = text;
+      let isMentioned = false;
+
+      if (settings.namesForNotification) {
+        const names = settings.namesForNotification
+          .split(",")
+          .map((n) => n.trim())
+          .filter(Boolean);
+
+        names.forEach((name) => {
+          const safeName = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          const regex = new RegExp(`(^|\\s|[.,!?])(${safeName})(?=$|\\s|[.,!?])`, "gi");
+          if (regex.test(processedText)) {
+            isMentioned = true;
+            processedText = processedText.replace(regex, `$1<span class="myname">$2</span>`);
+          }
+        });
+      }
+
+      if (!isMentioned && text.includes('class="myname"')) {
+        isMentioned = true;
+      }
+
+      if (isMentioned) {
+        soundManager.playSound(settings.myNameNotificationSound, settings.notificationMyNameVolume);
+      }
+
+      return { text: processedText, isMentioned };
+    },
+  };
+
+  /**
+   * Initializes the standalone Modern Chat engine and binds Vue reactive subscriptions.
+   *
+   * @returns {void}
+   */
+  function initModernChat() {
+    if (!settings.newChat) return;
+
+    const chatForm = document.getElementById("chat_form");
+    const trChatTd = document.querySelector("#tr_chat > td");
+    if (!chatForm || !trChatTd) return;
+
+    document.getElementById("uwu_chat_msg")?.remove();
+
+    const chatContainer = document.createElement("div");
+    chatContainer.id = "uwu_chat_msg";
+    chatContainer.style.flexDirection = settings.reverseChat ? "column-reverse" : "column";
+
+    if (settings.reverseChat) {
+      trChatTd.appendChild(chatContainer);
+      trChatTd.appendChild(chatForm);
+    } else {
+      trChatTd.prepend(chatForm);
+      chatForm.after(chatContainer);
+    }
+
+    const chatRanksCache = new Map();
+    const processedMessageIds = new Set();
+
+    /**
+     * Asynchronously fetches cat ranks from DOM tooltips and updates target span.
+     *
+     * @param {string|number} catId - Target cat profile identifier.
+     * @param {HTMLElement} rankSpan - Element to populate.
+     */
+    function updateChatRankAsync(catId, rankSpan) {
+      if (!rankSpan || !catId || catId === ". . .") return;
+
+      const strId = String(catId);
+      if (chatRanksCache.has(strId)) {
+        rankSpan.innerHTML = chatRanksCache.get(strId);
         return;
       }
 
       setTimeout(() => {
         try {
-          const profileLink = document.querySelector(`.cat_tooltip a[href="/cat${catId}"]`);
+          const profileLink = document.querySelector(`.cat_tooltip a[href="/cat${strId}"]`);
           if (profileLink) {
             const tooltip = profileLink.closest(".cat_tooltip");
             const rankNode = tooltip?.querySelector("small > i");
             const rankText = rankNode?.textContent?.trim();
 
             if (rankText) {
-              const rankHtml = ` <small><i>(${rankText})</i></small>`;
-              chatRanksCache.set(catId, rankHtml);
-              rankElement.innerHTML = rankHtml;
+              const rankHtml = ` <small><i>(${rankText})</i></small> `;
+              chatRanksCache.set(strId, rankHtml);
+              rankSpan.innerHTML = rankHtml;
               return;
             }
           }
+          chatRanksCache.set(strId, "");
         } catch (err) {
-          console.error(`UwU | Rank resolution error for cat ${catId}:`, err);
+          console.error(`UwU | Rank lookup error for cat ${strId}:`, err);
         }
-      }, 150);
+      }, 100);
     }
+
+    chatContainer.addEventListener("click", (event) => {
+      const target = event.target;
+
+      const nickEl = target.closest(".nick");
+      if (nickEl) {
+        event.preventDefault();
+        const input = document.querySelector("#txt textarea#text, #txt input#text");
+        if (!input) return;
+
+        const nick = nickEl.textContent.trim();
+        input.value += `${nick}, `;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.focus();
+        return;
+      }
+
+      const reportBtn = target.closest(".msg_report");
+      if (reportBtn) {
+        event.preventDefault();
+        try {
+          const chatContext = getVueData("chat");
+          if (chatContext && typeof chatContext.report === "function") {
+            chatContext.report({ target: reportBtn });
+          }
+        } catch (err) {
+          console.error("UwU | Chat report dispatch error:", err);
+        }
+      }
+    });
 
     /**
-     * Processes message node and injects configured enhancements.
+     * Renders a single message payload into the Modern Chat container.
      *
-     * @param {HTMLElement} msgNode - The root message element (usually a <span> wrapping the <table>).
-     * @param {boolean} [allowSound=true] - Whether to allow sound notifications (false during initial load).
+     * @param {Object} msg - The message object from Vue.
      */
-    function enhanceMessage(msgNode, allowSound = true) {
-      if (msgNode.dataset.uwuEnhanced) return;
-      msgNode.dataset.uwuEnhanced = "true";
+    function renderMessage(msg) {
+      const { text } = ChatMentionProcessor.process(msg.text || "");
+      const { textStyle, nickStyle } = ChatStyleFormatter.getStyles(msg);
 
-      const chatText = msgNode.querySelector(".chat_text");
-      const nickEl = msgNode.querySelector(".nick");
-      const reportLink = msgNode.querySelector(".msg_report");
-      const profileLink = msgNode.querySelector('.profile_actions_cell a[href^="/cat"]');
-
-      if (!chatText || !nickEl) return;
-
-      const msgId = reportLink?.dataset?.id;
-      const catId = profileLink ? profileLink.getAttribute("href").replace("/cat", "") : null;
-      const textSpan = chatText.querySelector("span:not(.uwu-chat-time)");
-
-      // 1. Notification for climbing numbers integration
-      const meta = msgId ? chatMsgMeta.get(String(msgId)) : null;
+      const volumeClass = msg.volume !== undefined ? `vlm${msg.volume}` : "vlm5";
       const isNotification =
-        meta?.textTransformation === "italic" ||
-        (textSpan && textSpan.textContent.trim().startsWith("[") && textSpan.textContent.trim().endsWith("]"));
+        msg.textTransformation === "italic" ||
+        (msg.text && msg.text.trim().startsWith("[") && msg.text.trim().endsWith("]"));
+      const nickClass = isNotification ? "nick is-notification" : "nick";
 
-      if (isNotification) {
-        nickEl.classList.add("is-notification");
+      const catId = msg.cat || ". . .";
+      const nickName = msg.login || "Неизвестный";
+      const rankSpanId = `uwu-rank-${msg.id || Date.now()}-${Math.floor(Math.random() * 10000)}`;
+
+      let timeStr = "";
+      if (settings.showChatTime && msg.time) {
+        const d = new Date(msg.time * 1000);
+        timeStr = `<span class="uwu-chat-time">[${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}]</span> `;
       }
 
-      // 2. Time
-      if (settings.showChatTime) {
-        let timeStr = "";
-        if (meta && meta.time) {
-          const d = new Date(meta.time * 1000);
-          timeStr = `[${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}] `;
-        } else {
-          const now = new Date();
-          timeStr = `[${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}] `;
-        }
+      const idHtml = settings.showChatId ? ` <i class="uwu-chat-id">[${catId}]</i>` : "";
 
-        const timeSpan = document.createElement("span");
-        timeSpan.className = "uwu-chat-time";
-        timeSpan.textContent = timeStr;
-        chatText.prepend(timeSpan);
+      const rowHtml = `
+        <hr>
+        <div class="uwu-chat-msg-row">
+          <div class="chat_text ${volumeClass}">
+            ${timeStr}<span style="${textStyle}">${text}</span> - <b class="${nickClass}" style="${nickStyle}">${nickName}</b><span id="${rankSpanId}"></span>${idHtml}
+          </div>
+          <div class="uwu-chat-actions">
+            <a href="/cat${catId}" title="Перейти в профиль" target="_blank" rel="noopener noreferrer">➝</a>&nbsp;|&nbsp;
+            <a href="#" title="Пожаловаться на нарушение ОПИ" class="msg_report" data-id="${msg.id}" data-login="${nickName}">X</a>
+          </div>
+        </div>
+      `;
+
+      chatContainer.insertAdjacentHTML("afterbegin", rowHtml);
+
+      if (settings.showChatRanks) {
+        updateChatRankAsync(catId, document.getElementById(rankSpanId));
       }
+    }
 
-      // 3. Cat ID
-      if (settings.showChatId && catId) {
-        const idSpan = document.createElement("i");
-        idSpan.className = "uwu-chat-id";
-        idSpan.textContent = ` [${catId}]`;
-        nickEl.after(idSpan);
-      }
+    watchVueData(
+      "chat.messages",
+      (messages) => {
+        if (!Array.isArray(messages)) return;
 
-      // 4. Ranks
-      if (settings.showChatRanks && catId) {
-        const rankSpan = document.createElement("span");
-        rankSpan.className = "uwu-chat-rank";
-        nickEl.after(rankSpan);
-        updateChatRankAsync(catId, rankSpan);
-      }
+        const newBatch = messages.filter((m) => m && m.id && !processedMessageIds.has(m.id));
+        if (newBatch.length === 0) return;
 
-      // 5. Custom mention highlighting & Sound trigger
-      let isMentioned = false;
+        newBatch.sort((a, b) => a.id - b.id);
 
-      if (textSpan && settings.namesForNotification) {
-        const rawText = textSpan.innerHTML;
-        const names = settings.namesForNotification
-          .split(",")
-          .map((n) => n.trim())
-          .filter(Boolean);
-
-        let replacedText = rawText;
-        names.forEach((name) => {
-          const safePattern = escapeRegExp(name);
-          const regex = new RegExp(`(^|\\s|[.,!?])(${safePattern})(?=$|\\s|[.,!?])`, "gi");
-          if (regex.test(replacedText)) {
-            isMentioned = true;
-            replacedText = replacedText.replace(regex, `$1<span class="myname">$2</span>`);
-          }
+        newBatch.forEach((msg) => {
+          processedMessageIds.add(msg.id);
+          renderMessage(msg);
         });
 
-        if (isMentioned) {
-          textSpan.innerHTML = replacedText;
+        // Purge original chat DOM nodes to eliminate vanilla lags
+        const originalChat = document.getElementById("chat_msg");
+        if (originalChat && originalChat.hasChildNodes()) {
+          originalChat.textContent = "";
         }
-      }
+      },
+      { deep: true, immediate: true }
+    );
 
-      if (!isMentioned && chatText.querySelector(".myname")) {
-        isMentioned = true;
-      }
-
-      if (isMentioned && allowSound) {
-        soundManager.playSound(
-          settings.myNameNotificationSound,
-          settings.notificationMyNameVolume
-        );
-      }
-    }
-
-    // Observe native insertions into #chat_msg
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === 1) {
-            if (node.querySelector?.(".chat_text")) {
-              enhanceMessage(node, true);
-            } else if (node.classList?.contains("chat_text")) {
-              const parentMsg = node.closest("span") || node;
-              enhanceMessage(parentMsg, true);
-            }
-          }
-        });
-      });
-    });
-
-    observer.observe(chatMsg, { childList: true, subtree: true });
-
-    chatMsg.querySelectorAll(".chat_text").forEach((el) => {
-      const parent = el.closest("span") || el;
-      enhanceMessage(parent, false);
-    });
+    initChatAutoResizePersistence();
   }
 
-  setupSingleCallback("#chat_msg", initChatEnhancements);
-
-  // Styles
-  const chatEnhanceStyles = document.createElement("style");
-  chatEnhanceStyles.id = "uwu-chat-enhancements";
-  chatEnhanceStyles.innerHTML = `
-    #chat_msg {
-      height: ${settings.chatHeight || 275}px;
-      resize: vertical;
-      overflow-y: auto;
-      ${settings.reverseChat ? "display: flex !important; flex-direction: column-reverse !important;" : ""}
-    }
-    .uwu-chat-time {
-      opacity: 0.5;
-      font-size: 0.85em;
-      margin-right: 4px;
-      font-family: monospace;
-    }
-    .uwu-chat-id {
-      opacity: 0.6;
-      font-size: 0.85em;
-    }
-  `;
-  document.head.appendChild(chatEnhanceStyles);
+  setupSingleCallback("#tr_chat", initModernChat);
 
   // ====================================================================================================================
-  //   . . . НОВЫЙ ВВОД ЧАТА . . .
-  // ====================================================================================================================
-  const chatForm = document.getElementById("chat_form");
-  const trChatTd = document.querySelector("#tr_chat > td");
-
-  function updateChatFormPosition() {
-    if (settings.reverseChat && chatForm && trChatTd) {
-      trChatTd.appendChild(chatForm);
-    } else if (chatForm && trChatTd) {
-      trChatTd.prepend(chatForm);
-    }
-  }
-  updateChatFormPosition();
-
-  if (settings.newChatInput) {
-    const txtSpan = document.getElementById("txt");
-
-    if (txtSpan) {
-      const originalInput = txtSpan.querySelector("input#text");
-      let textarea = document.createElement("textarea");
-      textarea.id = "text";
-      textarea.maxLength = 255;
-      textarea.className = "ui-input";
-      textarea.style.height = "auto";
-      textarea.style.width = "100%";
-      textarea.style.resize = "vertical";
-      textarea.value = originalInput ? originalInput.value : "";
-
-      if (originalInput) {
-        originalInput.style.display = "none";
-        originalInput.id = "text-original";
-        txtSpan.insertBefore(textarea, originalInput);
-      }
-
-      textarea.addEventListener("input", () => {
-        if (originalInput) {
-          originalInput.value = textarea.value;
-          originalInput.dispatchEvent(new Event("input", { bubbles: true }));
-        }
-      });
-
-      watchVueData("chat.text", (newVal) => {
-        if (typeof newVal === "string" && textarea.value !== newVal) {
-          textarea.value = newVal;
-          textarea.dispatchEvent(new Event("input", { bubbles: true }));
-        }
-      });
-
-      textarea.addEventListener("keydown", function (event) {
-        if (event.key === "Enter" && !event.shiftKey) {
-          event.preventDefault();
-          if (originalInput) {
-            originalInput.value = textarea.value;
-            originalInput.dispatchEvent(new Event("input", { bubbles: true }));
-          }
-          const sendButton = document.getElementById("msg_send");
-          sendButton?.click();
-        }
-      });
-    }
-  }
-
-  // ====================================================================================================================
-  //   . . . СЧЁТЧИК СИМВОЛОВ В ЧАТЕ . . .
+  //   . . . ПОЛЕ ВВОДА ЧАТА И СЧЁТЧИК СИМВОЛОВ . . .
   // ====================================================================================================================
 
   /**
-   * Injects character counter into the chat input form.
+   * Replaces the native single-line input with an auto-expanding multiline textarea.
+   *
+   * @returns {void}
+   */
+  function setupChatInput() {
+    if (!settings.newChatInput) return;
+
+    const txtSpan = document.getElementById("txt");
+    const chatForm = document.getElementById("chat_form");
+    if (!txtSpan || !chatForm) return;
+
+    const originalInput = txtSpan.querySelector("input#text");
+    if (!originalInput) return;
+
+    if (document.getElementById("text-textarea")) return;
+
+    const textarea = document.createElement("textarea");
+    textarea.id = "text-textarea";
+    textarea.maxLength = 255;
+    textarea.className = "ui-input";
+    textarea.style.cssText = "height: auto; width: 100%; resize: vertical; box-sizing: border-box;";
+    textarea.value = originalInput.value || "";
+
+    originalInput.style.display = "none";
+    txtSpan.insertBefore(textarea, originalInput);
+
+    /**
+     * Synchronizes textarea contents into CatWar's native input and triggers Vue events.
+     */
+    const syncToOriginal = () => {
+      originalInput.value = textarea.value;
+      originalInput.dispatchEvent(new Event("input", { bubbles: true }));
+      originalInput.dispatchEvent(new Event("change", { bubbles: true }));
+    };
+
+    textarea.addEventListener("input", syncToOriginal);
+
+    const inputProto = Object.getPrototypeOf(originalInput);
+    const originalDescriptor = Object.getOwnPropertyDescriptor(inputProto, "value");
+
+    if (originalDescriptor && originalDescriptor.set) {
+      Object.defineProperty(originalInput, "value", {
+        get() {
+          return originalDescriptor.get.call(this);
+        },
+        set(val) {
+          originalDescriptor.set.call(this, val);
+          if (val === "" && textarea.value !== "") {
+            textarea.value = "";
+            chatForm.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+        },
+        configurable: true,
+      });
+    }
+
+    chatForm.addEventListener("submit", () => {
+      setTimeout(() => {
+        if (originalInput.value === "") {
+          textarea.value = "";
+          chatForm.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+      }, 15);
+    });
+
+    textarea.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        if (event.shiftKey) {
+          event.preventDefault();
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+          textarea.value = textarea.value.substring(0, start) + "\n" + textarea.value.substring(end);
+          textarea.selectionStart = textarea.selectionEnd = start + 1;
+          syncToOriginal();
+        } else {
+          event.preventDefault();
+          const trimmed = textarea.value.trim();
+          if (!trimmed) return;
+
+          syncToOriginal();
+
+          const sendBtn = document.getElementById("msg_send");
+          if (sendBtn) {
+            sendBtn.click();
+          } else {
+            chatForm.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+          }
+
+          setTimeout(() => {
+            if (originalInput.value === "") {
+              textarea.value = "";
+              chatForm.dispatchEvent(new Event("input", { bubbles: true }));
+            }
+          }, 30);
+        }
+      }
+    });
+
+    const syncBotDialogueVisibility = () => {
+      const botSelect = txtSpan.querySelector("select#text");
+      if (botSelect) {
+        textarea.style.display = "none";
+      } else {
+        textarea.style.display = "";
+      }
+    };
+
+    const botObserver = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type === "childList") {
+          syncBotDialogueVisibility();
+          break;
+        }
+      }
+    });
+
+    botObserver.observe(txtSpan, { childList: true });
+    syncBotDialogueVisibility();
+  }
+
+  /**
+   * Injects a live character length counter adjacent to the volume slider.
+   *
+   * @returns {void}
    */
   function setupCharCounter() {
     if (!settings.showChatCharCounter) return;
@@ -14447,100 +16207,25 @@ if (targetCW3.test(window.location.href)) {
 
     const counterElement = document.createElement("span");
     counterElement.id = "uwu-char-counter";
-    counterElement.style.margin = "0 8px";
-    counterElement.style.opacity = "0.75";
-    counterElement.style.fontSize = "12px";
+    counterElement.style.cssText = "margin: 0 8px; opacity: 0.75; font-size: 12px;";
 
     volumeLabel.parentNode.insertBefore(counterElement, volumeLabel);
     volumeLabel.parentNode.insertBefore(document.createTextNode(" | "), volumeLabel);
 
-    /**
-     * Updates the counter display. Wow so smart.
-     */
     function updateCounter() {
-      const inputField = chatForm.querySelector("textarea#text, input#text");
-      if (!inputField) return;
-
-      const currentLength = inputField.value.length;
-      const maxLength = inputField.maxLength > 0 ? inputField.maxLength : 255;
-      counterElement.textContent = `${currentLength}/${maxLength}`;
+      const field = chatForm.querySelector("textarea#text-textarea, input#text");
+      if (!field) return;
+      counterElement.textContent = `${field.value.length}/${field.maxLength || 255}`;
     }
 
-    chatForm.addEventListener("input", (e) => {
-      if (e.target && (e.target.id === "text" || e.target.id === "text-hide")) {
-        updateCounter();
-      }
-    });
-
+    chatForm.addEventListener("input", updateCounter);
     updateCounter();
   }
 
-  setupSingleCallback("#chat_form", setupCharCounter);
-  // ====================================================================================================================
-  //   . . . РЕДИЗАЙНЫ + + ЗАКРУГЛЕНИЕ БЛОКОВ . . .
-  // ====================================================================================================================
-  const sliceInfoStyle = document.createElement("style");
-
-  if (settings.sliceInfoBlock) {
-    sliceInfoStyle.innerHTML = `
-      #info_main > tbody > tr > td {
-        background-color: ${theme?.blocksColor || ""};
-        margin-bottom: 5px;
-      }
-    `;
-    document.head.appendChild(sliceInfoStyle);
-  } else {
-    sliceInfoStyle.innerHTML = `
-      #tr_info > td {
-        background-color: ${theme?.blocksColor || ""};
-      }
-    `;
-    document.head.appendChild(sliceInfoStyle);
-  }
-
-  const edgeTrimBlocksStyle = document.createElement("style");
-  if (settings.edgeTrimBlocks) {
-    edgeTrimBlocksStyle.innerHTML =
-      // css
-      `
-    #info_main > tbody > tr > td {
-      width: fit-content;
-      border-radius: 10px;
-      margin-bottom: 10px;
-    }
-    
-    #info_main,
-    #tos,
-    #cages_overflow,
-    #cages_div {
-      border-radius: 10px;
-    }
-    
-    #main_table > tbody > #tr_actions,
-    #main_table > tbody > #tr_mouth,
-    #main_table > tbody > #tr_chat,
-    #main_table > tbody > #tr_tos,
-    #main_table > tbody > #tr_info {
-      margin: 0px 10px 10px 10px;
-    }
-    
-    #tr_chat,
-    #tr_actions > td,
-    #tr_mouth > td,
-    #location,
-    #tr_info > td {
-      border-radius: 10px;
-    }
-
-    .small {
-      border-top-left-radius: 0px;
-      border-top-right-radius: 0px;
-      border-bottom-right-radius: 10px;
-      border-bottom-left-radius: 10px;
-    }
-    `;
-    document.head.appendChild(edgeTrimBlocksStyle);
-  }
+  setupSingleCallback("#chat_form", () => {
+    setupChatInput();
+    setupCharCounter();
+  });
 
   // ====================================================================================================================
   //  . . . ЗВУК БЛОКИРОВАНИЯ / ОТЖАТИЯ . . .
@@ -14556,13 +16241,16 @@ if (targetCW3.test(window.location.href)) {
 
     const blockObserver = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
-        if (mutation.type === "attributes" && mutation.attributeName === "src") {
+        if (
+          mutation.type === "attributes" &&
+          mutation.attributeName === "src"
+        ) {
           const currentSrc = blockElement.getAttribute("src");
           if (currentSrc !== lastSrc) {
             lastSrc = currentSrc;
             soundManager.playSound(
               settings.notificationBlockSound,
-              settings.notificationBlockVolume
+              settings.notificationBlockVolume,
             );
           }
         }
@@ -14571,7 +16259,7 @@ if (targetCW3.test(window.location.href)) {
 
     blockObserver.observe(blockElement, {
       attributes: true,
-      attributeFilter: ["src"]
+      attributeFilter: ["src"],
     });
   }
 
@@ -14598,7 +16286,8 @@ if (targetCW3.test(window.location.href)) {
     const button = document.createElement("button");
     button.id = "updateTableButton";
     button.className = "ui-btn";
-    button.style.cssText = "width: 100%; box-sizing: border-box; margin: 4px 0 12px 0; flex-shrink: 0;";
+    button.style.cssText =
+      "width: 100%; box-sizing: border-box; margin: 4px 0 12px 0; flex-shrink: 0;";
     button.textContent = "Обновить команды";
 
     if (resizeHandle) {
@@ -14649,7 +16338,7 @@ if (targetCW3.test(window.location.href)) {
       cages.forEach((cage) => {
         const catName = cage.querySelector(".cat_tooltip a")?.textContent;
         const arrow = cage.querySelector(
-          ".arrow.arrow-paws, .arrow.arrow-claws, .arrow.arrow-teeth"
+          ".arrow.arrow-paws, .arrow.arrow-claws, .arrow.arrow-teeth",
         );
 
         if (catName && arrow) {
@@ -14758,7 +16447,7 @@ if (targetCW3.test(window.location.href)) {
      */
     function drainLogQueue() {
       const entries = Array.from(fightLog.childNodes).filter(
-        (entry) => entry.tagName === "SPAN"
+        (entry) => entry.tagName === "SPAN",
       );
       if (entries.length === 0) return;
 
@@ -14771,11 +16460,14 @@ if (targetCW3.test(window.location.href)) {
         const latestEntry = compactedFightLog.firstElementChild;
         const latestTextSpan = latestEntry?.querySelector(".text");
 
-        if (latestTextSpan && latestTextSpan.textContent.trim() === originalText) {
+        if (
+          latestTextSpan &&
+          latestTextSpan.textContent.trim() === originalText
+        ) {
           const countLabel = latestEntry.querySelector(".count");
           const existingCount = parseInt(
             countLabel.textContent.match(/x(\d+)$/)[1],
-            10
+            10,
           );
           countLabel.textContent = ` x${existingCount + count}`;
         } else {
@@ -14871,7 +16563,7 @@ if (targetCW3.test(window.location.href)) {
     skyDiv.id = "skyDuplicate";
 
     const globalContainerElement = document.getElementById(
-      "uwu-global-container"
+      "uwu-global-container",
     );
     globalContainerElement.appendChild(skyDiv);
 
@@ -14917,7 +16609,7 @@ if (targetCW3.test(window.location.href)) {
       { attributes: true, attributeFilter: ["style"] },
       8,
       500,
-      10
+      10,
     );
   }
   // ====================================================================================================================
@@ -15072,7 +16764,7 @@ if (targetCW3.test(window.location.href)) {
     const temperatureElement = document.querySelector("#tos");
     const temperatureElementHTML = temperatureElement.outerHTML;
     const backgroundValue = /background:\s*([a-zA-Z0-9#()]+);/.exec(
-      temperatureElementHTML
+      temperatureElementHTML,
     );
 
     if (backgroundValue && backgroundValue.length > 1) {
@@ -15218,7 +16910,7 @@ if (targetCW3.test(window.location.href)) {
       },
       8,
       500,
-      20
+      20,
     );
 
     setupMutationObserver("img[src*='symbole/season']", getSeason, {
@@ -15298,7 +16990,7 @@ if (targetCW3.test(window.location.href)) {
             console.error(`Чёта не скачалось: ${image.url}`);
             reject();
           };
-        })
+        }),
       );
     }
 
@@ -15323,7 +17015,7 @@ if (targetCW3.test(window.location.href)) {
 
   function setWeatherPerformanceMode() {
     const isLow = settings.weatherParticlesAmount === "low";
-    
+
     rainNumParticles = isLow ? 4 : 10;
     snowTimerValue = isLow ? 240 : 120;
     desiredNumberOfFireflies = isLow ? 6 : 10;
@@ -15375,7 +17067,7 @@ if (targetCW3.test(window.location.href)) {
       raindrop.length,
       0,
       Math.PI,
-      2 * Math.PI
+      2 * Math.PI,
     );
     weatherCtx.fillStyle = "rgba(150, 150, 150, 0.4)";
     weatherCtx.fill();
@@ -15467,7 +17159,7 @@ if (targetCW3.test(window.location.href)) {
       pixelRaindrop.x,
       pixelRaindrop.y,
       imageWidth * scaleFactor,
-      imageHeight * scaleFactor
+      imageHeight * scaleFactor,
     );
   }
   // ====================================================================================================================
@@ -15551,7 +17243,7 @@ if (targetCW3.test(window.location.href)) {
           pixelSnowflake.x,
           pixelSnowflake.y,
           pixelSnowflake.size,
-          pixelSnowflake.image
+          pixelSnowflake.image,
         );
       }
     }
@@ -15601,7 +17293,7 @@ if (targetCW3.test(window.location.href)) {
         }
       } else {
         console.warn(
-          "Element to be removed is not a child of weatherContainer."
+          "Element to be removed is not a child of weatherContainer.",
         );
       }
     }, 6000);
@@ -15875,7 +17567,7 @@ if (targetCW3.test(window.location.href)) {
         pixelSnowflake.x,
         pixelSnowflake.y,
         pixelSnowflake.size,
-        pixelSnowflake.image
+        pixelSnowflake.image,
       );
     }
 
@@ -15892,7 +17584,7 @@ if (targetCW3.test(window.location.href)) {
       if (pixelRaindrop.y >= weatherCanvas.height - pixelRaindrop.size) {
         pixelRaindrops.splice(i, 1);
         pixelSplashes.push(
-          generateSplash(pixelRaindrop.x, weatherCanvas.height - 24)
+          generateSplash(pixelRaindrop.x, weatherCanvas.height - 24),
         );
       }
     }
@@ -15908,7 +17600,7 @@ if (targetCW3.test(window.location.href)) {
         splash.y,
         splash.size / 1.2 / weatherModifier,
         0,
-        Math.PI * 2
+        Math.PI * 2,
       );
       weatherCtx.fillStyle = "rgba(150, 150, 150, 0.4)";
       weatherCtx.fill();
@@ -15923,7 +17615,7 @@ if (targetCW3.test(window.location.href)) {
         pixelSplash.x,
         pixelSplash.y,
         pixelSplash.size * weatherModifier * 2,
-        pixelSplash.size * weatherModifier * 2
+        pixelSplash.size * weatherModifier * 2,
       );
     }
 
@@ -17593,7 +19285,6 @@ function initializeTemplates() {
       }
 
       #uwu-templates-list {
-        max-height: 220px;
         overflow-x: auto;
         border-radius: 20px;
         background-color: #2e2e2e;
