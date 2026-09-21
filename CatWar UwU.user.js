@@ -184,7 +184,6 @@ const uwuDefaultSettings = {
   cellsBordersThickness: "1",
   cellsBordersColor: "#ffffff",
   cellsNumbers: false,
-  fastStyles: false,
   displayParametersPercentages: false,
   compactMouth: false,
   showMoreCatInfo: false,
@@ -272,7 +271,6 @@ const uwuDefaultSettings = {
   calculators: false,
   savingLS: false,
 
-  extendedSettingsPanel: false,
   showUpdateNotification: false,
   showSplashScreens: false,
   extendedHints: true,
@@ -681,8 +679,7 @@ const uwusettings =
             </div>
 
             <div class="uwu-settings-card__item">
-              <p>Делает небо шапкой страницы, пряча под Игровую (а также чинит его пропажу при редизайне). На широких
-                мониторах может растягиваться.</p>
+              <p>Делает блок Неба шапкой страницы, пряча под Игровую, делая неким "Фоном". Отлично видно и смотрится с прозрачными дизайнами.</p>
               <div class="uwu-settings-card__row">
                 <input type="checkbox" id="sky-in-the-sky" data-setting="skyInHeader" />
                 <label for="sky-in-the-sky">Небо в небе (небо в шапке)</label>
@@ -771,16 +768,6 @@ const uwusettings =
                 <input type="text" id="SettingImageURLField" placeholder="Вставьте URL"
                   data-setting="backgroundUserImageURL" />
                 <button id="SettingSaveButton1" class="uwu-button install-button">Сохранить</button>
-              </div>
-            </div>
-
-            <div class="uwu-settings-card__item">
-              <p>Панель быстрого переключения полезных визуальных стилей в расширенном меню Игровой.</p>
-              <div class="uwu-settings-card__row">
-                <input type="checkbox" id="fast-Styles" data-setting="fastStyles" />
-                <label for="fast-Styles">Быстрые стили</label>
-                <label id="uwu-what-this"
-                  title="— Не показывать всплывающее окно 'О коте'&#10;— Скрыть Игровое поле&#10;— Скрыть фон Игрового Поля&#10;— Скрыть Небо&#10;— Всегда день/ярко&#10;— Границы клеток">[?]</label>
               </div>
             </div>
           </div>
@@ -949,7 +936,7 @@ const uwusettings =
             <hr class="uwu-hr" />
 
             <div class="uwu-settings-card__item">
-              <p>Свободный модульный HUD: позволяет перетаскивать блоки и менять их размеры прямо в Игровой с умным магнетизмом. 
+              <p>Свободный модульный HUD: позволяет перетаскивать блоки и менять их размеры прямо в Игровой. 
               Чтобы редактировать Игровую, зайдите в неё и раскройте контекстное окно быстрых настроек UwU, они прямо в навигационной панели Игровой.</p>
               <div class="uwu-settings-card__row">
                 <input type="checkbox" id="custom-layout" data-setting="customLayout" />
@@ -958,7 +945,6 @@ const uwusettings =
             </div>
 
             <div class="uwu-settings-card__item" style="margin-top: 2px;">
-              <p>Сброс сохранённых координат и размеров всех окон интерфейса к базовым значениям:</p>
               <div class="uwu-settings-card__row">
                 <button id="reset-hud-layout-btn" class="uwu-button remove-button">Сбросить расположение окон HUD</button>
               </div>
@@ -1004,15 +990,6 @@ const uwusettings =
             <hr class="uwu-hr" />
 
             <div class="uwu-settings-card__item">
-              <p>Добавляет картинки костюмов в списки для удобного поиска. Высоту списков можно растягивать мышкой за уголок
-                в нижнем правом краю!</p>
-              <div class="uwu-settings-card__row">
-                <input type="checkbox" id="redesign-Costums-Settings" data-setting="redesignCostumsSettings" />
-                <label for="redesign-Costums-Settings">Редизайн страницы костюмов</label>
-              </div>
-            </div>
-
-            <div class="uwu-settings-card__item">
               <p>Современные таблицы отчётов автоматических племенных действий.</p>
               <div class="uwu-settings-card__row">
                 <input type="checkbox" id="automatic-actions-redesign" data-setting="automaticActionsRedesign" />
@@ -1041,14 +1018,6 @@ const uwusettings =
               <div class="uwu-settings-card__row">
                 <input type="checkbox" id="blogsea-redesign" data-setting="blogseaRedesign" />
                 <label for="blogsea-redesign">Редизайн поиска блогов/лент</label>
-              </div>
-            </div>
-
-            <div class="uwu-settings-card__item">
-              <p>Оформление постов и навигации блогов в виде карточек.</p>
-              <div class="uwu-settings-card__row">
-                <input type="checkbox" id="blogs-redesign" data-setting="blogsRedesign" />
-                <label for="blogs-redesign">Редизайн постов в блогах/лентах</label>
               </div>
             </div>
           </div>
@@ -1689,8 +1658,6 @@ const uwusettings =
             <div class="uwu-settings-card__item">
               <p>Закреплённые ссылки в верхней строке навигации Игровой:</p>
               <div class="uwu-settings-card__row">
-                <input type="checkbox" id="quick-Link1" data-setting="quickLink1" />
-                <label for="quick-Link1">Настройки</label>
                 <input type="checkbox" id="quick-Link2" data-setting="quickLink2" style="margin-left: 10px;" />
                 <label for="quick-Link2">Памятка</label>
                 <input type="checkbox" id="quick-Link3" data-setting="quickLink3" style="margin-left: 10px;" />
@@ -1899,18 +1866,18 @@ const uwusettings =
             <hr class="uwu-hr" />
 
             <div class="uwu-settings-card__item">
-              <p>Отображает круглую плавающую кнопку для открытия панели расширенных настроек в Игровой.</p>
+              <p>Отображает текущую погоду из Игровой в шапке настроек. Если выключено, то погода в шапке будет рандомная!</p>
               <div class="uwu-settings-card__row">
-                <input type="checkbox" id="extended-settings-Panel" data-setting="extendedSettingsPanel" />
-                <label for="extended-settings-Panel">⚙️ Панель расширенных настроек</label>
+                <input type="checkbox" id="duplicate-game-weather" data-setting="duplicateGameWeather" />
+                <label for="duplicate-game-weather">Дублировать погоду с Игровой</label>
               </div>
             </div>
 
             <div class="uwu-settings-card__item">
-              <p>Показывает индикатор и плашку в расширенном меню при выходе новой версии CatWar UwU.</p>
+              <p>Показывает индикатор на кнопке меню UwU при установке новой версии скрипта.</p>
               <div class="uwu-settings-card__row">
                 <input type="checkbox" id="show-Update-Notification" data-setting="showUpdateNotification" />
-                <label for="show-Update-Notification">Уведомлять об обновлениях скрипта</label>
+                <label for="show-Update-Notification">Индикатор обновления скрипта</label>
               </div>
             </div>
 
@@ -2140,59 +2107,67 @@ const newsPanel =
       <div class="uwu-modal-card">
         <div class="uwu-modal-header">
           <h3>🌿 Обновление v${current_uwu_version}</h3>
-          <button type="button" class="uwu-modal-close" id="uwu-news-modal-close" title="Закрыть (Esc)">✖</button>
+          <button type="button" class="uwu-modal-close" id="uwu-news-modal-close"
+            title="Закрыть (Esc)">✖</button>
         </div>
         <hr class="uwu-hr" />
         <div class="uwu-modal-body">
           <h4>Главное</h4>
-          <p>— Теперь Настройки UwU "нативненько" встроены к остальным навигационным кнопкам в общих Настройках!</p>
-          <p>— А так же новейшее переоформление Настроек UwU! Надеюсь вам чуточку понравится...</p>
-          <p>— Новости и детали обновления теперь в небольшой кнопочке в Навигационной панели UwU.</p>
-          <p>— Полный редизайн карточки "Темы и цвета Игровой".</p>
-          <p>— Полная перепись Редизайна Игровой! Теперь это полноценный модульный HUD-редактор. Теперь можно перетаскивать блоки как угодно, и куда угодно, играясь с их положением как вам вздумается. Включается он кнопкой «Редактировать интерфейс» прямо в выпадающем меню UwU на верхней навигационной панели Игровой.</p>
-          <p>— Написан свой ColorPicker для крутых фич: поддержка прозрачности, история цветов и легкого встраивания. Теперь никаких левых ссылок на левые сайты! Все старые браузерные пикеры в моде заменены на него!</p>
-          <p>— Быстрые ссылки починены и адаптированы под новую шапку Игровой.</p>
-          <p>— Показ ID котов в чате вынесен в отдельную самостоятельную настройку.</p>
+          <p>— Теперь Настройки UwU "нативненько" встроены к остальным навигационным
+            кнопкам в общих Настройках!</p>
+          <p>— А так же новейшее переоформление Настроек UwU! Надеюсь вам чуточку
+            понравится... К примеру мини-погода в панельки навигации...</p>
+          <p>— Новости и детали обновления теперь в небольшой кнопочке в
+            Навигационной панели Настроек UwU.</p>
+          <p>— Полный редизайн карточки "Темы и цвета Игровой". Теперь чуть более
+            понятно, читаемей и просто круче!</p>
+          <p>— Написан свой ColorPicker для крутых фич: поддержка прозрачности,
+            история цветов и легкого встраивания. Теперь никаких левых ссылок на
+            левые сайты! Все старые браузерные пикеры в моде заменены на него!</p>
+          <p>— Полная перепись Редизайна Игровой! Теперь это полноценный модульный
+            HUD-редактор. Можно перетаскивать блоки как угодно, и куда угодно,
+            играясь с их положением и размерами как вам вздумается. Включается он
+            кнопкой «Редактировать интерфейс» прямо в выпадающем меню UwU на верхней
+            навигационной панели Игровой (Ну или в Настройках мода).</p>
+          <p>— Показ ID котов в чате вынесен в отдельную самостоятельную
+            настройку.</p>
           <hr class="uwu-hr" />
           <h4>Внешний вид</h4>
-          <p>— Панель БР: вырезаны лишние костыли драга и высоты (Они теперь тоже нативные).</p>
+          <p>— Панель БР: вырезаны лишние костыли драга и высоты (Они теперь тоже
+            нативные).</p>
           <p>— Очищены устаревшие пункты в настройках.</p>
-          <p>— Удалены все лишние и ненужные темы настроек UwU... Простите, если кто-то пользовался. Но, возможно, в будущем что-то вернётся на кастомайз!</p>
-          <p>— Функции Современного чата вынесены в отдельный блок для визуального понимания и удобства.</p>
+          <p>— Удалены все лишние и ненужные темы настроек UwU... Простите, если
+            кто-то пользовался. Но, возможно, в будущем что-то вернётся на
+            кастомайз!</p>
+          <p>— Функции Современного чата вынесены в отдельный блок для визуального
+            понимания и удобства.</p>
+          <p>— Удалены редизайны постов в блогах/лентах и страницы костюмов из-за
+            неактуальности.</p>
+          <p>— Узоры теперь не сжимаются некрасиво на Параметрах и Навыках.</p>
+          <p>— Небо теперь снова видно и работает в Редизайне Игровой!</p>
           <hr class="uwu-hr" />
           <h4>Изменения кода</h4>
-          <p>— Удален прикол с Отображением душевых котов.</p>
-          <p>— Счётчик символов работает и с ванильной строкой.</p>
+          <p>— Быстрые ссылки починены и адаптированы под новую шапку Игровой.</p>
+          <p>— Удален функционал-прикол с Отображением душевых котов из-за
+            неактуальности.</p>
+          <p>— Счётчик символов работает и с ванильной строкой (И вроде просто
+            починен).</p>
           <p>— Возвращена подпись громкости уведомлений для Минного поля.</p>
           <p>— Починен звук получения нового ЛС.</p>
-          <p>— Звуковое уведомление о Боевой стойке через Vue.</p>
-          <p>— "Подробнее о параметрах" теперь читают из Vue.</p>
-          <p>— Добавлен Мини генератор погодных частиц. Используется для фона шапки Хедера Настроек UwU.</p>
-          <p>— Минное поле теперь не застревает под Навигационной панелькой в Игровой.</p>
+          <p>— Звуковое уведомление о Боевой стойке теперь через Vue.</p>
+          <p>— "Подробнее о параметрах" теперь тоже читают из Vue.</p>
+          <p>— Добавлен Мини генератор погодных частиц. Используется для фона шапки
+            Хедера Настроек UwU.</p>
+          <p>— Минное поле теперь не застревает под Навигационной панелькой в
+            Игровой.</p>
+          <p>— Ссылка в Игровой на "Настройки" удалена из-за неактуальности.</p>
+          <p>— Удалены "Быстрые стили" из-за неактуальности, ибо
+            "расширенное меню Игровой" теперь отстуствует. Все галочки теперь
+            перманентно существуют и работают в выпадающем меню UwU в Игровой.</p>
+          <p>— Переписан и улучшен генератор выпадающих списков. Теперь больше возможностей и меньше проблем от браузерных списков!</p>
           <hr class="uwu-hr" />
           <p class="uwu-modal-date">Дата выпуска: ??.??.26</p>
         </div>
-      </div>
-    </div>
-  `;
-// ====================================================================================================================
-//   . . . HTML ПАНЕЛЬ РАСШИРЕННЫХ НАСТРОЕК . . .
-// ====================================================================================================================
-const extendedSettingsButton =
-  /* HTML */
-  `
-    <div id="uwu-extended-settings">
-      <button type="button" id="extended-settings-button">
-        <img
-          src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/partly_sunny_rain.png"
-          alt="Иконка"
-          width="36"
-          height="36"
-        />
-      </button>
-
-      <div id="extended-settings-container">
-        <div id="splash-screen-panel"></div>
       </div>
     </div>
   `;
@@ -3134,54 +3109,99 @@ details {
   animation: fadeOut 6s ease-in-out forwards;
 }
 
+/* ===================== FLOATING SELECT POPOVER ===================== */
 .custom-select {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
 }
 
 .select-selected,
 .uwu-select-selected {
-  margin-top: 10px;
-  width: fit-content;
-  border-radius: 10px;
-  color: white;
-  background-color: #5c5c5c;
-  -webkit-backdrop-filter: var(--uwu-glass-blur);
-  backdrop-filter: var(--uwu-glass-blur);
-  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 1px 1px 5px 1px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.15)) !important;
+  border-radius: 8px !important;
+  padding: 6px 12px !important;
+  color: var(--ui-text, #ffffff) !important;
+  font-family: inherit;
+  font-size: 13px;
   cursor: pointer;
-}
-
-.uwu-select-selected {
+  user-select: none;
   width: fit-content;
+  box-sizing: border-box;
+  margin: 0 !important;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.select-items,
-uwu-select-items {
-  margin-top: 5px;
-  display: none;
-  position: absolute;
-  border-radius: 10px;
-  width: max-content;
-  color: white;
-  background-color: #5c5c5c;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-  -webkit-backdrop-filter: var(--uwu-glass-blur);
-  backdrop-filter: var(--uwu-glass-blur);
-  z-index: 1;
+.select-selected:hover,
+.uwu-select-selected:hover,
+.select-selected.active {
+  background-color: rgba(0, 0, 0, 0.45) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
-.select-items div {
-  padding: 8px 16px;
+.uwu-select-popover {
+  gap: 4px;
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: column;
+
+  position: fixed;
+  z-index: 10005;
+  min-width: 160px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 6px;
+  border-radius: 12px;
+  background: #ffffff1a;
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+  font-family: inherit;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.uwu-select-popover::-webkit-scrollbar {
+  width: 5px;
+}
+
+.uwu-select-popover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+}
+
+.uwu-select-popover__item {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
   cursor: pointer;
+  transition: background 0.15s ease;
+  white-space: nowrap;
 }
 
-.select-items div:hover {
-  background-color: #757575;
+.uwu-select-popover__item:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
-.custom-select.active .select-items {
-  display: block;
+.uwu-select-popover__item.is-selected {
+  background: rgba(131, 229, 255, 0.2);
+  color: #83e5ff;
+  font-weight: 600;
+}
+
+.select-selected::after {
+  content: "▾";
+  font-size: 1rem;
+  opacity: 0.6;
+  pointer-events: none;
+  line-height: 1;
 }
 
 #climbingRefreshNotificationSoundContainer button,
@@ -4306,7 +4326,7 @@ function ensureGcpStyles() {
       background: linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
     }
     .gcp-alpha-bg {
-      background: repeating-conic-gradient(rgba(128, 128, 128, 0.4) 0% 25%, transparent 0% 50%) 50% / 6px 6px;
+      background: repeating-conic-gradient(rgba(128, 128, 128, 0.4) 0% 25%, transparent 0% 50%) 50% / 12px 12px;
     }
     .gcp-alpha-fill {
       width: 100%;
@@ -4352,7 +4372,7 @@ function ensureGcpStyles() {
     .gcp-field-swatch {
       border: none !important;
       border-radius: 8px;
-      background: repeating-conic-gradient(rgba(128, 128, 128, 0.35) 0% 25%, transparent 0% 50%) 50% / 6px 6px;
+      background: repeating-conic-gradient(rgba(128, 128, 128, 0.35) 0% 25%, transparent 0% 50%) 50% / 12px 12px;
       box-shadow: 1px 1px 5px 1px rgba(0, 0, 0, 0.35);
       overflow: hidden;
       flex-shrink: 0;
@@ -4453,7 +4473,7 @@ function ensureGcpStyles() {
       border: none !important;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
       cursor: pointer;
-      background: repeating-conic-gradient(rgba(128, 128, 128, 0.4) 0% 25%, transparent 0% 50%) 50% / 4px 4px;
+      background: repeating-conic-gradient(rgba(128, 128, 128, 0.4) 0% 25%, transparent 0% 50%) 50% / 6px 6px;
       overflow: hidden;
       flex-shrink: 0;
       transition: transform 0.15s ease;
@@ -5183,7 +5203,10 @@ function initHeaderWeather(headerCard) {
 
   // 1. Weather Type
   const allowedWeather = ["rain", "snow", "fireflies"];
-  let weatherType = uwuStorage.getItem("uwu_lastActiveWeather");
+  let weatherType = settings.duplicateGameWeather
+    ? uwuStorage.getItem("uwu_lastActiveWeather")
+    : null;
+
   if (!allowedWeather.includes(weatherType)) {
     weatherType = allowedWeather[Math.floor(Math.random() * allowedWeather.length)];
   }
@@ -7030,38 +7053,156 @@ if (targetSettings.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . СОЗДАНИЕ ВЫПАДАЮЩИХ СПИСКОВ . . .
   // ====================================================================================================================
+  /**
+   * Singleton popover manager for custom select dropdowns attached directly to document body.
+   * Prevents stacking context clipping and handles auto-flipping near viewport edges.
+   */
+  class CustomSelectPopover {
+    static instance = null;
+
+    static getInstance() {
+      if (!CustomSelectPopover.instance) {
+        CustomSelectPopover.instance = new CustomSelectPopover();
+      }
+      return CustomSelectPopover.instance;
+    }
+
+    constructor() {
+      this.activeTrigger = null;
+      this.onSelectCallback = null;
+
+      this.el = document.createElement("div");
+      this.el.className = "uwu-select-popover";
+      this.el.style.display = "none";
+      document.body.appendChild(this.el);
+
+      document.addEventListener("pointerdown", (e) => {
+        if (this.isOpen() && !this.el.contains(e.target) && !this.activeTrigger?.contains(e.target)) {
+          this.close();
+        }
+      });
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && this.isOpen()) {
+          this.close();
+        }
+      });
+    }
+
+    isOpen() {
+      return this.el.style.display !== "none";
+    }
+
+    isOpenFor(triggerEl) {
+      return this.isOpen() && this.activeTrigger === triggerEl;
+    }
+
+    /**
+     * Opens the floating dropdown menu relative to the trigger element coordinates.
+     *
+     * @param {Object} params - Configuration options.
+     * @param {HTMLElement} params.trigger - Trigger button element.
+     * @param {Array<{id: string, name: string}>} params.options - Dropdown choices.
+     * @param {string} params.selectedId - Currently selected option identifier.
+     * @param {Function} params.onSelect - Option selection callback.
+     */
+    open({ trigger, options, selectedId, onSelect }) {
+      this.activeTrigger = trigger;
+      this.onSelectCallback = onSelect;
+
+      this.el.innerHTML = "";
+      options.forEach((opt) => {
+        const itemEl = document.createElement("div");
+        itemEl.className = "uwu-select-popover__item";
+        if (opt.id === selectedId) itemEl.classList.add("is-selected");
+        itemEl.textContent = opt.name;
+
+        itemEl.addEventListener("click", () => {
+          if (typeof this.onSelectCallback === "function") {
+            this.onSelectCallback(opt);
+          }
+          this.close();
+        });
+
+        this.el.appendChild(itemEl);
+      });
+
+      this.el.style.display = "flex";
+     this.activeTrigger.classList.add("active");
+
+      // Viewport position calculation & boundary flipping
+      const rect = trigger.getBoundingClientRect();
+      const popoverHeight = Math.min(240, options.length * 36 + 12);
+      const minWidth = Math.max(160, rect.width);
+
+      let top = rect.bottom + 4;
+      let left = rect.left;
+
+      // Flip upwards if overflowing below viewport
+      if (top + popoverHeight > window.innerHeight - 10) {
+        top = Math.max(10, rect.top - popoverHeight - 4);
+      }
+
+      // Clamp horizontally within viewport
+      if (left + minWidth > window.innerWidth - 10) {
+        left = window.innerWidth - minWidth - 10;
+      }
+
+      this.el.style.minWidth = `${minWidth}px`;
+      this.el.style.left = `${Math.max(10, left)}px`;
+      this.el.style.top = `${top}px`;
+    }
+
+    close() {
+      this.el.style.display = "none";
+      this.activeTrigger = null;
+      this.onSelectCallback = null;
+    }
+  }
+
+  /**
+   * Initializes a custom dropdown trigger bound to the global floating popover.
+   *
+   * @param {string} selectId - DOM ID of the custom select container.
+   * @param {Array<{id: string, name: string}>} options - Available dropdown choices.
+   * @returns {void}
+   */
   function createCustomSelect(selectId, options) {
     const selectContainer = document.getElementById(selectId);
+    if (!selectContainer) return;
+
     const selectedElement = selectContainer.querySelector(".select-selected");
-    const optionsContainer = selectContainer.querySelector(".select-items");
+    if (!selectedElement) return;
+
+    selectContainer._uwuOptions = options;
 
     if (settings && settings[selectId] !== undefined) {
-      const selectedOption = options.find(
-        (option) => option.id === settings[selectId]
-      );
-      if (selectedOption) {
-        selectedElement.textContent = selectedOption.name;
+      const currentOption = options.find((opt) => opt.id === settings[selectId]);
+      if (currentOption) {
+        selectedElement.textContent = currentOption.name;
       }
     }
 
-    options.forEach((option, index) => {
-      const optionElement = document.createElement("div");
-      optionElement.textContent = option.name;
-      optionElement.dataset.id = option.id;
+    selectedElement.onclick = (e) => {
+      e.stopPropagation();
+      const popover = CustomSelectPopover.getInstance();
 
-      optionElement.addEventListener("click", () => {
-        selectedElement.textContent = option.name;
-        settings[selectId] = option.id;
-        saveSettings();
-        selectContainer.classList.remove("active");
+      if (popover.isOpenFor(selectedElement)) {
+        popover.close();
+        return;
+      }
+
+      popover.open({
+        trigger: selectedElement,
+        options: selectContainer._uwuOptions || options,
+        selectedId: settings[selectId],
+        onSelect: (option) => {
+          selectedElement.textContent = option.name;
+          settings[selectId] = option.id;
+          saveSettings();
+        },
       });
-
-      optionsContainer.appendChild(optionElement);
-    });
-
-    selectedElement.addEventListener("click", () => {
-      selectContainer.classList.toggle("active");
-    });
+    };
   }
 
   // ====================================================================================================================
@@ -7138,7 +7279,7 @@ if (targetSettings.test(window.location.href)) {
   }
 
   /**
-   * Rebuilds all sound-related custom select dropdowns dynamically.
+   * Synchronizes sound options across all notification selectors.
    */
   function updateAllSoundSelects() {
     const soundSelectIds = [
@@ -7149,43 +7290,26 @@ if (targetSettings.test(window.location.href)) {
       "notificationInMouthSound",
       "notificationInFightModeSound",
       "notificationBlockSound",
-      "intervalTimerSound"
+      "intervalTimerSound",
     ];
-    
+
     const currentSounds = soundManager.getSoundList();
 
-    soundSelectIds.forEach(selectId => {
+    soundSelectIds.forEach((selectId) => {
       const selectContainer = document.getElementById(selectId);
       if (!selectContainer) return;
-      
-      const optionsContainer = selectContainer.querySelector(".select-items");
+
       const selectedElement = selectContainer.querySelector(".select-selected");
-      if (!optionsContainer || !selectedElement) return;
+      if (!selectedElement) return;
 
-      optionsContainer.innerHTML = "";
-      let foundCurrent = false;
+      selectContainer._uwuOptions = currentSounds;
 
-      currentSounds.forEach(option => {
-        const optionElement = document.createElement("div");
-        optionElement.textContent = option.name;
-        optionElement.dataset.id = option.id;
+      const currentVal = settings[selectId];
+      const match = currentSounds.find((opt) => opt.id === currentVal);
 
-        if (option.id === settings[selectId]) {
-          foundCurrent = true;
-          selectedElement.textContent = option.name;
-        }
-
-        optionElement.addEventListener("click", () => {
-          selectedElement.textContent = option.name;
-          settings[selectId] = option.id;
-          saveSettings();
-          selectContainer.classList.remove("active");
-        });
-
-        optionsContainer.appendChild(optionElement);
-      });
-
-      if (!foundCurrent && currentSounds.length > 0) {
+      if (match) {
+        selectedElement.textContent = match.name;
+      } else if (currentSounds.length > 0) {
         settings[selectId] = currentSounds[0].id;
         saveSettings();
         selectedElement.textContent = currentSounds[0].name;
@@ -7360,112 +7484,6 @@ if (targetSettings.test(window.location.href)) {
 
   loadSettings();
   updateExportField();
-  // ====================================================================================================================
-  //  . . . РЕДИЗАЙН НАСТРОЕК КОСТЮМОВ . . .
-  // ====================================================================================================================
-  if (settings.redesignCostumsSettings) {
-    function addStyles() {
-      const style = document.createElement("style");
-      style.innerHTML =
-        // css
-        `
-        .list-group-item {
-            display: grid !important;
-            grid-template-columns: auto 1fr;
-            grid-template-rows: auto auto;
-            align-items: center;
-            margin-bottom: 10px;
-            width: 280px !important;
-        }
-        .list-group-item img {
-            margin-right: 10px;
-            width: 50px;
-            height: 80px;
-        }
-        .costume-image-container {
-            grid-column: 1;
-            grid-row: 1 / span 2;
-            margin-right: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .list-group {
-          resize: vertical;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          width: 100%;
-        }
-        .list-group-item span {
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
-        .costume-id {
-            font-weight: bold;
-            margin-bottom: 5px;
-            grid-column: 2;
-            grid-row: 1;
-        }
-        .costume-text {
-            grid-column: 2;
-            grid-row: 2;
-        }
-
-        .col-3 {
-          display: flex;
-          flex-direction: row;
-          flex-wrap: wrap;
-        }
-
-        .col-3 > button {
-          height: 22px;
-        }
-    `;
-      document.head.appendChild(style);
-    }
-
-    function addCostumePreview() {
-      const items = document.querySelectorAll(".list-group-item");
-      items.forEach((item) => {
-        const costumeId = item.textContent.trim().split(" ")[0];
-        const imageContainer = item.querySelector(".costume-image-container");
-        const img = imageContainer ? imageContainer.querySelector("img") : null;
-
-        if (
-          !imageContainer ||
-          !img ||
-          img.getAttribute("data-costume-id") !== costumeId
-        ) {
-          const imgUrl = `https://catwar.net/cw3/cats/0/costume/${costumeId}.png`;
-
-          if (!imageContainer) {
-            const newImageContainer = document.createElement("div");
-            newImageContainer.classList.add("costume-image-container");
-
-            const newImg = document.createElement("img");
-            newImg.src = imgUrl;
-            newImg.alt = `Costume ${costumeId}`;
-            newImg.setAttribute("data-costume-id", costumeId);
-
-            newImageContainer.appendChild(newImg);
-
-            item.insertBefore(newImageContainer, item.firstChild);
-          } else {
-            img.src = imgUrl;
-            img.setAttribute("data-costume-id", costumeId);
-          }
-        }
-      });
-    }
-
-    addStyles();
-    setupMutationObserver(".double-container", addCostumePreview, {
-      childList: true,
-      subtree: true,
-    });
-  }
 
   // ====================================================================================================================
   //  . . . СБРОС КООРДИНАТ HUD . . .
@@ -10691,7 +10709,8 @@ if (targetCW3.test(window.location.href)) {
       {
         id: "hunger",
         name: "Голод",
-        formula: (percentageLoss) => Math.ceil((percentageLoss / 100) * 9) * 15,
+        formula: (percentageLoss) =>
+          percentageLoss > 0 ? Math.ceil((percentageLoss / 100) * 9) * 15 : 0,
       },
       { id: "thirst", name: "Жажда", timePerPercent: 90 },
       { id: "need", name: "Нужда", timePerPercent: 45 },
@@ -10720,9 +10739,7 @@ if (targetCW3.test(window.location.href)) {
         percentage = match ? parseInt(match[1], 10) : 0;
       }
 
-      const effectivePercentage = ["hunger", "thirst", "need"].includes(id)
-        ? 100 - percentage
-        : percentage;
+      const effectivePercentage = Math.max(0, Math.min(100, Math.round(percentage)));
       const reversePercentage = 100 - effectivePercentage;
 
       let timeInfo = "";
@@ -12027,7 +12044,6 @@ if (targetCW3.test(window.location.href)) {
     if (!navElement || navElement.querySelector(".uwu-quick-link")) return;
 
     const quickLinksConfig = {
-      quickLink1: { href: "/settings", text: "Настройки" },
       quickLink2: { href: "/ls?id=0", text: "Памятка" },
       quickLink3: { href: "/blogs", text: "Блоги" },
       quickLink4: { href: "/sniff", text: "Лента" },
@@ -12337,6 +12353,13 @@ if (targetCW3.test(window.location.href)) {
   const defaultBackgroundImageUrl =
     "https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/parametersBackgroundImageURL.png";
 
+  /**
+   * Generates CSS rules for parameter and skill bars.
+   * Disabling scaleX transformations to prevent texture distortion.
+   * catwar i hate ur scaleX styles. pls bring me back my simple width...
+   *
+   * @returns {string} Compiled CSS stylesheet text.
+   */
   function generateParameterStyles() {
     let cssStyles = "";
 
@@ -12349,7 +12372,12 @@ if (targetCW3.test(window.location.href)) {
     const otherFirstCellBackground = `linear-gradient(to right, ${otherColors[0]}, ${otherColors[1]})`;
     const otherLastCellBackground = `linear-gradient(to right, ${otherColors[2]}, ${otherColors[3]})`;
 
-    cssStyles += `#parameters_skills_block .bar-fill { background: ${otherFirstCellBackground}; }\n`;
+    cssStyles += `
+      #parameters_skills_block .bar-fill {
+        background: ${otherFirstCellBackground};
+        transform: none !important;
+        transition: width 0.2s ease !important;
+      }\n`;
     cssStyles += `#parameters_skills_block .bar { background: ${otherLastCellBackground}; }\n`;
 
     const backgroundImageURL = settings.parametersUserBackgroundImage
@@ -12383,6 +12411,11 @@ if (targetCW3.test(window.location.href)) {
     return cssStyles;
   }
 
+  /**
+   * Injects or updates the custom parameter CSS in document head.
+   *
+   * @returns {void}
+   */
   function applyParameterColors() {
     const existingStyleTag = document.getElementById("custom-parameter-styles");
     if (existingStyleTag) {
@@ -12397,8 +12430,61 @@ if (targetCW3.test(window.location.href)) {
     document.head.appendChild(styleTag);
   }
 
+  /**
+   * Synchronizes parameter and skill progress bar widths directly with CatWar's Vue.
+   *
+   * @param {Record<string, { barWidth?: number }>} paramData - The reactive parameter data object from Vue.
+   * @returns {void}
+   */
+  function syncParameterBarWidths(paramData) {
+    if (!paramData || typeof paramData !== "object") return;
+
+    for (const [paramId, data] of Object.entries(paramData)) {
+      if (!data || typeof data.barWidth !== "number") continue;
+
+      const container = document.getElementById(paramId);
+      const barFill = container?.querySelector(".bar-fill");
+      if (barFill) {
+        const targetWidth = `${data.barWidth}%`;
+        if (barFill.style.width !== targetWidth) {
+          barFill.style.width = targetWidth;
+        }
+      }
+    }
+
+    // Defensive fallback for non-reactive or dynamically injected progress bars
+    document
+      .querySelectorAll("#parameters_skills_block .bar-fill")
+      .forEach((barFill) => {
+        if (!barFill.style.width && barFill.style.transform) {
+          const match = barFill.style.transform.match(/scaleX\(([\d.]+)\)/);
+          if (match) {
+            barFill.style.width = `${parseFloat(match[1]) * 100}%`;
+          }
+        }
+      });
+  }
+
+  /**
+   * Binds the reactive watcher to Vue's parameter.data once the UI container is mounted.
+   *
+   * @returns {void}
+   */
+  function initParameterBarsWidthSync() {
+    setupSingleCallback("#parameters_skills_block", () => {
+      watchVueData(
+        "parameter.data",
+        (newVal) => {
+          syncParameterBarWidths(newVal);
+        },
+        { deep: true, immediate: true }
+      );
+    });
+  }
+
   if (settings.userParametersTheme) {
     applyParameterColors();
+    initParameterBarsWidthSync();
   }
 
   function applyParametersTextShadow() {
@@ -12411,6 +12497,7 @@ if (targetCW3.test(window.location.href)) {
   }
 
   applyParametersTextShadow();
+
   // ====================================================================================================================
   //   . . . ПОЛЬЗОВАТЕЛЬСКИЙ ШРИФТ . . .
   // ====================================================================================================================
@@ -12549,22 +12636,116 @@ if (targetCW3.test(window.location.href)) {
   //   . . . РЕДИЗАЙН ИГРОВОЙ . . .
   // ====================================================================================================================
   /**
-   * Manages the dynamic stylesheet for the custom HUD layout.
+   * Manages the dynamic and pre-compiled stylesheets for the custom HUD layout.
    */
   const uwuCustomLayoutCssManager = {
-    styleId: "uwu-custom-layout-style",
+    baseStyleId: "uwu-custom-layout-style",
+    compiledStyleId: "uwu-custom-layout-compiled",
+
+    autoHeightTiles: [
+      "tr_chat",
+      "tr_actions",
+      "tr_mouth",
+      "tr_tos",
+      "parameter",
+      "history",
+      "family",
+    ],
 
     /**
-     * Generates and injects the layout CSS rules using centralized CSS variables
-     * for gaps and tile slot dimensions.
+     * Normalizes and quantizes a tile slot width ratio to 10% steps within [20, 100].
+     *
+     * @param {TileSlot} slot - Target slot data model.
+     * @returns {number} Width ratio percentage (20 to 100, step 10).
+     */
+    getSlotWidthRatio(slot) {
+      if (!slot) return 100;
+      if (typeof slot.widthRatio === "number" && !isNaN(slot.widthRatio)) {
+        return Math.max(20, Math.min(100, Math.round(slot.widthRatio / 10) * 10));
+      }
+      if (slot.widthMode === "50%") return 50;
+      if (slot.widthMode === "33%") return 30;
+      return 100;
+    },
+
+    /**
+     * Compiles layout state into scoped CSS rules, preventing conflicts with dragging clones.
+     *
+     * @param {HudLayoutState} layout - Complete layout schema.
+     * @returns {string} Compiled CSS text.
+     */
+    compile(layout) {
+      if (!layout) return "";
+
+      const gap = typeof layout.gap === "number" ? layout.gap : 10;
+      const radius = typeof layout.radius === "number" ? layout.radius : 10;
+      const leftGrow = typeof layout.leftGrow === "number" ? layout.leftGrow : 5;
+      const rightGrow = typeof layout.rightGrow === "number" ? layout.rightGrow : 5;
+
+      const skySlot = [...(layout.left || []), ...(layout.right || [])].find((s) => s.id === "tr_sky");
+      const skyHeight = skySlot && typeof skySlot.height === "number" && skySlot.height > 0 ? skySlot.height : 120;
+
+      let css = `
+        :root {
+          --uwu-tile-gap: ${gap}px;
+          --uwu-tile-rb: ${radius}px;
+          --uwu-left-grow: ${leftGrow};
+          --uwu-right-grow: ${rightGrow};
+          --uwu-chat-height: ${settings.chatHeight || 275}px;
+          --uwu-history-height: ${settings.historyHeight || 215}px;
+          --uwu-items-height: ${settings.itemListHeight || 180}px;
+          --uwu-sky-height: ${skyHeight}px;
+        }
+      `;
+
+      const allSlots = [...(layout.left || []), ...(layout.right || [])];
+      allSlots.forEach((slot) => {
+        if (!slot || !slot.id) return;
+        const ratio = this.getSlotWidthRatio(slot);
+        let widthExpr = "100%";
+        if (ratio < 100) {
+          const multiplier = (1 - ratio / 100).toFixed(2);
+          widthExpr = `calc(${ratio}% - (var(--uwu-tile-gap, 10px) * ${multiplier}))`;
+        }
+
+        css += `.uwu-dock-zone > #${slot.id}.uwu-tile-block { width: ${widthExpr} !important; }\n`;
+
+        if (slot.id === "tr_sky") {
+          css += `.uwu-dock-zone > #tr_sky.uwu-tile-block #sky { height: var(--uwu-sky-height, 120px) !important; }\n`;
+        } else if (!this.autoHeightTiles.includes(slot.id) && typeof slot.height === "number" && slot.height > 0) {
+          css += `.uwu-dock-zone > #${slot.id}.uwu-tile-block { height: ${slot.height}px !important; }\n`;
+        }
+      });
+
+      return css;
+    },
+
+    /**
+     * Injects or updates the compiled CSS stylesheet in document head.
+     *
+     * @param {HudLayoutState} layout - Current layout schema.
+     * @returns {void}
+     */
+    applyCompiled(layout) {
+      let style = document.getElementById(this.compiledStyleId);
+      if (!style) {
+        style = document.createElement("style");
+        style.id = this.compiledStyleId;
+        document.head.appendChild(style);
+      }
+      style.textContent = this.compile(layout);
+    },
+
+    /**
+     * Injects base structural CSS rules for HUD containers.
      *
      * @returns {void}
      */
     enable() {
-      if (document.getElementById(this.styleId)) return;
+      if (document.getElementById(this.baseStyleId)) return;
 
       const style = document.createElement("style");
-      style.id = this.styleId;
+      style.id = this.baseStyleId;
       style.textContent = `
         /* === FIXES AND RESETS CATWAR VANILLA CSS STYLES === */
         html {
@@ -12666,21 +12847,38 @@ if (targetCW3.test(window.location.href)) {
 
         .uwu-tile-w-grip {
           position: absolute;
-          top: 8px;
-          right: -3px;
-          bottom: 8px;
-          width: 7px;
+          top: 10px;
+          right: 10px;
+          bottom: 24px;
+          width: 6px;
           cursor: ew-resize;
-          background: rgba(131, 229, 255, 0.3);
-          border-radius: 4px;
+          background: #858585bd;
+          border-radius: 999px;
+          transition: all 0.2s ease;
           z-index: 10003;
-          transition: background 0.15s ease, box-shadow 0.15s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .uwu-tile-w-grip::after {
+          content: "";
+          width: 2px;
+          height: 34px;
+          max-height: calc(100% - 12px);
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.5);
+          transition: background-color 0.2s ease;
         }
 
         .uwu-tile-w-grip:hover,
         .uwu-tile-w-grip.active {
           background: #83e5ff;
-          box-shadow: 0 0 8px #83e5ff;
+        }
+
+        .uwu-tile-w-grip:hover::after,
+        .uwu-tile-w-grip.active::after {
+          background: #000000;
         }
 
         .uwu-dock-zone--empty {
@@ -12837,21 +13035,49 @@ if (targetCW3.test(window.location.href)) {
         /* ===================== EDIT MODE UI & DROPZONES ===================== */
         .uwu-editing .uwu-dock-zone--empty {
           display: flex !important;
-          width: 140px !important;
-          min-height: 300px;
-          border: 2px dashed rgba(131, 229, 255, 0.35);
-          border-radius: 12px;
+          flex: 0 0 68px !important;
+          width: 68px !important;
+          min-width: 68px !important;
+          max-width: 68px !important;
+          align-self: stretch;
+          min-height: 380px;
+          border: 2px dashed rgba(131, 229, 255, 0.4) !important;
+          border-radius: var(--uwu-tile-rb, 8px) !important;
           align-items: center;
           justify-content: center;
-          background: rgba(131, 229, 255, 0.04);
+          background: rgba(131, 229, 255, 0.03) !important;
+          box-sizing: border-box;
+          padding: 16px 0;
+          cursor: pointer;
+          user-select: none;
+          transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .uwu-editing .uwu-dock-zone--empty:hover {
+          background: rgba(131, 229, 255, 0.08) !important;
+          border-color: #83e5ff !important;
         }
 
         .uwu-editing .uwu-dock-zone--empty:after {
           content: "Перетащите сюда";
-          font-size: 12px;
-          opacity: 0.5;
-          text-align: center;
+          writing-mode: vertical-rl;
+          text-orientation: mixed;
+          letter-spacing: 2px;
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+          color: rgba(131, 229, 255, 0.65);
           pointer-events: none;
+          transition: color 0.2s ease;
+        }
+
+        .uwu-editing .uwu-dock-zone--empty:hover:after {
+          color: #ffffff;
+        }
+
+        .uwu-dock-zone--empty + .uwu-zone-splitter,
+        .uwu-zone-splitter:has(+ #uwu-dock-right.uwu-dock-zone--empty) {
+          display: none !important;
         }
 
         .uwu-drop-placeholder {
@@ -12910,6 +13136,7 @@ if (targetCW3.test(window.location.href)) {
           color: #ffffff;
           cursor: pointer;
           transition: all 0.15s ease;
+          margin-right: 14px;
         }
 
         .uwu-tile-mode-btn:hover {
@@ -12921,10 +13148,10 @@ if (targetCW3.test(window.location.href)) {
           position: absolute;
           bottom: 10px;
           left: 10px;
-          right: 10px;
+          right: 24px;
           height: 6px;
           cursor: ns-resize;
-          background: rgba(255, 255, 255, 0.2);
+          background: #858585bd;
           border-radius: 999px;
           transition: all 0.2s ease;
           z-index: 10002;
@@ -12945,7 +13172,6 @@ if (targetCW3.test(window.location.href)) {
         .uwu-tile-h-grip:hover,
         .uwu-tile-h-grip.active {
           background: #83e5ff;
-          box-shadow: 0 0 10px #83e5ff;
         }
 
         .uwu-tile-h-grip:hover::after,
@@ -13017,17 +13243,41 @@ if (targetCW3.test(window.location.href)) {
         #family.uwu-tile-block {
           background-color: var(--cw3-page-bg, rgba(var(--ds-info-rgb, 255, 255, 255), 0.55));
         }
+
+        /* ===================== SKY TILE ===================== */
+        #tr_sky.uwu-tile-block {
+          padding: 0 !important;
+          overflow: hidden !important;
+          border-radius: var(--uwu-tile-rb, 8px);
+          height: auto !important;
+        }
+
+        #tr_sky.uwu-tile-block > td {
+          padding: 0 !important;
+          width: 100% !important;
+          border-radius: inherit;
+        }
+
+        #tr_sky.uwu-tile-block #sky {
+          width: 100% !important;
+          max-width: 100% !important;
+          height: var(--uwu-sky-height, 120px);
+          background-size: cover;
+          background-position: center;
+          border-radius: inherit;
+        }
       `;
       document.head.appendChild(style);
     },
 
     /**
-     * Removes the custom layout stylesheet from document head.
+     * Removes all layout stylesheets from head.
      *
      * @returns {void}
      */
     disable() {
-      document.getElementById(this.styleId)?.remove();
+      document.getElementById(this.baseStyleId)?.remove();
+      document.getElementById(this.compiledStyleId)?.remove();
     },
   };
 
@@ -13062,6 +13312,7 @@ if (targetCW3.test(window.location.href)) {
   window.uwuHudEditor = (() => {
     const BLOCK_NAMES = {
       tr_field: "Поле Игровой (1000x1000)",
+      tr_sky: "Небо",
       tr_chat: "Чат",
       tr_actions: "Действия",
       tr_mouth: "Рот (Инвентарь)",
@@ -13073,27 +13324,30 @@ if (targetCW3.test(window.location.href)) {
 
     let isEditMode = false;
 
+    const getSlotWidthRatio = (slot) => uwuCustomLayoutCssManager.getSlotWidthRatio(slot);
+
     /**
-     * Generates the classic default layout (Field center, Info left, Chat/Actions/Mouth/Tos right).
+     * Generates the canonical default HUD layout configuration.
      *
-     * @returns {HudLayoutState}
+     * @returns {HudLayoutState} Clean baseline layout state.
      */
     function getDefaultLayout() {
       return {
-        leftWidth: 420,
-        rightWidth: 460,
+        leftGrow: 5,
+        rightGrow: 5,
         gap: 10,
         radius: 10,
         left: [
-          { id: "parameter", widthMode: "100%", height: 0 },
-          { id: "history", widthMode: "100%", height: 0 },
-          { id: "family", widthMode: "100%", height: 0 },
+          { id: "tr_sky", widthRatio: 100, height: 50 },
+          { id: "parameter", widthRatio: 100, height: 0 },
+          { id: "history", widthRatio: 100, height: 0 },
+          { id: "family", widthRatio: 100, height: 0 },
         ],
         right: [
-          { id: "tr_tos", widthMode: "100%", height: 42 },
-          { id: "tr_chat", widthMode: "100%", height: 320 },
-          { id: "tr_actions", widthMode: "100%", height: 210 },
-          { id: "tr_mouth", widthMode: "100%", height: 180 },
+          { id: "tr_tos", widthRatio: 100, height: 42 },
+          { id: "tr_chat", widthRatio: 100, height: 320 },
+          { id: "tr_actions", widthRatio: 100, height: 210 },
+          { id: "tr_mouth", widthRatio: 100, height: 180 },
         ],
       };
     }
@@ -13105,28 +13359,18 @@ if (targetCW3.test(window.location.href)) {
      */
     function getLayout() {
       const saved = uwuStorage.getItem("uwu_hud_layout");
+
       if (saved && Array.isArray(saved.left) && Array.isArray(saved.right)) {
-        saved.gap = typeof saved.gap === "number" && !isNaN(saved.gap) ? Math.max(0, saved.gap) : 8;
-        saved.radius = typeof saved.radius === "number" && !isNaN(saved.radius) ? Math.max(0, saved.radius) : 8;
-
-        const expandLegacyInfo = (slots) => {
-          const result = [];
-          slots.forEach((slot) => {
-            if (slot.id === "tr_info") {
-              result.push({ id: "parameter", widthMode: slot.widthMode || "100%", height: 0 });
-              result.push({ id: "history", widthMode: slot.widthMode || "100%", height: 0 });
-              result.push({ id: "family", widthMode: slot.widthMode || "100%", height: 0 });
-            } else {
-              result.push(slot);
-            }
-          });
-          return result;
+        return {
+          leftGrow: typeof saved.leftGrow === "number" ? saved.leftGrow : 5,
+          rightGrow: typeof saved.rightGrow === "number" ? saved.rightGrow : 5,
+          gap: typeof saved.gap === "number" && !isNaN(saved.gap) ? Math.max(0, saved.gap) : 10,
+          radius: typeof saved.radius === "number" && !isNaN(saved.radius) ? Math.max(0, saved.radius) : 10,
+          left: saved.left,
+          right: saved.right,
         };
-
-        saved.left = expandLegacyInfo(saved.left);
-        saved.right = expandLegacyInfo(saved.right);
-        return saved;
       }
+
       return getDefaultLayout();
     }
 
@@ -13147,6 +13391,11 @@ if (targetCW3.test(window.location.href)) {
         cz.className = "uwu-dock-center";
         const field = document.getElementById("tr_field");
         if (field) cz.appendChild(field);
+      } else {
+        const field = document.getElementById("tr_field");
+        if (field && field.parentElement !== cz) {
+          cz.appendChild(field);
+        }
       }
 
       if (!lz) {
@@ -13206,34 +13455,9 @@ if (targetCW3.test(window.location.href)) {
       if (!tbody) return;
 
       const layout = getLayout();
-      const gap = typeof layout.gap === "number" ? layout.gap : 8;
-      const radius = typeof layout.radius === "number" ? layout.radius : 8;
-
-      let leftGrow = typeof layout.leftGrow === "number" ? layout.leftGrow : null;
-      let rightGrow = typeof layout.rightGrow === "number" ? layout.rightGrow : null;
-
-      if (leftGrow === null || rightGrow === null) {
-        const lPx = typeof layout.leftWidth === "number" ? layout.leftWidth : 420;
-        const rPx = typeof layout.rightWidth === "number" ? layout.rightWidth : 460;
-        const total = lPx + rPx;
-        leftGrow = Number(((lPx / total) * 10).toFixed(2));
-        rightGrow = Number((10 - leftGrow).toFixed(2));
-      }
-
-      document.documentElement.style.setProperty("--uwu-tile-gap", `${gap}px`);
-      document.documentElement.style.setProperty("--uwu-tile-rb", `${radius}px`);
-      document.documentElement.style.setProperty("--uwu-left-grow", String(leftGrow));
-      document.documentElement.style.setProperty("--uwu-right-grow", String(rightGrow));
-      document.documentElement.style.setProperty("--uwu-chat-height", `${settings.chatHeight || 275}px`);
-      document.documentElement.style.setProperty("--uwu-history-height", `${settings.historyHeight || 215}px`);
-      document.documentElement.style.setProperty("--uwu-items-height", `${settings.itemListHeight || 180}px`);
+      uwuCustomLayoutCssManager.applyCompiled(layout);
 
       const { leftZone, centerZone, rightZone } = ensureDockZones(tbody);
-
-      leftZone.style.width = "";
-      rightZone.style.width = "";
-      leftZone.style.flex = `${leftGrow} 1 0px`;
-      rightZone.style.flex = `${rightGrow} 1 0px`;
 
       leftZone.classList.toggle("uwu-dock-zone--empty", layout.left.length === 0);
       rightZone.classList.toggle("uwu-dock-zone--empty", layout.right.length === 0);
@@ -13242,15 +13466,17 @@ if (targetCW3.test(window.location.href)) {
         const el = document.getElementById(slot.id);
         if (!el) return;
 
-        el.classList.add("uwu-tile-block");
-        const ratio = getSlotWidthRatio(slot);
-        applySlotWidth(el, ratio);
-        el.dataset.widthRatio = String(ratio);
+        if (slot.id === "tr_sky" && settings.skyInHeader) {
+          el.style.setProperty("display", "none", "important");
+          return;
+        }
 
-        if (!AUTO_HEIGHT_TILES.includes(slot.id) && typeof slot.height === "number" && slot.height > 0) {
-          el.style.height = `${slot.height}px`;
-        } else {
-          el.style.height = "";
+        el.classList.add("uwu-tile-block");
+        el.dataset.widthRatio = String(getSlotWidthRatio(slot));
+
+        el.style.removeProperty("width");
+        if (slot.id !== "tr_sky") {
+          el.style.removeProperty("height");
         }
 
         zoneEl.appendChild(el);
@@ -13328,22 +13554,6 @@ if (targetCW3.test(window.location.href)) {
         bindSmoothTileDrag(blockEl, overlay, leftZone, rightZone);
         blockEl.appendChild(overlay);
       });
-    }
-
-    /**
-     * Normalizes and quantizes a tile slot width ratio to 10% steps within [20, 100].
-     * Provides backwards compatibility with legacy 'widthMode' string values.
-     *
-     * @param {TileSlot} slot - Target slot data model.
-     * @returns {number} Width ratio percentage (20 to 100, step 10).
-     */
-    function getSlotWidthRatio(slot) {
-      if (typeof slot.widthRatio === "number" && !isNaN(slot.widthRatio)) {
-        return Math.max(20, Math.min(100, Math.round(slot.widthRatio / 10) * 10));
-      }
-      if (slot.widthMode === "50%") return 50;
-      if (slot.widthMode === "33%") return 30;
-      return 100;
     }
 
     /**
@@ -13483,22 +13693,60 @@ if (targetCW3.test(window.location.href)) {
     }
 
     /**
-     * Calculates the target drop zone and adjacent sibling node from pointer coordinates.
+     * Determines the optimal drop target zone and relative dock placement for the dragged tile.
      *
-     * @param {number} clientX - Pointer X coordinate.
-     * @param {number} clientY - Pointer Y coordinate.
-     * @param {HTMLElement} leftZone - Left column container.
-     * @param {HTMLElement} rightZone - Right column container.
-     * @param {HTMLElement} draggedEl - The block currently being moved.
+     * @param {number} clientX - Pointer horizontal screen coordinate.
+     * @param {number} clientY - Pointer vertical screen coordinate.
+     * @param {HTMLElement} leftZone - Left dock column container.
+     * @param {HTMLElement} rightZone - Right dock column container.
+     * @param {HTMLElement} draggedEl - Tile block currently being dragged.
      * @param {HTMLElement} placeholder - Active layout placeholder indicator.
-     * @returns {{ zone: HTMLElement, beforeSibling: HTMLElement|null, dockType: "left"|"right"|"vertical-before"|"vertical-after", targetSibling: HTMLElement|null }|null}
-    */
-    function findDropTarget(clientX, clientY, leftZone, rightZone, draggedEl, placeholder) {
+     * @param {HTMLElement|null} activeDockSibling - Currently active side-docked target sibling.
+     * @returns {{ zone: HTMLElement, beforeSibling: HTMLElement|null, dockType: "left"|"right"|"vertical-before"|"vertical-after", targetSibling: HTMLElement|null }|null} Drop target descriptor.
+     */
+    function findDropTarget(clientX, clientY, leftZone, rightZone, draggedEl, placeholder, activeDockSibling) {
       const hoveredEl = document.elementFromPoint(clientX, clientY);
-      const zone = hoveredEl?.closest(".uwu-dock-zone");
+      let zone = hoveredEl?.closest(".uwu-dock-zone");
 
       if (!zone || (zone !== leftZone && zone !== rightZone)) {
-        return null;
+        const lRect = leftZone.getBoundingClientRect();
+        const rRect = rightZone.getBoundingClientRect();
+        if (clientX >= lRect.left && clientX <= lRect.right && clientY >= lRect.top && clientY <= lRect.bottom) {
+          zone = leftZone;
+        } else if (clientX >= rRect.left && clientX <= rRect.right && clientY >= rRect.top && clientY <= rRect.bottom) {
+          zone = rightZone;
+        } else {
+          return null;
+        }
+      }
+
+      if (activeDockSibling && activeDockSibling.parentElement === zone) {
+        const pRect = placeholder.getBoundingClientRect();
+        const sRect = activeDockSibling.getBoundingClientRect();
+        const rowLeft = Math.min(pRect.left, sRect.left);
+        const rowRight = Math.max(pRect.right, sRect.right);
+        const rowTop = Math.min(pRect.top, sRect.top);
+        const rowBottom = Math.max(pRect.bottom, sRect.bottom);
+
+        const inRow =
+          clientY >= rowTop - 14 &&
+          clientY <= rowBottom + 14 &&
+          clientX >= rowLeft - 25 &&
+          clientX <= rowRight + 25;
+
+        if (inRow) {
+          const midX = (rowLeft + rowRight) / 2;
+          const isLeft = clientX < midX;
+          const dockType = isLeft ? "left" : "right";
+          const beforeSibling = isLeft ? activeDockSibling : activeDockSibling.nextElementSibling;
+
+          return {
+            zone,
+            beforeSibling,
+            dockType,
+            targetSibling: activeDockSibling,
+          };
+        }
       }
 
       const siblings = Array.from(zone.children).filter(
@@ -13508,49 +13756,68 @@ if (targetCW3.test(window.location.href)) {
           child !== placeholder
       );
 
-      let beforeSibling = null;
-      let dockType = "vertical-after";
-      let targetSibling = null;
+      if (siblings.length === 0) {
+        return { zone, beforeSibling: null, dockType: "vertical-after", targetSibling: null };
+      }
 
+      let targetSibling = null;
       for (const child of siblings) {
         const cRect = child.getBoundingClientRect();
-        const isInVerticalRange = clientY >= cRect.top && clientY <= cRect.bottom;
-
-        if (isInVerticalRange) {
+        if (
+          clientX >= cRect.left &&
+          clientX <= cRect.right &&
+          clientY >= cRect.top &&
+          clientY <= cRect.bottom
+        ) {
           targetSibling = child;
-          const relX = (clientX - cRect.left) / cRect.width;
-          const relY = (clientY - cRect.top) / cRect.height;
-
-          if (relY < 0.25) {
-            dockType = "vertical-before";
-            beforeSibling = child;
-          } else if (relY > 0.75) {
-            dockType = "vertical-after";
-            beforeSibling = child.nextElementSibling;
-          } else if (relX < 0.25) {
-            dockType = "left";
-            beforeSibling = child;
-          } else if (relX > 0.75) {
-            dockType = "right";
-            beforeSibling = child.nextElementSibling;
-          } else {
-            if (relY < 0.5) {
-              dockType = "vertical-before";
-              beforeSibling = child;
-            } else {
-              dockType = "vertical-after";
-              beforeSibling = child.nextElementSibling;
-            }
-          }
-          break;
-        } else if (clientY < cRect.top) {
-          dockType = "vertical-before";
-          beforeSibling = child;
           break;
         }
       }
 
-      return { zone, beforeSibling, dockType, targetSibling };
+      if (targetSibling) {
+        const cRect = targetSibling.getBoundingClientRect();
+        const relX = (clientX - cRect.left) / cRect.width;
+        const relY = (clientY - cRect.top) / cRect.height;
+
+        let dockType = "vertical-after";
+        let beforeSibling = null;
+
+        if (relY < 0.22) {
+          dockType = "vertical-before";
+          beforeSibling = targetSibling;
+        } else if (relY > 0.78) {
+          dockType = "vertical-after";
+          beforeSibling = targetSibling.nextElementSibling;
+        } else if (relX < 0.35) {
+          dockType = "left";
+          beforeSibling = targetSibling;
+        } else if (relX > 0.65) {
+          dockType = "right";
+          beforeSibling = targetSibling.nextElementSibling;
+        } else {
+          if (relY < 0.5) {
+            dockType = "vertical-before";
+            beforeSibling = targetSibling;
+          } else {
+            dockType = "vertical-after";
+            beforeSibling = targetSibling.nextElementSibling;
+          }
+        }
+
+        return { zone, beforeSibling, dockType, targetSibling };
+      }
+
+      const firstRect = siblings[0].getBoundingClientRect();
+      if (clientY < firstRect.top) {
+        return { zone, beforeSibling: siblings[0], dockType: "vertical-before", targetSibling: null };
+      }
+
+      const lastRect = siblings[siblings.length - 1].getBoundingClientRect();
+      if (clientY > lastRect.bottom) {
+        return { zone, beforeSibling: null, dockType: "vertical-after", targetSibling: null };
+      }
+
+      return { zone, beforeSibling: null, dockType: "vertical-after", targetSibling: null };
     }
 
     /**
@@ -13647,11 +13914,17 @@ if (targetCW3.test(window.location.href)) {
           const initH = isChat && chatMsgEl ? chatMsgEl.offsetHeight : blockEl.offsetHeight;
 
           const onMove = (me) => {
-            const newH = Math.max(80, initH + (me.clientY - startY));
+            const newH = Math.max(50, initH + (me.clientY - startY));
             if (isChat && chatMsgEl) {
               chatMsgEl.style.height = `${newH}px`;
               document.documentElement.style.setProperty("--uwu-chat-height", `${newH}px`);
               settings.chatHeight = String(newH);
+            } else if (slot.id === "tr_sky") {
+              const skyEl = blockEl.querySelector("#sky");
+              if (skyEl) skyEl.style.height = `${newH}px`;
+              document.documentElement.style.setProperty("--uwu-sky-height", `${newH}px`);
+              blockEl.style.height = `${newH}px`;
+              slot.height = newH;
             } else {
               blockEl.style.height = `${newH}px`;
               slot.height = newH;
@@ -13671,6 +13944,29 @@ if (targetCW3.test(window.location.href)) {
       }
 
       return overlay;
+    }
+
+    /**
+     * Dynamically updates the empty state class of dock zones based on present tiles and active placeholder.
+     *
+     * @param {HTMLElement} leftZone - Left dock column container.
+     * @param {HTMLElement} rightZone - Right dock column container.
+     * @param {HTMLElement|null} placeholder - Active drag placeholder element.
+     * @returns {void}
+     */
+    function updateEmptyZoneStates(leftZone, rightZone, placeholder) {
+      const isLeftEmpty =
+        Array.from(leftZone.children).filter(
+          (c) => c.classList.contains("uwu-tile-block") && c.style.display !== "none"
+        ).length === 0 && !leftZone.contains(placeholder);
+
+      const isRightEmpty =
+        Array.from(rightZone.children).filter(
+          (c) => c.classList.contains("uwu-tile-block") && c.style.display !== "none"
+        ).length === 0 && !rightZone.contains(placeholder);
+
+      leftZone.classList.toggle("uwu-dock-zone--empty", isLeftEmpty);
+      rightZone.classList.toggle("uwu-dock-zone--empty", isRightEmpty);
     }
 
     /**
@@ -13732,6 +14028,8 @@ if (targetCW3.test(window.location.href)) {
         blockEl.before(placeholder);
         blockEl.style.setProperty("display", "none", "important");
 
+        updateEmptyZoneStates(leftZone, rightZone, placeholder);
+
         let currentDropTarget = null;
         let activeDockSibling = null;
 
@@ -13745,7 +14043,15 @@ if (targetCW3.test(window.location.href)) {
           ghost.style.left = `${me.clientX - offsetX}px`;
           ghost.style.top = `${me.clientY - offsetY}px`;
 
-          const target = findDropTarget(me.clientX, me.clientY, leftZone, rightZone, blockEl, placeholder);
+          const target = findDropTarget(
+            me.clientX,
+            me.clientY,
+            leftZone,
+            rightZone,
+            blockEl,
+            placeholder,
+            activeDockSibling
+          );
           currentDropTarget = target;
 
           if (!target) {
@@ -13756,7 +14062,9 @@ if (targetCW3.test(window.location.href)) {
             return;
           }
 
-          const isSideDock = (target.dockType === "left" || target.dockType === "right") && target.targetSibling;
+          const isSideDock =
+            (target.dockType === "left" || target.dockType === "right") &&
+            target.targetSibling;
 
           if (isSideDock) {
             const sibling = target.targetSibling;
@@ -13797,6 +14105,8 @@ if (targetCW3.test(window.location.href)) {
               target.zone.appendChild(placeholder);
             }
           }
+
+          updateEmptyZoneStates(leftZone, rightZone, placeholder);
         };
 
         const onMouseUp = () => {
@@ -13808,7 +14118,8 @@ if (targetCW3.test(window.location.href)) {
           ghost.remove();
           blockEl.style.removeProperty("display");
 
-          const isSideDock = currentDropTarget &&
+          const isSideDock =
+            currentDropTarget &&
             (currentDropTarget.dockType === "left" || currentDropTarget.dockType === "right") &&
             currentDropTarget.targetSibling;
 
@@ -13841,8 +14152,7 @@ if (targetCW3.test(window.location.href)) {
           activeDockSibling = null;
           currentDropTarget = null;
 
-          leftZone.classList.toggle("uwu-dock-zone--empty", leftZone.querySelectorAll(".uwu-tile-block").length === 0);
-          rightZone.classList.toggle("uwu-dock-zone--empty", rightZone.querySelectorAll(".uwu-tile-block").length === 0);
+          updateEmptyZoneStates(leftZone, rightZone, null);
         };
 
         window.addEventListener("mousemove", onMouseMove);
@@ -13871,6 +14181,12 @@ if (targetCW3.test(window.location.href)) {
       document.querySelectorAll(".uwu-zone-splitter").forEach((s) => s.remove());
       document.querySelector(".uwu-drop-placeholder")?.remove();
 
+      // Clear any temporary inline resize styles from drag handles
+      document.querySelectorAll(".uwu-tile-block").forEach((el) => {
+        el.style.removeProperty("width");
+        if (el.id !== "tr_sky") el.style.removeProperty("height");
+      });
+
       if (save) {
         const lz = document.getElementById("uwu-dock-left");
         const rz = document.getElementById("uwu-dock-right");
@@ -13882,22 +14198,16 @@ if (targetCW3.test(window.location.href)) {
           if (!zone) return [];
           return Array.from(zone.children)
             .filter((el) => el.classList.contains("uwu-tile-block"))
-            .map((el) => {
-              const ratio = parseInt(el.dataset.widthRatio || "100", 10);
-              return {
-                id: el.id,
-                widthRatio: ratio,
-                widthMode: `${ratio}%`,
-                height: el.offsetHeight,
-              };
-            });
+            .map((el) => ({
+              id: el.id,
+              widthRatio: parseInt(el.dataset.widthRatio || "100", 10),
+              height: el.offsetHeight,
+            }));
         };
 
         const finalLayout = {
           leftGrow: lGrow,
           rightGrow: rGrow,
-          leftWidth: lz ? lz.offsetWidth : 420,
-          rightWidth: rz ? rz.offsetWidth : 460,
           gap: gapVal,
           radius: radiusVal,
           left: collectSlots(lz),
@@ -13905,6 +14215,7 @@ if (targetCW3.test(window.location.href)) {
         };
 
         uwuStorage.setItem("uwu_hud_layout", finalLayout);
+        uwuCustomLayoutCssManager.applyCompiled(finalLayout);
         applyLayout();
       } else {
         applyLayout();
@@ -13915,13 +14226,35 @@ if (targetCW3.test(window.location.href)) {
       startEditMode,
       stopEditMode,
       applyLayout,
+      getLayout,
     };
   })();
 
   if (targetCW3.test(window.location.href) && settings.customLayout) {
-    setupSingleCallback("#main_table", () => {
-      window.uwuHudEditor.applyLayout();
-    });
+    // 1. Inject compiled layout CSS instantly before Vue finishes mounting
+    uwuCustomLayoutCssManager.enable();
+    uwuCustomLayoutCssManager.applyCompiled(window.uwuHudEditor.getLayout());
+
+    // 2. Safely dock elements into zones
+    setupMutationObserver(
+      "#main_table > tbody",
+      () => {
+        const tbody = document.querySelector("#main_table > tbody");
+        if (!tbody) return;
+
+        const hasStrayRows = Array.from(tbody.children).some(
+          (child) => child.tagName === "TR" && child.id !== "tr_field"
+        );
+
+        if (hasStrayRows || !document.getElementById("uwu-dock-left")) {
+          window.uwuHudEditor.applyLayout();
+        }
+      },
+      { childList: true },
+      15,
+      300,
+      50
+    );
   }
 
   /**
@@ -20275,328 +20608,4 @@ if (targetBlogsea.test(window.location.href) && settings.blogseaRedesign) {
     }
 
   setupMutationObserver("#branch", applyBlogseaRedesign, { childList: true, subtree: true });
-}
-
-// ====================================================================================================================
-//   . . . РЕДИЗАЙН БЛОГОВ И ЛЕНТЫ . . .
-// ====================================================================================================================
-if ((targetBlog.test(window.location.href) || targetSniff.test(window.location.href)) && settings.blogsRedesign) {
-  function applyBlogsNavRedesign() {
-    const pageFormDiv = document.querySelector('#page_form > div');
-    if (!pageFormDiv || pageFormDiv.querySelector('.uwu-blogs-header-wrapper')) return;
-
-    const urlParams = new URLSearchParams(window.location.search);
-    let currentPage = parseInt(urlParams.get('page')) || 1;
-
-    const headerWrapper = document.createElement('div');
-    headerWrapper.className = 'uwu-blogs-header-wrapper';
-
-    const topRow = document.createElement('div');
-    topRow.className = 'uwu-header-top-row';
-
-    const pagContainer = document.createElement('div');
-    pagContainer.className = 'uwu-pagination-container';
-
-    const actionContainer = document.createElement('div');
-    actionContainer.className = 'uwu-action-container';
-
-    const filterContainer = document.createElement('div');
-    filterContainer.className = 'uwu-filter-container';
-
-    const prevSpan = document.getElementById('prev_page_span');
-    const nextSpan = document.getElementById('next_page_span');
-    const prevLink = document.getElementById('prev_page');
-    const nextLink = document.getElementById('next_page');
-    
-    const pageLabel = document.createElement('div');
-    pageLabel.className = 'uwu-page-label';
-    pageLabel.textContent = `Страница ${currentPage}`;
-
-    if (prevLink) {
-        prevLink.innerHTML = '← Назад';
-        prevLink.addEventListener('click', () => {
-            currentPage = Math.max(1, currentPage - 1);
-            pageLabel.textContent = `Страница ${currentPage}`;
-        });
-    }
-    if (nextLink) {
-        nextLink.innerHTML = 'Вперёд →';
-        nextLink.addEventListener('click', () => {
-            currentPage++;
-            pageLabel.textContent = `Страница ${currentPage}`;
-        });
-    }
-
-    if (prevSpan) pagContainer.appendChild(prevSpan);
-    pagContainer.appendChild(pageLabel);
-    if (nextSpan) pagContainer.appendChild(nextSpan);
-
-    const anchors = Array.from(pageFormDiv.querySelectorAll('a'));
-    anchors.forEach(a => {
-        if (a.id === 'prev_page' || a.id === 'next_page') return; 
-        
-        if (a.textContent.includes('Создать')) {
-            a.innerHTML = '✍️ Создать';
-            actionContainer.appendChild(a);
-        } else if (a.textContent.includes('Поиск')) {
-            a.innerHTML = '🔍 Поиск';
-            filterContainer.appendChild(a);
-        } else {
-            filterContainer.appendChild(a);
-        }
-    });
-
-    const notApproved = document.getElementById('notApproved');
-    if (notApproved) {
-        filterContainer.appendChild(notApproved);
-    }
-
-    pageFormDiv.innerHTML = '';
-    
-    topRow.appendChild(pagContainer);
-    if (actionContainer.childNodes.length > 0) {
-        topRow.appendChild(actionContainer);
-    }
-    
-    headerWrapper.appendChild(topRow);
-    if (filterContainer.childNodes.length > 0) {
-        headerWrapper.appendChild(filterContainer);
-    }
-
-    pageFormDiv.appendChild(headerWrapper);
-
-    if (!document.getElementById('uwu-blogs-redesign-styles')) {
-        const style = document.createElement("style");
-        style.id = "uwu-blogs-redesign-styles";
-        style.innerHTML = /* CSS */`
-            .uwu-blogs-header-wrapper {
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
-                margin-bottom: 20px;
-            }
-
-            .uwu-header-top-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                flex-wrap: wrap;
-                gap: 10px;
-            }
-
-            .uwu-pagination-container {
-                display: flex;
-                align-items: center;
-                background: rgba(127, 127, 127, 0.15);
-                border: 1px solid rgba(127, 127, 127, 0.2);
-                border-radius: 12px;
-                padding: 4px;
-            }
-
-            #prev_page_span, #next_page_span, #notApproved {
-                font-size: 0 !important;
-                color: transparent !important;
-                display: inline-flex !important;
-                align-items: center;
-            }
-
-            .uwu-page-label {
-                opacity: 0.8;
-                font-weight: 600;
-                padding: 0 15px;
-                user-select: none;
-            }
-
-            #prev_page, #next_page {
-                background: rgba(127, 127, 127, 0.1);
-                padding: 6px 14px;
-                border-radius: 8px;
-                text-decoration: none !important;
-                font-size: 13px !important;
-                font-weight: normal !important;
-                transition: background-color 0.2s ease, transform 0.2s ease;
-            }
-
-            #prev_page:hover, #next_page:hover {
-                background: rgba(127, 127, 127, 0.25);
-                transform: translateY(-1px);
-            }
-
-            .uwu-action-container a {
-                display: inline-flex;
-                background: rgba(127, 127, 127, 0.2);
-                border: 1px solid rgba(127, 127, 127, 0.3);
-                padding: 8px 16px;
-                border-radius: 12px;
-                text-decoration: none;
-                font-weight: 600;
-                transition: all 0.2s ease;
-            }
-
-            .uwu-action-container a:hover {
-                background: rgba(127, 127, 127, 0.3);
-                transform: translateY(-2px);
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            }
-
-            .uwu-filter-container {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 8px;
-                background: rgba(127, 127, 127, 0.1);
-                padding: 10px;
-                border-radius: 12px;
-                border: 1px solid rgba(127, 127, 127, 0.2);
-            }
-
-            .uwu-filter-container a {
-                background: rgba(127, 127, 127, 0.1);
-                border: 1px solid rgba(127, 127, 127, 0.15);
-                padding: 6px 12px;
-                border-radius: 8px;
-                text-decoration: none;
-                transition: all 0.2s ease;
-            }
-
-            .uwu-filter-container a:hover, 
-            .uwu-filter-container a.active {
-                background: rgba(127, 127, 127, 0.25);
-                border-color: rgba(127, 127, 127, 0.3);
-            }
-            
-            .blog, .comment {
-                background: rgba(127, 127, 127, 0.08);
-                border: 1px solid rgba(127, 127, 127, 0.2);
-                border-radius: 12px;
-                padding: 16px;
-                margin-bottom: 16px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-                transition: transform 0.2s ease, border-color 0.2s ease;
-                position: relative;
-            }
-
-            .blog:hover, .comment:hover {
-                border-color: rgba(127, 127, 127, 0.3);
-            }
-
-            .blog-title, .comment-title {
-                font-size: 17px;
-                font-weight: 600;
-                margin: 0 0 6px 0 !important;
-                line-height: 1.3;
-            }
-
-            .comment-title {
-                font-size: 14px;
-                padding-right: 60px;
-            }
-
-            .blog-title a, .comment-title a {
-                text-decoration: none !important;
-                transition: opacity 0.2s ease;
-            }
-
-            .blog-title a:hover, .comment-title a:hover {
-                opacity: 0.7;
-            }
-
-            .blog-info, .comment-info {
-                font-size: 11px;
-                opacity: 0.6;
-                margin: 0 0 12px 0 !important;
-                padding-bottom: 12px;
-                border-bottom: 1px solid rgba(127, 127, 127, 0.2);
-            }
-
-            .blog-info a, .comment-info a {
-                font-weight: 500;
-                text-decoration: none;
-            }
-
-            .blog-info a:hover, .comment-info a:hover {
-                opacity: 0.8;
-                text-decoration: underline;
-            }
-
-            .blog-tags {
-                font-size: 11px;
-                margin-bottom: 12px !important;
-                display: flex;
-                flex-wrap: wrap;
-                gap: 6px;
-                align-items: center;
-            }
-
-            .blog-tags .tag {
-                background: rgba(127, 127, 127, 0.15);
-                padding: 4px 8px;
-                border-radius: 6px;
-                color: inherit !important;
-                text-decoration: none !important;
-                border: 1px solid transparent;
-                transition: all 0.2s ease;
-            }
-
-            .blog-tags .tag:hover {
-                background: rgba(127, 127, 127, 0.25);
-                border-color: rgba(127, 127, 127, 0.3);
-            }
-
-            .blog > hr.line, .comment > hr.line {
-                display: none !important;
-            }
-
-            .blog-read {
-                margin-top: 12px !important;
-            }
-            
-            .blog-read a {
-                display: inline-block;
-                font-weight: 600;
-                color: inherit !important;
-                background: rgba(127, 127, 127, 0.15);
-                padding: 6px 12px;
-                border-radius: 8px;
-                text-decoration: none !important;
-                transition: background 0.2s ease;
-            }
-
-            .blog-read a:hover {
-                background: rgba(127, 127, 127, 0.25);
-            }
-            
-            .comment p:has(> .comment-delete) {
-                margin: 0;
-            }
-
-            .comment-delete {
-                position: absolute;
-                top: 16px;
-                right: 16px;
-                font-size: 11px;
-                color: inherit !important;
-                background: rgba(127, 127, 127, 0.1);
-                border: 1px solid rgba(127, 127, 127, 0.2);
-                padding: 4px 8px;
-                border-radius: 6px;
-                text-decoration: none !important;
-                opacity: 0.5;
-                transition: all 0.2s ease;
-            }
-            
-            .comment:hover .comment-delete {
-                opacity: 0.8;
-            }
-            
-            .comment-delete:hover {
-                background: rgba(255, 100, 100, 0.2);
-                border-color: rgba(255, 100, 100, 0.4);
-                opacity: 1;
-            }
-        `;
-        document.head.appendChild(style);
-    }
-  }
-
-  setupMutationObserver("#blog-links", applyBlogsNavRedesign, { childList: true, subtree: true });
 }
