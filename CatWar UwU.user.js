@@ -317,6 +317,7 @@ const defaultThemes = {
     colors: {
       backgroundColor: "#161616",
       blocksColor: "#242424",
+      subBlocksColor: "#1b1b1b",
       chatColor: "#242424",
       textColor: "#d5d5d5",
       catTooltipBackground: "#242424",
@@ -325,6 +326,7 @@ const defaultThemes = {
       accentColor1: "#111111",
       accentColor2: "#2e2e2e82",
       accentColor3: "#fc872a",
+      accentColor4: "#2a2a2a",
       moveNameColor: "#d5d5d5",
       moveNameBackground: "#242424",
       climbingPanelBackground: "#242424",
@@ -334,6 +336,7 @@ const defaultThemes = {
     colors: {
       backgroundColor: "#161616",
       blocksColor: "#2b2b2b63",
+      subBlocksColor: "#1e1e1e4d",
       chatColor: "#2b2b2b63",
       textColor: "#d5d5d5",
       catTooltipBackground: "#2b2b2b63",
@@ -342,6 +345,7 @@ const defaultThemes = {
       accentColor1: "#111111",
       accentColor2: "#2e2e2e82",
       accentColor3: "#fc872a",
+      accentColor4: "#ffffff14",
       moveNameColor: "#d5d5d5",
       moveNameBackground: "#2b2b2b63",
       climbingPanelBackground: "#2b2b2b63",
@@ -822,10 +826,11 @@ const uwusettings =
             </div>
 
             <div class="uwu-settings-card__item">
-              <div id="theme-selector" class="uwu-select"
-                style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <label for="theme-select">Текущая тема:</label>
-                <select id="theme-select" class="uwu-select-selected" style="margin-top: 0;"></select>
+              <div id="theme-selector" class="uwu-settings-card__row" style="flex-wrap: wrap;">
+                <label>Текущая тема:</label>
+                <div class="custom-select" id="theme-select-container">
+                  <div class="select-selected" id="theme-select-selected">Тёмная Тема</div>
+                </div>
                 <button id="addThemeButton" class="uwu-button install-button">Добавить тему</button>
                 <button id="removeThemeButton" style="display: none;" class="uwu-button remove-button">Удалить тему</button>
               </div>
@@ -2120,7 +2125,7 @@ const newsPanel =
           <p>— Новости и детали обновления теперь в небольшой кнопочке в
             Навигационной панели Настроек UwU.</p>
           <p>— Полный редизайн карточки "Темы и цвета Игровой". Теперь чуть более
-            понятно, читаемей и просто круче!</p>
+            понятно, читаемей, на один акцент больше и просто круче! Ну и теперь цвета снова работают в Игровой!</p>
           <p>— Написан свой ColorPicker для крутых фич: поддержка прозрачности,
             история цветов и легкого встраивания. Теперь никаких левых ссылок на
             левые сайты! Все старые браузерные пикеры в моде заменены на него!</p>
@@ -2221,10 +2226,7 @@ const manualWeatherPanel =
 
 </div>
 <div id="aurora-settings-panel">
-<p>Изменения, сделанные в этой панели, сохранятся!</p>
-<h5>Здесь будет возможность переместить Северное Сияние в реальном времени, исключать локации из генерации погоды,
-  либо запрещать
-  определённой погоде существовать на выбранной локации. Но это всё пока что лишь мечта...</h5>
+<h5>Здесь очень давно должно было быть что-то крутое, теперь здесь только пустыня...</h5>
 </div>
 `;
 // ====================================================================================================================
@@ -3191,8 +3193,7 @@ details {
 }
 
 .uwu-select-popover__item.is-selected {
-  background: rgba(131, 229, 255, 0.2);
-  color: #83e5ff;
+  background: rgb(255 255 255 / 20%);
   font-weight: 600;
 }
 
@@ -3612,7 +3613,7 @@ details {
   position: fixed;
   inset: 0;
   z-index: 100000;
-  background: rgba(0, 0, 0, 0.65);
+  background: var(--overlay-background-color, rgba(0, 0, 0, 0.65));
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   display: flex;
@@ -3624,19 +3625,21 @@ details {
 }
 
 .uwu-modal-card {
-  background: rgba(26, 26, 26, 0.95);
+  background: rgba(var(--ds-info-rgb, 33, 36, 43), 0.96);
   border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.15));
-  border-radius: 16px;
+  border-radius: var(--settings-radius, var(--ui-radius, 16px));
   width: 100%;
   max-width: 580px;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-  color: var(--ui-text, #ffffff);
-  font-family: "Montserrat", sans-serif;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  color: var(--ui-text, var(--ds-page-text, #ffffff));
+  font-family: inherit;
   overflow: hidden;
   box-sizing: border-box;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .uwu-modal-header {
@@ -4531,7 +4534,7 @@ function ensureGcpStyles() {
 }
 
 /**
- * Singleton Popover Window with 2D SV palette, Hue/Alpha tracks, and color history.
+ * Popover Window with 2D SV palette, Hue/Alpha tracks, and color history.
  */
 class GlassColorPickerPopover {
   static instance = null;
@@ -6378,7 +6381,7 @@ if (targetSettings.test(window.location.href)) {
   // ====================================================================================================================
   const pickersGrid = document.getElementById("theme-pickers-grid");
   const saveThemeButton = document.getElementById("saveThemeButton");
-  const themeSelect = document.getElementById("theme-select");
+  const themeSelectSelected = document.getElementById("theme-select-selected");
   const addThemeButton = document.getElementById("addThemeButton");
   const removeThemeButton = document.getElementById("removeThemeButton");
 
@@ -6386,26 +6389,45 @@ if (targetSettings.test(window.location.href)) {
   let allThemes = getThemes();
 
   const themeConfig = [
-    { key: "backgroundColor", label: "Цвет фона страницы" },
-    { key: "blocksColor", label: "Основной цвет блоков" },
-    { key: "chatColor", label: "Основной цвет чата" },
+    // 1. Foreground and background
+    { key: "backgroundColor", label: "Цвет фона страницы", category: "Основное и фон" },
     { key: "textColor", label: "Цвет текста" },
     { key: "linkColor", label: "Цвет ссылок" },
+
+    // 2. Blocks and chat
+    { key: "blocksColor", label: "Внешние блоки", category: "Блоки и чат", hint: "Внешние подложки действий, рта, параметров и навигации" },
+    { key: "subBlocksColor", label: "Вложенные блоки", hint: "Внутренние карточки истории и параметров." },
+    { key: "chatColor", label: "Основной цвет чата", hint: "Фон контейнера сообщений чата" },
+
+    // 3. Interface and navigation
+    { key: "moveNameBackground", label: "Цвет фона перехода", category: "Интерфейс и навигация" },
+    { key: "moveNameColor", label: "Цвет текста перехода" },
     { key: "catTooltipBackground", label: "Фон подсказки «О Коте»" },
     { key: "fightPanelBackground", label: "Фон панели Боевого режима" },
-    { key: "moveNameColor", label: "Цвет текста перехода" },
-    { key: "moveNameBackground", label: "Цвет фона перехода" },
     { key: "climbingPanelBackground", label: "Фон Минного Поля" },
-    { key: "accentColor1", label: "Акценты 1", hint: "Кнопки, слайдеры и текст имени в чате" },
-    { key: "accentColor2", label: "Акценты 2", hint: "Линии в чате, разделители и ползунок громкости" },
-    { key: "accentColor3", label: "Акценты 3", hint: "Цвет уведомлений (ЛС и подсветка упоминания в чате)" },
+
+    // 4. Highlights
+    { key: "accentColor1", label: "Фон полей ввода", category: "Элементы управления и акценты" },
+    { key: "accentColor2", label: "Рамки, линии и разделители" },
+    { key: "accentColor3", label: "Уведомления и упоминания" },
+    { key: "accentColor4", label: "Фон кнопок" },
   ];
 
   /** @type {Object<string, GlassColorPicker>} */
   const activePickers = {};
 
   if (pickersGrid) {
+    pickersGrid.innerHTML = "";
     themeConfig.forEach((item) => {
+      if (item.category) {
+        const catHeader = document.createElement("div");
+        catHeader.className = "gcp-category-header";
+        catHeader.style.cssText =
+          "grid-column: 1 / -1; margin-top: 14px; margin-bottom: 2px; font-size: 13px; font-weight: 700; color: #83e5ff; letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 4px;";
+        catHeader.textContent = item.category;
+        pickersGrid.appendChild(catHeader);
+      }
+
       activePickers[item.key] = new GlassColorPicker(pickersGrid, {
         label: item.label,
         hint: item.hint || "",
@@ -6421,6 +6443,12 @@ if (targetSettings.test(window.location.href)) {
     });
   }
 
+  /**
+   * Populates theme pickers.
+   *
+   * @param {string} themeName - Name of the theme to load.
+   * @returns {void}
+   */
   function loadThemeToInputs(themeName) {
     const currentThemeColors = allThemes[themeName]?.colors || {};
     themeConfig.forEach(({ key }) => {
@@ -6428,6 +6456,11 @@ if (targetSettings.test(window.location.href)) {
     });
   }
 
+  /**
+   * Extracts values.
+   *
+   * @returns {void}
+   */
   function saveThemeFromInputs() {
     const themeData = { colors: {} };
     themeConfig.forEach(({ key }) => {
@@ -6438,50 +6471,68 @@ if (targetSettings.test(window.location.href)) {
   }
 
   function updateThemeSelect() {
-    themeSelect.innerHTML = "";
-    Object.keys(allThemes).forEach((name) => {
-      const option = document.createElement("option");
-      option.value = name;
-      option.textContent = name;
-      themeSelect.appendChild(option);
-    });
-    themeSelect.value = currentThemeName;
-    removeThemeButton.style.display = Object.keys(defaultThemes).includes(currentThemeName) ? "none" : "inline";
+    if (themeSelectSelected) {
+      themeSelectSelected.textContent = currentThemeName;
+    }
+    if (removeThemeButton) {
+      removeThemeButton.style.display = isDefaultTheme(currentThemeName) ? "none" : "inline";
+    }
+    updateSaveButtonState();
   }
 
-  themeSelect.addEventListener("change", (event) => {
-    currentThemeName = event.target.value;
-    setCurrentThemeName(currentThemeName);
-    loadThemeToInputs(currentThemeName);
-    updateThemeSelect();
-    updateSaveButtonState();
-  });
+  if (themeSelectSelected) {
+    themeSelectSelected.onclick = (e) => {
+      e.stopPropagation();
+      const popover = CustomSelectPopover.getInstance();
 
-  addThemeButton.addEventListener("click", () => {
+      if (popover.isOpenFor(themeSelectSelected)) {
+        popover.close();
+        return;
+      }
+
+      const options = Object.keys(allThemes).map((name) => ({
+        id: name,
+        name: name,
+      }));
+
+      popover.open({
+        trigger: themeSelectSelected,
+        options,
+        selectedId: currentThemeName,
+        onSelect: (option) => {
+          currentThemeName = option.id;
+          setCurrentThemeName(currentThemeName);
+          loadThemeToInputs(currentThemeName);
+          updateThemeSelect();
+        },
+      });
+    };
+  }
+
+  addThemeButton?.addEventListener("click", () => {
     const newThemeName = prompt("Введите название новой темы:");
     if (newThemeName && !allThemes[newThemeName]) {
       allThemes[newThemeName] = { colors: {} };
       saveThemes(allThemes);
-      updateThemeSelect();
-      themeSelect.value = newThemeName;
       currentThemeName = newThemeName;
       setCurrentThemeName(currentThemeName);
       loadThemeToInputs(currentThemeName);
+      updateThemeSelect();
     }
   });
 
-  removeThemeButton.addEventListener("click", () => {
-    if (!Object.keys(defaultThemes).includes(currentThemeName)) {
+  removeThemeButton?.addEventListener("click", () => {
+    if (!isDefaultTheme(currentThemeName)) {
       delete allThemes[currentThemeName];
       saveThemes(allThemes);
       currentThemeName = "Тёмная Тема";
       setCurrentThemeName(currentThemeName);
-      updateThemeSelect();
       loadThemeToInputs(currentThemeName);
+      updateThemeSelect();
     }
   });
 
-  saveThemeButton.addEventListener("click", () => {
+  saveThemeButton?.addEventListener("click", () => {
     if (isDefaultTheme(currentThemeName)) {
       alert("Вы не можете изменять стандартные темы. Пожалуйста, создайте свою собственную тему.");
     } else {
@@ -7055,7 +7106,6 @@ if (targetSettings.test(window.location.href)) {
   // ====================================================================================================================
   /**
    * Singleton popover manager for custom select dropdowns attached directly to document body.
-   * Prevents stacking context clipping and handles auto-flipping near viewport edges.
    */
   class CustomSelectPopover {
     static instance = null;
@@ -7154,6 +7204,7 @@ if (targetSettings.test(window.location.href)) {
     }
 
     close() {
+      this.activeTrigger?.classList.remove("active");
       this.el.style.display = "none";
       this.activeTrigger = null;
       this.onSelectCallback = null;
@@ -8146,11 +8197,34 @@ if (targetCW3Kns.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . ПОЛЬЗОВАТЕЛЬСКИЕ ТЕМЫ / ЦВЕТА . . .
   // ====================================================================================================================
+  /**
+   * Applies the custom color scheme to the coat constructor (KNS) interface.
+   *
+   * @returns {void}
+   */
   function applyTheme() {
+    const existingStyle = document.getElementById("uwu-theme-kns-style");
+    if (existingStyle) {
+      existingStyle.remove();
+    }
+
+    const subBlocks = theme?.subBlocksColorColor || theme?.blocksColor || "";
+
     const newStyle = document.createElement("style");
+    newStyle.id = "uwu-theme-kns-style";
     newStyle.innerHTML =
       /* CSS */
       `
+      :root, #app {
+        --cw3-page-bg: ${theme?.blocksColor || "transparent"} !important;
+        --cw3-page-text: ${theme?.textColor || "inherit"} !important;
+        --ds-page-text: ${theme?.textColor || "inherit"} !important;
+        --ds-page-link: ${theme?.linkColor || "inherit"} !important;
+        --ds-info-text: ${theme?.textColor || "inherit"} !important;
+        --ds-input-bg: ${theme?.accentColor1 || "#111111"} !important;
+        --ds-input-text: ${theme?.textColor || "#d5d5d5"} !important;
+      }
+
       body {
         background: ${theme?.backgroundColor || ""};
       }
@@ -8163,13 +8237,17 @@ if (targetCW3Kns.test(window.location.href)) {
         background-color: ${theme?.blocksColor || ""};
       }
 
+      .block-inner, fieldset {
+        background-color: ${theme?.subBlocksColor || "unset"} !important;
+      }
+
       ::-webkit-scrollbar-track {
         background-color: ${theme?.blocksColor || ""};
       }
 
       ::-webkit-scrollbar-thumb {
         background-color: ${theme?.accentColor3 || ""};
-    }
+      }
     
       body, input, select, .ui-slider-handle {
         color: ${theme?.textColor || ""};
@@ -8193,7 +8271,6 @@ if (targetCW3Kns.test(window.location.href)) {
       a, a:hover {
         color: ${theme?.linkColor || ""};
       }
-
       `;
     document.head.appendChild(newStyle);
   }
@@ -8227,50 +8304,150 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . ПОЛЬЗОВАТЕЛЬСКИЕ ТЕМЫ / ЦВЕТА . . .
   // ====================================================================================================================
+  /**
+   * Injects comprehensive CSS rules to apply custom theme colors over CatWar's native design tokens.
+   *
+   * @returns {void}
+   */
   function applyTheme() {
+    const existingStyle = document.getElementById("uwu-user-theme-style");
+    if (existingStyle) {
+      existingStyle.remove();
+    }
+
     const newStyle = document.createElement("style");
+    newStyle.id = "uwu-user-theme-style";
     newStyle.innerHTML =
       /* CSS */
       `
+      /* === 1. CATWAR === */
+      :root, #app {
+        --cw3-page-bg: ${theme?.blocksColor || "transparent"} !important;
+        --cw3-page-text: ${theme?.textColor || "inherit"} !important;
+        --ds-page-text: ${theme?.textColor || "inherit"} !important;
+        --ds-page-link: ${theme?.linkColor || "inherit"} !important;
+        --ds-page-link-hover: ${theme?.accentColor3 || theme?.linkColor || "inherit"} !important;
+        --ds-info-text: ${theme?.textColor || "inherit"} !important;
+        --ds-info-link: ${theme?.linkColor || "inherit"} !important;
+        --ds-info-link-hover: ${theme?.accentColor3 || theme?.linkColor || "inherit"} !important;
+        --ds-input-bg: ${theme?.accentColor1 || "#111111"} !important;
+        --ds-input-text: ${theme?.textColor || "#d5d5d5"} !important;
+        --ds-primary: ${theme?.accentColor3 || "#fc872a"} !important;
+      }
+
+      /* === 2. BASE PAGE AND FIELD OVERRIDES === */
       body {
-        background: ${theme?.backgroundColor || ""};
+        background: ${theme?.backgroundColor || ""} !important;
+        background-color: ${theme?.backgroundColor || ""} !important;
+        color: ${theme?.textColor || ""} !important;
       }
 
       #cages_overflow {
-        background: black;
-      } 
+        background: black !important;
+      }
 
-      #tr_actions > td, 
-      #tr_mouth > td, 
-      #location, 
-      .small,
+      #main_table {
+        background: transparent !important;
+        background-color: transparent !important;
+        border-color: transparent !important;
+      }
+
+      /* === 3. OUTER CONTAINER BLOCKS === */
+      #tr_actions,
+      #tr_mouth,
+      #tr_info,
+      #compact_actions,
+      #info_main {
+        background: ${theme?.blocksColor || "transparent"} !important;
+        background-color: ${theme?.blocksColor || "transparent"} !important;
+      }
+
+      #tr_tos > td,
       #parameter.uwu-tile-block,
       #history.uwu-tile-block,
       #family.uwu-tile-block {
-        background-color: ${theme?.blocksColor || ""};
+        background-color: ${theme?.blocksColor || "transparent"} !important;
+      } 
+
+      #tr_tos > td,
+      #tr_actions > td {
+        box-shadow: none !important;
+      }
+
+      /* === 4. CHAT === */
+      #tr_chat {
+        background-color: unset !important;
+      }
+
+      #tr_chat > td {
+        background-color: ${theme?.chatColor || "inherit"} !important;
+        color: ${theme?.textColor || "inherit"} !important;
+      }
+
+      /* === 5. NESTED SUB-BLOCKS & CARDS === */
+      #thdey,
+      #ctdey,
+      #compact_info,
+      #relatives_block,
+      #history_block,
+      #parameters_skills_block,
+      #buffdey {
+        background-color: ${theme?.subBlocksColor || "unset"} !important;
+        color: ${theme?.textColor || "inherit"} !important;
+      }
+
+      .game-topbar {
+        background: ${theme?.subBlocksColor || "unset"} !important;
+        color: ${theme?.textColor || "inherit"} !important;
+      }
+
+      .game-topbar-nav > a {
+        color: ${theme?.textColor || "inherit"} !important;
+      }
+
+      .game-topbar-nav > a:hover,
+      .game-topbar-nav > a:focus {
+        background: ${theme?.accentColor2 || "rgba(255, 255, 255, 0.1)"} !important;
+        color: ${theme?.accentColor3 || theme?.linkColor || "#fc872a"} !important;
+      }
+
+      #location, 
+      .small {
+        background-color: ${theme?.subBlocksColor || "unset"} !important;
       }
 
       #history_block > div {
         background-color: unset !important;
       }
 
-      #main_table, #tr_mouth, #tr_actions, #info_main {
-        background-color: unset;
-        background: none;
-      }
-    
-      #tr_chat {
-        background-color: ${theme?.chatColor || ""};
-      }
-    
+      /* === 6. INPUTS, BUTTONS & SLIDERS === */
       body, input, select, .ui-slider-handle, .hotkey {
-        color: ${theme?.textColor || ""};
+        color: ${theme?.textColor || ""} !important;
       }
-    
-      input, select, .ui-slider-horizontal {
-        background-color: ${theme?.accentColor1 || ""};
-        background: ${theme?.accentColor1 || ""};
-        border: solid 1px ${theme?.accentColor2 || ""};
+
+      input:not([type="button"]):not([type="submit"]):not([type="checkbox"]):not([type="range"]),
+      select,
+      textarea {
+        background-color: ${theme?.accentColor1 || "unset"} !important;
+        background: ${theme?.accentColor1 || "unset"} !important;
+        color: ${theme?.textColor || "inherit"} !important;
+        border: 1px solid ${theme?.accentColor2 || "transparent"} !important;
+      }
+
+      button.ui-btn,
+      input[type="button"],
+      input[type="submit"],
+      .hotkey,
+      .vc-btn {
+        background: ${theme?.accentColor4 || "unset"} !important;
+        background-color: ${theme?.accentColor4 || "unset"} !important;
+        color: ${theme?.textColor || "inherit"} !important;
+        border: 1px solid ${theme?.accentColor2 || "transparent"} !important;
+      }
+
+      .vc-btn:hover,
+      button.ui-btn:hover:not(:disabled) {
+        background: color-mix(in srgb, ${theme?.accentColor4 || "transparent"} 85%, white) !important;
       }
 
       .ui-widget-content .ui-state-default {
@@ -8282,11 +8459,7 @@ if (targetCW3.test(window.location.href)) {
         border: solid 1px ${theme?.accentColor2 || ""};
       }
 
-      .myname {
-        color: ${theme?.accentColor1 || ""};
-        background: ${theme?.accentColor3 || ""};
-      }
-
+      /* === 7. TOOLTIPS, MODALS & DIALOGS === */
       span.cat_tooltip {
         background: ${theme?.catTooltipBackground || ""} !important;
         color: ${theme?.textColor || ""} !important;
@@ -8296,37 +8469,14 @@ if (targetCW3.test(window.location.href)) {
       span.cat_tooltip > span.online {
         filter: brightness(2) contrast(150%);
       }
-      
-      .cat:hover .cat_tooltip a, .other_cats_list > a { 
-        color: ${theme?.linkColor || ""}; 
+
+      .cat_tooltip a,
+      .cat:hover .cat_tooltip a,
+      .other_cats_list > a { 
+        color: ${theme?.linkColor || ""} !important; 
       }
 
-      .move_name {
-        color: ${theme?.moveNameColor || ""};
-        background-color: ${theme?.moveNameBackground || ""} !important;
-      }
-    
-      a, a:hover {
-        color: ${theme?.linkColor || ""};
-      }
-
-      #fightPanel {
-        background-color: ${theme?.fightPanelBackground || ""};
-      }
-
-      .hotkey {
-        background-color: ${theme?.accentColor1 || ""};
-      }
-
-      #newchat, #newls {
-        color: ${theme?.accentColor3 || ""};
-      }
-
-      .cat-info {
-      background-color: ${theme?.catTooltipBackground || ""} !important;
-      color: ${theme?.textColor || ""} !important;
-      }
-
+      .cat-info,
       .modal-body,
       .vc-container {
         background: ${theme?.catTooltipBackground || ""} !important;
@@ -8335,17 +8485,47 @@ if (targetCW3.test(window.location.href)) {
       }
 
       .vc-title {
-        color: ${theme?.textColor || ""};
+        color: ${theme?.textColor || ""} !important;
       }
 
-      .vc-btn {
-        background-color: ${theme?.accentColor1 || ""};
-        background: ${theme?.accentColor1 || ""};
+      #fightPanel {
+        background-color: ${theme?.fightPanelBackground || ""} !important;
       }
 
-      .vc-btn:hover {
-        background-color: color-mix(in srgb, ${theme?.accentColor1 || "transparent"} 85%, white);
-        background: color-mix(in srgb, ${theme?.accentColor1 || "transparent"} 85%, white);
+      /* === 8. MOVEMENT & ACCENTS === */
+      .move_name {
+        color: ${theme?.moveNameColor || ""} !important;
+        background-color: ${theme?.moveNameBackground || ""} !important;
+      }
+
+      .hotkey {
+        background-color: ${theme?.accentColor1 || ""} !important;
+      }
+
+      .myname {
+        color: ${theme?.accentColor1 || ""};
+        background: ${theme?.accentColor3 || ""};
+      }
+
+      #newchat, #newls {
+        color: ${theme?.accentColor1 || "#ffffff"} !important;
+        background-color: ${theme?.accentColor3 || ""} !important;
+      }
+
+      /* === 9. LINKS & HEADINGS === */
+      a, a:hover {
+        color: ${theme?.linkColor || ""};
+      }
+
+      #info_main h2 a.toggle,
+      #info_main h2 a.toggle:link,
+      #info_main h2 a.toggle:visited {
+        color: ${theme?.linkColor || ""} !important;
+      }
+
+      #info_main h2 a.toggle:hover,
+      #info_main h2 a.toggle:focus {
+        color: ${theme?.accentColor3 || theme?.linkColor || ""} !important;
       }
       `;
     document.head.appendChild(newStyle);
@@ -8611,7 +8791,6 @@ if (targetCW3.test(window.location.href)) {
       </div>
       <div id="uwu-popover-fast-styles" class="uwu-fast-styles-box"></div>
 
-      <!-- Isolated slot for manual weather controls -->
       <div id="uwu-popover-weather-container" style="display: none;"></div>
 
       <a href="/settings" target="_blank" class="uwu-footer-link">
@@ -12452,7 +12631,6 @@ if (targetCW3.test(window.location.href)) {
       }
     }
 
-    // Defensive fallback for non-reactive or dynamically injected progress bars
     document
       .querySelectorAll("#parameters_skills_block .bar-fill")
       .forEach((barFill) => {
@@ -12748,10 +12926,6 @@ if (targetCW3.test(window.location.href)) {
       style.id = this.baseStyleId;
       style.textContent = `
         /* === FIXES AND RESETS CATWAR VANILLA CSS STYLES === */
-        html {
-          overflow-y: scroll;
-        }
-
         h2 {
           margin: 4px 0 6px 0;
         }
@@ -12903,11 +13077,18 @@ if (targetCW3.test(window.location.href)) {
           display: inline-flex;
           align-items: center;
           gap: 4px;
-          margin: 0 8px 0 auto;
-          padding: 2px 8px;
+          margin-left: auto;
+          margin-right: 0;
+          margin-bottom: 0px;
+          margin-top: 0px;
           background: transparent;
           font-size: 13px;
           white-space: nowrap;
+          flex-shrink: 0;
+        }
+
+        #black_points.in-topbar + .game-location {
+          margin-left: 6px !important;
         }
 
         #cages_overflow,
@@ -13244,6 +13425,15 @@ if (targetCW3.test(window.location.href)) {
           background-color: var(--cw3-page-bg, rgba(var(--ds-info-rgb, 255, 255, 255), 0.55));
         }
 
+        #mix {
+          padding-top: 8px !important;
+          gap: 0 !important;
+        }
+
+        #mix > button {
+          margin: 0 !important;
+        }
+
         /* ===================== SKY TILE ===================== */
         #tr_sky.uwu-tile-block {
           padding: 0 !important;
@@ -13565,12 +13755,17 @@ if (targetCW3.test(window.location.href)) {
      * @returns {void}
      */
     function applySlotWidth(element, ratio) {
+      if (!element) return;
       const normalized = Math.max(20, Math.min(100, Math.round(ratio / 10) * 10));
       if (normalized >= 100) {
-        element.style.width = "100%";
+        element.style.setProperty("width", "100%", "important");
       } else {
         const gapMultiplier = (1 - normalized / 100).toFixed(2);
-        element.style.width = `calc(${normalized}% - (var(--uwu-tile-gap, 8px) * ${gapMultiplier}))`;
+        element.style.setProperty(
+          "width",
+          `calc(${normalized}% - (var(--uwu-tile-gap, 10px) * ${gapMultiplier}))`,
+          "important"
+        );
       }
     }
 
