@@ -2133,9 +2133,11 @@ const newsPanel =
             HUD-редактор. Можно перетаскивать блоки как угодно, и куда угодно,
             играясь с их положением и размерами как вам вздумается. Включается он
             кнопкой «Редактировать интерфейс» прямо в выпадающем меню UwU на верхней
-            навигационной панели Игровой (Ну или в Настройках мода).</p>
+            навигационной панели Игровой (Ну или в Настройках мода, но редактировать всё равно надо в Игровой).</p>
           <p>— Показ ID котов в чате вынесен в отдельную самостоятельную
             настройку.</p>
+          <p>— Теперь вы случайно не очистите всё поле/таблицу в Минном поле. Вам нужно будет прожать ещё разок на кнопку для подтверждения!</p>
+          <p>— А ещё Минное поле станет чуть легче открывать на тач-экранах!</p>
           <hr class="uwu-hr" />
           <h4>Внешний вид</h4>
           <p>— Панель БР: вырезаны лишние костыли драга и высоты (Они теперь тоже
@@ -2150,6 +2152,7 @@ const newsPanel =
             неактуальности.</p>
           <p>— Узоры теперь не сжимаются некрасиво на Параметрах и Навыках.</p>
           <p>— Небо теперь снова видно и работает в Редизайне Игровой!</p>
+          <p>— Подчищена старая и неактуальная надпись про будущие приколы в Управлении Погодой.</p>
           <hr class="uwu-hr" />
           <h4>Изменения кода</h4>
           <p>— Быстрые ссылки починены и адаптированы под новую шапку Игровой.</p>
@@ -2163,13 +2166,14 @@ const newsPanel =
           <p>— "Подробнее о параметрах" теперь тоже читают из Vue.</p>
           <p>— Добавлен Мини генератор погодных частиц. Используется для фона шапки
             Хедера Настроек UwU.</p>
-          <p>— Минное поле теперь не застревает под Навигационной панелькой в
+          <p>— Минное поле и Таймер напоминалка теперь не застревает под Навигационной панелькой в
             Игровой.</p>
           <p>— Ссылка в Игровой на "Настройки" удалена из-за неактуальности.</p>
           <p>— Удалены "Быстрые стили" из-за неактуальности, ибо
             "расширенное меню Игровой" теперь отстуствует. Все галочки теперь
             перманентно существуют и работают в выпадающем меню UwU в Игровой.</p>
           <p>— Переписан и улучшен генератор выпадающих списков. Теперь больше возможностей и меньше проблем от браузерных списков!</p>
+          <p>— Исправлена логика сокращения ударов в БР. Теперь удары в разных режимах не будут складываться.</p>
           <hr class="uwu-hr" />
           <p class="uwu-modal-date">Дата выпуска: ??.??.26</p>
         </div>
@@ -9370,7 +9374,7 @@ if (targetCW3.test(window.location.href)) {
     const timerStyles = document.createElement("style");
     timerStyles.innerHTML = /* CSS */ `
       #uwu-interval-timer-main-panel {
-        z-index: 11;
+        z-index: 1600;
         pointer-events: auto;
         width: 180px;
         position: absolute;
@@ -11120,6 +11124,73 @@ if (targetCW3.test(window.location.href)) {
     let currentY;
     let wasDragging = false;
 
+    /**
+     * Attaches asynchronous, non-blocking two-step confirmation with cooldown and countdown to a button.
+     * Prevents accidental clicks by disabling the button for 1s, then exposes a 3s confirmation window.
+     *
+     * @param {HTMLButtonElement} button - Target button element to manage.
+     * @param {() => void} onConfirm - Callback triggered upon successful second click.
+     * @returns {() => void} Cleanup function that resets pending timers and restores default state.
+     */
+    function attachTwoStepClearConfirmation(button, onConfirm) {
+      const defaultText = "Очистить всё поле/таблицу";
+      let lockTimer = null;
+      let countdownTimer = null;
+      let isReadyForConfirm = false;
+
+      const resetState = () => {
+        clearTimeout(lockTimer);
+        clearInterval(countdownTimer);
+        lockTimer = null;
+        countdownTimer = null;
+        isReadyForConfirm = false;
+
+        button.disabled = false;
+        button.textContent = defaultText;
+        button.classList.remove("remove-button");
+      };
+
+      button.addEventListener("click", () => {
+        if (isReadyForConfirm) {
+          resetState();
+          onConfirm();
+          return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Подождите... (1с)";
+        button.style.setProperty("background-color", "rgba(50, 15, 15, 0.75)", "important");
+        button.style.setProperty("opacity", "0.55", "important");
+        button.style.setProperty("cursor", "not-allowed", "important");
+        button.style.setProperty("filter", "grayscale(30%)", "important");
+
+        lockTimer = setTimeout(() => {
+          isReadyForConfirm = true;
+          button.disabled = false;
+
+          button.style.removeProperty("background-color");
+          button.style.removeProperty("opacity");
+          button.style.removeProperty("filter");
+          button.style.setProperty("cursor", "pointer", "important");
+          button.classList.add("remove-button");
+
+          let remainingSeconds = 3;
+          button.textContent = `Точно очистить? (${remainingSeconds}с)`;
+
+          countdownTimer = setInterval(() => {
+            remainingSeconds--;
+            if (remainingSeconds > 0) {
+              button.textContent = `Точно очистить? (${remainingSeconds}с)`;
+            } else {
+              resetState();
+            }
+          }, 1000);
+        }, 1000);
+      });
+
+      return resetState;
+    }
+
     function saveClimbingPanelStatus() {
       const status = {
         x: currentX,
@@ -11553,8 +11624,9 @@ if (targetCW3.test(window.location.href)) {
         const clearButton = document.createElement("button");
         clearButton.textContent = "Очистить всё поле/таблицу";
         clearButton.id = "button-clear-table";
-        clearButton.addEventListener("click", clearTable);
         tableContainer.appendChild(clearButton);
+
+        attachTwoStepClearConfirmation(clearButton, clearTable);
       },
 
       renderNoTableMessage() {
@@ -11631,8 +11703,8 @@ if (targetCW3.test(window.location.href)) {
     let touchStartTime;
     let touchStartX;
     let touchStartY;
-    const CLICK_THRESHOLD = 200;
-    const MOVE_THRESHOLD = 10;
+    const CLICK_THRESHOLD = 250;
+    const MOVE_THRESHOLD = 12;
 
     function handleTouchStart(e) {
       touchStartTime = Date.now();
@@ -11645,7 +11717,6 @@ if (targetCW3.test(window.location.href)) {
     function handleTouchEnd(e) {
       dragEnd(e);
 
-      // Проверяем, был ли это клик
       const touchEndTime = Date.now();
       const touchDuration = touchEndTime - touchStartTime;
 
@@ -11667,32 +11738,51 @@ if (targetCW3.test(window.location.href)) {
     }
 
     function dragStart(e) {
-      const touch = e.touches ? e.touches[0] : e;
+      const isTouch = e.type.startsWith("touch");
+      const pointer = isTouch ? e.touches[0] : e;
 
       const savedStatus = uwuStorage.getItem("uwu_climbingPanelStatus");
       initialX =
-        touch.clientX -
+        pointer.clientX -
         (savedStatus ? savedStatus.x : climbingMainPanel.offsetLeft);
       initialY =
-        touch.clientY -
+        pointer.clientY -
         (savedStatus ? savedStatus.y : climbingMainPanel.offsetTop);
 
       if (e.target === climbingPanelButton) {
         isDragging = true;
         wasDragging = false;
+        
+        touchStartX = pointer.clientX;
+        touchStartY = pointer.clientY;
       }
 
-      if (e.type === "touchstart") {
+      if (isTouch) {
         e.preventDefault();
       }
     }
 
     function drag(e) {
       if (isDragging) {
-        const touch = e.touches ? e.touches[0] : e;
+        const isTouch = e.type.startsWith("touch");
+        const pointer = isTouch ? e.touches[0] : e;
 
-        currentX = touch.clientX - initialX;
-        currentY = touch.clientY - initialY;
+        if (!wasDragging) {
+          const moveDistance = Math.sqrt(
+            Math.pow(pointer.clientX - touchStartX, 2) +
+            Math.pow(pointer.clientY - touchStartY, 2)
+          );
+          
+          const currentThreshold = isTouch ? 12 : 0;
+
+          if (moveDistance < currentThreshold) {
+            return;
+          }
+          wasDragging = true; 
+        }
+
+        currentX = pointer.clientX - initialX;
+        currentY = pointer.clientY - initialY;
 
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
@@ -11707,9 +11797,9 @@ if (targetCW3.test(window.location.href)) {
 
         setPosition(currentX, currentY, climbingMainPanel);
 
-        wasDragging = true;
-
-        e.preventDefault();
+        if (isTouch) {
+          e.preventDefault();
+        }
       }
     }
 
@@ -12888,6 +12978,10 @@ if (targetCW3.test(window.location.href)) {
 
         css += `.uwu-dock-zone > #${slot.id}.uwu-tile-block { width: ${widthExpr} !important; }\n`;
 
+        if (slot.align === "right") {
+          css += `.uwu-dock-zone > #${slot.id}.uwu-tile-block { margin-left: auto !important; margin-right: 0 !important; }\n`;
+        }
+
         if (slot.id === "tr_sky") {
           css += `.uwu-dock-zone > #tr_sky.uwu-tile-block #sky { height: var(--uwu-sky-height, 120px) !important; }\n`;
         } else if (!this.autoHeightTiles.includes(slot.id) && typeof slot.height === "number" && slot.height > 0) {
@@ -12949,7 +13043,8 @@ if (targetCW3.test(window.location.href)) {
           box-shadow: unset !important;
         }
 
-        #tr_tos > td {
+        #tr_tos > td,
+        #location {
           background-color: unset !important;
         }
 
@@ -13022,7 +13117,6 @@ if (targetCW3.test(window.location.href)) {
         .uwu-tile-w-grip {
           position: absolute;
           top: 10px;
-          right: 10px;
           bottom: 24px;
           width: 6px;
           cursor: ew-resize;
@@ -13033,6 +13127,14 @@ if (targetCW3.test(window.location.href)) {
           display: flex;
           align-items: center;
           justify-content: center;
+        }
+
+        .uwu-tile-w-grip--left {
+          left: 8px;
+        }
+
+        .uwu-tile-w-grip--right {
+          right: 8px;
         }
 
         .uwu-tile-w-grip::after {
@@ -13269,6 +13371,8 @@ if (targetCW3.test(window.location.href)) {
                       height 0.18s ease;
           pointer-events: none;
           border-radius: var(--uwu-tile-rb, 8px);
+          min-height: 60px !important;
+          max-height: 140px !important;
         }
 
         .uwu-editing .uwu-tile-block {
@@ -13747,18 +13851,23 @@ if (targetCW3.test(window.location.href)) {
     }
 
     /**
-     * Calculates and applies inline width with exact gap deduction to prevent flex-wrapping.
+     * Calculates and applies inline width with exact gap deduction and edge anchoring.
      * Formula: P% - (gap * (1 - P / 100))
      *
      * @param {HTMLElement} element - DOM element to size.
      * @param {number} ratio - Width percentage ratio (20 to 100).
+     * @param {"left"|"right"} [align="left"] - Horizontal alignment anchor.
      * @returns {void}
      */
-    function applySlotWidth(element, ratio) {
+    function applySlotWidth(element, ratio, align = "left") {
       if (!element) return;
       const normalized = Math.max(20, Math.min(100, Math.round(ratio / 10) * 10));
+
       if (normalized >= 100) {
         element.style.setProperty("width", "100%", "important");
+        element.style.removeProperty("margin-left");
+        element.style.removeProperty("margin-right");
+        element.dataset.align = "left";
       } else {
         const gapMultiplier = (1 - normalized / 100).toFixed(2);
         element.style.setProperty(
@@ -13766,6 +13875,16 @@ if (targetCW3.test(window.location.href)) {
           `calc(${normalized}% - (var(--uwu-tile-gap, 10px) * ${gapMultiplier}))`,
           "important"
         );
+
+        if (align === "right") {
+          element.style.setProperty("margin-left", "auto", "important");
+          element.style.setProperty("margin-right", "0", "important");
+          element.dataset.align = "right";
+        } else {
+          element.style.removeProperty("margin-left");
+          element.style.removeProperty("margin-right");
+          element.dataset.align = "left";
+        }
       }
     }
 
@@ -14016,19 +14135,238 @@ if (targetCW3.test(window.location.href)) {
     }
 
     /**
-     * Generates an interactive shield overlay with 10% width step grip and height resize controls.
+     * Builds the DOM structure for the tile overlay and returns its interactive control nodes.
      *
-     * @param {TileSlot} slot - Layout slot model.
+     * @param {TileSlot} slot - Tile data model.
      * @param {HTMLElement} blockEl - Target tile DOM element.
-     * @returns {HTMLElement} The created overlay container.
+     * @param {number} currentRatio - Initial width percentage ratio.
+     * @param {boolean} hasHeightGrip - Whether the block allows vertical resizing.
+     * @returns {{ overlay: HTMLElement, modeBtn: HTMLElement, leftWGrip: HTMLElement, rightWGrip: HTMLElement, hGrip: HTMLElement|null }}
      */
-    function createTileOverlay(slot, blockEl) {
+    function buildOverlayDom(slot, blockEl, currentRatio, hasHeightGrip) {
       const overlay = document.createElement("div");
       overlay.className = "uwu-tile-overlay";
       overlay.dataset.blockId = slot.id;
 
+      overlay.innerHTML = `
+        <div class="uwu-tile-w-grip uwu-tile-w-grip--left" title="Потяните влево/вправо для изменения ширины (шаг 10%)"></div>
+        <span class="uwu-tile-title-tag">${BLOCK_NAMES[slot.id] || slot.id}</span>
+        <button type="button" class="uwu-tile-mode-btn" title="Клик: быстрое переключение">${currentRatio}%</button>
+        <div class="uwu-tile-w-grip uwu-tile-w-grip--right" title="Потяните влево/вправо для изменения ширины (шаг 10%)"></div>
+        ${hasHeightGrip ? '<div class="uwu-tile-h-grip" title="Потяните для изменения высоты"></div>' : ""}
+      `;
+
+      return {
+        overlay,
+        modeBtn: overlay.querySelector(".uwu-tile-mode-btn"),
+        leftWGrip: overlay.querySelector(".uwu-tile-w-grip--left"),
+        rightWGrip: overlay.querySelector(".uwu-tile-w-grip--right"),
+        hGrip: overlay.querySelector(".uwu-tile-h-grip"),
+      };
+    }
+
+    /**
+     * Binds click handler to cycle width presets (100% -> 50% -> 30%).
+     *
+     * @param {HTMLElement} modeBtn - Percentage display toggle button.
+     * @param {TileSlot} slot - Tile data model.
+     * @param {HTMLElement} blockEl - Target tile DOM element.
+     * @returns {void}
+     */
+    function bindModeCycle(modeBtn, slot, blockEl) {
+      modeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const cycle = [100, 50, 30];
+        const cur = parseInt(blockEl.dataset.widthRatio || "100", 10);
+        const nextIdx = (cycle.indexOf(cur) + 1) % cycle.length;
+        const nextRatio = cycle[nextIdx] || 100;
+        const align = blockEl.dataset.align === "right" && nextRatio < 100 ? "right" : "left";
+
+        applySlotWidth(blockEl, nextRatio, align);
+        blockEl.dataset.widthRatio = String(nextRatio);
+        modeBtn.textContent = `${nextRatio}%`;
+        slot.widthRatio = nextRatio;
+        slot.widthMode = `${nextRatio}%`;
+        slot.align = align;
+      });
+    }
+
+    /**
+     * Binds mouse resize interaction to the height grip handle.
+     *
+     * @param {HTMLElement|null} hGrip - Bottom resize handle element.
+     * @param {TileSlot} slot - Tile data model.
+     * @param {HTMLElement} blockEl - Target tile DOM element.
+     * @returns {void}
+     */
+    function bindHeightResize(hGrip, slot, blockEl) {
+      if (!hGrip) return;
+
+      hGrip.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        hGrip.classList.add("active");
+
+        const startY = e.clientY;
+        const isChat = slot.id === "tr_chat";
+        const chatMsgEl = isChat
+          ? (document.getElementById("uwu_chat_msg") || document.getElementById("chat_msg"))
+          : null;
+        const initH = isChat && chatMsgEl ? chatMsgEl.offsetHeight : blockEl.offsetHeight;
+
+        const onMove = (me) => {
+          const newH = Math.max(50, initH + (me.clientY - startY));
+          if (isChat && chatMsgEl) {
+            chatMsgEl.style.height = `${newH}px`;
+            document.documentElement.style.setProperty("--uwu-chat-height", `${newH}px`);
+            settings.chatHeight = String(newH);
+          } else if (slot.id === "tr_sky") {
+            const skyEl = blockEl.querySelector("#sky");
+            if (skyEl) skyEl.style.height = `${newH}px`;
+            document.documentElement.style.setProperty("--uwu-sky-height", `${newH}px`);
+            blockEl.style.height = `${newH}px`;
+            slot.height = newH;
+          } else {
+            blockEl.style.height = `${newH}px`;
+            slot.height = newH;
+          }
+        };
+
+        const onUp = () => {
+          hGrip.classList.remove("active");
+          if (isChat) saveSettings();
+          window.removeEventListener("mousemove", onMove);
+          window.removeEventListener("mouseup", onUp);
+        };
+
+        window.addEventListener("mousemove", onMove);
+        window.addEventListener("mouseup", onUp);
+      });
+    }
+
+    /**
+     * Binds bilateral width handles with linked pair splitter logic and edge anchoring.
+     *
+     * @param {HTMLElement} leftGrip - Left resize handle.
+     * @param {HTMLElement} rightGrip - Right resize handle.
+     * @param {HTMLElement} modeBtn - Percentage button for UI updates.
+     * @param {TileSlot} slot - Tile data model.
+     * @param {HTMLElement} blockEl - Target tile DOM element.
+     * @returns {void}
+     */
+    function bindWidthResize(leftGrip, rightGrip, modeBtn, slot, blockEl) {
+      const attachGrip = (gripEl, direction) => {
+        gripEl.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          gripEl.classList.add("active");
+
+          const startX = e.clientX;
+          const parentZone = blockEl.parentElement;
+          const zoneWidth = parentZone.clientWidth;
+
+          const prev = blockEl.previousElementSibling;
+          const next = blockEl.nextElementSibling;
+          const isRowPartner = (el) =>
+            el &&
+            el.classList.contains("uwu-tile-block") &&
+            Math.abs(el.offsetTop - blockEl.offsetTop) < 25;
+
+          const hasLeftPartner = direction === "left" && isRowPartner(prev);
+          const hasRightPartner = direction === "right" && isRowPartner(next);
+          const partner = hasLeftPartner ? prev : hasRightPartner ? next : null;
+
+          const initRatio = parseInt(blockEl.dataset.widthRatio || "100", 10);
+          const partnerInitRatio = partner
+            ? parseInt(partner.dataset.widthRatio || "100", 10)
+            : 0;
+          const totalPairRatio = partner ? initRatio + partnerInitRatio : 100;
+
+          const onMove = (me) => {
+            const rawDeltaRatio = ((me.clientX - startX) / zoneWidth) * 100;
+            const stepDelta = Math.round(rawDeltaRatio / 10) * 10;
+
+            if (partner) {
+              const deltaForCurrent = direction === "left" ? -stepDelta : stepDelta;
+              const minRatio = 20;
+              const maxRatio = totalPairRatio - minRatio;
+
+              const targetRatio = Math.max(minRatio, Math.min(maxRatio, initRatio + deltaForCurrent));
+              const targetPartnerRatio = totalPairRatio - targetRatio;
+
+              applySlotWidth(blockEl, targetRatio, blockEl.dataset.align || "left");
+              blockEl.dataset.widthRatio = String(targetRatio);
+              modeBtn.textContent = `${targetRatio}%`;
+              slot.widthRatio = targetRatio;
+              slot.widthMode = `${targetRatio}%`;
+
+              applySlotWidth(partner, targetPartnerRatio, partner.dataset.align || "left");
+              partner.dataset.widthRatio = String(targetPartnerRatio);
+              const partnerBtn = partner.querySelector(".uwu-tile-mode-btn");
+              if (partnerBtn) partnerBtn.textContent = `${targetPartnerRatio}%`;
+
+              const partnerSlot = [
+                ...(uwuHudEditor.getLayout().left || []),
+                ...(uwuHudEditor.getLayout().right || []),
+              ].find((s) => s.id === partner.id);
+              if (partnerSlot) {
+                partnerSlot.widthRatio = targetPartnerRatio;
+                partnerSlot.widthMode = `${targetPartnerRatio}%`;
+              }
+            } else {
+              if (direction === "left") {
+                const targetRatio = Math.max(20, Math.min(100, initRatio - stepDelta));
+                const align = targetRatio >= 100 ? "left" : "right";
+
+                applySlotWidth(blockEl, targetRatio, align);
+                blockEl.dataset.widthRatio = String(targetRatio);
+                blockEl.dataset.align = align;
+                modeBtn.textContent = `${targetRatio}%`;
+                slot.widthRatio = targetRatio;
+                slot.widthMode = `${targetRatio}%`;
+                slot.align = align;
+              } else {
+                const targetRatio = Math.max(20, Math.min(100, initRatio + stepDelta));
+
+                applySlotWidth(blockEl, targetRatio, "left");
+                blockEl.dataset.widthRatio = String(targetRatio);
+                blockEl.dataset.align = "left";
+                modeBtn.textContent = `${targetRatio}%`;
+                slot.widthRatio = targetRatio;
+                slot.widthMode = `${targetRatio}%`;
+                slot.align = "left";
+              }
+            }
+          };
+
+          const onUp = () => {
+            gripEl.classList.remove("active");
+            window.removeEventListener("mousemove", onMove);
+            window.removeEventListener("mouseup", onUp);
+          };
+
+          window.addEventListener("mousemove", onMove);
+          window.addEventListener("mouseup", onUp);
+        });
+      };
+
+      attachGrip(leftGrip, "left");
+      attachGrip(rightGrip, "right");
+    }
+
+    /**
+     * Orchestrates tile overlay creation and binds modular resize/cycle behaviors.
+     *
+     * @param {TileSlot} slot - Layout slot model.
+     * @param {HTMLElement} blockEl - Target tile DOM element.
+     * @returns {HTMLElement} The assembled overlay container element.
+     */
+    function createTileOverlay(slot, blockEl) {
       const currentRatio = getSlotWidthRatio(slot);
       blockEl.dataset.widthRatio = String(currentRatio);
+      if (slot.align === "right") {
+        blockEl.dataset.align = "right";
+      }
 
       const hasHeightGrip = ![
         "tr_actions",
@@ -14039,104 +14377,16 @@ if (targetCW3.test(window.location.href)) {
         "family",
       ].includes(slot.id);
 
-      overlay.innerHTML = `
-        <span class="uwu-tile-title-tag">${BLOCK_NAMES[slot.id] || slot.id}</span>
-        <button type="button" class="uwu-tile-mode-btn" title="Клик: быстрое переключение">${currentRatio}%</button>
-        <div class="uwu-tile-w-grip" title="Потяните по горизонтали (шаг 10%)"></div>
-        ${hasHeightGrip ? '<div class="uwu-tile-h-grip" title="Потяните для изменения высоты"></div>' : ""}
-      `;
+      const { overlay, modeBtn, leftWGrip, rightWGrip, hGrip } = buildOverlayDom(
+        slot,
+        blockEl,
+        currentRatio,
+        hasHeightGrip
+      );
 
-      const modeBtn = overlay.querySelector(".uwu-tile-mode-btn");
-      modeBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const cycle = [100, 50, 30];
-        const cur = parseInt(blockEl.dataset.widthRatio || "100", 10);
-        const nextIdx = (cycle.indexOf(cur) + 1) % cycle.length;
-        const nextRatio = cycle[nextIdx] || 100;
-
-        applySlotWidth(blockEl, nextRatio);
-        blockEl.dataset.widthRatio = String(nextRatio);
-        modeBtn.textContent = `${nextRatio}%`;
-        slot.widthRatio = nextRatio;
-        slot.widthMode = `${nextRatio}%`;
-      });
-
-      const wGrip = overlay.querySelector(".uwu-tile-w-grip");
-      wGrip.addEventListener("mousedown", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        wGrip.classList.add("active");
-
-        const startX = e.clientX;
-        const parentZone = blockEl.parentElement;
-        const zoneWidth = parentZone.clientWidth;
-        const initW = blockEl.offsetWidth;
-
-        const onMove = (me) => {
-          const deltaX = me.clientX - startX;
-          const rawPercent = ((initW + deltaX) / zoneWidth) * 100;
-          const snapped = Math.max(20, Math.min(100, Math.round(rawPercent / 10) * 10));
-
-          applySlotWidth(blockEl, snapped);
-          blockEl.dataset.widthRatio = String(snapped);
-          modeBtn.textContent = `${snapped}%`;
-          slot.widthRatio = snapped;
-          slot.widthMode = `${snapped}%`;
-        };
-
-        const onUp = () => {
-          wGrip.classList.remove("active");
-          window.removeEventListener("mousemove", onMove);
-          window.removeEventListener("mouseup", onUp);
-        };
-
-        window.addEventListener("mousemove", onMove);
-        window.addEventListener("mouseup", onUp);
-      });
-
-      const hGrip = overlay.querySelector(".uwu-tile-h-grip");
-      if (hGrip) {
-        hGrip.addEventListener("mousedown", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          hGrip.classList.add("active");
-
-          const startY = e.clientY;
-          const isChat = slot.id === "tr_chat";
-          const chatMsgEl = isChat
-            ? (document.getElementById("uwu_chat_msg") || document.getElementById("chat_msg"))
-            : null;
-          const initH = isChat && chatMsgEl ? chatMsgEl.offsetHeight : blockEl.offsetHeight;
-
-          const onMove = (me) => {
-            const newH = Math.max(50, initH + (me.clientY - startY));
-            if (isChat && chatMsgEl) {
-              chatMsgEl.style.height = `${newH}px`;
-              document.documentElement.style.setProperty("--uwu-chat-height", `${newH}px`);
-              settings.chatHeight = String(newH);
-            } else if (slot.id === "tr_sky") {
-              const skyEl = blockEl.querySelector("#sky");
-              if (skyEl) skyEl.style.height = `${newH}px`;
-              document.documentElement.style.setProperty("--uwu-sky-height", `${newH}px`);
-              blockEl.style.height = `${newH}px`;
-              slot.height = newH;
-            } else {
-              blockEl.style.height = `${newH}px`;
-              slot.height = newH;
-            }
-          };
-
-          const onUp = () => {
-            hGrip.classList.remove("active");
-            if (isChat) saveSettings();
-            window.removeEventListener("mousemove", onMove);
-            window.removeEventListener("mouseup", onUp);
-          };
-
-          window.addEventListener("mousemove", onMove);
-          window.addEventListener("mouseup", onUp);
-        });
-      }
+      bindModeCycle(modeBtn, slot, blockEl);
+      bindWidthResize(leftWGrip, rightWGrip, modeBtn, slot, blockEl);
+      bindHeightResize(hGrip, slot, blockEl);
 
       return overlay;
     }
@@ -14178,7 +14428,9 @@ if (targetCW3.test(window.location.href)) {
         if (
           e.target.classList.contains("uwu-tile-mode-btn") ||
           e.target.classList.contains("uwu-tile-h-grip") ||
-          e.target.classList.contains("uwu-tile-w-grip")
+          e.target.classList.contains("uwu-tile-w-grip") ||
+          e.target.closest(".uwu-tile-w-grip") ||
+          e.target.closest(".uwu-tile-h-grip")
         ) {
           return;
         }
@@ -14187,6 +14439,11 @@ if (targetCW3.test(window.location.href)) {
         const rect = blockEl.getBoundingClientRect();
         const offsetX = e.clientX - rect.left;
         const offsetY = e.clientY - rect.top;
+
+        const clampPlaceholderHeight = (h) => Math.max(60, Math.min(140, Math.round(h || 80)));
+
+        const initialBlockHeight = blockEl.offsetHeight || rect.height || 100;
+        const basePlaceholderHeight = clampPlaceholderHeight(initialBlockHeight);
 
         let formerPartner = null;
         if (parseInt(blockEl.dataset.widthRatio || "100", 10) <= 50) {
@@ -14218,7 +14475,7 @@ if (targetCW3.test(window.location.href)) {
         const placeholder = document.createElement("div");
         placeholder.className = "uwu-drop-placeholder";
         applySlotWidth(placeholder, 100);
-        placeholder.style.height = `${blockEl.offsetHeight}px`;
+        placeholder.style.height = `${basePlaceholderHeight}px`;
 
         blockEl.before(placeholder);
         blockEl.style.setProperty("display", "none", "important");
@@ -14231,7 +14488,7 @@ if (targetCW3.test(window.location.href)) {
         const restoreSiblingWidth = (sibling) => {
           if (!sibling) return;
           const originalRatio = parseInt(sibling.dataset.widthRatio || "100", 10);
-          applySlotWidth(sibling, originalRatio);
+          applySlotWidth(sibling, originalRatio, sibling.dataset.align || "left");
         };
 
         const onMouseMove = (me) => {
@@ -14272,7 +14529,7 @@ if (targetCW3.test(window.location.href)) {
 
             applySlotWidth(sibling, 50);
             applySlotWidth(placeholder, 50);
-            placeholder.style.height = `${sibling.offsetHeight}px`;
+            placeholder.style.height = `${clampPlaceholderHeight(sibling.offsetHeight)}px`;
 
             if (target.dockType === "left") {
               if (placeholder.nextElementSibling !== sibling) {
@@ -14290,7 +14547,7 @@ if (targetCW3.test(window.location.href)) {
             }
 
             applySlotWidth(placeholder, 100);
-            placeholder.style.height = `${blockEl.offsetHeight}px`;
+            placeholder.style.height = `${basePlaceholderHeight}px`;
 
             if (target.beforeSibling) {
               if (placeholder.nextElementSibling !== target.beforeSibling) {
@@ -14396,6 +14653,7 @@ if (targetCW3.test(window.location.href)) {
             .map((el) => ({
               id: el.id,
               widthRatio: parseInt(el.dataset.widthRatio || "100", 10),
+              align: el.dataset.align === "right" ? "right" : "left",
               height: el.offsetHeight,
             }));
         };
@@ -14426,11 +14684,9 @@ if (targetCW3.test(window.location.href)) {
   })();
 
   if (targetCW3.test(window.location.href) && settings.customLayout) {
-    // 1. Inject compiled layout CSS instantly before Vue finishes mounting
     uwuCustomLayoutCssManager.enable();
     uwuCustomLayoutCssManager.applyCompiled(window.uwuHudEditor.getLayout());
 
-    // 2. Safely dock elements into zones
     setupMutationObserver(
       "#main_table > tbody",
       () => {
@@ -16971,37 +17227,89 @@ if (targetCW3.test(window.location.href)) {
     }
 
     /**
-     * Drains all queued raw entries from the native log into the compacted log view.
+     * Checks whether an incoming log span matches the latest compacted entry in target, mode, and styling.
+     *
+     * @param {HTMLElement|null} latestRow - The topmost row in the compacted fight log.
+     * @param {HTMLElement} newEntry - The native span element received from CatWar's fight log.
+     * @param {string} originalText - Cleaned text content of the action without multipliers.
+     * @param {string} innerContent - Cleaned inner HTML content of the action.
+     * @returns {boolean} True if the entries share identical target, mode classes, styles, and datasets.
+     */
+    function isSameFightAction(latestRow, newEntry, originalText, innerContent) {
+      if (!latestRow || !newEntry) return false;
+
+      const latestTextSpan = latestRow.querySelector(".text");
+      if (!latestTextSpan) return false;
+
+      const sameText = latestTextSpan.textContent.trim() === originalText;
+      const sameHtml = latestTextSpan.innerHTML.trim() === innerContent;
+      if (!sameText || !sameHtml) return false;
+
+      const latestClasses = Array.from(latestRow.classList).sort().join(" ");
+      const newClasses = Array.from(newEntry.classList).sort().join(" ");
+      if (latestClasses !== newClasses) return false;
+
+      const latestStyle = (latestRow.getAttribute("style") || "").trim().toLowerCase().replace(/;\s*$/, "");
+      const newStyle = (newEntry.getAttribute("style") || "").trim().toLowerCase().replace(/;\s*$/, "");
+      if (latestStyle !== newStyle) return false;
+
+      const latestDatasetKeys = Object.keys(latestRow.dataset);
+      const newDatasetKeys = Object.keys(newEntry.dataset);
+      if (latestDatasetKeys.length !== newDatasetKeys.length) return false;
+      for (const key of newDatasetKeys) {
+        if (latestRow.dataset[key] !== newEntry.dataset[key]) return false;
+      }
+
+      return true;
+    }
+
+    /**
+     * Drains queued raw entries from CatWar's log into the compacted log view.
+     *
+     * @returns {void}
      */
     function drainLogQueue() {
-      const entries = Array.from(fightLog.childNodes).filter(
-        (entry) => entry.tagName === "SPAN",
-      );
+      const childNodes = Array.from(fightLog.childNodes);
+      const entries = childNodes.filter((entry) => entry.tagName === "SPAN");
+
+      childNodes.forEach((node) => {
+        if (node.tagName !== "SPAN") node.remove();
+      });
+
       if (entries.length === 0) return;
 
       entries.forEach((entry) => {
         const text = entry.textContent.trim();
-        const match = text.match(/^(.*) x(\d+)$/);
-        const originalText = match ? match[1] : text;
-        const count = match ? parseInt(match[2], 10) : 1;
+        const textMatch = text.match(/^(.*?)\s+x(\d+)$/);
+        const originalText = textMatch ? textMatch[1].trim() : text;
+        const count = textMatch ? parseInt(textMatch[2], 10) : 1;
+
+        let innerContent = entry.innerHTML.trim();
+        if (textMatch && textMatch[2]) {
+          innerContent = innerContent.replace(/\s+x\d+$/, "").trim();
+        }
 
         const latestEntry = compactedFightLog.firstElementChild;
-        const latestTextSpan = latestEntry?.querySelector(".text");
 
-        if (
-          latestTextSpan &&
-          latestTextSpan.textContent.trim() === originalText
-        ) {
+        if (isSameFightAction(latestEntry, entry, originalText, innerContent)) {
           const countLabel = latestEntry.querySelector(".count");
           const existingCount = parseInt(
-            countLabel.textContent.match(/x(\d+)$/)[1],
+            countLabel?.textContent.match(/x(\d+)/)?.[1] || "1",
             10,
           );
-          countLabel.textContent = ` x${existingCount + count}`;
+          if (countLabel) {
+            countLabel.textContent = ` x${existingCount + count}`;
+          }
         } else {
           const row = document.createElement("div");
-          row.className = entry.className;
-          row.innerHTML = `<span class="text">${originalText}</span><label class="count"> x${count}</label>`;
+
+          Array.from(entry.attributes).forEach((attr) => {
+            if (attr.name !== "id") {
+              row.setAttribute(attr.name, attr.value);
+            }
+          });
+
+          row.innerHTML = `<span class="text">${innerContent}</span><label class="count"> x${count}</label>`;
           compactedFightLog.insertAdjacentElement("afterbegin", row);
         }
 
