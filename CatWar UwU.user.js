@@ -2154,6 +2154,7 @@ const newsPanel =
           <p>— Узоры теперь не сжимаются некрасиво на Параметрах и Навыках.</p>
           <p>— Небо теперь снова видно и работает в Редизайне Игровой!</p>
           <p>— Подчищена старая и неактуальная надпись про будущие приколы в Управлении Погодой.</p>
+          <p>— Дизайн сохранённых сообщений адаптирован под редизайн CatWar'а.</p>
           <hr class="uwu-hr" />
           <h4>Изменения кода</h4>
           <p>— Быстрые ссылки починены и адаптированы под новую шапку Игровой.</p>
@@ -2179,6 +2180,7 @@ const newsPanel =
           <p>— Починен, возможно, столетний баг с тем, что не читалась температура Игровой. Возможно починились светлячки, и точно починились динамичные размеры частиц.</p>
           <p>— Чуть подправлен расчёт падения перехода активности.</p>
           <p>— Лог чистильщика теперь снова пишет локацию.</p>
+          <p>— Чуть починен расчёт размера сохранённых сообщений.</p>
           <hr class="uwu-hr" />
           <p class="uwu-modal-date">Дата выпуска: 23.09.26</p>
         </div>
@@ -20482,8 +20484,10 @@ initializeTemplates();
 if (targetLs.test(window.location.href) && settings.savingLS) {
 
   /**
-   * Отображает сохраненное сообщение в контейнере.
-   * @param {string} lsId - ID сообщения для отображения.
+   * Displays offline saved message payload matching CatWar's detailed view.
+   *
+   * @param {string} lsId - Target message identifier.
+   * @returns {void}
    */
   function displaySavedMessage(lsId) {
     const container = document.getElementById("uwu-saved-ls-container");
@@ -20493,40 +20497,47 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
     const ls = savedLs[lsId];
 
     if (!ls) {
-      container.innerHTML =
-        "<h3>Ошибка: Сохранённое сообщение не найдено.</h3><p><a href='#' id='uwu-back-to-saved-list'>Назад к списку</a></p>";
-      document
-        .getElementById("uwu-back-to-saved-list")
-        .addEventListener("click", showSavedMessagesInterface);
+      container.innerHTML = `
+        <div class="ls-list-wrap ui-soft-box" style="padding: 20px; text-align: center;">
+          <h3>Ошибка: Сохранённое сообщение не найдено.</h3>
+          <button type="button" id="uwu-back-to-saved-list" class="ui-btn ui-btn--tiny" style="margin-top: 10px;">← Назад к списку</button>
+        </div>
+      `;
+      document.getElementById("uwu-back-to-saved-list")?.addEventListener("click", showSavedMessagesInterface);
       return;
     }
 
     const typeLabel = ls.type === 0 ? "Отправитель" : "Получатель";
-    const catLink = `<a href="/cat${ls.catId}" id="msg_login">${ls.catName}</a>`;
+    const catLink = `<a href="/cat${ls.catId}" id="msg_login" target="_blank" rel="noopener noreferrer">${ls.catName}</a>`;
 
-    const messageHTML = `
-      <p><a href="#" id="uwu-back-to-saved-list">← Назад к сохранённым</a></p>
-      <table id="msg_table" border="1">
-        <tbody>
-          <tr>
-            <td colspan="2"><span id="msg_subject">${ls.subject}</span></td>
-          </tr>
-          <tr>
-            <td valign="top" id="msg_info">
-              ${typeLabel}: ${catLink}<br>
-              ${ls.date}<br>
-              <i>(сохранённая оффлайн-копия)</i>
-            </td>
-            <td><div class="parsed">${ls.text}</div></td>
-          </tr>
-        </tbody>
-      </table>
+    container.innerHTML = `
+      <div class="ls-list-wrap ui-soft-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <button type="button" id="uwu-back-to-saved-list" class="ui-btn ui-btn--tiny">
+            ← Назад к сохранённым
+          </button>
+          <span style="font-size: 11px; opacity: 0.55; text-transform: uppercase; letter-spacing: 0.5px;">Офлайн-копия</span>
+        </div>
+
+        <table id="msg_table" border="1" style="width: 100%;">
+          <tbody>
+            <tr>
+              <td colspan="2"><span id="msg_subject"><b>${ls.subject}</b></span></td>
+            </tr>
+            <tr>
+              <td valign="top" id="msg_info" style="width: 220px;">
+                ${typeLabel}: ${catLink}<br>
+                ${ls.date}<br>
+                <small style="opacity: 0.65; display: block; margin-top: 6px;">Сохранено: ${ls.savedate}</small>
+              </td>
+              <td><div class="parsed">${ls.text}</div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     `;
 
-    container.innerHTML = messageHTML;
-    document
-      .getElementById("uwu-back-to-saved-list")
-      .addEventListener("click", showSavedMessagesInterface);
+    document.getElementById("uwu-back-to-saved-list")?.addEventListener("click", showSavedMessagesInterface);
   }
 
   /**
@@ -20612,7 +20623,9 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
   }
 
   /**
-   * Добавляет кнопки управления сохранением на страницу просмотра ЛС.
+   * Injects save and delete controls into the native message viewer toolbar.
+   *
+   * @returns {void}
    */
   function addSaveButtonsToMessagePage() {
     const subjectSpan = document.getElementById("msg_subject");
@@ -20621,40 +20634,37 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
     const subjectTd = subjectSpan.closest("td");
     if (!subjectTd) return;
 
-    const oldButtons = document.getElementById("uwu-ls-buttons");
-    if (oldButtons) oldButtons.remove();
+    document.getElementById("uwu-ls-buttons")?.remove();
 
     const lsId = parseInt(window.location.href.split("=")[1], 10);
     const savedLs = uwuStorage.getItem("uwu_saved_ls") || {};
-    const isSaved = savedLs.hasOwnProperty(lsId);
+    const isSaved = Object.prototype.hasOwnProperty.call(savedLs, lsId);
 
     const buttonsContainer = document.createElement("span");
     buttonsContainer.id = "uwu-ls-buttons";
-    buttonsContainer.style.float = "right";
-    buttonsContainer.style.display = "inline-block";
+    buttonsContainer.style.cssText = "float: right; display: inline-flex; align-items: center; gap: 6px;";
 
-    const saveButton = document.createElement("input");
+    if (isSaved) {
+      const savedDate = document.createElement("small");
+      savedDate.textContent = `Сохранено: ${savedLs[lsId].savedate}`;
+      savedDate.style.cssText = "opacity: 0.65; margin-right: 6px;";
+      buttonsContainer.appendChild(savedDate);
+    }
+
+    const saveButton = document.createElement("button");
     saveButton.type = "button";
-    saveButton.value = isSaved ? "Обновить" : "Сохранить";
-    saveButton.className = "uwu-button install-button";
-    saveButton.style.marginLeft = "5px";
+    saveButton.textContent = isSaved ? "Обновить" : "Сохранить";
+    saveButton.className = "ui-btn ui-btn--tiny ui-btn--primary";
     saveButton.onclick = saveCurrentLS;
-
     buttonsContainer.appendChild(saveButton);
 
     if (isSaved) {
-      const deleteButton = document.createElement("input");
+      const deleteButton = document.createElement("button");
       deleteButton.type = "button";
-      deleteButton.value = "Удалить";
-      deleteButton.className = "uwu-button remove-button";
-      deleteButton.style.marginLeft = "5px";
+      deleteButton.textContent = "Удалить";
+      deleteButton.className = "ui-btn ui-btn--tiny ui-btn--danger";
       deleteButton.onclick = () => deleteSavedLS(lsId);
       buttonsContainer.appendChild(deleteButton);
-
-      const savedDate = document.createElement("i");
-      savedDate.textContent = `Сохранено: ${savedLs[lsId].savedate}`;
-      savedDate.style.marginRight = "10px";
-      buttonsContainer.prepend(savedDate);
     }
 
     subjectTd.appendChild(buttonsContainer);
@@ -20703,44 +20713,31 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
     document.getElementById("uwu-saved-ls-tab")?.classList.remove("active");
   }
 
-  /**
-   * Внедряет CSS-стили для интерфейса сохранения ЛС.
-   */
   function injectLSSyles() {
     if (document.getElementById("uwu-ls-styles")) return;
 
-    const css =
-      /* CSS */
-      `
-       #links > #uwu-saved-ls-tab {
-        padding: 2px 8px;
-        border-radius: 10px;
-        background-color: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        transition: background-color 0.3s ease;
-        text-decoration: none !important;
+    const css = /* CSS */ `
+      #uwu-saved-ls-container {
+        margin-top: 10px;
       }
-      #links > #uwu-saved-ls-tab:hover, 
-      #links > #uwu-saved-ls-tab.active {
-        background-color: rgba(255, 255, 255, 0.2);
+      #uwu-saved-ls-container .ui-soft-box {
+        padding: 14px;
+        border-radius: 12px;
+        box-sizing: border-box;
       }
-
-      #uwu-saved-ls-container .messList {
-        table-layout: fixed;
-        width: 100%;
+      .uwu-ls-storage-bar-wrap {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        opacity: 0.75;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--ui-line, rgba(255, 255, 255, 0.08));
       }
-      
-      #uwu-saved-ls-container .messList a {
-        color: #0000cd;
-      }
-      
-      #uwu-saved-ls-container .messList th:nth-child(1) { width: 50%; }
-      #uwu-saved-ls-container .messList th:nth-child(2) { width: 25%; }
-      #uwu-saved-ls-container .messList th:nth-child(3) { width: 20%; }
-      #uwu-saved-ls-container .messList th:nth-child(4) { width: 5%; }
-
-      #uwu-saved-ls-container .delete-saved-ls {
-        padding: 1px 7px;
+      .uwu-ls-filter-btn.active {
+        background: var(--ui-accent, rgba(131, 229, 255, 0.25)) !important;
+        font-weight: 700;
       }
     `;
     const styleElement = document.createElement("style");
@@ -20750,103 +20747,136 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
   }
 
   /**
-   * Отрисовывает список сохраненных сообщений в указанном контейнере.
-   * @param {HTMLElement} container - Элемент для отрисовки.
+   * Calculates accurate UTF-8 byte consumption of stored private messages.
+   *
+   * @returns {{ bytes: number, formatted: string, percent: string }} Storage metrics.
+   */
+  function getSavedLsStorageUsage() {
+    const savedLs = uwuStorage.getItem("uwu_saved_ls") || {};
+    const serialized = JSON.stringify(savedLs);
+    const bytes = new TextEncoder().encode(serialized).length;
+
+    const totalQuotaBytes = 5 * 1024 * 1024;
+    const percent = Math.min(100, (bytes / totalQuotaBytes) * 100).toFixed(1);
+
+    let formatted = "";
+    if (bytes < 1024) {
+      formatted = `${bytes} Б`;
+    } else if (bytes < 1024 * 1024) {
+      formatted = `${(bytes / 1024).toFixed(1)} КБ`;
+    } else {
+      formatted = `${(bytes / (1024 * 1024)).toFixed(2)} МБ`;
+    }
+
+    return { bytes, formatted, percent };
+  }
+
+  /**
+   * Renders the saved messages list adopting CatWar's layout.
+   *
+   * @param {HTMLElement} container - DOM mount target.
+   * @returns {void}
    */
   function renderSavedMessagesList(container) {
-    const savedLsRaw = uwuStorage.getItem("uwu_saved_ls");
-    const savedLs = savedLsRaw || {};
+    const savedLs = uwuStorage.getItem("uwu_saved_ls") || {};
     const keys = Object.keys(savedLs);
+    const storage = getSavedLsStorageUsage();
 
-    const storageSize = savedLsRaw
-      ? (new TextEncoder().encode(savedLsRaw).length / 1024 / 1024).toFixed(2)
-      : 0;
+    const escapeHtml = (str) => {
+      const d = document.createElement("div");
+      d.textContent = str || "";
+      return d.innerHTML;
+    };
 
     if (keys.length === 0) {
-      container.innerHTML = "<h3>У вас нет сохранённых сообщений.</h3>";
+      container.innerHTML = `
+        <div class="ls-list-wrap ui-soft-box" style="text-align: center; padding: 30px;">
+          <h3 style="margin: 0 0 8px 0; opacity: 0.85;">У вас нет сохранённых сообщений</h3>
+          <p style="font-size: 13px; opacity: 0.5; margin: 0;">
+            Откройте любое письмо и нажмите «Сохранить», чтобы оно появилось здесь.
+          </p>
+        </div>
+      `;
       return;
     }
 
-    let inboxHTML = "";
-    let outboxHTML = "";
+    keys.sort((a, b) => new Date(savedLs[b].savedate) - new Date(savedLs[a].savedate));
 
-    keys.sort(
-      (a, b) => new Date(savedLs[b].savedate) - new Date(savedLs[a].savedate)
-    );
-
-    keys.forEach((key) => {
+    const rowsHtml = keys.map((key) => {
       const ls = savedLs[key];
-      const rowHTML =
-        /* HTML */
-        `
-          <tr class="msg_read">
-            <td>
-              <a href="#" class="uwu-saved-msg-open" data-id="${key}"
-                >${ls.subject}</a
-              >
-            </td>
-            <td><a href="/cat${ls.catId}">${ls.catName}</a></td>
-            <td>${ls.savedate}</td>
-            <td>
-              <input
-                type="button"
-                value="X"
-                class="uwu-button remove-button delete-saved-ls"
-                data-id="${key}"
-                title="Удалить"
-              />
-            </td>
-          </tr>
-        `;
-      if (ls.type === 0) {
-        inboxHTML += rowHTML;
-      } else {
-        outboxHTML += rowHTML;
-      }
+      const isInbox = ls.type === 0;
+      const typeLabel = isInbox ? "Входящее" : "Исходящее";
+      const interlocutorLabel = isInbox ? "От" : "Кому";
+
+      return `
+        <tr class="msg_read uwu-saved-row" data-type="${isInbox ? "inbox" : "outbox"}">
+          <td>
+            <a href="#" class="uwu-saved-msg-open" data-id="${key}">${escapeHtml(ls.subject || "(Без темы)")}</a>
+          </td>
+          <td>
+            <a href="/cat${ls.catId}" target="_blank" rel="noopener noreferrer">${escapeHtml(ls.catName)}</a>
+            <small style="opacity: 0.55; display: block; font-size: 11px;">${interlocutorLabel} • ${typeLabel}</small>
+          </td>
+          <td><small style="opacity: 0.75;">${escapeHtml(ls.savedate || ls.date)}</small></td>
+          <td style="text-align: center;">
+            <button type="button" class="ui-btn ui-btn--tiny ui-btn--danger delete-saved-ls" data-id="${key}" title="Удалить из сохранённых" style="padding: 2px 7px;">
+              ✕
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    container.innerHTML = `
+      <div class="ls-list-wrap ui-soft-box">
+        <div class="uwu-ls-storage-bar-wrap">
+          <div style="display: flex; gap: 6px;">
+            <button type="button" class="ui-btn ui-btn--tiny uwu-ls-filter-btn active" data-filter="all">Все (${keys.length})</button>
+            <button type="button" class="ui-btn ui-btn--tiny uwu-ls-filter-btn" data-filter="inbox">Входящие</button>
+            <button type="button" class="ui-btn ui-btn--tiny uwu-ls-filter-btn" data-filter="outbox">Отправленные</button>
+          </div>
+          <span>Использовано: <b>${storage.formatted}</b> из 5.00 МБ (${storage.percent}%)</span>
+        </div>
+
+        <table border="1" id="messList">
+          <thead>
+            <tr>
+              <th style="width: 45%;">Тема</th>
+              <th style="width: 25%;">Собеседник</th>
+              <th style="width: 20%;">Дата сохранения</th>
+              <th style="width: 10%; text-align: center;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    // Filter tabs logic
+    container.querySelectorAll(".uwu-ls-filter-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        container.querySelectorAll(".uwu-ls-filter-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        const filter = btn.dataset.filter;
+        container.querySelectorAll(".uwu-saved-row").forEach((row) => {
+          if (filter === "all" || row.dataset.type === filter) {
+            row.style.display = "";
+          } else {
+            row.style.display = "none";
+          }
+        });
+      });
     });
 
-    container.innerHTML =
-      /* HTML */
-      `
-        <p style="text-align: center; color: #888;">
-          Использовано примерно ${storageSize} из 5.00 МБ дискового
-          пространства.
-        </p>
-        <h2>Входящие</h2>
-        <table class="messList">
-          <tbody>
-            <tr>
-              <th>Тема</th>
-              <th>Отправитель</th>
-              <th>Дата сохранения</th>
-              <th></th>
-            </tr>
-            ${inboxHTML}
-          </tbody>
-        </table>
-        <br />
-        <h2>Отправленные</h2>
-        <table class="messList">
-          <tbody>
-            <tr>
-              <th>Тема</th>
-              <th>Получатель</th>
-              <th>Дата сохранения</th>
-              <th></th>
-            </tr>
-            ${outboxHTML}
-          </tbody>
-        </table>
-      `;
-
-    container.querySelectorAll(".delete-saved-ls").forEach((button) => {
-      button.addEventListener("click", (e) => {
-        const lsId = e.target.dataset.id;
-        if (
-          confirm(
-            "Вы уверены, что хотите удалить эту переписку из сохранённых?"
-          )
-        ) {
+    // Action handlers
+    container.querySelectorAll(".delete-saved-ls").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const lsId = btn.dataset.id;
+        if (confirm("Вы уверены, что хотите удалить эту переписку из сохранённых?")) {
           deleteSavedLS(lsId, true);
           renderSavedMessagesList(container);
         }
@@ -20856,32 +20886,29 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
     container.querySelectorAll(".uwu-saved-msg-open").forEach((link) => {
       link.addEventListener("click", (e) => {
         e.preventDefault();
-        const lsId = e.target.dataset.id;
-        displaySavedMessage(lsId);
+        displaySavedMessage(link.dataset.id);
       });
     });
   }
 
   /**
-   * Добавляет вкладку "Сохранённые" в меню ЛС.
+   * Injects the Saved tab into the native folder navigation list.
+   *
+   * @returns {void}
    */
   function addSavedMessagesTab() {
-    const linksContainer = document.getElementById("links");
-    if (!linksContainer || document.getElementById("uwu-saved-ls-tab")) return;
+    const tabsContainer = document.querySelector("#links .tabs");
+    if (!tabsContainer || document.getElementById("uwu-saved-ls-tab")) return;
 
-    const tabsContainer = linksContainer.querySelector(".tabs");
-
-    if (tabsContainer) {
-      tabsContainer.insertAdjacentHTML(
-        "beforeend",
-        `<a href="#" class="tab folder" id="uwu-saved-ls-tab" role="tab">Сохранённые (<span id="uwu-saved-ls-count">0</span>)</a>`
-      );
-    }
+    tabsContainer.insertAdjacentHTML(
+      "beforeend",
+      `<a href="#" class="tab folder" id="uwu-saved-ls-tab" role="tab">Сохранённые (<span id="uwu-saved-ls-count">0</span>)</a>`
+    );
 
     const savedTab = document.getElementById("uwu-saved-ls-tab");
     savedTab.addEventListener("click", showSavedMessagesInterface);
 
-    linksContainer.querySelectorAll("a:not(#uwu-saved-ls-tab)").forEach((a) => {
+    tabsContainer.querySelectorAll(".tab:not(#uwu-saved-ls-tab)").forEach((a) => {
       a.addEventListener("click", () => {
         if (!a.href.includes("ls?id=")) {
           hideSavedMessagesInterface();
