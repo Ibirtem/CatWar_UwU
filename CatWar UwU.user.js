@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v1.47.1-08.26
+// @version      v2.0.0-09.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -106,11 +106,16 @@ const uwuStorage = {
 // ====================================================================================================================
 //   . . . DEFAULT НАСТРОЙКИ . . .
 // ====================================================================================================================
-const current_uwu_version = "1.47.1";
+/**
+ * @type {string}
+ */
+const current_uwu_version =
+  typeof GM_info !== "undefined" && GM_info?.script?.version
+    ? GM_info.script.version.replace(/^v/i, "")
+    : "?.?.?";
+
 // ✨🦐✨🦐✨
 const uwuDefaultSettings = {
-  settingsTheme: "dark",
-
   weatherEnabled: false,
   weatherDrops: false,
   weatherParticlesAmount: "normal",
@@ -128,17 +133,15 @@ const uwuDefaultSettings = {
   gameFieldBackgroundUser: false,
   gameFieldBackgroundUserImageURL: "",
   userTheme: false,
-  userThemeKns: false,
   glassStyle: false,
   hideRelativesByDefault: false,
   twoColumnParameters: false,
   automaticActionsRedesign: false,
-  showOtherCatsList: "2",
   commentsAvatars: false,
 
-  chatHeight: "275",
   newChat: false,
-  addCommaAfterNick: false,
+  chatHeight: "275",
+  showChatId: false,
   reverseChat: false,
   newChatInput: false,
   showChatCharCounter: false,
@@ -180,17 +183,13 @@ const uwuDefaultSettings = {
   cellsBordersThickness: "1",
   cellsBordersColor: "#ffffff",
   cellsNumbers: false,
-  fastStyles: false,
   displayParametersPercentages: false,
   compactMouth: false,
   showMoreCatInfo: false,
   showParametersDetails: false,
   showExactSkillsValues: false,
 
-  draggingFightPanel: false,
   compactFightLog: false,
-  fightPanelAdjustableHeight: false,
-  fightPanelHeight: "70",
   fightTeams: false,
   fightTeamsColors: {
     team1: ["#41cd70", "#cd4141"],
@@ -271,7 +270,6 @@ const uwuDefaultSettings = {
   calculators: false,
   savingLS: false,
 
-  extendedSettingsPanel: false,
   showUpdateNotification: false,
   showSplashScreens: false,
   extendedHints: true,
@@ -318,6 +316,7 @@ const defaultThemes = {
     colors: {
       backgroundColor: "#161616",
       blocksColor: "#242424",
+      subBlocksColor: "#1b1b1b",
       chatColor: "#242424",
       textColor: "#d5d5d5",
       catTooltipBackground: "#242424",
@@ -326,6 +325,7 @@ const defaultThemes = {
       accentColor1: "#111111",
       accentColor2: "#2e2e2e82",
       accentColor3: "#fc872a",
+      accentColor4: "#2a2a2a",
       moveNameColor: "#d5d5d5",
       moveNameBackground: "#242424",
       climbingPanelBackground: "#242424",
@@ -335,6 +335,7 @@ const defaultThemes = {
     colors: {
       backgroundColor: "#161616",
       blocksColor: "#2b2b2b63",
+      subBlocksColor: "#1e1e1e4d",
       chatColor: "#2b2b2b63",
       textColor: "#d5d5d5",
       catTooltipBackground: "#2b2b2b63",
@@ -343,6 +344,7 @@ const defaultThemes = {
       accentColor1: "#111111",
       accentColor2: "#2e2e2e82",
       accentColor3: "#fc872a",
+      accentColor4: "#ffffff14",
       moveNameColor: "#d5d5d5",
       moveNameBackground: "#2b2b2b63",
       climbingPanelBackground: "#2b2b2b63",
@@ -370,7 +372,6 @@ function createSoundManager() {
 
   /**
    * Retrieves or initializes an Audio instance for the given sound ID.
-   * Uses lazy loading to prevent preloading all audio files at startup.
    * 
    * @param {string} id - The sound identifier.
    * @returns {HTMLAudioElement|null}
@@ -533,19 +534,19 @@ const uwusettings =
   /* HTML */
   `
     <div id="uwusettings">
-      <div id="uwusettings-header">
-        <div id="uwusettings-header-glass">
-          <div class="main-settings-container">
-            <div id="settingsTheme" class="custom-select">
-              <label for="settingsTheme">Тема настроек:</label>
-              <div class="select-selected">Классическая</div>
-              <div class="select-items">
-                <!-- Опции будут добавлены сюда -->
-              </div>
-            </div>
+      <div id="uwusettings-header" class="uwu-settings-card uwu-header-card">
+        <div class="main-settings-container">
+          <h1>Настройки CatWar UwU</h1>
+          <div class="link-container" style="display: flex; align-items: center;">
+              <button
+                type="button"
+                id="uwu-version-badge"
+                class="uwu-version-badge"
+                title="Что нового в версии v${current_uwu_version}?"
+              >
+                🌿 v${current_uwu_version}
+              </button>
 
-            <h1>Настройки CatWar UwU</h1>
-            <div class="link-container">
               <a
                 href="https://vk.com/catwar_uwu"
                 target="_blank"
@@ -556,8 +557,8 @@ const uwusettings =
                 <img
                   src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/VK_logo.png"
                   alt="VK"
-                  width="40"
-                  height="40"
+                  width="36"
+                  height="36"
                 />
               </a>
               <a
@@ -569,2710 +570,1525 @@ const uwusettings =
                 <img
                   src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/icon_github.png"
                   alt="GitHub"
-                  width="40"
-                  height="40"
+                  width="36"
+                  height="36"
                 />
               </a>
             </div>
-          </div>
+        </div>
 
-          <hr id="uwu-hr" class="uwu-hr-head" />
-          <div id="button-container">
-            <button id="effects-button" class="active">
-              <h2>
-                Природные эффекты
-                <img
-                  src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/partly_sunny_rain.png"
-                  alt="Иконка"
-                  width="24"
-                  height="24"
-                />
-              </h2>
-            </button>
-            <button id="theme-button">
-              <h2>
-                Оформление
-                <img
-                  src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/sparkles.png"
-                  alt="Иконка"
-                  width="24"
-                  height="24"
-                />
-              </h2>
-            </button>
-            <button id="utility-button">
-              <h2>
-                Инструментарий
-                <img
-                  src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/flashlight.png"
-                  alt="Иконка"
-                  width="24"
-                  height="24"
-                />
-              </h2>
-            </button>
-            <button id="modules-button">
-              <h2>
-                Надстройки
-                <img
-                  src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/construction.png"
-                  alt="Иконка"
-                  width="24"
-                  height="24"
-                />
-              </h2>
-            </button>
-            <button id="personal-costumes-button">
-              <h2>
-                Личные костюмы
-                <img
-                  src="https://raw.githubusercontent.com/Arisamiga/CatWar/refs/heads/Personal-Costumes/images/costumes.png"
-                  alt="Иконка"
-                  width="24"
-                  height="24"
-                />
-              </h2>
-            </button>
-          </div>
-          <hr id="uwu-hr" class="uwu-hr-head" />
+        <hr class="uwu-hr" />
+
+        <div id="button-container" class="uwu-header-pills">
+          <button id="effects-button" class="active">
+            <h2>Природные эффекты <img
+                src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/partly_sunny_rain.png" width="20"
+                height="20" /></h2>
+          </button>
+          <button id="theme-button">
+            <h2>Оформление <img src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/sparkles.png" width="20"
+                height="20" /></h2>
+          </button>
+          <button id="utility-button">
+            <h2>Инструментарий <img src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/flashlight.png"
+                width="20" height="20" /></h2>
+          </button>
+          <button id="modules-button">
+            <h2>Надстройки <img src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/construction.png"
+                width="20" height="20" /></h2>
+          </button>
+          <button id="personal-costumes-button">
+            <h2>Личные костюмы <img
+                src="https://raw.githubusercontent.com/Arisamiga/CatWar/refs/heads/Personal-Costumes/images/costumes.png"
+                width="20" height="20" /></h2>
+          </button>
         </div>
       </div>
 
       <div id="uwusettings-main">
         <div id="effects-panel">
-          <h2>Природа и окружение</h2>
 
-          <div>
-            <p>
-              Включает генерацию Динамичной погоды в Игровой, такие как дождь,
-              снегопады или Северные Сияния.
-            </p>
-            <input
-              type="checkbox"
-              id="weather-enabled"
-              data-setting="weatherEnabled"
-            />
-            <label for="weather-enabled">Показывать природные эффекты</label>
-          </div>
+          <!-- ДИНАМИЧЕСКИЕ ОСАДКИ И СТИЛИЗАЦИЯ ПОЛЯ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Динамическая погода и осадки</h3>
+            <hr id="uwu-hr" class="uwu-hr">
 
-          <div>
-            <p>
-              Количество частиц динамичной погоды (снег, дождь). "Мало частиц" повысит производительность на слабых устройствах.
-            </p>
-            <label>Интенсивность осадков:</label>
-            <div class="custom-select" id="weatherParticlesAmount">
-              <div class="select-selected">Много частиц (Стандарт)</div>
-              <div class="select-items">
-                <!-- Опции будут добавлены сюда -->
+            <div class="uwu-settings-card__item">
+              <p>Включает генерацию динамической погоды в Игровой (дождь, снегопады, северные сияния).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="weather-enabled" data-setting="weatherEnabled" />
+                <label for="weather-enabled">Показывать природные эффекты</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Количество частиц осадков. "Мало частиц" повышает производительность на слабых устройствах.</p>
+              <div class="uwu-settings-card__row">
+                <label>Интенсивность осадков:</label>
+                <div class="custom-select" id="weatherParticlesAmount">
+                  <div class="select-selected">Много частиц (Стандарт)</div>
+                  <div class="select-items"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Эффекты всплесков и оседания частиц при падении на нижнюю границу экрана.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="weather-drops" data-setting="weatherDrops" />
+                <label for="weather-drops">Эффекты приземления частиц</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Замена стандартных капель и снежинок на пиксельные текстуры.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="minecraft-style" data-setting="minecraftStyle" />
+                <label for="minecraft-style">Minecraft частицы</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отключает ночное затемнение игрового поля.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="always-day" data-setting="alwaysDay" />
+                <label for="always-day">Всегда день/ярко</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает панель ручного вызова погоды в расширенных настройках (отключает природную генерацию).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="manual-Weather-Panel" data-setting="manualWeatherPanel" />
+                <label for="manual-Weather-Panel">Ручное управление погодой</label>
               </div>
             </div>
           </div>
 
-          <div>
-            <p>
-              Может немного повлиять на производительность из-за возрастания
-              количества частиц на экране.
-            </p>
-            <input
-              type="checkbox"
-              id="weather-drops"
-              data-setting="weatherDrops"
-            />
-            <label for="weather-drops">Эффекты приземления частиц</label>
-          </div>
+          <!-- СЕВЕРНОЕ СИЯНИЕ И НЕБО -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Северное сияние и небо</h3>
+            <hr id="uwu-hr" class="uwu-hr">
 
-          <div>
-            <p>
-              Замена стандартных частиц на знакомые всеми пиксельные частицы.
-            </p>
-            <input
-              type="checkbox"
-              id="minecraft-style"
-              data-setting="minecraftStyle"
-            />
-            <label for="minecraft-style-enabled">Minecraft частицы</label>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Позиционирование эффекта Северного Сияния на экране.</p>
+              <div class="uwu-settings-card__row">
+                <label>Северное Сияние:</label>
+                <div class="custom-select" id="auroraPos">
+                  <div class="select-selected">Сверху</div>
+                  <div class="select-items"></div>
+                </div>
+              </div>
+            </div>
 
-          <div>
-            <p>Убирает затемнение Игрового поля.</p>
-            <input type="checkbox" id="always-day" data-setting="alwaysDay" />
-            <label for="always-day">Всегда день/ярко</label>
-          </div>
-
-          <div>
-            <p>
-              Отображает панель Ручного управления погодой в ⚙️Панели
-              Расширенных Настройках Игровой. Выключает натуральную генерацию
-              погоды.
-            </p>
-            <input
-              type="checkbox"
-              id="manual-Weather-Panel"
-              data-setting="manualWeatherPanel"
-            />
-            <label for="manual-Weather-Panel">Ручное управление погоды</label>
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          
-          <div>
-            <p>Расположение Северного Сияния на экране.</p>
-            <label>Северное Сияние:</label>
-            <div class="custom-select" id="auroraPos">
-              <div class="select-selected">Сверху</div>
-              <div class="select-items">
-                <!-- Опции будут добавлены сюда -->
+            <div class="uwu-settings-card__item">
+              <p>Делает блок Неба шапкой страницы, пряча под Игровую, делая неким "Фоном". Отлично видно и смотрится с прозрачными дизайнами.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="sky-in-the-sky" data-setting="skyInHeader" />
+                <label for="sky-in-the-sky">Небо в небе (небо в шапке)</label>
               </div>
             </div>
           </div>
 
-          <div>
-            <p>
-              Делает небо шапкой страницы, пряча под игровую, а так же по факту
-              чинит его потерю при Редизайне игровой. Будет выглядеть не очень
-              на широкоформатных мониторах из-за растягивания изображения.
-            </p>
-            <input
-              type="checkbox"
-              id="sky-in-the-sky"
-              data-setting="skyInHeader"
-            />
-            <label for="sky-in-the-sky">Небо в небе.</label>
-          </div>
+          <!-- Z-INDEX И СЛОИ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Слои отображения</h3>
+            <hr id="uwu-hr" class="uwu-hr">
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          
-          <div>
-            <p>
-              Z-index Погоды. Позволяет настроить, будут ли эффекты отображаться
-              поверх или позади игровых элементов.
-            </p>
-            <label>Перекрытие элементов:</label>
-            <div class="custom-select" id="weatherZIndex">
-              <div class="select-selected">Стандарт</div>
-              <div class="select-items">
-                <!-- Опции будут добавлены сюда -->
+            <div class="uwu-settings-card__item">
+              <p>Определяет глубину отображения эффектов относительно игровых окон и чата.</p>
+              <div class="uwu-settings-card__row">
+                <label>Перекрытие элементов:</label>
+                <div class="custom-select" id="weatherZIndex">
+                  <div class="select-selected">Стандарт</div>
+                  <div class="select-items"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         <div id="theme-panel">
-          <h2>Поле Игровой</h2>
+          <!-- ПОЛЕ ИГРОВОЙ И ФОНЫ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Поле Игровой и фоны</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>
-              Заменяет все фоны игровых локаций на выбранный вами фон. Помните,
-              что для правильного отображения нужно изображение 1000х1000 px.
-            </p>
-            <input
-              type="checkbox"
-              id="game-Field-background-User"
-              data-setting="gameFieldBackgroundUser"
-            />
-            <label for="game-Field-background-User-enabled"
-              >Статичный фон локации:</label
-            >
-            <input
-              type="text"
-              id="gameFieldSettingImageURLField"
-              placeholder="Вставьте URL"
-              data-setting="gameFieldBackgroundUserImageURL"
-            />
-            <button id="SettingSaveButton1" class="uwu-button install-button">
-              Сохранить
-            </button>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Заменяет все фоны игровых локаций на статичный фон (рекомендуется 1000х1000 px).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="game-Field-background-User" data-setting="gameFieldBackgroundUser" />
+                <label for="game-Field-background-User">Статичный фон локации:</label>
+                <input type="text" id="gameFieldSettingImageURLField" placeholder="Вставьте URL"
+                  data-setting="gameFieldBackgroundUserImageURL" />
+                <button id="SettingSaveButton1" class="uwu-button install-button">Сохранить</button>
+              </div>
+            </div>
 
-          <div>
-            <p>Отрисовывает границы клеток Игрового поля.</p>
-            <input
-              type="checkbox"
-              id="cells-Borders"
-              data-setting="cellsBorders"
-            />
-            <label for="cells-Borders">Границы клеток</label>
-          </div>
-          <p>Толщина/Яркость границ</p>
-          <div id="step-slider">
-            <input
-              type="range"
-              min="1"
-              max="9"
-              value="1"
-              id="cells-Borders-Thickness"
-              class="uwu-range-slider"
-              list="ThicknessStep"
-              data-setting="cellsBordersThickness"
-            />
-            <datalist id="ThicknessStep">
-              <option value="1">0.1</option>
-              <option value="5">0.5</option>
-              <option value="9">0.9</option>
-            </datalist>
-          </div>
-          <div>
-            <label for="cells-Borders-Color">Цвет границы клеток</label>
-            <input
-              type="color"
-              id="cells-Borders-Color"
-              data-setting="cellsBordersColor"
-              value="#ffffff"
-            />
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Отрисовывает границы клеток игрового поля с выбором толщины и цвета.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="cells-Borders" data-setting="cellsBorders" />
+                <label for="cells-Borders">Границы клеток</label>
+              </div>
+              <div class="uwu-settings-card__row" style="margin-top: 4px;">
+                <label>Толщина / яркость:</label>
+                <div id="step-slider" style="flex: 0 1 180px;">
+                  <input type="range" min="1" max="9" value="1" id="cells-Borders-Thickness" list="ThicknessStep"
+                    data-setting="cellsBordersThickness" />
+                  <datalist id="ThicknessStep">
+                    <option value="1">0.1</option>
+                    <option value="5">0.5</option>
+                    <option value="9">0.9</option>
+                  </datalist>
+                </div>
+                <label style="margin-left: 10px;">Цвет:</label>
+                <div id="cells-borders-color-picker"></div>
+              </div>
+            </div>
 
-          <div>
-            <p>Обозначает клетки Игрового поля числами.</p>
-            <input
-              type="checkbox"
-              id="cells-Numbers"
-              data-setting="cellsNumbers"
-            />
-            <label for="cells-Numbers">Нумерация клеток</label>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Обозначает клетки игрового поля числовыми индексами.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="cells-Numbers" data-setting="cellsNumbers" />
+                <label for="cells-Numbers">Нумерация клеток</label>
+              </div>
+            </div>
 
-          <div>
-            <p>
-              Ставит на страницу фон, повторяющий фон Игровой локации, а так же
-              размывает и затемняет его.
-            </p>
-            <input
-              type="checkbox"
-              id="background-repeat"
-              data-setting="backgroundRepeat"
-            />
-            <label for="weather-enabled">Фон страницы из локации</label>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Ставит на страницу фон, повторяющий локацию Игровой (с размытием и затемнением).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="background-repeat" data-setting="backgroundRepeat" />
+                <label for="background-repeat">Фон страницы из локации</label>
+              </div>
+            </div>
 
-          <div>
-            <p>Ставит на страницу фон из предоставленной ссылки.</p>
-            <input
-              type="checkbox"
-              id="background-user"
-              data-setting="backgroundUser"
-            />
-            <label for="background-user-enabled">Свой фон страницы:</label>
-            <input
-              type="text"
-              id="SettingImageURLField"
-              placeholder="Вставьте URL"
-              data-setting="backgroundUserImageURL"
-            />
-            <button id="SettingSaveButton1" class="uwu-button install-button">
-              Сохранить
-            </button>
-          </div>
-
-          <div>
-            <p>
-              Позволяет быстро сменять полезные стили в ⚙️Панели Расширенных
-              настроек в Игровой.
-            </p>
-            <input type="checkbox" id="fast-Styles" data-setting="fastStyles" />
-            <label for="fast-Styles">Быстрые стили</label>
-            <label
-              id="uwu-what-this"
-              title="
-            — Не показывать всплывающее окно 'О коте'
-            — Скрыть Игровое поле
-            — Скрыть фон Игрового Поля
-            — Скрыть Небо
-            — Всегда день/ярко
-            — Границы клеток
-            "
-              >[?]</label
-            >
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Дефекты</h2>
-
-          <div>
-            <p>Добавляет котам иконки их дефектов (раны, грязь и т.д.).</p>
-            <input
-              type="checkbox"
-              id="show-defects-enabled"
-              data-setting="showDefectsEnabled"
-            />
-            <label for="show-defects-enabled">Показывать иконки дефектов</label>
-          </div>
-
-          <div>
-            <p>Выберите стиль отображения иконок дефектов.</p>
-            <label>Стиль иконок:</label>
-            <div class="custom-select" id="defectsStyle">
-              <div class="select-selected">Стандартный</div>
-              <div class="select-items">
-                <!-- Опции будут добавлены сюда -->
+            <div class="uwu-settings-card__item">
+              <p>Устанавливает пользовательское фоновое изображение на всю страницу.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="background-user" data-setting="backgroundUser" />
+                <label for="background-user">Свой фон страницы:</label>
+                <input type="text" id="SettingImageURLField" placeholder="Вставьте URL"
+                  data-setting="backgroundUserImageURL" />
+                <button id="SettingSaveButton1" class="uwu-button install-button">Сохранить</button>
               </div>
             </div>
           </div>
 
-          <div>
-            <p>Выберите качество иконок дефектов.</p>
-            <label>Качество иконок:</label>
-            <div class="custom-select" id="defectsQuality">
-              <div class="select-selected">Высокое/Новое</div>
-              <div class="select-items">
-                <!-- Опции будут добавлены сюда -->
+          <!-- ДЕФЕКТЫ ПЕРСОНАЖЕЙ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Дефекты персонажей</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает визуальные маркеры дефектов (раны, переломы, кашель, грязь и т.д.).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-defects-enabled" data-setting="showDefectsEnabled" />
+                <label for="show-defects-enabled">Показывать иконки дефектов</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Стиль отображения иконок дефектов на котах.</p>
+              <div class="uwu-settings-card__row">
+                <label>Стиль:</label>
+                <div class="custom-select" id="defectsStyle">
+                  <div class="select-selected">Стандартный</div>
+                  <div class="select-items"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Разрешение и четкость текстур дефектов.</p>
+              <div class="uwu-settings-card__row">
+                <label>Качество текстур:</label>
+                <div class="custom-select" id="defectsQuality">
+                  <div class="select-selected">Высокое/Новое (200x300)</div>
+                  <div class="select-items"></div>
+                </div>
               </div>
             </div>
           </div>
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Темы и цвета Игровой</h2>
+          <!-- ТЕМЫ И ЦВЕТА ИГРОВОЙ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Темы и цвета Игровой</h3>
+            <hr class="uwu-hr" />
 
-          <p>
-            Здесь вы можете выставить собственные цвета для игровой. Принимаются
-            "HEX" значения (Пример: #000) с поддержкой прозрачности. Будьте
-            аккуратны и не забывайте выключать другие цвета/темы в других
-            скриптах/модах. Очистите поле чтобы вернуться к стандартным цветам.
-          </p>
-          <input type="checkbox" id="user-theme" data-setting="userTheme" />
-          <label for="user-theme-enabled">Использовать свои цвета</label>
-
-          <div id="theme-selector" class="uwu-select">
-            <label for="theme-select">Выберите тему:</label>
-            <select id="theme-select" class="uwu-select-selected"></select>
-            <button id="addThemeButton" class="uwu-button install-button">
-              Добавить тему
-            </button>
-            <button
-              id="removeThemeButton"
-              style="display: none;"
-              class="uwu-button remove-button"
-            >
-              Удалить тему
-            </button>
-          </div>
-
-          <div id="color-picker">
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="backgroundColorField"
-                placeholder="Вставьте HEX код"
-                data-color="backgroundColor"
-              />
-              <label>Цвет фона</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="blocksColorField"
-                placeholder="Вставьте HEX код"
-                data-color="blocksColor"
-              />
-              <label>Основной цвет блоков</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="chatColorField"
-                placeholder="Вставьте HEX код"
-                data-color="chatColor"
-              />
-              <label>Основной цвет чата</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="SettingTextColorField"
-                placeholder="Вставьте HEX код"
-                data-color="textColor"
-              />
-              <label>Цвет текста</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="colorField"
-                placeholder="Вставьте HEX код"
-                data-color="linkColor"
-              />
-              <label>Цвет ссылок</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="catTooltipBackgroundField"
-                placeholder="Вставьте HEX код"
-                data-color="catTooltipBackground"
-              />
-              <label>Цвет фона подсказки "О Коте"</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="settingFightPanelBackgroundField"
-                placeholder="Вставьте HEX код"
-                data-color="fightPanelBackground"
-              />
-              <label>Цвет панели Боевого режима</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="settingsMoveNameColorField"
-                placeholder="Вставьте HEX код"
-                data-color="moveNameColor"
-              />
-              <label>Цвет текста перехода</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="settingsMoveNameBackgroundField"
-                placeholder="Вставьте HEX код"
-                data-color="moveNameBackground"
-              />
-              <label>Цвет фона перехода</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="settingsclimbingPanelBackgroundField"
-                placeholder="Вставьте HEX код"
-                data-color="climbingPanelBackground"
-              />
-              <label>Цвет фона Минного Поля</label>
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="accentColorField1"
-                placeholder="Вставьте HEX код"
-                data-color="accentColor1"
-              />
-              <label
-                title="В основном всякие кнопки, слайдеры и строки ввода + цвет букв упоминания вас в Чате. Старайтесь пока делать просто оттенки чёрного цвета."
-                >[?] Акценты 1</label
-              >
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="accentColorField2"
-                placeholder="Вставьте HEX код"
-                data-color="accentColor2"
-              />
-              <label
-                title="Линии в чате и некоторых других частях, кружочек слайдера громкости."
-                >[?] Акценты 2</label
-              >
-            </div>
-            <div id="color-picker-input">
-              <input
-                type="text"
-                id="accentColorField3"
-                placeholder="Вставьте HEX код"
-                data-color="accentColor3"
-              />
-              <label title="Цвет уведомлений. Например ЛС и вашего имени в Чате"
-                >[?] Акценты 3</label
-              >
-            </div>
-
-            <div style="flex: 0 0 100%">
-              <button id="saveThemeButton" class="uwu-button install-button">
-                Сохранить
-              </button>
-              <p>
-                Отличный сайт для выбора цветов с поддержкой прозрачности:
-                <a href="https://get-color.ru/transparent/" target="_blank"
-                  >https://get-color.ru/transparent/</a
-                >
-              </p>
-            </div>
-          </div>
-
-          <div>
-            <p>Применяет вашу тему и на конструктор окрасов.</p>
-            <input
-              type="checkbox"
-              id="user-theme"
-              data-setting="userThemeKns"
-            />
-            <label for="user-theme-enabled">Цвета в конструкторе окрасов</label>
-          </div>
-
-          <div>
-            <p>Добавляет эффект размытия (Blur) заднего фона для основных блоков игровой.</p>
-            <input type="checkbox" id="glass-style" data-setting="glassStyle" />
-            <label for="glass-style">Эффект размытия (стекло)</label>
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Шрифты и текст</h2>
-
-          <div>
-            <p>Кастомная настройка шрифтов в Игровой</p>
-            <input
-              type="checkbox"
-              id="use-User-Fonts"
-              data-setting="useUserFonts"
-            />
-            <label for="use-User-Fonts">Свой шрифт</label>
-          </div>
-
-          <div>
-            <input
-              type="text"
-              id="font-Size-Body"
-              placeholder="14"
-              data-font-size="fontSizeBody"
-            />
-            <label for="font-Size-Body">px; Размер общего шрифт</label>
-          </div>
-
-          <div>
-            <input
-              type="text"
-              id="font-Size-Small"
-              placeholder="12"
-              data-font-size="fontSizeSmall"
-            />
-            <label for="font-Size-Small"
-              >px; Размер шрифта быстрых ссылок</label
-            >
-          </div>
-
-          <div>
-            <input
-              type="text"
-              id="font-Size-Location"
-              placeholder="14"
-              data-font-size="fontSizeLocation"
-            />
-            <label for="font-Size-Location">px; Размер шрифта локации</label>
-          </div>
-
-          <div>
-            <p>
-              Подгрузка шрифта идёт автоматически. Для поиска возможных шрифтов,
-              воспользуйтесь сайтом:
-              <a href="https://fonts.google.com/?lang=ru_Cyrl" target="_blank"
-                >https://fonts.google.com/?lang=ru_Cyrl</a
-              >
-            </p>
-            <input
-              type="text"
-              id="font-Family-Body"
-              placeholder="Verdana"
-              data-font-size="fontFamilyBody"
-            />
-            <label for="font-Family-Body">Название вида шрифта</label>
-          </div>
-
-          <details>
-            <summary
-              style="cursor: pointer; font-size: 16px; font-weight: bold;"
-            >
-              Настройка шрифта громкости сообщений в чате
-            </summary>
-            <div>
-              <input
-                type="text"
-                id="vlm0"
-                placeholder="10"
-                data-font-size="vlm0"
-              />
-              <label for="vlm0">px; Громкость 0 (Самый тихий)</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm1"
-                placeholder="11"
-                data-font-size="vlm1"
-              />
-              <label for="vlm1">px; Громкость 1</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm2"
-                placeholder="11.5"
-                data-font-size="vlm2"
-              />
-              <label for="vlm2">px; Громкость 2</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm3"
-                placeholder="12"
-                data-font-size="vlm3"
-              />
-              <label for="vlm3">px; Громкость 3</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm4"
-                placeholder="12.5"
-                data-font-size="vlm4"
-              />
-              <label for="vlm4">px; Громкость 4</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm5"
-                placeholder="13"
-                data-font-size="vlm5"
-              />
-              <label for="vlm5">px; Громкость 5 (Стандартная громкость)</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm6"
-                placeholder="15"
-                data-font-size="vlm6"
-              />
-              <label for="vlm6">px; Громкость 6</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm7"
-                placeholder="17"
-                data-font-size="vlm7"
-              />
-              <label for="vlm7">px; Громкость 7</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm8"
-                placeholder="19"
-                data-font-size="vlm8"
-              />
-              <label for="vlm8">px; Громкость 8</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm9"
-                placeholder="21"
-                data-font-size="vlm9"
-              />
-              <label for="vlm9">px; Громкость 9</label>
-            </div>
-            <div>
-              <input
-                type="text"
-                id="vlm10"
-                placeholder="23"
-                data-font-size="vlm10"
-              />
-              <label for="vlm10">px; Громкость 10 (Самая громкая)</label>
-            </div>
-          </details>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Редизайны Игровой</h2>
-
-          <p>
-            Тот самый знаменитный редизайн, но с почти более расширенной
-            кастомизацией.
-          </p>
-          <input
-            type="checkbox"
-            id="custom-layout"
-            data-setting="customLayout"
-          />
-          <label for="custom-layout">Компактный редизайн</label>
-
-          <div id="layout-customizer">
-            <div id="layout-preview">
-              <div class="column left">
-                <!-- Левая колонка -->
-              </div>
-              <div class="column center">
-                <!-- Центральная колонка -->
-                <div class="block center-block">Поле Игровой</div>
-              </div>
-              <div class="column right">
-                <!-- Правая колонка -->
-              </div>
-              <ul id="block-list">
-                <!-- Элементы списка блоков -->
-              </ul>
-            </div>
-            <button id="reset-layout-button" class="uwu-button remove-button">
-              Сбросить
-            </button>
-          </div>
-
-          <div>
-            <input
-              type="text"
-              id="chat-height"
-              placeholder="Вставьте значение"
-              data-setting="chatHeight"
-            />
-            <label for="chat-height">px; Высота Чата</label>
-          </div>
-
-          <div>
-            <input
-              type="text"
-              id="history-height"
-              placeholder="Вставьте значение"
-              data-setting="historyHeight"
-            />
-            <label for="history-height">px; Высота Истории</label>
-          </div>
-
-          <div>
-            <input
-              type="text"
-              id="item-list-height"
-              placeholder="Вставьте значение"
-              data-setting="itemListHeight"
-            />
-            <label for="item-list-height">px; Высота инвентаря</label>
-          </div>
-
-          <label>Отображать Душевых котов:</label>
-          <div class="custom-select" id="showOtherCatsList">
-            <div class="select-selected">
-              Выберите стиль отображения Душевых котов
-            </div>
-            <div class="select-items">
-              <!-- Опции будут добавлены сюда -->
-            </div>
-          </div>
-
-          <div>
-            <p>
-              Визуальное разделение блока "Информация" на меньшие блоки
-              "Параметров, Истории и Родственные связи".
-            </p>
-            <input
-              type="checkbox"
-              id="slice-info-block"
-              data-setting="sliceInfoBlock"
-            />
-            <label for="slice-info-block">Разделить блок Информации</label>
-          </div>
-
-          <div>
-            <p>
-              Выстраивает Состояния/Потребности и Навыки в две компактные колонки бок о бок, экономя место по высоте.
-            </p>
-            <input
-              type="checkbox"
-              id="two-column-parameters"
-              data-setting="twoColumnParameters"
-            />
-            <label for="two-column-parameters">Компактные параметры и навыки</label>
-          </div>
-
-          <div>
-            <p>Автоматически скрывает блок «Родственные связи» при каждой загрузке игровой... Ого!</p>
-            <input
-              type="checkbox"
-              id="hide-relatives-default"
-              data-setting="hideRelativesByDefault"
-            />
-            <label for="hide-relatives-default">Скрывать Родственные связи по умолчанию</label>
-          </div>
-
-          <div>
-            <p>Скругляет края блоков в Игровой.</p>
-            <input
-              type="checkbox"
-              id="edge-trim-blocks"
-              data-setting="edgeTrimBlocks"
-            />
-            <label for="edge-trim-blocks">Скругление блоков</label>
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Остальные редизайны</h2>
-
-          <div>
-            <p>
-              Добавляет изображение костюмов в строки для наглядного отображения
-              и упрощённого поиска. Вы можете вытянуть высоту столбцов за их
-              стрелочки в нижнем правом краю!
-            </p>
-            <input
-              type="checkbox"
-              id="redesign-Costums-Settings"
-              data-setting="redesignCostumsSettings"
-            />
-            <label for="redesign-Costums-Settings"
-              >Редизайн Настройки костюмов</label
-            >
-          </div>
-
-          <div>
-            <p>Обновляет внешний вид страницы «Автоматические племенные действия».</p>
-            <input type="checkbox" id="automatic-actions-redesign" data-setting="automaticActionsRedesign" />
-            <label for="automatic-actions-redesign">Редизайн племенных отчетов</label>
-          </div>
-
-          <div>
-            <p>
-              Превращает текстовые ссылки в меню вашего профиля (Обучение, Блоги, Настройки и т.д.) в удобные кнопки.
-            </p>
-            <input
-              type="checkbox"
-              id="profile-menu-redesign"
-              data-setting="profileMenuRedesign"
-            />
-            <label for="profile-menu-redesign">Редизайн меню профиля</label>
-          </div>
-
-          <div>
-            <p>
-              Добавляет аватар с профиля отправителя на его комментарий в лентах
-              и блогах.
-            </p>
-            <input
-              type="checkbox"
-              id="comments-avatars"
-              data-setting="commentsAvatars"
-            />
-            <label for="comments-avatars">Аватарки в комментариях</label>
-          </div>
-
-          <div>
-            <p>Обновляет внешний вид поиска блогов и добавляет кликабельную сортировку по столбцам.</p>
-            <input type="checkbox" id="blogsea-redesign" data-setting="blogseaRedesign" />
-            <label for="blogsea-redesign">Редизайн поиска блогов/лент</label>
-          </div>
-
-          <div>
-            <p>Обновляет внешний вид навигации и постов в блогах и лентах, превращая их в аккуратные карточки.</p>
-            <input type="checkbox" id="blogs-redesign" data-setting="blogsRedesign" />
-            <label for="blogs-redesign">Редизайн постов в блогах/лентах</label>
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Чат Игровой</h2>
-
-          <div>
-            <p>
-              Более функциональный Чат: допись ID отправителя и звуковое
-              уведомление при вашем упоминании.
-            </p>
-            <input type="checkbox" id="new-chat" data-setting="newChat" />
-            <label for="new-chat">Современный Чат</label>
-          </div>
-
-          <div id="myNameNotificationSoundContainer">
-            <div class="custom-select" id="myNameNotificationSound">
-              <div class="select-selected">Выберите звук</div>
-              <div class="select-items">
-                <!-- Опции будут добавлены сюда -->
+            <div class="uwu-settings-card__item">
+              <p>Переопределяет цветовую схему игровых блоков, чата, переходов и подсказок.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="user-theme" data-setting="userTheme" />
+                <label for="user-theme">Использовать свои цвета</label>
               </div>
             </div>
 
-            <div id="notification-volume">
-              <p>Громкость</p>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                value="5"
-                class="uwu-range-slider"
-                id="notification-MyName-Volume"
-                list="volumeStep"
-                data-setting="notificationMyNameVolume"
-              />
-              <datalist id="volumeStep">
-                <option value="1">10%</option>
-                <option value="10">100%</option>
-              </datalist>
+            <div class="uwu-settings-card__item">
+              <div id="theme-selector" class="uwu-settings-card__row" style="flex-wrap: wrap;">
+                <label>Текущая тема:</label>
+                <div class="custom-select" id="theme-select-container">
+                  <div class="select-selected" id="theme-select-selected">Тёмная Тема</div>
+                </div>
+                <button id="addThemeButton" class="uwu-button install-button">Добавить тему</button>
+                <button id="removeThemeButton" style="display: none;" class="uwu-button remove-button">Удалить тему</button>
+              </div>
+            </div>
+
+            <div id="color-picker" style="margin-top: 4px;">
+              <div id="theme-pickers-grid" class="gcp-grid"></div>
+              <div style="flex: 0 0 100%; margin-top: 14px;">
+                <button id="saveThemeButton" class="uwu-button install-button">Сохранить тему</button>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Добавляет матовое размытие (Backdrop Blur) под основными блоками Игровой.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="glass-style" data-setting="glassStyle" />
+                <label for="glass-style">Эффект стекла (Blur)</label>
+              </div>
             </div>
           </div>
 
-          <div>
-            <p>
-              Ваши собственные имена и клички на упоминания в чате. Просто
-              пропишите их через запятую. Пример: Мяу, Мяуич, МяуВкин
-            </p>
-            <input
-              type="text"
-              id="names-For-Notification"
-              placeholder=". . ."
-              data-setting="namesForNotification"
-            />
+          <!-- ШРИФТЫ И ТЕКСТ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Шрифты и текст</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Позволяет настроить сторонний шрифт и точные размеры элементов интерфейса.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="use-User-Fonts" data-setting="useUserFonts" />
+                <label for="use-User-Fonts">Включить кастомные шрифты</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 140px;">Основной шрифт (px):</label>
+                <input type="text" id="font-Size-Body" placeholder="14" data-font-size="fontSizeBody"
+                  style="width: 80px;" />
+              </div>
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 140px;">Быстрые ссылки (px):</label>
+                <input type="text" id="font-Size-Small" placeholder="12" data-font-size="fontSizeSmall"
+                  style="width: 80px;" />
+              </div>
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 140px;">Название локации (px):</label>
+                <input type="text" id="font-Size-Location" placeholder="14" data-font-size="fontSizeLocation"
+                  style="width: 80px;" />
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Название шрифта (загружается с Google Fonts автоматически при наличии кириллицы):</p>
+              <div class="uwu-settings-card__row">
+                <input type="text" id="font-Family-Body" placeholder="Verdana" data-font-size="fontFamilyBody"
+                  style="width: 200px;" />
+                <a href="https://fonts.google.com/?lang=ru_Cyrl" target="_blank" rel="noopener noreferrer"
+                  style="font-size: 12px; text-decoration: underline;">Каталог шрифтов Google</a>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <details class="uwu-details-card">
+                <summary style="cursor: pointer; font-size: 14px; font-weight: 600; padding: 4px 0;">
+                  Размеры шрифтов по громкости сообщений (vlm0 – vlm10)
+                </summary>
+                <div
+                  style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin-top: 10px;">
+                  <div><input type="text" id="vlm0" placeholder="10" data-font-size="vlm0" style="width: 50px;" /> <label
+                      for="vlm0">0 (Шёпот)</label></div>
+                  <div><input type="text" id="vlm1" placeholder="11" data-font-size="vlm1" style="width: 50px;" /> <label
+                      for="vlm1">Громкость 1</label></div>
+                  <div><input type="text" id="vlm2" placeholder="11.5" data-font-size="vlm2" style="width: 50px;" /> <label
+                      for="vlm2">Громкость 2</label></div>
+                  <div><input type="text" id="vlm3" placeholder="12" data-font-size="vlm3" style="width: 50px;" /> <label
+                      for="vlm3">Громкость 3</label></div>
+                  <div><input type="text" id="vlm4" placeholder="12.5" data-font-size="vlm4" style="width: 50px;" /> <label
+                      for="vlm4">Громкость 4</label></div>
+                  <div><input type="text" id="vlm5" placeholder="13" data-font-size="vlm5" style="width: 50px;" /> <label
+                      for="vlm5">5 (Стандарт)</label></div>
+                  <div><input type="text" id="vlm6" placeholder="15" data-font-size="vlm6" style="width: 50px;" /> <label
+                      for="vlm6">Громкость 6</label></div>
+                  <div><input type="text" id="vlm7" placeholder="17" data-font-size="vlm7" style="width: 50px;" /> <label
+                      for="vlm7">Громкость 7</label></div>
+                  <div><input type="text" id="vlm8" placeholder="19" data-font-size="vlm8" style="width: 50px;" /> <label
+                      for="vlm8">Громкость 8</label></div>
+                  <div><input type="text" id="vlm9" placeholder="21" data-font-size="vlm9" style="width: 50px;" /> <label
+                      for="vlm9">Громкость 9</label></div>
+                  <div><input type="text" id="vlm10" placeholder="23" data-font-size="vlm10" style="width: 50px;" /> <label
+                      for="vlm10">10 (Крик)</label></div>
+                </div>
+              </details>
+            </div>
           </div>
 
-          <div>
-            <p>
-              При клике на имя кота в строку чата будет выставляться его имя с
-              запятой.
-            </p>
-            <input
-              type="checkbox"
-              id="add-comma-after-nick"
-              data-setting="addCommaAfterNick"
-            />
-            <label for="add-comma-after-nick">Обращение с запятой</label>
+          <!-- РЕДИЗАЙН ИГРОВОЙ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Редизайн Игровой</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Свободный модульный HUD: позволяет перетаскивать блоки и менять их размеры прямо в Игровой. 
+              Чтобы редактировать Игровую, зайдите в неё и раскройте контекстное окно быстрых настроек UwU, они прямо в навигационной панели Игровой.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="custom-layout" data-setting="customLayout" />
+                <label for="custom-layout">Включить Редизайн Игровой</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item" style="margin-top: 2px;">
+              <div class="uwu-settings-card__row">
+                <button id="reset-hud-layout-btn" class="uwu-button remove-button">Сбросить расположение окон HUD</button>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 140px;">Высота чата (px):</label>
+                <input type="text" id="chat-height" placeholder="275" data-setting="chatHeight" style="width: 90px;" />
+              </div>
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 140px;">Высота истории (px):</label>
+                <input type="text" id="history-height" placeholder="215" data-setting="historyHeight"
+                  style="width: 90px;" />
+              </div>
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 140px;">Высота рта/вещей (px):</label>
+                <input type="text" id="item-list-height" placeholder="180" data-setting="itemListHeight"
+                  style="width: 90px;" />
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Компактное отображение шкал потребностей и навыков в две колонки бок о бок.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="two-column-parameters" data-setting="twoColumnParameters" />
+                <label for="two-column-parameters">Компактные параметры и навыки</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Автоматически скрывает блок «Родственные связи» при входе в Игровую.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="hide-relatives-default" data-setting="hideRelativesByDefault" />
+                <label for="hide-relatives-default">Скрывать Родственные связи по умолчанию</label>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <p>
-              Работает только с "Современным чатом". Отображет чат снизу вверх,
-              а так же смещает окно ввода сообщения под чат.
-            </p>
-            <input
-              type="checkbox"
-              id="reverse-Chat"
-              data-setting="reverseChat"
-            />
-            <label for="reverse-Chat">Инверсия чата</label>
+          <!-- РЕДИЗАЙНЫ СТРАНИЦ САЙТА -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Редизайны страниц сайта</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Современные таблицы отчётов автоматических племенных действий.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="automatic-actions-redesign" data-setting="automaticActionsRedesign" />
+                <label for="automatic-actions-redesign">Редизайн племенных отчетов</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Превращает текстовые ссылки меню персонажа (Обучение, Блоги, Настройки) в удобные кнопки.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="profile-menu-redesign" data-setting="profileMenuRedesign" />
+                <label for="profile-menu-redesign">Редизайн меню профиля</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает аватарку кота рядом с его комментарием в блогах и лентах.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="comments-avatars" data-setting="commentsAvatars" />
+                <label for="comments-avatars">Аватарки в комментариях</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Обновленный каталог блогов с кликабельной сортировкой по столбцам таблицы.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="blogsea-redesign" data-setting="blogseaRedesign" />
+                <label for="blogsea-redesign">Редизайн поиска блогов/лент</label>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <p>
-              Более удобная строка ввода сообщений над чатом с возможностью
-              растягивания. Пока что насильно берёт цвета с "Использовать свои
-              цвета".
-            </p>
-            <input
-              type="checkbox"
-              id="new-chat-input"
-              data-setting="newChatInput"
-            />
-            <label for="new-chat-input"
-              >Альтернативная строка ввода сообщений</label
-            >
+          <!-- ЧАТ ИГРОВОЙ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Чат Игровой</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Альтернативное поле ввода с поддержкой растягивания по высоте для больших текстов.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="new-chat-input" data-setting="newChatInput" />
+                <label for="new-chat-input">Альтернативная строка ввода сообщений</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Индикатор лимита длины текста в строке ввода.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-chat-char-counter" data-setting="showChatCharCounter" />
+                <label for="show-chat-char-counter">Показывать счётчик символов в чате</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Игнорирует цвета сообщений других игроков, отображая текст цветом текущей темы оформления (работает для обоих типов чата).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="disable-custom-chat-colors" data-setting="disableCustomChatColors" />
+                <label for="disable-custom-chat-colors">Не красить в кастомные цвета текст чата</label>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <p>Отображает счётчик символов в строке ввода Современного Чата.</p>
-            <input
-              type="checkbox"
-              id="show-chat-char-counter"
-              data-setting="showChatCharCounter"
-            />
-            <label for="show-chat-char-counter"
-              >Показывать счётчик символов в чате</label
-            >
+          <!-- СОВРЕМЕННЫЙ ЧАТ UWU -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Современный чат UwU</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Собственный улучшенный и расширенный Чат Игровой. <b>Все пункты ниже работают только при включении этой опции:</b></p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="new-chat" data-setting="newChat" />
+                <label for="new-chat">Включить Современный чат</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает ID кота рядом с ником персонажа.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-chat-id" data-setting="showChatId" />
+                <label for="show-chat-id">Показывать ID в чате</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает должность кота в скобках после его имени.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-chat-ranks" data-setting="showChatRanks" />
+                <label for="show-chat-ranks">Показывать должности</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Добавляет время отправки перед текстом сообщения.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-chat-time" data-setting="showChatTime" />
+                <label for="show-chat-time">Показывать время сообщений</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Инвертирует порядок сообщений (новые снизу) и переносит ввод под чат.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="reverse-Chat" data-setting="reverseChat" />
+                <label for="reverse-Chat">Инверсия чата</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Звуковое уведомление при упоминании вашего ника или псевдонимов в чате:</p>
+              <div id="myNameNotificationSoundContainer" class="uwu-settings-card__row">
+                <div class="custom-select" id="myNameNotificationSound">
+                  <div class="select-selected">Выберите звук</div>
+                  <div class="select-items"></div>
+                </div>
+                <div id="notification-volume" style="display: flex; align-items: center; gap: 8px;">
+                  <label>Громкость:</label>
+                  <input type="range" min="1" max="10" value="5" id="notification-MyName-Volume" list="volumeStep"
+                    data-setting="notificationMyNameVolume" style="width: 100px;" />
+                  <datalist id="volumeStep">
+                    <option value="1">10%</option>
+                    <option value="10">100%</option>
+                  </datalist>
+                </div>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Псевдонимы и клички для упоминаний (через запятую: Кот, Котик, Мяу):</p>
+              <input type="text" id="names-For-Notification" placeholder="Кот, Котик..." data-setting="namesForNotification"
+                style="width: 100%; max-width: 380px;" />
+            </div>
           </div>
 
-          <div>
-            <p>Отображает должность персонажа в чате.</p>
-            <input
-              type="checkbox"
-              id="show-chat-ranks"
-              data-setting="showChatRanks"
-            />
-            <label for="show-chat-ranks"
-              >Показывать должности</label
-            >
-          </div>
+          <!-- ПАРАМЕТРЫ И НАВЫКИ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Параметры и навыки</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>Добавляет перед сообщением время его получения.</p>
-            <input
-              type="checkbox"
-              id="show-chat-time"
-              data-setting="showChatTime"
-            />
-            <label for="show-chat-time"
-              >Показывать время сообщений</label
-            >
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Заменяет стандартные градиенты шкал потребностей и умений на собственные.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="user-Parameters-Theme" data-setting="userParametersTheme" />
+                <label for="user-Parameters-Theme">Использовать своё оформление</label>
+              </div>
+            </div>
 
-          <div>
-            <p>
-              Игнорирует кастомные цвета, которые игроки ставят на свои сообщения, оставляя только их шрифт.
-            </p>
-            <input
-              type="checkbox"
-              id="disable-custom-chat-colors"
-              data-setting="disableCustomChatColors"
-            />
-            <label for="disable-custom-chat-colors">Не красить в кастомные цвета текст чата</label>
-          </div>
+            <div id="parameters-color-settings" class="parameters-color-settings">
+              <table class="parameters-color-table">
+                <thead>
+                  <tr>
+                    <th rowspan="2" class="parameters-color-table--header parameters-color-table--name-th">Параметр</th>
+                    <th colspan="2" class="parameters-color-table--header parameters-color-table--group-th">Заливка шкалы
+                    </th>
+                    <th colspan="2" class="parameters-color-table--header">Фон шкалы</th>
+                  </tr>
+                  <tr>
+                    <th class="parameters-color-table--sub-header">От</th>
+                    <th class="parameters-color-table--sub-header parameters-color-table--divider-th">До</th>
+                    <th class="parameters-color-table--sub-header">От</th>
+                    <th class="parameters-color-table--sub-header">До</th>
+                  </tr>
+                </thead>
+                <tbody id="color-settings-body" class="parameters-color-table--body"></tbody>
+              </table>
+            </div>
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Параметры и навыки</h2>
+            <div class="uwu-settings-card__item">
+              <p>Отображает точные числовые значения поверх полосок навыков.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-exact-skills-values" data-setting="showExactSkillsValues" />
+                <label for="show-exact-skills-values">Точные значения навыков</label>
+              </div>
+            </div>
 
-          <div>
-            <p>Отображает точные значения навыков поверх их шкал.</p>
-            <input
-              type="checkbox"
-              id="show-exact-skills-values"
-              data-setting="showExactSkillsValues"
-            />
-            <label for="show-exact-skills-values">Точные значения навыков</label>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Импорт и экспорт цветовой палитры параметров в формате JSON:</p>
+              <div class="uwu-settings-card__row">
+                <input type="text" id="param-colors-export-field" placeholder="Экспорт" readonly style="width: 140px;" />
+                <input type="text" id="param-colors-import-field" placeholder="Импорт" style="width: 140px;" />
+                <button id="param-colors-import-btn" class="uwu-button install-button">Вставить</button>
+              </div>
+            </div>
 
-          <div>
-            <p>Заменяет стандартное оформление Параметров и Навыков на ваш.</p>
-            <input
-              type="checkbox"
-              id="user-Parameters-Theme"
-              data-setting="userParametersTheme"
-            />
-            <label for="user-Parameters-Theme"
-              >Использовать своё оформление</label
-            >
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Добавляет тень под текст на шкалах для читаемости на светлых темах.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="parameters-Text-Shadow" data-setting="parametersTextShadow" />
+                <label for="parameters-Text-Shadow">Тень текста параметров</label>
+              </div>
+            </div>
 
-          <div>
-            <p>Полезно когда светлый текст на светлом фоне.</p>
-            <input
-              type="checkbox"
-              id="parameters-Text-Shadow"
-              data-setting="parametersTextShadow"
-            />
-            <label for="parameters-Text-Shadow"
-              >Тень текста параметров</label
-            >
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Журнал истории прироста боевых умений (БУ).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-might-history" data-setting="showMightHistory" />
+                <label for="show-might-history">История прокачки БУ</label>
+              </div>
+            </div>
 
-          <div>
-            <p>Записывает историю изменений Боевых Умений (БУ).</p>
-            <input
-              type="checkbox"
-              id="show-might-history"
-              data-setting="showMightHistory"
-            />
-            <label for="show-might-history">История прокачки БУ</label>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Накладывает текстурный узор поверх шкал параметров.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="parameters-Background-Image" data-setting="parametersBackgroundImage" />
+                <label for="parameters-Background-Image">Стандартный узор</label>
+              </div>
+            </div>
 
-          <div id="parameters-color-settings" class="parameters-color-settings">
-            <table class="parameters-color-table">
-              <thead>
-                <tr>
-                  <th class="parameters-color-table--header">Градиент</th>
-                  <th class="parameters-color-table--header">От</th>
-                  <th class="parameters-color-table--header">До</th>
-                  <th class="parameters-color-table--header">От</th>
-                  <th class="parameters-color-table--header">До</th>
-                </tr>
-              </thead>
-              <tbody
-                id="color-settings-body"
-                class="parameters-color-table--body"
-              >
-                <!-- JS Вставит строки -->
-              </tbody>
-            </table>
-          </div>
-
-          <div>
-            <p>Импорт/Экспорт настроек цветов параметров и навыков.</p>
-            <input
-              type="text"
-              id="param-colors-export-field"
-              placeholder="Экспорт"
-              readonly
-            />
-            <input
-              type="text"
-              id="param-colors-import-field"
-              placeholder="Импорт"
-            />
-            <button
-              id="param-colors-import-btn"
-              class="uwu-button install-button"
-            >
-              Вставить
-            </button>
-          </div>
-
-          <div>
-            <p>Накладывает поверх цветов изображение с узорами.</p>
-            <input
-              type="checkbox"
-              id="parameters-Background-Image"
-              data-setting="parametersBackgroundImage"
-            />
-            <label for="parameters-Background-Image">Узоры</label>
-          </div>
-
-          <div>
-            <p>Накладывает поверх уже ваше изображение.</p>
-            <input
-              type="checkbox"
-              id="parameters-User-Background-Image"
-              data-setting="parametersUserBackgroundImage"
-            />
-            <label for="parameters-User-Background-Image">Свои узоры:</label>
-            <input
-              type="text"
-              id="parametersUserBackgroundImageField"
-              placeholder="Вставьте URL"
-              data-setting="parametersUserBackgroundImageURL"
-            />
-            <button id="SettingSaveButton1" class="uwu-button install-button">
-              Сохранить
-            </button>
+            <div class="uwu-settings-card__item">
+              <p>Накладывает пользовательскую текстуру по прямой ссылке.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="parameters-User-Background-Image" data-setting="parametersUserBackgroundImage" />
+                <label for="parameters-User-Background-Image">Свой узор:</label>
+                <input type="text" id="parametersUserBackgroundImageField" placeholder="Вставьте URL"
+                  data-setting="parametersUserBackgroundImageURL" />
+                <button id="SettingSaveButton1" class="uwu-button install-button">Сохранить</button>
+              </div>
+            </div>
           </div>
         </div>
 
         <div id="utility-panel">
-          <h2>Подсветка</h2>
+          <!-- ПОДСВЕТКА РЕСУРСОВ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Подсветка ресурсов</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>Подсвечивает обводкой клетки полезные, и не очень, ресурсы</p>
-            <input
-              type="checkbox"
-              id="highlight-Resources"
-              data-setting="highlightResources"
-            />
-            <label for="highlight-Resources">Подсветка ресурсов</label>
-          </div>
-
-          <label>Стиль подсветки предметов:</label>
-          <div class="custom-select" id="highlightResourcesStyle">
-            <div class="select-selected">
-              Выберите стиль подсветки предметов
-            </div>
-            <div class="select-items">
-              <!-- Опции будут добавлены сюда -->
-            </div>
-          </div>
-          <label
-            id="uwu-what-this"
-            title="Стиль 'Фон' подсвечивает всю клетку и не нагружает Игровую. Стиль 'Свечение' дублирует содержимое ячейки и стилизует его, что может нагружать Игровую."
-            >[?]</label
-          >
-
-          <table class="uwu-table-highlight-Resources">
-            <thead>
-              <tr>
-                <th>Название</th>
-                <th>Цвет</th>
-                <th>Подсвечивать?</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Травы</td>
-                <td>
-                  <input
-                    type="color"
-                    class="uwu-color-picker"
-                    data-resource="Травы"
-                    value="#90EE90"
-                  />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input
-                    type="checkbox"
-                    class="uwu-highlight-checkbox"
-                    data-resource="Травы"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Мох</td>
-                <td>
-                  <input
-                    type="color"
-                    class="uwu-color-picker"
-                    data-resource="Мох"
-                    value="#90EE90"
-                  />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input
-                    type="checkbox"
-                    class="uwu-highlight-checkbox"
-                    data-resource="Мох"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Паутина</td>
-                <td>
-                  <input
-                    type="color"
-                    class="uwu-color-picker"
-                    data-resource="Паутина"
-                    value="#90EE90"
-                  />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input
-                    type="checkbox"
-                    class="uwu-highlight-checkbox"
-                    data-resource="Паутина"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Пыль</td>
-                <td>
-                  <input
-                    type="color"
-                    class="uwu-color-picker"
-                    data-resource="Пыль"
-                    value="#DDA0DD"
-                  />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input
-                    type="checkbox"
-                    class="uwu-highlight-checkbox"
-                    data-resource="Пыль"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Ветки, вьюнки, костоправы</td>
-                <td>
-                  <input
-                    type="color"
-                    class="uwu-color-picker"
-                    data-resource="Ветки, вьюнки, костоправы"
-                    value="#90EE90"
-                  />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input
-                    type="checkbox"
-                    class="uwu-highlight-checkbox"
-                    data-resource="Ветки, вьюнки, костоправы"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Травящие предметы</td>
-                <td>
-                  <input
-                    type="color"
-                    class="uwu-color-picker"
-                    data-resource="Травящие предметы"
-                    value="#FF0000"
-                  />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input
-                    type="checkbox"
-                    class="uwu-highlight-checkbox"
-                    data-resource="Травящие предметы"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Шаманские штучки</td>
-                <td>
-                  <input
-                    type="color"
-                    class="uwu-color-picker"
-                    data-resource="Шаманские штучки"
-                    value="#00BFFF"
-                  />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input
-                    type="checkbox"
-                    class="uwu-highlight-checkbox"
-                    data-resource="Шаманские штучки"
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <hr class="uwu-hr-head" />
-
-          <h2>Шаблоны</h2>
-
-          <div>
-            <p>
-              Позволяет создавать и быстро использовать собственные шаблоны
-              сообщений.
-            </p>
-            <input
-              type="checkbox"
-              id="show-Templates"
-              data-setting="showTemplates"
-            />
-            <label for="show-Templates">Отображать шаблоны</label>
-          </div>
-
-          <table id="uwu-table-templates">
-            <thead>
-              <tr>
-                <th>Сообщения</th>
-                <th>Чаты</th>
-                <th>Блоги и Лента</th>
-                <th>Комментарии</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="uwu-checkbox-cell">
-                  <input type="checkbox" data-setting="templatesInLs" />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input type="checkbox" data-setting="templatesInChats" />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input
-                    type="checkbox"
-                    data-setting="templatesInBlogsAndSniffs"
-                  />
-                </td>
-                <td class="uwu-checkbox-cell">
-                  <input type="checkbox" data-setting="templatesInComments" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <hr class="uwu-hr-head" />
-
-          <h2>Боевой режим</h2>
-
-          <div>
-            <p>Позволяет перетаскивать панель Боевого режима за штучку.</p>
-            <input
-              type="checkbox"
-              id="dragging-Fight-Panel"
-              data-setting="draggingFightPanel"
-            />
-            <label for="dragging-Fight-Panel"
-              >Перетаскивание панели Боевого режима</label
-            >
-          </div>
-
-          <div>
-            <p>Сокращает и прописывает количество повторяющихся ударов.</p>
-            <input
-              type="checkbox"
-              id="compact-Fight-Log"
-              data-setting="compactFightLog"
-            />
-            <label for="compact-Fight-Log">Компактный боевой лог</label>
-          </div>
-
-          <div>
-            <p>Возможность растягивать высоту панели и её начальная высота.</p>
-            <input
-              type="checkbox"
-              id="fight-Panel-Adjustable-Height"
-              data-setting="fightPanelAdjustableHeight"
-            />
-            <label for="fight-Panel-Adjustable-Height"
-              >Настраиваемая высота панели</label
-            >
-            <input
-              type="text"
-              id="fightPanelHeightField"
-              placeholder=". . ."
-              data-setting="fightPanelHeight"
-            />
-            <label>px; - Начальная высота панели</label>
-          </div>
-
-          <div>
-            <p>
-              Возможность перекрашивать и создавать команды в Панели Боевого
-              Режима.
-            </p>
-            <input type="checkbox" id="Fight-Teams" data-setting="fightTeams" />
-            <label for="fight-Teams">Команды в Боевом Режиме</label>
-            <input
-              type="text"
-              id="fightTeamsPanelHightField"
-              placeholder=". . ."
-              data-setting="fightTeamsPanelHight"
-            />
-            <label>px; - Начальная высота панели Командного Боя</label>
-          </div>
-
-          <div>
-            <p>
-              Звуковое уведомление при нажатии/отжатии кнопки блокировании
-              удара.
-            </p>
-            <input
-              type="checkbox"
-              id="notification-Block"
-              data-setting="notificationBlock"
-            />
-            <label for="notification-Block">Звук блокирования</label>
-            <div id="notificationBlockSoundContainer">
-              <div class="custom-select" id="notificationBlockSound">
-                <div class="select-selected">Выберите звук</div>
-                <div class="select-items"></div>
-              </div>
-              <div id="notification-volume">
-                <p>Громкость</p>
-                <input
-                  type="range"
-                  min="1"
-                  max="10"
-                  value="5"
-                  class="uwu-range-slider"
-                  id="notificationBlockVolume"
-                  list="volumeStep"
-                  data-setting="notificationBlockVolume"
-                />
-                <datalist id="volumeStep">
-                  <option value="1">10%</option>
-                  <option value="10">100%</option>
-                </datalist>
-              </div>
-              <div id="notificationBlockContainer"></div>
-            </div>
-          </div>
-
-          <table id="colorSettingsTable">
-            <thead>
-              <tr>
-                <th></th>
-                <th>Энергия</th>
-                <th>Снесено</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Команда 1</td>
-                <td>
-                  <input
-                    type="color"
-                    data-team="1"
-                    data-part="green"
-                    value="#41cd70"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="color"
-                    data-team="1"
-                    data-part="red"
-                    value="#cd4141"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Команда 2</td>
-                <td>
-                  <input
-                    type="color"
-                    data-team="2"
-                    data-part="green"
-                    value="#c968ff"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="color"
-                    data-team="2"
-                    data-part="red"
-                    value="#cd4141"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Команда 3</td>
-                <td>
-                  <input
-                    type="color"
-                    data-team="3"
-                    data-part="green"
-                    value="#44bcff"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="color"
-                    data-team="3"
-                    data-part="red"
-                    value="#cd4141"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Команда 4</td>
-                <td>
-                  <input
-                    type="color"
-                    data-team="4"
-                    data-part="green"
-                    value="#FFFF00"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="color"
-                    data-team="4"
-                    data-part="red"
-                    value="#cd4141"
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Часы</h2>
-
-          <div>
-            <p>Показывать ли часы в Игровой?</p>
-            <input
-              type="checkbox"
-              id="describe-show-clock"
-              data-setting="showClock"
-            />
-            <label for="describe-show-clock">Часы в Игровой</label>
-          </div>
-
-          <label>Стиль часов:</label>
-          <div class="custom-select" id="clockStyle">
-            <div class="select-selected">Выберите стиль часов</div>
-            <div class="select-items">
-              <!-- Опции будут добавлены сюда -->
-            </div>
-          </div>
-
-          <div><!-- Деление --></div>
-
-          <label>Где вставлять часы:</label>
-          <div class="custom-select" id="clockPosition">
-            <div class="select-selected">Выберите положение часов</div>
-            <div class="select-items">
-              <!-- Опции будут добавлены сюда -->
-            </div>
-          </div>
-
-          <div>
-            <input
-              type="checkbox"
-              id="describe-clock-Moscow-Time"
-              data-setting="clockMoscowTime"
-            />
-            <label for="describe-clock-Moscow-Time">Московское время</label>
-          </div>
-
-          <div>
-            <p>Размер шрифта часов</p>
-            <input
-              type="text"
-              id="clock-Font-Size"
-              placeholder=". . ."
-              data-setting="clockFontSize"
-            />
-          </div>
-
-          <div>
-            <button id="resetClockPosition" class="uwu-button remove-button">
-              Сброс позиции часов
-            </button>
-          </div>
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Таймер-напоминалка</h2>
-          <div>
-            <p>
-              Включает перетаскиваемое окно с таймером, который будет циклично
-              воспроизводить звуковой сигнал через заданный интервал времени.
-            </p>
-            <input
-              type="checkbox"
-              id="interval-timer-enabled"
-              data-setting="intervalTimerEnabled"
-            />
-            <label for="interval-timer-enabled"
-              >Включить таймер-напоминалку</label
-            >
-          </div>
-          <div id="intervalTimerContainer">
-            <div class="custom-select" id="intervalTimerSound">
-              <div class="select-selected">Выберите звук</div>
-              <div class="select-items"></div>
-            </div>
-            <div id="notification-volume">
-              <p>Громкость</p>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                value="5"
-                class="uwu-range-slider"
-                id="intervalTimerVolume"
-                list="volumeStep"
-                data-setting="intervalTimerVolume"
-              />
-              <datalist id="volumeStep">
-                <option value="1">10%</option>
-                <option value="10">100%</option>
-              </datalist>
-            </div>
-          </div>
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Рот (инвентарь)</h2>
-          <div>
-            <p>
-              Добавляет чекбокс для блокировки опускания предметов, сохраняя
-              возможность его использовать.
-            </p>
-            <input
-              type="checkbox"
-              id="block-item-drop"
-              data-setting="blockItemDrop"
-            />
-            <label for="block-item-drop">Блокировка опускания предмета</label>
-          </div>
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Охота</h2>
-
-          <div>
-            <p>
-              Дописывает на запахе, во время охоты, приближаетесь вы или
-              отдаляетесь от цели, а так же включает таймер.
-            </p>
-            <input
-              type="checkbox"
-              id="describe-Hunting-Smell"
-              data-setting="describeHuntingSmell"
-            />
-            <label for="describe-Hunting-Smell">Подсказки на запахе</label>
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Джойстики</h2>
-
-          <div>
-            <p>
-              Отображает Виртуальную сенсорную Джойстиковую кнопку для мобильных
-              устройств во время охоты для более удобного управления.
-            </p>
-            <input
-              type="checkbox"
-              id="hunting-Virtual-Joystick"
-              data-setting="huntingVirtualJoystick"
-            />
-            <label for="hunting-Virtual-Joystick"
-              >Виртуальный джойстик для охоты</label
-            >
-            <input
-              type="text"
-              id="sizeHuntingVirtualJoystickField"
-              placeholder=". . ."
-              data-setting="sizeHuntingVirtualJoystick"
-            />
-            <label>px; - Размер Джойстика. Стандартный размер - 150 px;</label>
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>"О котах"</h2>
-
-          <div>
-            <p>
-              Добавляет во всплывающее окно "О коте" кнопку "Подробнее" для
-              просмотра большей полезной информации.
-            </p>
-            <input
-              type="checkbox"
-              id="show-More-Cat-Info"
-              data-setting="showMoreCatInfo"
-            />
-            <label for="show-More-Cat-Info">Больше информации о Коте</label>
-          </div>
-
-          <div>
-            <p>
-              Сокращает и прописывает количество повторяющихся предметов в "О
-              коте".
-            </p>
-            <input
-              type="checkbox"
-              id="compact-Mouth"
-              data-setting="compactMouth"
-            />
-            <label for="compact-Mouth">Компактные инвентари</label>
-          </div>
-
-          <div>
-            <p>
-              Добавляет над собственными параметрами кнопку "Подробнее" для
-              просмотра большей полезной информации.
-            </p>
-            <input
-              type="checkbox"
-              id="show-Parameter-Details"
-              data-setting="showParametersDetails"
-            />
-            <label for="show-Parameter-Details">Подробные параметры</label>
-          </div>
-
-          <div>
-            <p>
-              Показывает дополнительную информацию в профиле кота, например БУ
-              цифрой.
-            </p>
-            <input
-              type="checkbox"
-              id="more-Profile-Info"
-              data-setting="moreProfileInfo"
-            />
-            <label for="more-Profile-Info">Больше информации в профиле</label>
-          </div>
-
-          <div>
-            <p>Добавляет полезные калькуляторы для вычислений в профиля.</p>
-            <input
-              type="checkbox"
-              id="calculators"
-              data-setting="calculators"
-            />
-            <label for="calculators">Калькуляторы активностей и лун.</label>
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Минное поле</h2>
-
-          <div>
-            <p>Включает окно для расчерчивания минного поля в Игровой.</p>
-            <input
-              type="checkbox"
-              id="climbing-panel"
-              data-setting="climbingPanel"
-            />
-            <label for="climbing-panel">Минное поле</label>
-            <p>
-              Здесь вы можете добавить/удалить Вкладки для хранения Таблиц и
-              количество самих таблиц в выбранной вкладке.
-            </p>
-            <h4>Вкладки</h4>
-            <div id="uwu-buttonRow1-settings"></div>
-            <h4>Локации / Таблицы</h4>
-            <div id="uwu-buttonRow2-settings"></div>
-          </div>
-
-          <label>Дизайн окна минного поля:</label>
-          <div class="custom-select" id="climbingPanelOrientation">
-            <div class="select-selected">Вертикальный</div>
-            <div class="select-items">
-              <!-- Опции будут добавлены сюда -->
-            </div>
-          </div>
-
-          <p>
-            Как вводить с клавиатуры: ЛКМ - выбрать клетку. С клавиатуры мины
-            ставятся от "0" до "7". Знак "минус" ( - ) равняется красной клетке,
-            а "равно" ( = ) ставит более яркую клетку, например для переходов,
-            которая не будет очищаться при "Очистить всё поле/таблицу". Два раза
-            ЛКМ на ячейку, чтобы очистить её значение.
-          </p>
-
-          <label>Вид ввода в минное поле:</label>
-          <div class="custom-select" id="climbingPanelInputsStyle">
-            <div class="select-selected">Клавиатура</div>
-            <div class="select-items">
-              <!-- Опции будут добавлены сюда -->
-            </div>
-          </div>
-
-          <div>
-            <p>
-              Дописывает в чате громкость уведомлений числом. В случае с
-              лазательными локациями - количество опасных клеток вокруг вас.
-            </p>
-            <input
-              type="checkbox"
-              id="climbing-Notifications-Numbers"
-              data-setting="climbingNotificationsNumbers"
-            />
-            <label for="climbing-Notifications-Numbers"
-              >Подписывать громкость уведомления</label
-            >
-          </div>
-
-          <div>
-            <p>Звуковое уведомление, когда карта локации обновляется.</p>
-            <input
-              type="checkbox"
-              id="climbing-Refresh-Notification"
-              data-setting="climbingRefreshNotification"
-            />
-            <label for="climbing-Refresh-Notification"
-              >Уведомлять об перестановке</label
-            >
-          </div>
-
-          <div id="climbingRefreshNotificationSoundContainer">
-            <div class="custom-select" id="climbingRefreshNotificationSound">
-              <div class="select-selected">Выберите звук</div>
-              <div class="select-items">
-                <!-- Опции будут добавлены сюда -->
+            <div class="uwu-settings-card__item">
+              <p>Подсвечивает клетки с ценными травами, мхом, предметами и паутиной.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="highlight-Resources" data-setting="highlightResources" />
+                <label for="highlight-Resources">Включить подсветку</label>
               </div>
             </div>
 
-            <div id="notification-volume">
-              <p>Громкость</p>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                value="5"
-                class="uwu-range-slider"
-                id="climbing-Refresh-Notification-Volume"
-                list="volumeStep"
-                data-setting="climbingRefreshNotificationVolume"
-              />
-              <datalist id="volumeStep">
-                <option value="1">10%</option>
-                <option value="10">100%</option>
-              </datalist>
+            <div class="uwu-settings-card__item">
+              <div class="uwu-settings-card__row">
+                <label>Стиль подсветки предметов:</label>
+                <div class="custom-select" id="highlightResourcesStyle">
+                  <div class="select-selected">Выберите стиль подсветки предметов</div>
+                  <div class="select-items"></div>
+                </div>
+                <label id="uwu-what-this"
+                  title="Стиль 'Фон' подсвечивает всю клетку и не нагружает Игровую.&#10;Стиль 'Свечение' дублирует содержимое ячейки и стилизует его, что может снижать FPS на слабых устройствах.">[?]</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item" style="overflow-x: auto;">
+              <table class="uwu-table-highlight-Resources gcp-table">
+                <thead>
+                  <tr>
+                    <th>Название</th>
+                    <th>Цвет</th>
+                    <th>Подсвечивать?</th>
+                  </tr>
+                </thead>
+                <tbody id="resources-table-body"></tbody>
+              </table>
             </div>
           </div>
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>BETA 🚧 Лог чистильщика 🚧 BETA</h2>
+          <!-- ШАБЛОНЫ СООБЩЕНИЙ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Шаблоны сообщений</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>
-              Упрощённое и удобное дублирование блока истории для любителей
-              чистить локации, в котором отображаются только поднятия и
-              опускания котов.
-            </p>
-            <input
-              type="checkbox"
-              id="cleaning-Log"
-              data-setting="cleaningLog"
-            />
-            <label for="cleaning-Log">Включить лог чистильщика</label>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Позволяет сохранять заготовки текстов и быстро вставлять их в формы ввода.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-Templates" data-setting="showTemplates" />
+                <label for="show-Templates">Отображать панель шаблонов</label>
+              </div>
+            </div>
 
-          <label>Вид отображения Лога:</label>
-          <div class="custom-select" id="cleaningLogStyle">
-            <div class="select-selected">Выберите вид Лога</div>
-            <div class="select-items">
-              <!-- Опции будут добавлены сюда -->
+            <div class="uwu-settings-card__item" style="overflow-x: auto;">
+              <table id="uwu-table-templates" class="gcp-table">
+                <thead>
+                  <tr>
+                    <th>Личные сообщения</th>
+                    <th>Чаты</th>
+                    <th>Блоги и Лента</th>
+                    <th>Комментарии</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="uwu-checkbox-cell">
+                      <input type="checkbox" data-setting="templatesInLs" />
+                    </td>
+                    <td class="uwu-checkbox-cell">
+                      <input type="checkbox" data-setting="templatesInChats" />
+                    </td>
+                    <td class="uwu-checkbox-cell">
+                      <input type="checkbox" data-setting="templatesInBlogsAndSniffs" />
+                    </td>
+                    <td class="uwu-checkbox-cell">
+                      <input type="checkbox" data-setting="templatesInComments" />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
-          <label
-            id="uwu-what-this"
-            title="
-      Умный - группирование множественных действий в более удобный, краткий и читаемый вид.
-      Ещё тут был 'стандартный', более привычный старый вид, но его съели росомахи.
-      "
-            >[?]</label
-          >
 
-          <details>
-            <summary
-              style="cursor: pointer; font-size: 16px; font-weight: bold;"
-            >
-              Как работает?
-            </summary>
-            <hr id="uwu-hr" class="uwu-hr" />
-            <p>1. Проверьте кота такими действиями, как:</p>
-            <p>— Потереться нос о нос</p>
-            <p>— Потереться щекой о щёку</p>
-            <p>— Помурлыкать вместе</p>
-            <p>— Обнюхать</p>
-            <p>
-              Вам выведится, можно ли поднять кота. Если он "Проверен", можете
-              смело...
-            </p>
-            <p>2. Поднять кота!</p>
-            <p>
-              Если же кот "Не спит", или перед поднятием вы его не проверили, то
-              Лог просто не запишет его.
-            </p>
-            <p>
-              — Больше настроек, например подсветка надписей или игнорирование
-              статуса кота, будет в будущем!
-            </p>
-            <p>
-              Если вы видите или вам кажется, что логика проверок и объединений,
-              странны и нелогичны, или даже что-то теряется, то можете сообщить
-              о проблеме в группу ВК!
-            </p>
-            <p>3. Попросились отпуститься?</p>
-            <p>
-              — Вы можете удалить из Лога последнего опущенного вами кота
-              кнопкой справа от "Очистить лог" в виде корзинки! Например, если
-              он выпросился погулять и он больше не актуален. Ещё разок!
-              Опускаете кота и он становится целью кнопки "Удалить"!
-            </p>
-            <hr id="uwu-hr" class="uwu-hr" />
-          </details>
+          <!-- БОЕВОЙ РЕЖИМ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Боевой режим</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>
-              При последующих проверках так же будет писаться ID кота. Не
-              добавляет ID к уже существущему тексту в логе.
-            </p>
-            <input
-              type="checkbox"
-              id="cleaning-Log"
-              data-setting="cleaningLogShowID"
-            />
-            <label for="cleaning-Log">Записывать ID</label>
+            <div class="uwu-settings-card__item">
+              <p>Группирует повторяющиеся удары в логе боя и добавляет счётчик (x2, x3...).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="compact-Fight-Log" data-setting="compactFightLog" />
+                <label for="compact-Fight-Log">Компактный боевой лог</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Возможность разделять котов на цветные команды в панели Боевого Режима.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="Fight-Teams" data-setting="fightTeams" />
+                <label for="Fight-Teams">Команды в БР</label>
+                <input type="text" id="fightTeamsPanelHightField" placeholder="100" data-setting="fightTeamsPanelHight"
+                  style="width: 70px; margin-left: 10px;" />
+                <label>px (высота панели)</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Звуковой сигнал при нажатии и отжатии щита блокирования:</p>
+              <div id="notificationBlockSoundContainer" class="uwu-settings-card__row">
+                <input type="checkbox" id="notification-Block" data-setting="notificationBlock" />
+                <label for="notification-Block">Звук блока</label>
+                <div class="custom-select" id="notificationBlockSound">
+                  <div class="select-selected">Выберите звук</div>
+                  <div class="select-items"></div>
+                </div>
+                <div id="notification-volume" style="display: flex; align-items: center; gap: 8px;">
+                  <label>Громкость:</label>
+                  <input type="range" min="1" max="10" value="5" id="notificationBlockVolume" list="volumeStep"
+                    data-setting="notificationBlockVolume" style="width: 100px;" />
+                </div>
+                <div id="notificationBlockContainer"></div>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item" style="overflow-x: auto; margin-top: 4px;">
+              <table id="colorSettingsTable" class="gcp-table">
+                <thead>
+                  <tr>
+                    <th>Команда</th>
+                    <th>Цвет энергии</th>
+                    <th>Цвет снесённого</th>
+                  </tr>
+                </thead>
+                <tbody id="fight-teams-table-body"></tbody>
+              </table>
+            </div>
           </div>
 
-          <div>
-            <input
-              type="text"
-              id="cleaning-Log-Height"
-              placeholder=". . ."
-              data-setting="cleaningLogHeight"
-            />
-            <label>px; - Начальная высота Лога</label>
+          <!-- ЧАСЫ В ИГРОВОЙ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Часы в Игровой</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает часы с синхронизацией точного времени по сети.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="describe-show-clock" data-setting="showClock" />
+                <label for="describe-show-clock">Включить часы</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 130px;">Стиль часов:</label>
+                <div class="custom-select" id="clockStyle">
+                  <div class="select-selected">Выберите стиль</div>
+                  <div class="select-items"></div>
+                </div>
+              </div>
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 130px;">Расположение:</label>
+                <div class="custom-select" id="clockPosition">
+                  <div class="select-selected">Выберите положение</div>
+                  <div class="select-items"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="describe-clock-Moscow-Time" data-setting="clockMoscowTime" />
+                <label for="describe-clock-Moscow-Time">Московское время (MSK)</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 130px;">Размер шрифта (px):</label>
+                <input type="text" id="clock-Font-Size" placeholder="14" data-setting="clockFontSize"
+                  style="width: 70px;" />
+                <button id="resetClockPosition" class="uwu-button remove-button" style="margin-left: 10px;">Сброс позиции
+                  часов</button>
+              </div>
+            </div>
           </div>
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>BETA 🚧 Лог ловли 🚧 BETA</h2>
+          <!-- ТАЙМЕР-НАПОМИНАЛКА -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Таймер-напоминалка</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>
-              Аналогично Логу чистильщика, но для отслеживания результатов
-              ныряния и ловли в ущелье. Группирует последовательные попытки в
-              один блок.
-            </p>
-            <input
-              type="checkbox"
-              id="catching-Log"
-              data-setting="catchingLog"
-            />
-            <label for="catching-Log">Включить лог ловли</label>
+            <div class="uwu-settings-card__item">
+              <p>Циклический перетаскиваемый таймер в Игровой с подачей звукового сигнала по истечении заданного времени.
+              </p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="interval-timer-enabled" data-setting="intervalTimerEnabled" />
+                <label for="interval-timer-enabled">Включить таймер-напоминалку</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <div id="intervalTimerContainer" class="uwu-settings-card__row">
+                <label>Звук таймера:</label>
+                <div class="custom-select" id="intervalTimerSound">
+                  <div class="select-selected">Выберите звук</div>
+                  <div class="select-items"></div>
+                </div>
+                <div id="notification-volume" style="display: flex; align-items: center; gap: 8px;">
+                  <label>Громкость:</label>
+                  <input type="range" min="1" max="10" value="5" id="intervalTimerVolume" list="volumeStep"
+                    data-setting="intervalTimerVolume" style="width: 100px;" />
+                </div>
+              </div>
+            </div>
           </div>
 
-          <details>
-            <summary
-              style="cursor: pointer; font-size: 16px; font-weight: bold;"
-            >
-              Как работает?
-            </summary>
-            <hr id="uwu-hr" class="uwu-hr" />
-            <p>
-              — Лог создаёт отдельные карточки для каждого типа действия
-              (Ныряние, Осмотр).
-            </p>
-            <p>
-              — Карточка считается активной 2 часа с момента последней попытки.
-            </p>
-            <p>
-              — Если вы вернётесь к тому же действию спустя 2 часа, создастся
-              новая карточка, а не дополнится старая.
-            </p>
-            <hr id="uwu-hr" class="uwu-hr" />
-          </details>
+          <!-- РОТ И ИНВЕНТАРЬ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Рот (Инвентарь)</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <input
-              type="text"
-              id="catching-Log-Height"
-              placeholder=". . ."
-              data-setting="catchingLogHeight"
-            />
-            <label>px; - Начальная высота Лога</label>
+            <div class="uwu-settings-card__item">
+              <p>Добавляет чекбокс для предотвращения случайного опускания выбранного предмета из рта.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="block-item-drop" data-setting="blockItemDrop" />
+                <label for="block-item-drop">Блокировка опускания предмета</label>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <p>
-              Здесь вы можете добавить свои собственные названия для предметов
-              по их ID. Каждая запись должна быть на новой строке в формате
-              "ID=Название". Например: <code>3966=Рыбка</code>. Этот список
-              имеет приоритет над встроенным.
-            </p>
-            <textarea
-              id="catching-log-custom-items"
-              rows="10"
-              style="width: 100%"
-              placeholder="3966=Рыба&#10;3967=Рыба побольше"
-            ></textarea>
-            <button
-              id="save-custom-items-btn"
-              class="uwu-button install-button"
-            >
-              Сохранить
-            </button>
-          </div>
-          <div>
-            <p>Импорт/Экспорт вашего списка названий предметов.</p>
-            <input
-              type="text"
-              id="custom-items-export-field"
-              placeholder="Экспорт"
-              readonly
-            />
-            <input
-              type="text"
-              id="custom-items-import-field"
-              placeholder="Импорт"
-            />
-            <button
-              id="custom-items-import-btn"
-              class="uwu-button install-button"
-            >
-              Вставить
-            </button>
+          <!-- ОХОТА И ДЖОЙСТИК -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Охота и джойстик</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает текстовую подсказку (ближе/дальше) и таймер на индикаторе запаха во время охоты.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="describe-Hunting-Smell" data-setting="describeHuntingSmell" />
+                <label for="describe-Hunting-Smell">Подсказки на запахе</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Сенсорный джойстик на экране охоты для удобного перемещения с мобильных устройств.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="hunting-Virtual-Joystick" data-setting="huntingVirtualJoystick" />
+                <label for="hunting-Virtual-Joystick">Виртуальный джойстик</label>
+                <input type="text" id="sizeHuntingVirtualJoystickField" placeholder="150"
+                  data-setting="sizeHuntingVirtualJoystick" style="width: 70px; margin-left: 10px;" />
+                <label>px (диаметр, по умолчанию 150)</label>
+              </div>
+            </div>
           </div>
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Быстрые ссылки</h2>
+          <!-- ИНФОРМАЦИЯ И КАЛЬКУЛЯТОРЫ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Информация о котах и профили</h3>
+            <hr class="uwu-hr" />
 
-          <p>Быстрые ссылки в Игровой.</p>
-          <div>
-            <input type="checkbox" id="quick-Link1" data-setting="quickLink1" />
-            <label for="quick-Link1">Настройки</label>
+            <div class="uwu-settings-card__item">
+              <p>Добавляет кнопку «Подробнее» во всплывающую подсказку «О коте» (дефекты, размер, ID).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-More-Cat-Info" data-setting="showMoreCatInfo" />
+                <label for="show-More-Cat-Info">Больше информации во всплывающем окне</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Группирует одинаковые предметы в инвентаре подсказки «О коте» со счётчиком количества.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="compact-Mouth" data-setting="compactMouth" />
+                <label for="compact-Mouth">Компактный инвентарь чужих котов</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Кнопка «Подробнее» над собственными шкалами с расчётом точного времени восстановления потребностей.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-Parameter-Details" data-setting="showParametersDetails" />
+                <label for="show-Parameter-Details">Подробная статистика параметров</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает уровень боевых умений (БУ) цифрой в профилях персонажей.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="more-Profile-Info" data-setting="moreProfileInfo" />
+                <label for="more-Profile-Info">БУ цифрой в профиле</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Встраивает интерактивные калькуляторы активности и возраста (лун) в профили кошек.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="calculators" data-setting="calculators" />
+                <label for="calculators">Калькуляторы активности и лун</label>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <input type="checkbox" id="quick-Link2" data-setting="quickLink2" />
-            <label for="quick-Link2">Памятка</label>
+          <!-- МИННОЕ ПОЛЕ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Минное поле</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Интерактивная панель для составления и сохранения карт лазательных локаций (минных полей).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="climbing-panel" data-setting="climbingPanel" />
+                <label for="climbing-panel">Включить окно минного поля</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Управление вкладками и сохраненными таблицами локаций:</p>
+              <h4 style="margin: 4px 0;">Вкладки:</h4>
+              <div id="uwu-buttonRow1-settings"></div>
+              <h4 style="margin: 6px 0 4px;">Локации / Таблицы:</h4>
+              <div id="uwu-buttonRow2-settings"></div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 140px;">Ориентация панели:</label>
+                <div class="custom-select" id="climbingPanelOrientation">
+                  <div class="select-selected">Вертикальный</div>
+                  <div class="select-items"></div>
+                </div>
+              </div>
+              <div class="uwu-settings-card__row">
+                <label style="min-width: 140px;">Способ ввода данных:</label>
+                <div class="custom-select" id="climbingPanelInputsStyle">
+                  <div class="select-selected">Клавиатура</div>
+                  <div class="select-items"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <details class="uwu-details-card">
+                <summary style="cursor: pointer; font-weight: 600;">⌨ Как ставить отметки с клавиатуры?</summary>
+                <div style="font-size: 13px; line-height: 1.5; margin-top: 6px; opacity: 0.85;">
+                  • ЛКМ — выбрать клетку.<br>
+                  • Цифры от <b>0</b> до <b>7</b> — поставить число мин.<br>
+                  • Знак минус ( <b>-</b> ) — красная опасная клетка (мина).<br>
+                  • Знак равно ( <b>=</b> ) — яркая клетка (переход, не стирается кнопкой очистки).<br>
+                  • Два клика ЛКМ по ячейке — стереть её значение.
+                </div>
+              </details>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает числовую громкость уведомления в чате (количество мин вокруг кота).</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="climbing-Notifications-Numbers" data-setting="climbingNotificationsNumbers" />
+                <label for="climbing-Notifications-Numbers">Подписывать числовую громкость в чате</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Звуковое оповещение при обновлении карты опасных клеток:</p>
+              <div id="climbingRefreshNotificationSoundContainer" class="uwu-settings-card__row">
+                <input type="checkbox" id="climbing-Refresh-Notification" data-setting="climbingRefreshNotification" />
+                <label for="climbing-Refresh-Notification">Звук обновления</label>
+                <div class="custom-select" id="climbingRefreshNotificationSound">
+                  <div class="select-selected">Выберите звук</div>
+                  <div class="select-items"></div>
+                </div>
+                <div id="notification-volume" style="display: flex; align-items: center; gap: 8px;">
+                  <label>Громкость:</label>
+                  <input type="range" min="1" max="10" value="5" id="climbing-Refresh-Notification-Volume" list="volumeStep"
+                    data-setting="climbingRefreshNotificationVolume" style="width: 100px;" />
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <input type="checkbox" id="quick-Link3" data-setting="quickLink3" />
-            <label for="quick-Link3">Блоги</label>
-          </div>
+          <!-- ЛОГИ ЧИСТИЛЬЩИКА И ЛОВЛИ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Логи чистки и ловли (BETA)</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <input type="checkbox" id="quick-Link4" data-setting="quickLink4" />
-            <label for="quick-Link4">Лента</label>
-          </div>
-
-          <div>
-            <p>
-              Ваши ссылки. Вставляете ссылку, пробел и пишите название. Для
-              множества просто пишите через запятую. Пример: https://мяу Котики,
-              https://мяу2 Больше-котиков
-            </p>
-            <input
-              type="text"
-              id="users-quick-Links"
-              placeholder=". . ."
-              data-setting="userQuickLinks"
-            />
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-
-          <h2>Уведомления</h2>
-          <p>Уведомлять звуком, когда:</p>
-
-          <table class="notification-table">
-            <tbody>
-              <tr>
-                <td>
-                  <input
-                    type="checkbox"
-                    id="notification-PM"
-                    data-setting="notificationPM"
-                  />
-                </td>
-                <td>
-                  <div class="custom-select" id="notificationPMSound">
-                    <div class="select-selected">Выберите звук</div>
-                    <div class="select-items"></div>
+            <div class="uwu-settings-card__item">
+              <p>Журнал чистильщика: автоматическая фиксация проверок сна, поднятий и опусканий котов.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="cleaning-Log" data-setting="cleaningLog" />
+                <label for="cleaning-Log">Включить лог чистильщика</label>
+                <div class="custom-select" id="cleaningLogStyle" style="margin-left: 10px;">
+                  <div class="select-selected">Умный</div>
+                  <div class="select-items"></div>
+                </div>
+              </div>
+              <div class="uwu-settings-card__item">
+                <details class="uwu-details-card">
+                  <summary style="cursor: pointer; font-weight: 600;">🐾 Как работает лог чистильщика?</summary>
+                  <div style="font-size: 13px; line-height: 1.45; margin-top: 6px; opacity: 0.85;">
+                    <b>1.</b> Проверьте кота действием («потереться носом», «щекой о щёку», «помурлыкать» или
+                    «обнюхать»).<br>
+                    <b>2.</b> Если кот спит — смело поднимайте, лог запишет его. Если не спит или вы забыли проверить — лог
+                    предупредит об этом.<br>
+                    <b>3.</b> Кнопка с корзинкой рядом с очисткой лога удаляет <i>последнего опущенного кота</i> (например,
+                    если он проснулся и выпросился гулять).
                   </div>
-                </td>
-                <td>
-                  <div class="volume-control">
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
-                      value="5"
-                      class="uwu-range-slider"
-                      id="notificationPMVolume"
-                      list="volumeStep"
-                      data-setting="notificationPMVolume"
-                    />
-                    <datalist id="volumeStep">
-                      <option value="1">10%</option>
-                      <option value="10">100%</option>
-                    </datalist>
-                  </div>
-                </td>
-                <td id="notificationPMContainer"></td>
-                <td><label for="notification-PM">Новое ЛС</label></td>
-              </tr>
-              <tr>
-                <td>
-                  <input
-                    type="checkbox"
-                    id="notification-Action-End"
-                    data-setting="notificationActionEnd"
-                  />
-                </td>
-                <td>
-                  <div class="custom-select" id="notificationActionEndSound">
-                    <div class="select-selected">Выберите звук</div>
-                    <div class="select-items"></div>
-                  </div>
-                </td>
-                <td>
-                  <div class="volume-control">
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
-                      value="5"
-                      class="uwu-range-slider"
-                      id="notificationActionEndVolume"
-                      list="volumeStep"
-                      data-setting="notificationActionEndVolume"
-                    />
-                    <datalist id="volumeStep">
-                      <option value="1">10%</option>
-                      <option value="10">100%</option>
-                    </datalist>
-                  </div>
-                </td>
-                <td id="notificationActionEndContainer"></td>
-                <td>
-                  <label for="notification-Action-End"
-                    >Действие закончилось</label
-                  >
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input
-                    type="checkbox"
-                    id="notification-Action-End-Early"
-                    data-setting="notificationActionEndEarly"
-                  />
-                </td>
-                <td colspan="3"></td>
-                <td>
-                  <label for="notification-Action-End-Early"
-                    >За 3 секунды</label
-                  >
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input
-                    type="checkbox"
-                    id="notification-In-Mouth"
-                    data-setting="notificationInMouth"
-                  />
-                </td>
-                <td>
-                  <div class="custom-select" id="notificationInMouthSound">
-                    <div class="select-selected">Выберите звук</div>
-                    <div class="select-items"></div>
-                  </div>
-                </td>
-                <td>
-                  <div class="volume-control">
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
-                      value="5"
-                      class="uwu-range-slider"
-                      id="notificationInMouthVolume"
-                      list="volumeStep"
-                      data-setting="notificationInMouthVolume"
-                    />
-                    <datalist id="volumeStep">
-                      <option value="1">10%</option>
-                      <option value="10">100%</option>
-                    </datalist>
-                  </div>
-                </td>
-                <td id="notificationInMouthContainer"></td>
-                <td>
-                  <label for="notification-In-Mouth">Кто-то меня поднял</label>
-                </td>
-              </tr>
+                </details>
+              </div>
+              <div class="uwu-settings-card__row" style="margin-top: 4px;">
+                <input type="checkbox" id="cleaning-Log-ShowID" data-setting="cleaningLogShowID" />
+                <label for="cleaning-Log-ShowID">Записывать ID персонажей</label>
+                <input type="text" id="cleaning-Log-Height" placeholder="120" data-setting="cleaningLogHeight"
+                  style="width: 70px; margin-left: 10px;" />
+                <label>px (высота)</label>
+              </div>
+            </div>
 
-              <tr>
-                <td>
-                  <input
-                    type="checkbox"
-                    id="notification-In-Fight-Mode"
-                    data-setting="notificationInFightMode"
-                  />
-                </td>
-                <td>
-                  <div class="custom-select" id="notificationInFightModeSound">
-                    <div class="select-selected">Выберите звук</div>
-                    <div class="select-items"></div>
-                  </div>
-                </td>
-                <td>
-                  <div class="volume-control">
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
-                      value="5"
-                      class="uwu-range-slider"
-                      id="notificationInFightModeVolume"
-                      list="volumeStep"
-                      data-setting="notificationInFightModeVolume"
-                    />
-                    <datalist id="volumeStep">
-                      <option value="1">10%</option>
-                      <option value="10">100%</option>
-                    </datalist>
-                  </div>
-                </td>
-                <td id="notificationInFightModeContainer"></td>
-                <td>
-                  <label for="notification-In-Fight-Mode"
-                    >Ввели в стойку (Т+2/Т+3)</label
-                  >
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <div class="uwu-settings-card__item" style="margin-top: 10px;">
+              <p>Журнал ловли: фиксация попыток ныряния и осмотра расщелин с учётом выловленной добычи.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="catching-Log" data-setting="catchingLog" />
+                <label for="catching-Log">Включить лог ловли</label>
+                <input type="text" id="catching-Log-Height" placeholder="120" data-setting="catchingLogHeight"
+                  style="width: 70px; margin-left: 10px;" />
+                <label>px (высота)</label>
+              </div>
+            </div>
 
-          <div>
-            <p>Дублирует время действий на название браузерной вкладки.</p>
-            <input
-              type="checkbox"
-              id="duplicate-Time-In-Browser-Tab"
-              data-setting="duplicateTimeInBrowserTab"
-            />
-            <label for="duplicate-Time-In-Browser-Tab"
-              >Показывать время действия на вкладке</label
-            >
+            <div class="uwu-settings-card__item">
+              <p>Пользовательские названия предметов по ID (формат: <code>ID=Название</code>, каждое с новой строки):</p>
+              <textarea id="catching-log-custom-items" rows="5" placeholder="3966=Рыба&#10;3967=Большая рыба"
+                class="uwu-textarea-field"></textarea>
+              <div class="uwu-settings-card__row">
+                <button id="save-custom-items-btn" class="uwu-button install-button">Сохранить названия</button>
+                <input type="text" id="custom-items-export-field" placeholder="Экспорт" readonly style="width: 120px;" />
+                <input type="text" id="custom-items-import-field" placeholder="Импорт" style="width: 120px;" />
+                <button id="custom-items-import-btn" class="uwu-button install-button">Вставить</button>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <p>Подсказывает оставшееся время до возможности понюхать.</p>
-            <input
-              type="checkbox"
-              id="show-Hint-When-To-Sniff"
-              data-setting="showHintWhenToSniff"
-            />
-            <label for="show-Hint-When-To-Sniff">Когда нюхать?</label>
+          <!-- БЫСТРЫЕ ССЫЛКИ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Быстрые ссылки в Игровой</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Закреплённые ссылки в верхней строке навигации Игровой:</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="quick-Link2" data-setting="quickLink2" style="margin-left: 10px;" />
+                <label for="quick-Link2">Памятка</label>
+                <input type="checkbox" id="quick-Link3" data-setting="quickLink3" style="margin-left: 10px;" />
+                <label for="quick-Link3">Блоги</label>
+                <input type="checkbox" id="quick-Link4" data-setting="quickLink4" style="margin-left: 10px;" />
+                <label for="quick-Link4">Лента</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Ваши личные ссылки. Вставьте ссылку, пробел и название. Несколько штук пишите через запятую.<br>
+                <i>Пример: https://catwar.net/clan Моё-племя, https://мяу Котики</i>
+              </p>
+              <input type="text" id="users-quick-Links" placeholder="https://... Название" data-setting="userQuickLinks"
+                style="width: 100%; max-width: 480px;" />
+            </div>
           </div>
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Общение</h2>
+          <!-- ЗВУКОВЫЕ УВЕДОМЛЕНИЯ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Звуковые уведомления</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>
-              Позволяет сохранять личные сообщения локально в браузере для
-              офлайн-доступа.
-            </p>
-            <input type="checkbox" id="saving-LS" data-setting="savingLS" />
-            <label for="saving-LS">Сохранение Личных сообщений</label>
+            <div class="uwu-settings-card__item" style="overflow-x: auto;">
+              <table class="notification-table gcp-table">
+                <thead>
+                  <tr>
+                    <th>Вкл</th>
+                    <th>Событие</th>
+                    <th>Мелодия</th>
+                    <th>Громкость</th>
+                    <th>Тест</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="uwu-checkbox-cell">
+                      <input type="checkbox" id="notification-PM" data-setting="notificationPM" />
+                    </td>
+                    <td><label for="notification-PM">Новое личное сообщение (ЛС)</label></td>
+                    <td>
+                      <div class="custom-select" id="notificationPMSound">
+                        <div class="select-selected">Выберите звук</div>
+                        <div class="select-items"></div>
+                      </div>
+                    </td>
+                    <td>
+                      <input type="range" min="1" max="10" value="5" id="notificationPMVolume" list="volumeStep"
+                        data-setting="notificationPMVolume" style="width: 90px;" />
+                    </td>
+                    <td id="notificationPMContainer"></td>
+                  </tr>
+
+                  <tr>
+                    <td class="uwu-checkbox-cell">
+                      <input type="checkbox" id="notification-Action-End" data-setting="notificationActionEnd" />
+                    </td>
+                    <td><label for="notification-Action-End">Завершение длительного действия</label></td>
+                    <td>
+                      <div class="custom-select" id="notificationActionEndSound">
+                        <div class="select-selected">Выберите звук</div>
+                        <div class="select-items"></div>
+                      </div>
+                    </td>
+                    <td>
+                      <input type="range" min="1" max="10" value="5" id="notificationActionEndVolume" list="volumeStep"
+                        data-setting="notificationActionEndVolume" style="width: 90px;" />
+                    </td>
+                    <td id="notificationActionEndContainer"></td>
+                  </tr>
+
+                  <tr>
+                    <td class="uwu-checkbox-cell">
+                      <input type="checkbox" id="notification-Action-End-Early" data-setting="notificationActionEndEarly" />
+                    </td>
+                    <td colspan="4">
+                      <label for="notification-Action-End-Early">Предупреждать заранее (за 3 секунды до конца)</label>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td class="uwu-checkbox-cell">
+                      <input type="checkbox" id="notification-In-Mouth" data-setting="notificationInMouth" />
+                    </td>
+                    <td><label for="notification-In-Mouth">Персонажа взяли в рот</label></td>
+                    <td>
+                      <div class="custom-select" id="notificationInMouthSound">
+                        <div class="select-selected">Выберите звук</div>
+                        <div class="select-items"></div>
+                      </div>
+                    </td>
+                    <td>
+                      <input type="range" min="1" max="10" value="5" id="notificationInMouthVolume" list="volumeStep"
+                        data-setting="notificationInMouthVolume" style="width: 90px;" />
+                    </td>
+                    <td id="notificationInMouthContainer"></td>
+                  </tr>
+
+                  <tr>
+                    <td class="uwu-checkbox-cell">
+                      <input type="checkbox" id="notification-In-Fight-Mode" data-setting="notificationInFightMode" />
+                    </td>
+                    <td><label for="notification-In-Fight-Mode">Ввели в боевую стойку (Т+2 / Т+3)</label></td>
+                    <td>
+                      <div class="custom-select" id="notificationInFightModeSound">
+                        <div class="select-selected">Выберите звук</div>
+                        <div class="select-items"></div>
+                      </div>
+                    </td>
+                    <td>
+                      <input type="range" min="1" max="10" value="5" id="notificationInFightModeVolume" list="volumeStep"
+                        data-setting="notificationInFightModeVolume" style="width: 90px;" />
+                    </td>
+                    <td id="notificationInFightModeContainer"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="uwu-settings-card__item" style="margin-top: 8px;">
+              <p>Дублирует таймер и название текущего действия в заголовок браузерной вкладки.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="duplicate-Time-In-Browser-Tab" data-setting="duplicateTimeInBrowserTab" />
+                <label for="duplicate-Time-In-Browser-Tab">Таймер действия на вкладке</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает подсказку времени перезарядки кнопки «Принюхиваться».</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-Hint-When-To-Sniff" data-setting="showHintWhenToSniff" />
+                <label for="show-Hint-When-To-Sniff">Подсказка: «Когда нюхать?»</label>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <p>
-              Автоматически находит и переносит ваши сохранённые ЛС из
-              подходящих модов и скриптов в хранилище UwU.
-            </p>
-            <button
-              id="import-ls-from-other-mods"
-              class="uwu-button install-button"
-            >
-              Импортировать ЛС из других модов и скриптов
-            </button>
-          </div>
+          <!-- ОБЩЕНИЕ И ЛИЧНЫЕ СООБЩЕНИЯ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Общение и личные сообщения</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>
-              Индивидуальный импорт/экспорт только сохранённых личных сообщений.
-            </p>
-            <input
-              type="text"
-              id="ls-export-field"
-              placeholder="Экспорт ЛС"
-              readonly
-            />
-            <input type="text" id="ls-import-field" placeholder="Импорт ЛС" />
-            <button id="ls-import-btn" class="uwu-button install-button">
-              Вставить
-            </button>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Локальное резервное копирование переписок в браузере для чтения офлайн.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="saving-LS" data-setting="savingLS" />
+                <label for="saving-LS">Сохранение личных сообщений (ЛС)</label>
+              </div>
+            </div>
 
-          <div>
-            <p>
-              Автоматически сохраняет и восстанавливает редактируемый текст
-              блога. Теперь вы не потеряете его случайно.
-            </p>
-            <input
-              type="checkbox"
-              id="restore-Blog-Creation"
-              data-setting="restoreBlogCreation"
-            />
-            <label for="restore-Blog-Creation"
-              >Восстановление содержимого Блога</label
-            >
-          </div>
+            <div class="uwu-settings-card__item">
+              <div class="uwu-settings-card__row">
+                <button id="import-ls-from-other-mods" class="uwu-button install-button">Импортировать ЛС из других
+                  модов</button>
+                <input type="text" id="ls-export-field" placeholder="Экспорт ЛС" readonly style="width: 140px;" />
+                <input type="text" id="ls-import-field" placeholder="Импорт ЛС" style="width: 140px;" />
+                <button id="ls-import-btn" class="uwu-button install-button">Вставить</button>
+              </div>
+            </div>
 
-          <div>
-            <p>Говорит само за себя.</p>
-            <input
-              type="checkbox"
-              id="more-BB-Codes"
-              data-setting="moreBBCodes"
-            />
-            <label for="more-BB-Codes">Дополнительные BB-Коды</label>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Автоматическое сохранение черновика при создании блога во избежание потери текста.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="restore-Blog-Creation" data-setting="restoreBlogCreation" />
+                <label for="restore-Blog-Creation">Восстановление черновика блога</label>
+              </div>
+            </div>
 
-          <div>
-            <p>
-              Позволяет предпросматривать отправляемые сообщения в лентах и
-              блогах.
-            </p>
-            <input
-              type="checkbox"
-              id="comment-Preview"
-              data-setting="commentPreview"
-            />
-            <label for="comment-Preview">Предпросмотр сообщений</label>
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Расширенная панель дополнительных BB-кодов в формах редактирования.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="more-BB-Codes" data-setting="moreBBCodes" />
+                <label for="more-BB-Codes">Дополнительные BB-коды</label>
+              </div>
+            </div>
 
-          <div>
-            <p>
-              Позволяет "отвечать" и "цитировать" сообщения в лентах и блогах.
-              При цитировании вы можете выделить кусочек текста на который
-              хотите ответить.
-            </p>
-            <input
-              type="checkbox"
-              id="more-Comment-Buttons"
-              data-setting="moreCommentButtons"
-            />
-            <label for="more-Comment-Buttons"
-              >Кнопки "Отправить" и "Цитировать"</label
-            >
-          </div>
+            <div class="uwu-settings-card__item">
+              <p>Интерактивный предпросмотр отправляемых комментариев в лентах и блогах.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="comment-Preview" data-setting="commentPreview" />
+                <label for="comment-Preview">Предпросмотр комментариев</label>
+              </div>
+            </div>
 
-          <div>
-            <p>
-              Оборачивает предпросмотр письма в оболочку, похожую на ту которая
-              во "Входящие".
-            </p>
-            <input
-              type="checkbox"
-              id="ls-Wrap-Preview"
-              data-setting="lsWrapPreview"
-            />
-            <label for="ls-Wrap-Preview">Наглядный предпросмотр письма</label>
+            <div class="uwu-settings-card__item">
+              <p>Быстрые кнопки ответа и цитирования выделенного фрагмента текста в комментариях.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="more-Comment-Buttons" data-setting="moreCommentButtons" />
+                <label for="more-Comment-Buttons">Кнопки «Ответить» и «Цитировать»</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Оформление предпросмотра письма в стиле входящего сообщения.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="ls-Wrap-Preview" data-setting="lsWrapPreview" />
+                <label for="ls-Wrap-Preview">Наглядный предпросмотр письма</label>
+              </div>
+            </div>
           </div>
         </div>
 
         <div id="modules-panel">
-          <h2>Главное</h2>
-          <div>
-            <p>
-              Постоянное отображание Панели Расширенных Настроек в Игровой. Сама
-              по себе пустая.
-            </p>
-            <input
-              type="checkbox"
-              id="extended-settings-Panel"
-              data-setting="extendedSettingsPanel"
-            />
-            <label for="extended-settings-Panel"
-              >⚙️Панель Расширенных Настроек</label
-            >
-          </div>
+          <!-- ОСНОВНЫЕ НАДСТРОЙКИ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Основные надстройки</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>
-              Отображает уведомление в ⚙️Панели Расширенных настроек в Игровой.
-            </p>
-            <input
-              type="checkbox"
-              id="show-Update-Notification"
-              data-setting="showUpdateNotification"
-            />
-            <label for="show-Update-Notification"
-              >Уведомлять об обновлении Скрипта/Мода UwU</label
-            >
-          </div>
-
-          <div>
-            <p>
-              ⚙️Панели Расширенных Настроек не будет так скучно с рандомными
-              фразами.
-            </p>
-            <input
-              type="checkbox"
-              id="show-Splash-Screens"
-              data-setting="showSplashScreens"
-            />
-            <label for="show-Splash-Screens">Показывать Splash надписи.</label>
-          </div>
-
-          <div>
-            <p>
-              Скрывать или отображать расширенные подсказки к настройкам.
-              Привет, я та самая расширенная подсказка. Делает Настройки CatWar
-              UwU очень компактным на вид.
-            </p>
-            <input
-              type="checkbox"
-              id="extended-Hints"
-              data-setting="extendedHints"
-            />
-            <label for="extended-Hints">Расширенные подсказки</label>
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Сборник стилей</h2>
-          <p>Онлайн сборник стилей от Разработчика.</p>
-          <hr id="uwu-hr" class="uwu-hr" />
-          <div id="module-info">
-            <!-- Сюда модули -->
-          </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Пользовательские звуки</h2>
-          <div>
-            <p>
-              Добавляйте собственные звуки по прямым ссылкам (mp3, ogg, wav) для
-              уведомлений.
-            </p>
-            <div
-              id="custom-sounds-container"
-              class="extended-settings-block"
-              style="padding: 10px; margin-top: 10px; width: 100%; box-sizing: border-box"
-            >
-              <div
-                id="custom-sounds-list"
-                style="
-                  display: flex;
-                  flex-direction: column;
-                  gap: 5px;
-                  margin-bottom: 10px;
-                "
-              >
-                <!-- Список звуков будет генерироваться здесь -->
+            <div class="uwu-settings-card__item">
+              <p>Отображает текущую погоду из Игровой в шапке настроек. Если выключено, то погода в шапке будет рандомная!</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="duplicate-game-weather" data-setting="duplicateGameWeather" />
+                <label for="duplicate-game-weather">Дублировать погоду с Игровой</label>
               </div>
+            </div>
 
-              <!-- Адаптивный блок добавления (Mobile First) -->
-              <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch">
-                <input
-                  type="text"
-                  id="custom-sound-name"
-                  placeholder="Название (напр. Мяу)"
-                  style="flex: 1 1 100px; margin: 0; width: auto"
-                />
-                <input
-                  type="text"
-                  id="custom-sound-url"
-                  placeholder="URL (https://...)"
-                  style="flex: 3 1 150px; margin: 0; width: auto"
-                />
-                <button
-                  id="add-custom-sound-btn"
-                  class="uwu-button install-button"
-                  style="flex: 1 1 auto; margin: 0; padding: 0 15px; white-space: nowrap"
-                >
-                  Добавить
-                </button>
+            <div class="uwu-settings-card__item">
+              <p>Показывает индикатор на кнопке меню UwU при установке новой версии скрипта.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-Update-Notification" data-setting="showUpdateNotification" />
+                <label for="show-Update-Notification">Индикатор обновления скрипта</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Отображает случайные приветственные Splash-фразы в расширенном меню Игровой.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-Splash-Screens" data-setting="showSplashScreens" />
+                <label for="show-Splash-Screens">Показывать Splash-надписи</label>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item">
+              <p>Скрывать или показывать подробные подсказки к настройкам. Привет, я та самая подсказка! Без меня настройки
+                выглядят гораздо компактнее.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="extended-Hints" data-setting="extendedHints" />
+                <label for="extended-Hints">Расширенные подсказки</label>
               </div>
             </div>
           </div>
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Единое Хранилище</h2>
-          <div>
-            <p>
-              Включает синхронизацию скрипта/мода между разными доменами CatWar
-              через хранилище 'monkey плагинов.
-            </p>
-            <p>
-              <b>ВНИМАНИЕ:</b> При первом включении этой опции, ваши текущие
-              локальные настройки и данные с этого сайта (например, catwar.net)
-              будут скопированы в единое хранилище и станут основными.
-              Убедитесь, что вы включаете эту опцию на том сайте, настройки и
-              данные которого хотите сохранить.
-            </p>
-            <input
-              type="checkbox"
-              id="unified-storage"
-              data-setting="unifiedStorage"
-            />
-            <label for="unified-storage"
-              >Использовать единое хранилище (.net & .su)</label
-            >
+          <!-- СБОРНИК СТИЛЕЙ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Сборник стилей</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Онлайн-каталог дополнительных модулей и модификаций интерфейса от разработчика:</p>
+            </div>
+
+            <div id="module-info" class="uwu-modules-grid">
+              <!-- -->
+            </div>
           </div>
 
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h2>Импорт/Экспорт</h2>
+          <!-- ПОЛЬЗОВАТЕЛЬСКИЕ ЗВУКИ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Пользовательские звуки</h3>
+            <hr class="uwu-hr" />
 
-          <div>
-            <p>Импорт/Экспорт всех настроек.</p>
-            <input type="text" id="exportSettings" placeholder="Экспорт" />
-            <input type="text" id="importSettings" placeholder="Импорт" />
-            <button id="importSettingsButton" class="uwu-button install-button">
-              Вставить
-            </button>
+            <div class="uwu-settings-card__item">
+              <p>Добавляйте собственные звуки по прямым ссылкам (mp3, ogg, wav) для использования во всех списках
+                уведомлений.</p>
+              <div id="custom-sounds-container" class="uwu-custom-sounds-box">
+                <div id="custom-sounds-list">
+                  <!-- -->
+                </div>
+
+                <div class="uwu-settings-card__row" style="margin-top: 10px; align-items: stretch;">
+                  <input type="text" id="custom-sound-name" placeholder="Название (напр. Мяу)" style="flex: 1 1 120px;" />
+                  <input type="text" id="custom-sound-url" placeholder="URL аудиофайла (https://...)"
+                    style="flex: 3 1 220px;" />
+                  <button id="add-custom-sound-btn" class="uwu-button install-button"
+                    style="flex: 1 1 auto; padding: 0 16px; white-space: nowrap;">
+                    Добавить звук
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <p>
-              Удаляет все настройки. В очень редких случаях может помочь при
-              проблемных проблемах.
-            </p>
-            <button id="resetAllSaves" class="uwu-button remove-button">
-              Сброс сохранений
-            </button>
+          <!-- ЕДИНОЕ ХРАНИЛИЩЕ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Единое хранилище (.net & .su)</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Включает синхронизацию настроек, тем и карт минного поля между доменами CatWar (.net и .su).</p>
+
+              <div class="uwu-warning-note">
+                <b>ВНИМАНИЕ:</b> При первом включении ваши текущие настройки именно с <u>этого сайта</u> скопируются в общее
+                хранилище и станут главными.<br>
+                Обязательно включайте эту галочку на том домене (например, catwar.net), настройки которого хотите сохранить!
+              </div>
+
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="unified-storage" data-setting="unifiedStorage" />
+                <label for="unified-storage">Использовать единое хранилище (.net & .su)</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- УПРАВЛЕНИЕ ДАННЫМИ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Управление данными</h3>
+            <hr class="uwu-hr" />
+
+            <div class="uwu-settings-card__item">
+              <p>Полный резервный экспорт и импорт всех настроек скрипта/мода в формате JSON:</p>
+              <div class="uwu-settings-card__row">
+                <input type="text" id="exportSettings" placeholder="Экспорт" readonly style="width: 150px;" />
+                <input type="text" id="importSettings" placeholder="Импорт" style="width: 150px;" />
+                <button id="importSettingsButton" class="uwu-button install-button">Импортировать</button>
+              </div>
+            </div>
+
+            <div class="uwu-settings-card__item" style="margin-top: 10px;">
+              <p>Удаляет вообще все сохранения и настройки мода UwU (темы, карты минного поля, историю БУ, звуки). В очень
+                редких случаях помогает при багах и проблемных проблемах:</p>
+              <div class="uwu-settings-card__row">
+                <button id="resetAllSaves" class="uwu-button remove-button">Сброс всех сохранений</button>
+              </div>
+            </div>
           </div>
         </div>
 
         <div id="personal-costumes-panel">
-          <h2>Личные костюмы</h2>
-          <p>
-            Здесь вы можете управлять костюмами для всех ваших котов. Костюмы
-            привязываются к конкретному коту.
-          </p>
-          <div>
-            <input
-              type="checkbox"
-              id="personal-costume-panel"
-              data-setting="personalCostumes"
-            />
-            <label for="personal-costume-panel"
-              >⚙️Включить персональные костюмы</label
-            >
-          </div>
-          <p>Добавляет кнопку «Сохранить костюм» при наведении на игрока.</p>
-          <div>
-            <input
-              type="checkbox"
-              id="show-costumes"
-              data-setting="showCostumesButtons"
-            />
-            <label for="show-costumes">Сохранять костюмы других игроков</label>
-          </div>
-          <br />
-          <hr id="uwu-hr" class="uwu-hr" />
+          <!-- НАСТРОЙКИ И СОХРАНЕНИЕ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Личные костюмы</h3>
+            <hr class="uwu-hr" />
 
-          <div class="costume-flex-box disabled">
-            <div class="costumeSettings" style="flex: 2;">
-              <div
-                id="cat-selector-container"
-                style="margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;"
-              >
-                <label>Выберите кота:</label>
-                <div
-                  style="display: flex; gap: 5px; align-items: center; margin-top: 5px;"
-                >
-                  <select
-                    id="current-cat-select"
-                    class="uwu-select-selected"
-                    style="width: 100%; margin: 0;"
-                  ></select>
-                  <button
-                    id="delete-cat-btn"
-                    class="uwu-button remove-button"
-                    title="Удалить этого кота из списка"
-                  >
-                    🗑️
-                  </button>
-                </div>
-
-                <label style="display: block; margin-top: 10px;"
-                  >Выберите позу для редактирования:</label
-                >
-                <select
-                  id="current-pose-select"
-                  class="uwu-select-selected"
-                  style="width: 100%; margin: 5px 0 0 0;"
-                >
-                  <!-- Пу-пу-пу -->
-                </select>
-                <div style="font-size: 0.8em; opacity: 0.6; margin-top: 2px;">
-                  * Позы сохраняются автоматически, когда вы меняете положение в
-                  Игровой.
-                </div>
-              </div>
-
-              <div>
-                <h3>Изменить Костюм:</h3>
-                <div
-                  style="font-size: 0.9em; opacity: 0.8; margin-bottom: 10px;"
-                >
-                  Загрузите изображение (желательно 200x300 или 2:3). Оно будет
-                  подогнано под размер.
-                </div>
-              </div>
-
-              <input
-                type="file"
-                id="costume-file"
-                accept="image/png"
-                class="uwu-button"
-                style="width: 100%; box-sizing: border-box;"
-              />
-              <br />
-
-              <div
-                style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 10px; margin-top: 10px;"
-              >
-                <button
-                  class="uwu-button install-button"
-                  id="changeCostume"
-                  style="flex: 1; white-space: normal; min-width: 120px;"
-                >
-                  Надеть на кота
-                </button>
-
-                <button
-                  class="uwu-button install-button"
-                  id="saveCostumeToNewSlot"
-                  style="flex: 1; white-space: normal; min-width: 120px;"
-                >
-                  Сохранить в библиотеку
-                </button>
+            <div class="uwu-settings-card__item">
+              <p>Здесь вы можете надевать свои уникальные костюмы, которые будут видны вам во время игры (К сожалению,
+                только вам...). Костюмы привязываются персонально к каждому вашему котику!</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="personal-costume-panel" data-setting="personalCostumes" />
+                <label for="personal-costume-panel">⚙️ Включить персональные костюмы</label>
               </div>
             </div>
 
-            <div
-              id="cat-preview-wrapper"
-              style="flex: 1; display: flex; flex-direction: column; align-items: center;"
-            >
-              <div
-                id="cat-image-container"
-                style="width: 100px; height: 150px; position: relative; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;"
-              ></div>
-              <p
-                id="cat-preview-name"
-                style="margin-top: 5px; margin-bottom: 5px; font-weight: bold; text-align: center;"
-              >
-                ...
+            <div class="uwu-settings-card__item">
+              <p>Добавляет «Сохранить костюм» в подсказку при наведении на игрока в Игровой.</p>
+              <div class="uwu-settings-card__row">
+                <input type="checkbox" id="show-costumes" data-setting="showCostumesButtons" />
+                <label for="show-costumes">Сохранять костюмы других игроков</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- ПРИМЕРОЧНАЯ -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Примерочная котика</h3>
+            <hr class="uwu-hr" />
+
+            <div class="costume-flex-box disabled">
+              <div class="costumeSettings" style="flex: 2; min-width: 260px;">
+                <div id="cat-selector-container"
+                  style="margin-bottom: 14px; border-bottom: 1px solid var(--ui-line, rgba(255,255,255,0.1)); padding-bottom: 14px;">
+                  <label style="font-weight: 600;">Выберите кота:</label>
+                  <div style="display: flex; gap: 8px; align-items: center; margin-top: 6px;">
+                    <select id="current-cat-select" class="uwu-select-selected" style="width: 100%; margin: 0;"></select>
+                    <button id="delete-cat-btn" class="uwu-button remove-button"
+                      title="Удалить этого кота из списка скрипта" style="padding: 6px 12px; margin: 0;">
+                      🗑️
+                    </button>
+                  </div>
+
+                  <label style="display: block; margin-top: 12px; font-weight: 600;">Выберите позу для
+                    редактирования:</label>
+                  <select id="current-pose-select" class="uwu-select-selected"
+                    style="width: 100%; margin: 6px 0 0 0;"></select>
+                  <div style="font-size: 12px; opacity: 0.7; margin-top: 6px; line-height: 1.4;">
+                    🐾 <i>Позы сохраняются сами, когда вы меняете положение (сидит, лежит, стоит) в Игровой.</i>
+                  </div>
+                </div>
+
+                <div class="uwu-settings-card__item">
+                  <h4 style="margin: 0; font-size: 15px;">Загрузить свой костюм:</h4>
+                  <p>Выберите PNG-изображение на прозрачном фоне (желательно 200x300 px или соотношение 2:3):</p>
+
+                  <input type="file" id="costume-file" accept="image/png" class="uwu-file-input" />
+
+                  <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+                    <button class="uwu-button install-button" id="changeCostume"
+                      style="flex: 1 1 140px; margin: 0; padding: 8px 12px;">
+                      Надеть на позу
+                    </button>
+
+                    <button class="uwu-button install-button" id="saveCostumeToNewSlot"
+                      style="flex: 1 1 140px; margin: 0; padding: 8px 12px;">
+                      В библиотеку (+)
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div id="cat-preview-wrapper"
+                style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 160px; padding: 10px; background: rgba(0,0,0,0.15); border: 1px solid var(--ui-line, rgba(255,255,255,0.1)); border-radius: 12px;">
+                <div id="cat-image-container"
+                  style="width: 100px; height: 150px; position: relative; border: 1px solid rgba(255,255,255,0.25); border-radius: 10px; overflow: hidden; background: rgba(0,0,0,0.2);">
+                </div>
+                <p id="cat-preview-name" style="margin: 8px 0 6px; font-weight: 700; text-align: center; font-size: 14px;">
+                  ...
+                </p>
+
+                <a class="uwu-button remove-button" id="removeCostume"
+                  style="font-size: 12px; padding: 4px 12px; text-decoration: none; color: inherit; margin: 0; cursor: pointer;"
+                  title="Снять текущий костюм с этой позы кота">
+                  Снять костюм
+                </a>
+              </div>
+            </div>
+
+            <div id="no-cats-warning" class="uwu-warning-note" style="display: none; text-align: center; margin-top: 14px;">
+              <h4 style="margin: 0 0 6px 0; font-size: 16px;">🔍 Котик ещё не обнаружен!</h4>
+              <p style="margin: 0; line-height: 1.5;">
+                Чтобы скрипт увидел вашего персонажа:<br>
+                1. Убедитесь, что галочка «Включить персональные костюмы» стоит.<br>
+                2. Зайдите в <a href="/cw3/" target="_blank" style="text-decoration: underline;">Игровую</a> хотя бы один
+                раз.<br>
+                3. Вернитесь сюда и обновите страничку.
               </p>
-
-              <a
-                class="uwu-button remove-button"
-                id="removeCostume"
-                style="font-size: 0.8em; padding: 2px 10px; text-decoration: none; color: inherit; margin-top: 5px;"
-                title="Снять текущий костюм с этого кота"
-                >Снять костюм</a
-              >
             </div>
           </div>
 
-          <div
-            id="no-cats-warning"
-            style="display: none; background: rgba(255, 100, 100, 0.1); border: 1px solid rgba(255, 100, 100, 0.3); padding: 15px; border-radius: 10px; margin-top: 10px; text-align: center;"
-          >
-            <h3>🔍 Коты не найдены</h3>
-            <p>
-              Чтобы настроить костюм, нужно, чтобы скрипт "увидел" вашего
-              персонажа.
-            </p>
-            <p>
-              1. Убедитесь, что галочка "Включить персональные костюмы" стоит.
-            </p>
-            <p>
-              2. Зайдите в <a href="/cw3/" target="_blank">Игровую</a> хотя бы
-              один раз.
-            </p>
-            <p>3. Вернитесь сюда и обновите страницу.</p>
+          <!-- БИБЛИОТЕКА -->
+          <div class="uwu-settings-card">
+            <h3 class="uwu-settings-card__title">Библиотека костюмов</h3>
+            <hr class="uwu-hr" />
+            <div class="uwu-settings-card__item">
+              <p>Сохранённые наряды, которые можно быстро примерить на любую позу любого вашего кота:</p>
+            </div>
+            <div class="costume-flex-box" id="costume-gallery" style="margin-top: 8px;"></div>
           </div>
-
-          <hr id="uwu-hr" class="uwu-hr" />
-          <h3>Библиотека костюмов (общая):</h3>
-          <div class="costume-flex-box" id="costume-gallery"></div>
-          <hr id="uwu-hr" class="uwu-hr-head" />
         </div>
       </div>
     </div>
@@ -3283,45 +2099,83 @@ const uwusettings =
 const newsPanel =
   /* HTML */
   `
-    <div id="news-panel">
-      <button id="news-button">
-        🌿 v${current_uwu_version} - Починились часы.
-      </button>
-      <div id="news-list" style="display: none">
-        <h3>Главное</h3>
-        <p>
-          — ...Никаких вам новых конфеток.
-        </p>
-        <hr id="uwu-hr" class="uwu-hr" />
-        <h3>Внешний вид</h3>
-        <p>— ...</p>
-        <hr id="uwu-hr" class="uwu-hr" />
-        <h3>Изменения кода</h3>
-        <p>—— v1.47.1</p>
-        <p>—— Чёта там пофиксил чтобы мск время было ок вроде как да.</p>
-        <hr id="uwu-hr" class="uwu-hr" />
-        <p>Дата выпуска: 07.08.26</p>
-      </div>
-    </div>
-  `;
-// ====================================================================================================================
-//   . . . HTML ПАНЕЛЬ РАСШИРЕННЫХ НАСТРОЕК . . .
-// ====================================================================================================================
-const extendedSettingsButton =
-  /* HTML */
-  `
-    <div id="uwu-extended-settings">
-      <button type="button" id="extended-settings-button">
-        <img
-          src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/partly_sunny_rain.png"
-          alt="Иконка"
-          width="36"
-          height="36"
-        />
-      </button>
-
-      <div id="extended-settings-container">
-        <div id="splash-screen-panel"></div>
+    <div id="uwu-news-modal" class="uwu-modal-overlay" style="display: none;">
+      <div class="uwu-modal-card">
+        <div class="uwu-modal-header">
+          <h3>🌿 Обновление v${current_uwu_version}</h3>
+          <button type="button" class="uwu-modal-close" id="uwu-news-modal-close"
+            title="Закрыть (Esc)">✖</button>
+        </div>
+        <hr class="uwu-hr" />
+        <div class="uwu-modal-body">
+          <h4>Главное</h4>
+          <p>— Теперь Настройки UwU "нативненько" встроены к остальным навигационным
+            кнопкам в общих Настройках!</p>
+          <p>— А так же новейшее переоформление Настроек UwU! Надеюсь вам чуточку
+            понравится... К примеру мини-погода в панельки навигации...</p>
+          <p>— Новости и детали обновления теперь в небольшой кнопочке в
+            Навигационной панели Настроек UwU.</p>
+          <p>— Полный редизайн карточки "Темы и цвета Игровой". Теперь чуть более
+            понятно, читаемей, на один акцент больше и просто круче! Ну и теперь цвета снова работают в Игровой!</p>
+          <p>— Написан свой ColorPicker для крутых фич: поддержка прозрачности,
+            история цветов и легкого встраивания. Теперь никаких левых ссылок на
+            левые сайты! Все старые браузерные пикеры в моде заменены на него!</p>
+          <p>— Полная перепись Редизайна Игровой! Теперь это полноценный модульный
+            HUD-редактор. Можно перетаскивать блоки как угодно, и куда угодно,
+            играясь с их положением и размерами как вам вздумается. Включается он
+            кнопкой «Редактировать интерфейс» прямо в выпадающем меню UwU на верхней
+            навигационной панели Игровой (Ну или в Настройках мода, но редактировать всё равно надо в Игровой).</p>
+          <p>— Показ ID котов в чате вынесен в отдельную самостоятельную
+            настройку.</p>
+          <p>— Теперь вы случайно не очистите всё поле/таблицу в Минном поле. Вам нужно будет прожать ещё разок на кнопку для подтверждения!</p>
+          <p>— А ещё Минное поле станет чуть легче открывать на тач-экранах!</p>
+          <p>— Теперь если вы включили часы в игровой, то они первично вас предупредят об том, что нужно выдать специальное разрешение для уточнений точного онлайн времени! Оно единоразовое и не будет появляться.</p>
+          <hr class="uwu-hr" />
+          <h4>Внешний вид</h4>
+          <p>— Панель БР: вырезаны лишние костыли драга и высоты (Они теперь тоже
+            нативные).</p>
+          <p>— Очищены устаревшие пункты в настройках.</p>
+          <p>— Удалены все лишние и ненужные темы настроек UwU... Простите, если
+            кто-то пользовался. Но, возможно, в будущем что-то вернётся на
+            кастомайз!</p>
+          <p>— Функции Современного чата вынесены в отдельный блок для визуального
+            понимания и удобства.</p>
+          <p>— Удалены редизайны постов в блогах/лентах и страницы костюмов из-за
+            неактуальности.</p>
+          <p>— Узоры теперь не сжимаются некрасиво на Параметрах и Навыках.</p>
+          <p>— Небо теперь снова видно и работает в Редизайне Игровой!</p>
+          <p>— Подчищена старая и неактуальная надпись про будущие приколы в Управлении Погодой.</p>
+          <p>— Дизайн сохранённых сообщений адаптирован под редизайн CatWar'а.</p>
+          <hr class="uwu-hr" />
+          <h4>Изменения кода</h4>
+          <p>— Быстрые ссылки починены и адаптированы под новую шапку Игровой.</p>
+          <p>— Удален функционал-прикол с Отображением душевых котов из-за
+            неактуальности.</p>
+          <p>— Счётчик символов работает и с ванильной строкой (И вроде просто
+            починен).</p>
+          <p>— Возвращена подпись громкости уведомлений для Минного поля.</p>
+          <p>— Починен звук получения нового ЛС.</p>
+          <p>— Звуковое уведомление о Боевой стойке теперь через Vue.</p>
+          <p>— "Подробнее о параметрах" теперь тоже читают из Vue.</p>
+          <p>— Добавлен Мини генератор погодных частиц. Используется для фона шапки
+            Хедера Настроек UwU.</p>
+          <p>— Минное поле и Таймер напоминалка теперь не застревает под Навигационной панелькой в
+            Игровой.</p>
+          <p>— Ссылка в Игровой на "Настройки" удалена из-за неактуальности.</p>
+          <p>— Удалены "Быстрые стили" из-за неактуальности, ибо
+            "расширенное меню Игровой" теперь отстуствует. Все галочки теперь
+            перманентно существуют и работают в выпадающем меню UwU в Игровой.</p>
+          <p>— Переписан и улучшен генератор выпадающих списков. Теперь больше возможностей и меньше проблем от браузерных списков!</p>
+          <p>— Исправлена логика сокращения ударов в БР. Теперь удары в разных режимах не будут складываться.</p>
+          <p>— "Скрыть Игровое поле" теперь реально скрывает игровое поле.</p>
+          <p>— Починен, возможно, столетний баг с тем, что не читалась температура Игровой. Возможно починились светлячки, и точно починились динамичные размеры частиц.</p>
+          <p>— Чуть подправлен расчёт падения перехода активности.</p>
+          <p>— Лог чистильщика теперь снова пишет локацию.</p>
+          <p>— Чуть починен расчёт размера сохранённых сообщений.</p>
+          <p>— Удалён "Цвета в конструкторе окрасов" из-за неактуальности и ненадобности.</p>
+          <hr class="uwu-hr" />
+          <p class="uwu-modal-date">Дата выпуска: 23.09.26</p>
+        </div>
       </div>
     </div>
   `;
@@ -3375,10 +2229,7 @@ const manualWeatherPanel =
 
 </div>
 <div id="aurora-settings-panel">
-<p>Изменения, сделанные в этой панели, сохранятся!</p>
-<h5>Здесь будет возможность переместить Северное Сияние в реальном времени, исключать локации из генерации погоды,
-  либо запрещать
-  определённой погоде существовать на выбранной локации. Но это всё пока что лишь мечта...</h5>
+<h5>Здесь очень давно должно было быть что-то крутое, теперь здесь только пустыня...</h5>
 </div>
 `;
 // ====================================================================================================================
@@ -3409,24 +2260,105 @@ const css_uwu_main = `
   --uwu-gray-border-hover: rgba(127, 127, 127, 0.3);
 }
 
-#uwu-settings {
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
-
 #uwusettings {
   font-family: "Montserrat", sans-serif;
   margin: 0 auto;
   border-radius: 20px;
-  border: 1px solid var(--uwu-border);
+  border: none;
+  background: transparent;
+  color: var(--ui-text, #dddddd);
+}
+
+/* ===================== CARDS ===================== */
+.uwu-settings-card {
+  background: var(--ui-fill, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.1));
+  border-radius: var(--settings-radius, 14px);
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-sizing: border-box;
+}
+
+.uwu-settings-card__title {
+  margin: 0 0 2px 0;
+  font-size: 24px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.85;
+  color: var(--ui-text, #ffffff);
+}
+
+.uwu-settings-card__item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.uwu-settings-card__item p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  opacity: 0.72;
+}
+
+.uwu-settings-card__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#uwu-settings-nav-item > span.settings-nav-icon > img {
+  background-color: unset;
+}
+
+/* ===================== TOGGLE SWITCHES ===================== */
+#uwusettings input[type="checkbox"] {
+  margin-right: 8px;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 36px;
+  height: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  flex-shrink: 0;
+  vertical-align: middle;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#uwusettings input[type="checkbox"]:checked {
+  background-color: var(--ui-accent, #90ff78a8);
+  border-color: var(--ui-accent, #90ff78a8);
+}
+
+#uwusettings input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: left 0.2s ease-in-out;
+}
+
+#uwusettings input[type="checkbox"]:checked::before {
+  left: calc(100% - 17px);
 }
 
 .main-settings-container {
   padding: 10px 15px 10px 15px;
-}
-
-#uwusettings-main {
-  padding: 0px 15px 0px 15px;
 }
 
 #news-panel {
@@ -3478,14 +2410,176 @@ const css_uwu_main = `
 }
 
 .uwu-hr {
+  width: -webkit-fill-available;
   border: var(--uwu-border) solid;
   border-radius: 15px;
 }
 
-#uwusettings .parameters-color-table,
-#uwusettings .parameters-color-table tr,
+#uwusettings .parameters-color-table {
+  width: 100%;
+  max-width: 360px;
+  border-collapse: collapse;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  margin: 10px 0;
+  box-sizing: border-box;
+}
+
+#uwusettings .parameters-color-table thead tr:first-child th {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 6px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  vertical-align: middle;
+  text-align: center;
+}
+
+#uwusettings .parameters-color-table thead .parameters-color-table--name-th {
+  text-align: left;
+  padding-left: 12px;
+}
+
+#uwusettings .parameters-color-table thead .parameters-color-table--group-th,
+#uwusettings .parameters-color-table thead .parameters-color-table--divider-th {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#uwusettings .parameters-color-table--sub-header {
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+
+#uwusettings .parameters-color-table--group {
+  padding: 10px 12px 6px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #83e5ff;
+  background: rgba(0, 0, 0, 0.25);
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+#uwusettings .parameters-color-table tbody tr {
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s ease;
+}
+
+#uwusettings .parameters-color-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+#uwusettings .parameters-color-table tbody tr:last-child {
+  border-bottom: none;
+}
+
 #uwusettings .parameters-color-table td {
-  border: 1px var(--uwu-table-border) solid;
+  padding: 6px 4px;
+  vertical-align: middle;
+  border: none !important;
+  text-align: center;
+}
+
+#uwusettings .parameters-color-table .parameters-color-table--name {
+  text-align: left;
+  padding-left: 12px !important;
+  font-size: 13px;
+  font-weight: 500;
+  color: #e0e0e0;
+  white-space: nowrap;
+}
+
+#uwusettings .parameters-color-table td:nth-child(3) {
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+#uwusettings .parameters-color-table td .gcp-field-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  margin: 0 auto;
+}
+
+/* ===================== SHARED GLASS TABLES STYLING ===================== */
+#uwusettings .gcp-table {
+  width: 100%;
+  max-width: 440px;
+  border-collapse: collapse;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  margin: 10px 0;
+  box-sizing: border-box;
+}
+
+#uwusettings .gcp-table thead th {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 6px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+
+#uwusettings .gcp-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s ease;
+}
+
+#uwusettings .gcp-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+#uwusettings .gcp-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+#uwusettings .gcp-table td {
+  padding: 6px 8px;
+  vertical-align: middle;
+  border: none !important;
+  text-align: center;
+}
+
+#uwusettings .gcp-table td:first-child {
+  text-align: left;
+  padding-left: 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #e0e0e0;
+}
+
+#uwusettings .gcp-table td .gcp-field-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  margin: 0 auto;
 }
 
 #colorSettingsTable,
@@ -4024,54 +3118,98 @@ details {
   animation: fadeOut 6s ease-in-out forwards;
 }
 
+/* ===================== FLOATING SELECT POPOVER ===================== */
 .custom-select {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
 }
 
 .select-selected,
 .uwu-select-selected {
-  margin-top: 10px;
-  width: fit-content;
-  border-radius: 10px;
-  color: white;
-  background-color: #5c5c5c;
-  -webkit-backdrop-filter: var(--uwu-glass-blur);
-  backdrop-filter: var(--uwu-glass-blur);
-  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 1px 1px 5px 1px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.15)) !important;
+  border-radius: 8px !important;
+  padding: 6px 12px !important;
+  color: var(--ui-text, #ffffff) !important;
+  font-family: inherit;
+  font-size: 13px;
   cursor: pointer;
-}
-
-.uwu-select-selected {
+  user-select: none;
   width: fit-content;
+  box-sizing: border-box;
+  margin: 0 !important;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.select-items,
-uwu-select-items {
-  margin-top: 5px;
-  display: none;
-  position: absolute;
-  border-radius: 10px;
-  width: max-content;
-  color: white;
-  background-color: #5c5c5c;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-  -webkit-backdrop-filter: var(--uwu-glass-blur);
-  backdrop-filter: var(--uwu-glass-blur);
-  z-index: 1;
+.select-selected:hover,
+.uwu-select-selected:hover,
+.select-selected.active {
+  background-color: rgba(0, 0, 0, 0.45) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
-.select-items div {
-  padding: 8px 16px;
+.uwu-select-popover {
+  gap: 4px;
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: column;
+
+  position: fixed;
+  z-index: 10005;
+  min-width: 160px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 6px;
+  border-radius: 12px;
+  background: #ffffff1a;
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+  font-family: inherit;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.uwu-select-popover::-webkit-scrollbar {
+  width: 5px;
+}
+
+.uwu-select-popover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+}
+
+.uwu-select-popover__item {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
   cursor: pointer;
+  transition: background 0.15s ease;
+  white-space: nowrap;
 }
 
-.select-items div:hover {
-  background-color: #757575;
+.uwu-select-popover__item:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
-.custom-select.active .select-items {
-  display: block;
+.uwu-select-popover__item.is-selected {
+  background: rgb(255 255 255 / 20%);
+  font-weight: 600;
+}
+
+.select-selected::after {
+  content: "▾";
+  font-size: 1rem;
+  opacity: 0.6;
+  pointer-events: none;
+  line-height: 1;
 }
 
 #climbingRefreshNotificationSoundContainer button,
@@ -4255,6 +3393,690 @@ uwu-select-items {
   pointer-events: none;
   cursor: not-allowed;
 }
+
+.uwu-header-card {
+  padding: 16px 20px 14px;
+  margin-bottom: 16px;
+  gap: 0;
+}
+
+.uwu-header-card .main-settings-container {
+  padding: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.uwu-header-card .main-settings-container h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.uwu-header-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+}
+
+.uwu-header-pills button {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.uwu-header-pills button h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+}
+
+.uwu-header-pills button:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #ffffff;
+}
+
+.uwu-header-pills button.active {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.uwu-details-card {
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.1));
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 8px 12px;
+}
+
+#uwusettings input[type="text"] {
+  color: var(--ui-text, #ffffff) !important;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+#uwusettings input[type="text"]:focus {
+  border-color: var(--ui-accent, #83e5ff) !important;
+  outline: none;
+}
+
+#uwusettings .uwu-select-selected {
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.15));
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: var(--ui-text, #ffffff);
+}
+
+#uwusettings-header-glass {
+  background: var(--ui-fill, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.1));
+  border-radius: var(--settings-radius, 14px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+}
+
+.uwu-textarea-field {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.15)) !important;
+  color: var(--ui-text, #ffffff) !important;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  resize: vertical;
+  outline: none;
+}
+
+.uwu-textarea-field:focus {
+  border-color: var(--ui-accent, #83e5ff) !important;
+}
+
+#uwusettings .notification-table {
+  width: 100%;
+  max-width: 100%;
+}
+
+#uwusettings .notification-table td {
+  padding: 8px 10px;
+  vertical-align: middle;
+}
+
+.uwu-modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.uwu-custom-sounds-box {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.1));
+  border-radius: 10px;
+  padding: 12px;
+  box-sizing: border-box;
+  margin-top: 6px;
+}
+
+.uwu-warning-note {
+  margin: 6px 0 10px 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  background: rgba(255, 193, 7, 0.08);
+  color: var(--ui-text, #ffffff);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.uwu-file-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.15)) !important;
+  color: var(--ui-text, #ffffff) !important;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  margin-top: 6px;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.uwu-file-input::file-selector-button {
+  background: var(--ui-fill, rgba(255, 255, 255, 0.1));
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.2));
+  border-radius: 6px;
+  color: inherit;
+  padding: 4px 10px;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.uwu-file-input::file-selector-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.costume-gallery-box {
+  background: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.1)) !important;
+  border-radius: 12px !important;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.costume-gallery-box:hover {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.uwu-version-badge {
+  background: var(--ui-fill, rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.15));
+  border-radius: 999px;
+  color: var(--ui-text, #ffffff);
+  padding: 6px 14px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 14px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(8px);
+}
+
+.uwu-version-badge:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.uwu-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  background: var(--overlay-background-color, rgba(0, 0, 0, 0.65));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  animation: uwuFadeIn 0.2s ease;
+}
+
+.uwu-modal-card {
+  background: rgba(var(--ds-info-rgb, 33, 36, 43), 0.96);
+  border: 1px solid var(--ui-line, rgba(255, 255, 255, 0.15));
+  border-radius: var(--settings-radius, var(--ui-radius, 16px));
+  width: 100%;
+  max-width: 580px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  color: var(--ui-text, var(--ds-page-text, #ffffff));
+  font-family: inherit;
+  overflow: hidden;
+  box-sizing: border-box;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.uwu-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px 10px;
+}
+
+.uwu-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #83e5ff;
+}
+
+.uwu-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.uwu-modal-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.uwu-modal-body {
+  padding: 0 20px 20px;
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.uwu-modal-body h4 {
+  margin: 12px 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  opacity: 0.9;
+}
+
+.uwu-modal-body p {
+  margin: 4px 0;
+  opacity: 0.8;
+}
+
+.uwu-modal-date {
+  margin-top: 14px !important;
+  font-size: 11px;
+  opacity: 0.5 !important;
+  text-align: right;
+}
+
+@keyframes uwuFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.uwu-header-card {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.uwu-header-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.uwu-header-weather-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.uwu-header-weather-layer canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.uwu-header-weather-layer .firefly {
+  position: absolute !important;
+}
+
+.uwu-header-weather-layer .firefly-glow {
+  position: absolute !important;
+  filter: blur(16px) !important;
+}
+
+/* ===================== NAVBAR UWU BUTTON & DROPDOWN ===================== */
+/* ===================== PREMIUM GLASS NAVBAR MENU ===================== */
+.game-topbar-uwu-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--ds-info-text, #ffffff);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  backdrop-filter: blur(8px);
+}
+
+.game-topbar-uwu-btn:hover,
+.game-topbar-uwu-btn.active {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #83e5ff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+.game-topbar-uwu-btn img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.uwu-nav-popover {
+  position: absolute;
+  z-index: 10005;
+  width: 300px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(20, 22, 28, 0.72) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+  animation: uwuPopIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes uwuPopIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.uwu-popover-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.uwu-popover-title-badge {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Splash phrase as subtle italic quote */
+.uwu-popover-splash {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  font-style: italic;
+  opacity: 0.85;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Redesign HUD Action Button */
+.uwu-hud-trigger-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(131, 229, 255, 0.25);
+  border: 1px solid rgba(131, 229, 255, 0.4);
+  color: #ffffff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+.uwu-hud-trigger-btn:hover {
+  background: rgba(131, 229, 255, 0.38);
+  border-color: rgba(131, 229, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+/* Fast Styles with Toggle Switches */
+.uwu-fast-styles-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.uwu-style-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease;
+}
+
+.uwu-style-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* iOS-like compact switch */
+.uwu-switch {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.uwu-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.uwu-switch-slider {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.uwu-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.uwu-switch input:checked + .uwu-switch-slider {
+  background-color: #41cd70;
+  border-color: #41cd70;
+}
+
+.uwu-switch input:checked + .uwu-switch-slider:before {
+  transform: translateX(14px);
+}
+
+/* Collapsible Manual Weather inside popover */
+.uwu-popover-details {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.uwu-popover-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  opacity: 0.8;
+  outline: none;
+}
+
+.uwu-popover-details summary:hover {
+  opacity: 1;
+}
+
+.uwu-footer-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  opacity: 0.7;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 4px 0;
+  transition: opacity 0.2s ease;
+}
+
+.uwu-footer-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* ===================== HUD MODULAR CANVAS & EDITOR ===================== */
+.uwu-hud-canvas {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  min-height: 100vh !important;
+}
+
+.uwu-hud-canvas > tbody {
+  display: block !important;
+  position: relative !important;
+  width: 100% !important;
+  min-height: 100vh !important;
+}
+
+.uwu-hud-block {
+  display: block !important;
+  position: absolute !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+.uwu-hud-toolbar {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(18, 18, 18, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  font-size: 13px;
+  font-family: "Montserrat", sans-serif;
+  user-select: none;
+}
+
+/* Block Drag Overlay & Handles */
+.uwu-hud-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10000;
+  border: 2px dashed #83e5ff;
+  background: rgba(131, 229, 255, 0.08);
+  border-radius: inherit;
+  cursor: move;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 6px;
+  pointer-events: auto !important;
+}
+
+.uwu-hud-overlay-title {
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #83e5ff;
+  pointer-events: none;
+}
+
+.uwu-hud-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #ffffff;
+  border: 2px solid #000000;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+  border-radius: 2px;
+  box-sizing: border-box;
+  z-index: 10001;
+}
+
+.uwu-hud-handle--se { bottom: -6px; right: -6px; cursor: nwse-resize; }
+.uwu-hud-handle--sw { bottom: -6px; left: -6px; cursor: nesw-resize; }
+.uwu-hud-handle--ne { top: -6px; right: -6px; cursor: nesw-resize; }
+.uwu-hud-handle--nw { top: -6px; left: -6px; cursor: nwse-resize; }
+.uwu-hud-handle--e  { top: calc(50% - 6px); right: -6px; cursor: ew-resize; }
+.uwu-hud-handle--s  { bottom: -6px; left: calc(50% - 6px); cursor: ns-resize; }
+
+/* Smart Alignment Guide Lines */
+.uwu-smart-guide {
+  position: absolute;
+  z-index: 99999;
+  background-color: #fc872a;
+  pointer-events: none;
+  display: none;
+}
+.uwu-smart-guide--x { height: 1px; left: 0; right: 0; box-shadow: 0 0 6px #fc872a; }
+.uwu-smart-guide--y { width: 1px; top: 0; bottom: 0; box-shadow: 0 0 6px #fc872a; }
 `;
 
 document.head.insertAdjacentHTML(
@@ -4262,230 +4084,6 @@ document.head.insertAdjacentHTML(
   `<style id="css-uwu-main">${css_uwu_main}</style>`
 );
 
-// ====================================================================================================================
-//   . . . ПРОЗРАЧНЫЙ CSS СТИЛЬ . . .
-// ====================================================================================================================
-// Glassmorphism вперёд Glassmorphism вперёд Glassmorphism вперёд Glassmorphism вперёд Glassmorphism вперёд
-const css_uwu_glass =
-  // css
-  `
-#uwusettings {
-  backdrop-filter: blur(16px);
-  background-color: rgba(255, 255, 255, 0.03);
-}
-
-.uwu-button {
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 8px 15px;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin: 5px;
-  margin-left: 0px;
-  color: #d5d5d5;
-}
-
-.uwu-button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.uwu-range-slider {
-  width: 100%;
-  cursor: pointer;
-  -webkit-appearance: none;
-  background-color: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 10px;
-  height: 10px;
-  outline: none;
-}
-
-.uwu-range-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  cursor: pointer;
-}
-
-.uwu-range-slider::-webkit-slider-thumb {
-  transform: translateY(-35%);
-}
-
-#uwusettings input[type="checkbox"] {
-  margin-right: 8px;
-  appearance: none;
-  transform: translate(-10%, 30%);
-  width: 35px;
-  height: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-}
-
-#uwusettings input[type="checkbox"]:checked {
-  background-color: #90ff78a8;
-}
-
-#uwusettings input[type="checkbox"]:not(:checked) {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-#uwusettings input[type="checkbox"]:before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 4px;
-  transform: translate(-50%, -50%);
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: background-color 0.2s ease-in-out, left 0.2s ease-in-out;
-}
-
-#uwusettings input[type="checkbox"]:checked:before {
-  left: calc(100% - 4px);
-}
-
-#uwusettings input[type="text"] {
-  width: 150px;
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 8px;
-  border-radius: 10px;
-  outline: none;
-  margin: 5px;
-  margin-left: 0px;
-}
-`;
-// ====================================================================================================================
-//   . . . ТЁМНАЯ ТЕМА . . .
-// ====================================================================================================================
-const css_uwu_dark =
-  /* CSS */
-  `
-#uwusettings {
-  background-color: #242424;
-  color: #dddddd;
-}
-
-#uwusettings-header-glass {
-  border-radius: 20px 20px 0px 0px;
-  backdrop-filter: blur(16px) brightness(0.9);
-}
-
-#news-button {
-  color: #dddddd;
-}
-
-.uwu-button {
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 8px 15px;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin: 5px;
-  margin-left: 0px;
-}
-
-.uwu-button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.uwu-range-slider {
-  width: 100%;
-  cursor: pointer;
-  -webkit-appearance: none;
-  background-color: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 10px;
-  height: 10px;
-  outline: none;
-}
-
-.uwu-range-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  cursor: pointer;
-}
-
-.uwu-range-slider::-webkit-slider-thumb {
-  transform: translateY(-35%);
-}
-
-#uwusettings input[type="checkbox"] {
-  margin-right: 8px;
-  appearance: none;
-  transform: translate(-10%, 30%);
-  width: 35px;
-  height: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-}
-
-#uwusettings input[type="checkbox"]:checked {
-  background-color: #90ff78a8;
-}
-
-#uwusettings input[type="checkbox"]:not(:checked) {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-#uwusettings input[type="checkbox"]:before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 4px;
-  transform: translate(-50%, -50%);
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: background-color 0.2s ease-in-out, left 0.2s ease-in-out;
-}
-
-#uwusettings input[type="checkbox"]:checked:before {
-  left: calc(100% - 4px);
-}
-
-#uwusettings input[type="text"] {
-  width: 150px;
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 8px;
-  border-radius: 10px;
-  outline: none;
-  margin: 5px;
-  margin-left: 0px;
-}
-`;
-// ====================================================================================================================
-//   . . . КЛАССИЧЕСКАЯ ТЕМА . . .
-// ====================================================================================================================
-// лол а где
-const css_uwu_classic = `
-
-`;
 // ====================================================================================================================
 //   . . . топовой шрифт кто не согласен тому в глаз 👅👅👅👅👅👅бе бе бе мяу мяу мяу мяу мяу мяу . . .
 // ====================================================================================================================
@@ -4497,7 +4095,8 @@ document.head.appendChild(link);
 // ====================================================================================================================
 //  . . . СОХРАНЕНИЯ И ЗАГРУЗКА НАСТРОЕК . . .
 // ====================================================================================================================
-let settings;
+let settings = { ...uwuDefaultSettings };
+loadSettings();
 
 function saveSettings() {
   try {
@@ -4621,7 +4220,7 @@ function watchVueData(path, callback, options = { deep: true }) {
   }
 
 // ====================================================================================================================
-//   . . . VUE  . . .
+//   . . . РАБОТА С ИЗОБРАЖЕНИЯМИ  . . .
 // ====================================================================================================================
 
 /**
@@ -4656,6 +4255,750 @@ async function resizeImageToAspectRatio(dataUrl, aspectRatio = 2 / 3) {
     img.src = dataUrl;
   });
 }
+
+// ====================================================================================================================
+//   . . . COLORPICKER . . .
+// ====================================================================================================================
+
+/**
+ * Injects self-contained glassmorphism styles for the GlassColorPicker component.
+ */
+function ensureGcpStyles() {
+  if (document.getElementById("gcp-styles")) return;
+
+  const style = document.createElement("style");
+  style.id = "gcp-styles";
+  style.textContent = `
+    /* Popover Window */
+    .gcp-popover {
+      position: fixed;
+      z-index: 10000;
+      width: 220px;
+      padding: 12px;
+      border-radius: 16px;
+      background: #ffffff1a;
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+      color: #ffffff;
+      font-family: inherit;
+      user-select: none;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .gcp-sv {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 10px;
+      cursor: crosshair;
+      border: none !important;
+      outline: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+    }
+    .gcp-sv-handle {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .gcp-sliders {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .gcp-slider-track {
+      position: relative;
+      width: 100%;
+      height: 12px;
+      display: flex;
+      align-items: center;
+    }
+    .gcp-track-bg {
+      position: absolute;
+      inset: 0;
+      height: 12px;
+      border-radius: 6px;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .gcp-hue-bg {
+      background: linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+    }
+    .gcp-alpha-bg {
+      background: repeating-conic-gradient(rgba(128, 128, 128, 0.4) 0% 25%, transparent 0% 50%) 50% / 12px 12px;
+    }
+    .gcp-alpha-fill {
+      width: 100%;
+      height: 100%;
+    }
+
+    .gcp-popover input[type="range"] {
+      position: absolute;
+      top: -4px;
+      left: 0;
+      width: 100%;
+      height: 20px;
+      min-height: 20px;
+      opacity: 0;
+      margin: 0;
+      padding: 0;
+      cursor: pointer;
+      z-index: 3;
+    }
+
+    .gcp-slider-thumb {
+      position: absolute;
+      top: 50%;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid rgba(0, 0, 0, 0.4);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 2;
+      box-sizing: border-box;
+    }
+
+    /* Footer Controls */
+    .gcp-footer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .gcp-preview-swatch,
+    .gcp-field-swatch {
+      border: none !important;
+      border-radius: 8px;
+      background: repeating-conic-gradient(rgba(128, 128, 128, 0.35) 0% 25%, transparent 0% 50%) 50% / 12px 12px;
+      box-shadow: 1px 1px 5px 1px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+      flex-shrink: 0;
+      transition: transform 0.15s ease;
+    }
+    .gcp-field-swatch:hover {
+      transform: scale(1.08);
+    }
+    .gcp-preview-swatch {
+      width: 30px;
+      height: 30px;
+    }
+    .gcp-field-swatch {
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+    }
+    .gcp-preview-color,
+    .gcp-field-preview {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* EyeDropper Tool Button */
+    .gcp-eyedropper-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s ease, transform 0.15s ease;
+      padding: 0;
+      margin: 0;
+    }
+    .gcp-eyedropper-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+      transform: scale(1.05);
+    }
+
+    .gcp-hex-wrap,
+    .gcp-field-hex-wrap {
+      display: flex;
+      align-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.25);
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+      padding: 0 8px;
+      height: 32px;
+      box-sizing: border-box;
+      flex: 1;
+    }
+    .gcp-hash,
+    .gcp-field-hash {
+      opacity: 0.5;
+      font-weight: bold;
+      font-size: 13px;
+      margin-right: 4px;
+      user-select: none;
+    }
+
+    .gcp-popover input.gcp-hex-input,
+    .gcp-field-row input.gcp-field-hex {
+      background: transparent !important;
+      background-color: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      outline: none !important;
+      color: #ffffff !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      min-height: 0 !important;
+      height: auto !important;
+      font-family: monospace !important;
+      font-size: 14px !important;
+      width: 100% !important;
+      line-height: 1.2 !important;
+    }
+
+    /* History Swatches */
+    .gcp-history {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      padding-top: 4px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .gcp-history-item {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: none !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+      cursor: pointer;
+      background: repeating-conic-gradient(rgba(128, 128, 128, 0.4) 0% 25%, transparent 0% 50%) 50% / 6px 6px;
+      overflow: hidden;
+      flex-shrink: 0;
+      transition: transform 0.15s ease;
+    }
+    .gcp-history-item:hover {
+      transform: scale(1.2);
+    }
+    .gcp-history-item-color {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Settings Page Grid & Flat Form Rows */
+    .gcp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 12px 18px;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .gcp-field-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 0;
+      border: none !important;
+      background: transparent !important;
+      box-sizing: border-box;
+    }
+    .gcp-field-header {
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0.9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .gcp-field-hint {
+      color: #83e5ff;
+      font-size: 11px;
+      cursor: help;
+    }
+    .gcp-field-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Alignment helper for table cells */
+    .parameters-color-table td .gcp-field-swatch {
+      margin: 0 auto;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+/**
+ * Popover Window with 2D SV palette, Hue/Alpha tracks, and color history.
+ */
+class GlassColorPickerPopover {
+  static instance = null;
+
+  static getInstance() {
+    if (!GlassColorPickerPopover.instance) {
+      GlassColorPickerPopover.instance = new GlassColorPickerPopover();
+    }
+    return GlassColorPickerPopover.instance;
+  }
+
+  constructor() {
+    ensureGcpStyles();
+    this.activePicker = null;
+    this.h = 0;
+    this.s = 1;
+    this.v = 1;
+    this.a = 1;
+    this.isDraggingSV = false;
+    this.history = this.loadHistory();
+
+    this.initDOM();
+    this.bindEvents();
+  }
+
+  loadHistory() {
+    try {
+      const stored = localStorage.getItem("gcp_color_history");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  saveHistory(hex) {
+    if (!hex || typeof hex !== "string") return;
+    this.history = [hex, ...this.history.filter((c) => c !== hex)].slice(0, 8);
+    try {
+      localStorage.setItem("gcp_color_history", JSON.stringify(this.history));
+    } catch {}
+    this.renderHistory();
+  }
+
+  initDOM() {
+    this.el = document.createElement("div");
+    this.el.className = "gcp-popover";
+    this.el.style.display = "none";
+
+    const hasEyeDropper = typeof window.EyeDropper === "function";
+    const eyeDropperBtnHTML = hasEyeDropper
+      ? `<button type="button" class="gcp-eyedropper-btn" title="Пипетка (выбрать цвет с экрана)">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m14 7 3 3m-5-1L4 17v3h3l8-8m-2-5 3-3a2.12 2.12 0 1 1 3 3l-3 3"/>
+          </svg>
+        </button>`
+      : "";
+
+    this.el.innerHTML = `
+      <div class="gcp-sv">
+        <div class="gcp-sv-handle"></div>
+      </div>
+      <div class="gcp-sliders">
+        <div class="gcp-slider-track">
+          <div class="gcp-track-bg gcp-hue-bg"></div>
+          <input type="range" class="gcp-hue-input" min="0" max="359" value="0">
+          <div class="gcp-slider-thumb gcp-hue-thumb"></div>
+        </div>
+        <div class="gcp-slider-track">
+          <div class="gcp-track-bg gcp-alpha-bg">
+            <div class="gcp-alpha-fill"></div>
+          </div>
+          <input type="range" class="gcp-alpha-input" min="0" max="100" value="100">
+          <div class="gcp-slider-thumb gcp-alpha-thumb"></div>
+        </div>
+      </div>
+      <div class="gcp-footer">
+        <div class="gcp-preview-swatch"><div class="gcp-preview-color"></div></div>
+        <div class="gcp-hex-wrap">
+          <span class="gcp-hash">#</span>
+          <input type="text" class="gcp-hex-input" maxlength="8" spellcheck="false">
+        </div>
+        ${eyeDropperBtnHTML}
+      </div>
+      <div class="gcp-history"></div>
+    `;
+
+    document.body.appendChild(this.el);
+
+    this.svArea = this.el.querySelector(".gcp-sv");
+    this.svHandle = this.el.querySelector(".gcp-sv-handle");
+    this.hueInput = this.el.querySelector(".gcp-hue-input");
+    this.hueThumb = this.el.querySelector(".gcp-hue-thumb");
+    this.alphaInput = this.el.querySelector(".gcp-alpha-input");
+    this.alphaThumb = this.el.querySelector(".gcp-alpha-thumb");
+    this.alphaFill = this.el.querySelector(".gcp-alpha-fill");
+    this.previewColor = this.el.querySelector(".gcp-preview-color");
+    this.hexInput = this.el.querySelector(".gcp-hex-input");
+    this.historyContainer = this.el.querySelector(".gcp-history");
+
+    this.hexInput.addEventListener("focus", (e) => e.target.select());
+
+    const eyeDropperBtn = this.el.querySelector(".gcp-eyedropper-btn");
+    if (eyeDropperBtn) {
+      eyeDropperBtn.addEventListener("click", async () => {
+        try {
+          const eyeDropper = new window.EyeDropper();
+          const result = await eyeDropper.open();
+          if (result && result.sRGBHex) {
+            this.syncFromHex(result.sRGBHex);
+            this.notify();
+          }
+        } catch {}
+      });
+    }
+
+    this.renderHistory();
+  };
+
+  renderHistory() {
+    this.historyContainer.innerHTML = "";
+    this.history.forEach((hex) => {
+      const item = document.createElement("div");
+      item.className = "gcp-history-item";
+      item.title = hex;
+      item.innerHTML = `<div class="gcp-history-item-color" style="background-color: ${hex}"></div>`;
+      item.addEventListener("click", () => {
+        if (!this.activePicker) return;
+        this.activePicker.setValue(hex);
+        this.syncFromHex(hex);
+      });
+      this.historyContainer.appendChild(item);
+    });
+  }
+
+  bindEvents() {
+    const updateSV = (e) => {
+      const rect = this.svArea.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
+      const y = Math.max(0, Math.min(rect.height, clientY - rect.top));
+
+      this.s = x / rect.width;
+      this.v = 1 - y / rect.height;
+
+      this.updateVisuals();
+      this.notify();
+    };
+
+    this.svArea.addEventListener("mousedown", (e) => {
+      this.isDraggingSV = true;
+      updateSV(e);
+    });
+    this.svArea.addEventListener("touchstart", (e) => {
+      this.isDraggingSV = true;
+      updateSV(e);
+    }, { passive: false });
+
+    window.addEventListener("mousemove", (e) => {
+      if (this.isDraggingSV) updateSV(e);
+    });
+    window.addEventListener("touchmove", (e) => {
+      if (this.isDraggingSV) updateSV(e);
+    }, { passive: false });
+
+    window.addEventListener("mouseup", () => (this.isDraggingSV = false));
+    window.addEventListener("touchend", () => (this.isDraggingSV = false));
+
+    this.hueInput.addEventListener("input", (e) => {
+      this.h = parseInt(e.target.value, 10);
+      this.updateVisuals();
+      this.notify();
+    });
+
+    this.alphaInput.addEventListener("input", (e) => {
+      this.a = parseInt(e.target.value, 10) / 100;
+      this.updateVisuals();
+      this.notify();
+    });
+
+    this.hexInput.addEventListener("input", () => {
+      const raw = this.hexInput.value.trim().replace(/^#/, "");
+      if (/^[0-9a-fA-F]{3,8}$/.test(raw)) {
+        this.syncFromHex("#" + raw);
+        this.notify();
+      }
+    });
+
+    // Close on click outside or Escape
+    document.addEventListener("pointerdown", (e) => {
+      if (this.isOpen() && !this.el.contains(e.target) && !e.target.closest(".gcp-field-swatch")) {
+        this.close();
+      }
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && this.isOpen()) {
+        this.close();
+      }
+    });
+  }
+
+  syncFromHex(hex) {
+    const parsed = GlassColorPicker.parseToRgba(hex);
+    const [h, s, v] = GlassColorPicker.rgbToHsv(parsed.r, parsed.g, parsed.b);
+    this.h = h;
+    this.s = s;
+    this.v = v;
+    this.a = parsed.a;
+    this.updateVisuals();
+  }
+
+  updateVisuals() {
+    const [r, g, b] = GlassColorPicker.hsvToRgb(this.h, this.s, this.v);
+    const hex8 = GlassColorPicker.rgbaToHex(r, g, b, this.a);
+
+    this.svArea.style.background = `linear-gradient(to top, #000000, transparent), linear-gradient(to right, #ffffff, hsl(${this.h}, 100%, 50%))`;
+    this.svHandle.style.left = `${this.s * 100}%`;
+    this.svHandle.style.top = `${(1 - this.v) * 100}%`;
+
+    const hueRatio = this.h / 359;
+    this.hueInput.value = this.h;
+    this.hueThumb.style.left = `calc(${hueRatio * 100}% + ${(0.5 - hueRatio) * 16}px)`;
+
+    const alphaPercent = Math.round(this.a * 100);
+    const alphaRatio = this.a;
+    this.alphaInput.value = alphaPercent;
+    this.alphaThumb.style.left = `calc(${alphaRatio * 100}% + ${(0.5 - alphaRatio) * 16}px)`;
+    this.alphaFill.style.background = `linear-gradient(to right, transparent, rgb(${r}, ${g}, ${b}))`;
+
+    this.previewColor.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${this.a})`;
+    this.hexInput.value = hex8.replace(/^#/, "");
+  };
+
+  notify() {
+    if (!this.activePicker) return;
+    const [r, g, b] = GlassColorPicker.hsvToRgb(this.h, this.s, this.v);
+    const hex = GlassColorPicker.rgbaToHex(r, g, b, this.a);
+    this.activePicker.applyFromPopover(hex);
+  }
+
+  open(trigger, picker) {
+    this.activePicker = picker;
+    const currentHex = picker.getValue() || "#161616";
+    this.syncFromHex(currentHex);
+
+    this.el.style.display = "flex";
+
+    const rect = trigger.getBoundingClientRect();
+    const popoverWidth = 215;
+    let left = rect.left;
+    let top = rect.bottom + 6;
+
+    if (left + popoverWidth > window.innerWidth - 10) {
+      left = window.innerWidth - popoverWidth - 10;
+    }
+    if (top + 230 > window.innerHeight) {
+      top = rect.top - 235;
+    }
+
+    this.el.style.left = `${Math.max(10, left)}px`;
+    this.el.style.top = `${Math.max(10, top)}px`;
+  }
+
+  close() {
+    if (this.activePicker) {
+      this.saveHistory(this.activePicker.getValue());
+    }
+    this.el.style.display = "none";
+    this.activePicker = null;
+  }
+
+  isOpen() {
+    return this.el.style.display !== "none";
+  }
+}
+
+/**
+ * Field-level Glass Color Picker Component.
+ */
+class GlassColorPicker {
+  /**
+   * @param {HTMLElement} container - DOM mount target.
+   * @param {Object} options - Configuration options.
+   * @param {string} [options.value=""] - Initial color value.
+   * @param {string} [options.label=""] - Field label text.
+   * @param {string} [options.hint=""] - Tooltip text.
+   * @param {"field"|"swatch"} [options.mode="field"] - Layout mode ("field" with hex input or "swatch" for tables).
+   * @param {Function} [options.onChange=null] - Change callback.
+   */
+  constructor(container, options = {}) {
+    ensureGcpStyles();
+    this.container = container;
+    this.options = Object.assign({ value: "", label: "", hint: "", mode: "field", onChange: null }, options);
+    this.value = this.options.value;
+
+    this.initDOM();
+    this.setValue(this.value, false);
+    this.bindEvents();
+  }
+
+  static parseToRgba(val) {
+    if (!val || typeof val !== "string" || !val.trim()) return { r: 0, g: 0, b: 0, a: 1, isEmpty: true };
+    let str = val.trim().replace(/^#/, "");
+    if (str.length === 3) str = str.split("").map((c) => c + c).join("") + "ff";
+    else if (str.length === 4) str = str.slice(0, 3).split("").map((c) => c + c).join("") + str[3] + str[3];
+    else if (str.length === 6) str += "ff";
+
+    if (str.length !== 8 || !/^[0-9a-fA-F]{8}$/.test(str)) return { r: 0, g: 0, b: 0, a: 1, isEmpty: false };
+
+    return {
+      r: parseInt(str.slice(0, 2), 16),
+      g: parseInt(str.slice(2, 4), 16),
+      b: parseInt(str.slice(4, 6), 16),
+      a: parseInt(str.slice(6, 8), 16) / 255,
+      isEmpty: false,
+    };
+  }
+
+  static rgbToHsv(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    const d = max - min;
+    let h = 0;
+    const s = max === 0 ? 0 : d / max;
+    const v = max;
+    if (max !== min) {
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h *= 60;
+    }
+    return [Math.round(h), s, v];
+  }
+
+  static hsvToRgb(h, s, v) {
+    const c = v * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = v - c;
+    let r = 0, g = 0, b = 0;
+    if (h >= 0 && h < 60) { r = c; g = x; b = 0; }
+    else if (h >= 60 && h < 120) { r = x; g = c; b = 0; }
+    else if (h >= 120 && h < 180) { r = 0; g = c; b = x; }
+    else if (h >= 180 && h < 240) { r = 0; g = x; b = c; }
+    else if (h >= 240 && h < 300) { r = x; g = 0; b = c; }
+    else if (h >= 300 && h < 360) { r = c; g = 0; b = x; }
+    return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
+  }
+
+  static rgbaToHex(r, g, b, a = 1) {
+    const toHex = (n) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, "0");
+    const hex6 = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    return a < 0.999 ? `${hex6}${toHex(a * 255)}` : hex6;
+  }
+
+  initDOM() {
+    if (this.options.mode === "swatch") {
+      this.root = document.createElement("div");
+      this.root.className = "gcp-field-swatch";
+      this.root.title = this.options.label || "Выбрать цвет";
+      this.root.innerHTML = '<div class="gcp-field-preview"></div>';
+      this.swatch = this.root;
+      this.preview = this.root.querySelector(".gcp-field-preview");
+      this.hexInput = null;
+      this.container.appendChild(this.root);
+      return;
+    }
+
+    this.root = document.createElement("div");
+    this.root.className = "gcp-field-row";
+
+    const titleAttr = this.options.hint ? `title="${this.options.hint}"` : "";
+    const hintMark = this.options.hint ? ' <span class="gcp-field-hint">[?]</span>' : "";
+
+    this.root.innerHTML = `
+      <div class="gcp-field-header">
+        <span class="gcp-field-label" ${titleAttr}>${this.options.label}${hintMark}</span>
+      </div>
+      <div class="gcp-field-controls">
+        <div class="gcp-field-swatch" title="Открыть палитру">
+          <div class="gcp-field-preview"></div>
+        </div>
+        <div class="gcp-field-hex-wrap">
+          <span class="gcp-field-hash">#</span>
+          <input type="text" class="gcp-field-hex" maxlength="8" spellcheck="false" placeholder="RRGGBBAA">
+        </div>
+      </div>
+    `;
+
+    this.swatch = this.root.querySelector(".gcp-field-swatch");
+    this.preview = this.root.querySelector(".gcp-field-preview");
+    this.hexInput = this.root.querySelector(".gcp-field-hex");
+
+    this.container.appendChild(this.root);
+  }
+
+  bindEvents() {
+    this.swatch.addEventListener("click", () => {
+      GlassColorPickerPopover.getInstance().open(this.swatch, this);
+    });
+
+    if (this.hexInput) {
+      this.hexInput.addEventListener("focus", (e) => e.target.select());
+      this.hexInput.addEventListener("input", () => {
+        const raw = this.hexInput.value.trim().replace(/^#/, "");
+        if (!raw) {
+          this.value = "";
+          this.preview.style.backgroundColor = "transparent";
+          this.triggerChange();
+          return;
+        }
+        if (/^[0-9a-fA-F]{3,8}$/.test(raw)) {
+          const parsed = GlassColorPicker.parseToRgba(raw);
+          this.value = GlassColorPicker.rgbaToHex(parsed.r, parsed.g, parsed.b, parsed.a);
+          this.preview.style.backgroundColor = this.value;
+          this.triggerChange();
+        }
+      });
+    }
+  }
+
+  applyFromPopover(hexValue) {
+    this.value = hexValue;
+    this.preview.style.backgroundColor = hexValue;
+    if (this.hexInput) {
+      this.hexInput.value = hexValue.replace(/^#/, "");
+    }
+    this.triggerChange();
+  }
+
+  triggerChange() {
+    if (typeof this.options.onChange === "function") {
+      this.options.onChange(this.value);
+    }
+  }
+
+  getValue() {
+    return this.value;
+  }
+
+  setValue(val, trigger = true) {
+    this.value = val || "";
+    if (!this.value) {
+      this.preview.style.backgroundColor = "transparent";
+      if (this.hexInput) this.hexInput.value = "";
+    } else {
+      const parsed = GlassColorPicker.parseToRgba(this.value);
+      this.value = GlassColorPicker.rgbaToHex(parsed.r, parsed.g, parsed.b, parsed.a);
+      this.preview.style.backgroundColor = this.value;
+      if (this.hexInput) this.hexInput.value = this.value.replace(/^#/, "");
+    }
+    if (trigger) this.triggerChange();
+  }
+}
+
 // ====================================================================================================================
 //   . . . СОХРАНЕНИЕ И РАБОТА С ЦВЕТОВЫМИ ТЕМАМИ . . .
 // ====================================================================================================================
@@ -4689,7 +5032,10 @@ function isDefaultTheme(themeName) {
 }
 
 function updateSaveButtonState() {
-  saveThemeButton.disabled = isDefaultTheme(currentThemeName);
+  const saveBtn = document.getElementById("saveThemeButton");
+  if (saveBtn) {
+    saveBtn.disabled = isDefaultTheme(getCurrentThemeName());
+  }
 }
 
 // ====================================================================================================================
@@ -4699,64 +5045,575 @@ function applyBackgroundImage(element, backgroundImage) {
   element.style.backgroundImage = backgroundImage;
 }
 
-function createSettingsBlock(blockId, content) {
-  const siteTable = document.querySelector("#site_table");
-  const isMobile = siteTable.getAttribute("data-mobile") === "0";
+/**
+ * Integrates the custom UwU settings panel into CatWar's native settings hub.
+ *
+ * @param {HTMLElement} settingsElement - The root container element (#uwu-settings) of UwU settings.
+ * @returns {void}
+ */
+function setupNativeSettingsIntegration(settingsElement) {
+  const nav = document.querySelector(".settings-nav");
+  const body = document.querySelector(".settings-body");
 
+  if (!nav || !body) {
+    const fallbackContainer =
+      document.querySelector("#branch") ||
+      document.querySelector("#site_table");
+    fallbackContainer?.appendChild(settingsElement);
+    return;
+  }
+
+  const uwuNavBtn = document.createElement("button");
+  uwuNavBtn.type = "button";
+  uwuNavBtn.className = "settings-nav-item";
+  uwuNavBtn.id = "uwu-settings-nav-item";
+  uwuNavBtn.innerHTML = `
+    <span aria-hidden="true" class="settings-nav-icon">
+      <img src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/partly_sunny_rain.png" alt="UwU" class="settings-nav-icon__svg" style="object-fit: contain;">
+    </span>
+    <span class="settings-nav-label">CatWar UwU</span>
+  `;
+
+  let isUwuActive = false;
+
+  /**
+   * Activates the UwU tab, highlights the nav button, and hides Vue setting panels.
+   */
+  function activateUwuTab() {
+    isUwuActive = true;
+    nav
+      .querySelectorAll(".settings-nav-item")
+      .forEach((btn) => btn.classList.remove("active"));
+    uwuNavBtn.classList.add("active");
+
+    Array.from(body.children).forEach((child) => {
+      if (child !== settingsElement) {
+        child.style.display = "none";
+      }
+    });
+    settingsElement.style.display = "block";
+  }
+
+  /**
+   * Deactivates the UwU tab, restores native Vue panels, and un-highlights the nav button.
+   */
+  function deactivateUwuTab() {
+    if (!isUwuActive) return;
+    isUwuActive = false;
+    uwuNavBtn.classList.remove("active");
+    settingsElement.style.display = "none";
+
+    Array.from(body.children).forEach((child) => {
+      if (child !== settingsElement) {
+        child.style.display = "";
+      }
+    });
+  }
+
+  uwuNavBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    activateUwuTab();
+  });
+
+  nav.addEventListener("click", (e) => {
+    const nativeBtn = e.target.closest(".settings-nav-item");
+    if (nativeBtn && nativeBtn !== uwuNavBtn) {
+      deactivateUwuTab();
+    }
+  });
+
+  settingsElement.style.display = "none";
+  nav.appendChild(uwuNavBtn);
+  body.appendChild(settingsElement);
+
+  const navObserver = new MutationObserver(() => {
+    if (!nav.contains(uwuNavBtn)) {
+      nav.appendChild(uwuNavBtn);
+    }
+  });
+  navObserver.observe(nav, { childList: true });
+
+  const bodyObserver = new MutationObserver(() => {
+    if (!body.contains(settingsElement)) {
+      body.appendChild(settingsElement);
+    }
+    if (isUwuActive) {
+      Array.from(body.children).forEach((child) => {
+        if (child !== settingsElement) {
+          child.style.display = "none";
+        }
+      });
+    }
+  });
+  bodyObserver.observe(body, { childList: true });
+}
+
+/**
+ * Creates the settings container and delegates mounting to the appropriate page structure.
+ *
+ * @param {string} blockId - Unique ID attribute for the root wrapper.
+ * @param {string} content - HTML template payload to inject into the wrapper.
+ * @returns {HTMLElement} The mounted settings container element.
+ */
+function createSettingsBlock(blockId, content) {
   const settingsElement = document.createElement("div");
   settingsElement.id = blockId;
   settingsElement.innerHTML = content;
 
-  const settingsContainer = isMobile
-    ? document.querySelector("#branch")
-    : siteTable;
-  settingsContainer.appendChild(settingsElement);
+  if (document.querySelector(".settings-hub")) {
+    setupNativeSettingsIntegration(settingsElement);
+  } else {
+    const siteTable = document.querySelector("#site_table");
+    const isMobile = siteTable?.getAttribute("data-mobile") === "0";
+    const settingsContainer = isMobile
+      ? document.querySelector("#branch")
+      : siteTable || document.body;
+    settingsContainer?.appendChild(settingsElement);
+  }
+
+  return settingsElement;
 }
+
+/**
+ * Asynchronously preloads an array of image resources.
+ *
+ * @param {Array<{url: string, image?: HTMLImageElement}>} imageList - Array of objects with image URLs.
+ * @returns {Promise<void>} Resolves when all images in the list are fully loaded.
+ */
+function preloadWeatherImages(imageList) {
+  return Promise.all(
+    imageList.map(
+      (item) =>
+        new Promise((resolve) => {
+          if (item.image) return resolve();
+          const img = new Image();
+          img.src = item.url;
+          img.onload = () => {
+            item.image = img;
+            resolve();
+          };
+          img.onerror = () => resolve();
+        })
+    )
+  );
+}
+
+/**
+ * Ambient weather background on the settings header card.
+ *
+ * @param {HTMLElement} headerCard - The header container (#uwusettings-header).
+ * @returns {() => void} Teardown callback that stops animation and removes listeners.
+ */
+function initHeaderWeather(headerCard) {
+  if (!headerCard || headerCard.querySelector(".uwu-header-weather-layer")) return () => {};
+
+  const layer = document.createElement("div");
+  layer.className = "uwu-header-weather-layer";
+  headerCard.prepend(layer);
+
+  // 1. Weather Type
+  const allowedWeather = ["rain", "snow", "fireflies"];
+  let weatherType = settings.duplicateGameWeather
+    ? uwuStorage.getItem("uwu_lastActiveWeather")
+    : null;
+
+  if (!allowedWeather.includes(weatherType)) {
+    weatherType = allowedWeather[Math.floor(Math.random() * allowedWeather.length)];
+  }
+
+  let animationFrameId = null;
+  let isRunning = false;
+  let isDestroyed = false;
+  let hasScattered = false;
+  let lastTick = performance.now();
+
+  // 2. Lifecycle Engine
+  let tick = () => {};
+
+  const startLoop = () => {
+    if (isRunning || isDestroyed) return;
+    isRunning = true;
+    lastTick = performance.now();
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = requestAnimationFrame(tick);
+  };
+
+  const stopLoop = () => {
+    isRunning = false;
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+  };
+
+  // 3. Fireflies
+  if (weatherType === "fireflies") {
+    const fireflyCount = 4;
+    const fireflies = [];
+
+    for (let i = 0; i < fireflyCount; i++) {
+      const dot = document.createElement("div");
+      dot.className = "firefly";
+      const glow = document.createElement("div");
+      glow.className = "firefly-glow";
+
+      layer.appendChild(dot);
+      layer.appendChild(glow);
+
+      fireflies.push({
+        dot,
+        glow,
+        x: 0,
+        y: 0,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        size: Math.random() * 3 + 4,
+      });
+    }
+
+    tick = () => {
+      if (!isRunning || isDestroyed) return;
+
+      const width = layer.clientWidth;
+      const height = layer.clientHeight;
+
+      fireflies.forEach((f) => {
+        f.x += f.vx;
+        f.y += f.vy;
+
+        if (f.x < 0 || f.x > width) f.vx *= -1;
+        if (f.y < 0 || f.y > height) f.vy *= -1;
+
+        f.dot.style.left = `${f.x}px`;
+        f.dot.style.top = `${f.y}px`;
+        f.dot.style.width = `${f.size}px`;
+        f.dot.style.height = `${f.size}px`;
+
+        f.glow.style.left = `${f.x - f.size * 2}px`;
+        f.glow.style.top = `${f.y - f.size * 2}px`;
+        f.glow.style.width = `${f.size * 5}px`;
+        f.glow.style.height = `${f.size * 5}px`;
+      });
+
+      animationFrameId = requestAnimationFrame(tick);
+    };
+
+    const scatterFireflies = (w, h) => {
+      fireflies.forEach((f) => {
+        f.x = Math.random() * w;
+        f.y = Math.random() * h;
+      });
+    };
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      if (isDestroyed) return;
+      for (const entry of entries) {
+        const w = Math.round(entry.contentRect.width);
+        const h = Math.round(entry.contentRect.height);
+
+        if (w > 0 && h > 0) {
+          if (!hasScattered) {
+            scatterFireflies(w, h);
+            hasScattered = true;
+          }
+          if (!document.hidden) startLoop();
+        } else {
+          stopLoop();
+        }
+      }
+    });
+    resizeObserver.observe(layer);
+
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        stopLoop();
+      } else if (layer.clientWidth > 0 && layer.clientHeight > 0) {
+        startLoop();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      isDestroyed = true;
+      stopLoop();
+      resizeObserver.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      layer.remove();
+    };
+  }
+
+  // 4. Rain & Snow
+  const canvas = document.createElement("canvas");
+  layer.appendChild(canvas);
+  const ctx = canvas.getContext("2d");
+
+  const isPixel = !!settings.minecraftStyle;
+  const pixelRainImages = [
+    { url: "https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/rain1.png" },
+    { url: "https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/rain2.png" },
+  ];
+  const pixelSnowImages = [
+    { url: "https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/snowflake1.png" },
+    { url: "https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/snowflake2.png" },
+  ];
+
+  if (isPixel) {
+    preloadWeatherImages(weatherType === "rain" ? pixelRainImages : pixelSnowImages);
+  }
+
+  const particleCount = weatherType === "rain" ? 12 : 9;
+
+  const createParticle = (spawnAcrossFullHeight = false) => {
+    const width = canvas.width || layer.clientWidth || 300;
+    const height = canvas.height || layer.clientHeight || 120;
+
+    if (weatherType === "rain") {
+      return {
+        x: Math.random() * width,
+        y: spawnAcrossFullHeight ? Math.random() * height : Math.random() * -40 - 10,
+        length: Math.random() * 8 + 14,
+        radiusX: 1.1,
+        speedY: Math.random() * 3 + 7,
+        speedX: Math.random() * 0.3 - 0.15,
+        size: Math.random() * 10 + 16,
+        img: pixelRainImages[Math.floor(Math.random() * pixelRainImages.length)],
+      };
+    }
+
+    return {
+      x: Math.random() * width,
+      y: spawnAcrossFullHeight ? Math.random() * height : Math.random() * -30 - 10,
+      size: isPixel ? Math.random() * 4 + 8 : Math.random() * 2 + 2,
+      speedY: Math.random() * 0.6 + 0.6,
+      speedX: (Math.random() - 0.5) * 0.35,
+      img: pixelSnowImages[Math.floor(Math.random() * pixelSnowImages.length)],
+    };
+  };
+
+  let particles = Array.from({ length: particleCount }, () => createParticle(false));
+
+  tick = (now) => {
+    if (!isRunning || isDestroyed) return;
+
+    const dt = Math.min((now - lastTick) / 1000, 0.1);
+    lastTick = now;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.y += p.speedY * 60 * dt;
+      p.x += p.speedX * 60 * dt;
+
+      if (weatherType === "rain") {
+        if (isPixel && p.img?.image) {
+          const img = p.img.image;
+          const scale = p.size / Math.max(img.width, img.height);
+          ctx.drawImage(img, p.x, p.y, img.width * scale, img.height * scale);
+        } else {
+          ctx.beginPath();
+          ctx.ellipse(p.x, p.y, p.radiusX, p.length, 0, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(165, 195, 230, 0.45)";
+          ctx.fill();
+        }
+
+        if (p.y > canvas.height + 25) {
+          particles[i] = createParticle(false);
+        }
+      } else {
+        if (isPixel && p.img?.image) {
+          const img = p.img.image;
+          ctx.drawImage(img, p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+        } else {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+          ctx.fill();
+        }
+
+        if (p.y > canvas.height + 15) {
+          particles[i] = createParticle(false);
+        }
+      }
+    }
+
+    animationFrameId = requestAnimationFrame(tick);
+  };
+
+  const resizeObserver = new ResizeObserver((entries) => {
+    if (isDestroyed) return;
+    for (const entry of entries) {
+      const w = Math.round(entry.contentRect.width);
+      const h = Math.round(entry.contentRect.height);
+
+      if (w > 0 && h > 0) {
+        canvas.width = w;
+        canvas.height = h;
+
+        if (!hasScattered) {
+          particles = Array.from({ length: particleCount }, () => createParticle(true));
+          hasScattered = true;
+        }
+
+        if (!document.hidden) startLoop();
+      } else {
+        stopLoop();
+      }
+    }
+  });
+
+  resizeObserver.observe(layer);
+
+  const onVisibilityChange = () => {
+    if (document.hidden) {
+      stopLoop();
+    } else if (layer.clientWidth > 0 && layer.clientHeight > 0) {
+      startLoop();
+    }
+  };
+  document.addEventListener("visibilitychange", onVisibilityChange);
+
+  return () => {
+    isDestroyed = true;
+    stopLoop();
+    resizeObserver.disconnect();
+    document.removeEventListener("visibilitychange", onVisibilityChange);
+    layer.remove();
+  };
+}
+
 // ====================================================================================================================
 //  . . . РАБОТА ПАНЕЛИ НАСТРОЕК . . .
 // ====================================================================================================================
 if (targetSettings.test(window.location.href)) {
   createSettingsBlock("uwu-settings", uwusettings);
 
-  const uwuSettingsElement = document.getElementById("uwusettings");
-  if (uwuSettingsElement) {
-    uwuSettingsElement.insertAdjacentHTML("beforeend", newsPanel);
+  const headerCard = document.getElementById("uwusettings-header");
+  if (headerCard) {
+    initHeaderWeather(headerCard);
   }
+
+  // ====================================================================================================================
+  //  . . . КНОПКА НОВОСТЕЙ . . .
+  // ====================================================================================================================
+  /**
+   * Initializes the changelog modal dialog and binds open/close interactions.
+   * @returns {void}
+   */
+  function initNewsModal() {
+    if (document.getElementById("uwu-news-modal")) return;
+
+    document.body.insertAdjacentHTML("beforeend", newsPanel);
+
+    const modal = document.getElementById("uwu-news-modal");
+    const openBtn = document.getElementById("uwu-version-badge");
+    const closeBtn = document.getElementById("uwu-news-modal-close");
+
+    const openModal = () => {
+      modal.style.display = "flex";
+    };
+
+    const closeModal = () => {
+      modal.style.display = "none";
+    };
+
+    openBtn?.addEventListener("click", openModal);
+    closeBtn?.addEventListener("click", closeModal);
+
+    modal?.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.style.display === "flex") {
+        closeModal();
+      }
+    });
+  }
+
+  initNewsModal();
 
   // ========================================================
   const paramTableBody = document.getElementById("color-settings-body");
-  if (paramTableBody) {
-    const paramsList = [
-      { id: "dream", name: "Сон", group: "Параметры" },
-      { id: "hunger", name: "Голод" },
-      { id: "thirst", name: "Жажда" },
-      { id: "need", name: "Нужда" },
-      { id: "health", name: "Здоровье" },
-      { id: "clean", name: "Чистота" },
-      { id: "smell", name: "Запах", group: "Навыки" },
-      { id: "dig", name: "Копание" },
-      { id: "swim", name: "Плавание" },
-      { id: "might", name: "БУ" },
-      { id: "tree", name: "Лазание" },
-      { id: "observ", name: "Зоркость" },
-      { id: "other", name: "", group: "Уникальные навыки" }
-    ];
+  /** @type {Object<string, GlassColorPicker>} */
+  const paramPickers = {};
 
-    let paramsHTML = "";
-    paramsList.forEach(p => {
+  const paramsList = [
+    { id: "dream", name: "Сон", group: "Параметры" },
+    { id: "hunger", name: "Голод" },
+    { id: "thirst", name: "Жажда" },
+    { id: "need", name: "Нужда" },
+    { id: "health", name: "Здоровье" },
+    { id: "clean", name: "Чистота" },
+    { id: "smell", name: "Запах", group: "Навыки" },
+    { id: "dig", name: "Копание" },
+    { id: "swim", name: "Плавание" },
+    { id: "might", name: "БУ" },
+    { id: "tree", name: "Лазание" },
+    { id: "observ", name: "Зоркость" },
+    { id: "other", name: "Другие", group: "Уникальные навыки" }
+  ];
+
+  if (paramTableBody) {
+    paramTableBody.innerHTML = "";
+
+    paramsList.forEach((p) => {
       if (p.group) {
-        paramsHTML += `<tr><th class="parameters-color-table--cell" colspan="5">${p.group}</th></tr>`;
+        const groupRow = document.createElement("tr");
+        groupRow.innerHTML = `<th class="parameters-color-table--group" colspan="5">${p.group}</th>`;
+        paramTableBody.appendChild(groupRow);
       }
-      paramsHTML += `
-        <tr>
-          <td class="parameters-color-table--cell">${p.name}</td>
-          <td class="parameters-color-table--cell"><input type="color" data-param="${p.id}" data-color-type="bar-from" /></td>
-          <td class="parameters-color-table--cell"><input type="color" data-param="${p.id}" data-color-type="bar-to" /></td>
-          <td class="parameters-color-table--cell"><input type="color" data-param="${p.id}" data-color-type="bg-from" /></td>
-          <td class="parameters-color-table--cell"><input type="color" data-param="${p.id}" data-color-type="bg-to" /></td>
-        </tr>`;
+
+      const row = document.createElement("tr");
+      const nameCell = document.createElement("td");
+      nameCell.className = "parameters-color-table--name";
+      nameCell.textContent = p.name;
+      row.appendChild(nameCell);
+
+      const colorTypes = [
+        "Заливка шкалы: от",
+        "Заливка шкалы: до",
+        "Фон шкалы: от",
+        "Фон шкалы: до"
+      ];
+
+      for (let i = 0; i < 4; i++) {
+        const cell = document.createElement("td");
+
+        paramPickers[`${p.id}_${i}`] = new GlassColorPicker(cell, {
+          mode: "swatch",
+          label: `${p.name}: ${colorTypes[i]}`,
+          onChange: (val) => {
+            if (!settings.parametersColors[p.id]) {
+              settings.parametersColors[p.id] = ["#008000", "#008000", "#cccccc", "#cccccc"];
+            }
+            settings.parametersColors[p.id][i] = val;
+            saveSettings();
+          }
+        });
+
+        row.appendChild(cell);
+      }
+
+      paramTableBody.appendChild(row);
     });
-    paramTableBody.innerHTML = paramsHTML;
+  }
+
+  // ====================================================================================================================
+  //  . . . ЦВЕТ ГРАНИЦ КЛЕТОК . . .
+  // ====================================================================================================================
+  const cellsBorderContainer = document.getElementById("cells-borders-color-picker");
+  if (cellsBorderContainer) {
+    if (!settings) loadSettings();
+
+    new GlassColorPicker(cellsBorderContainer, {
+      mode: "swatch",
+      value: settings?.cellsBordersColor || uwuDefaultSettings.cellsBordersColor || "#ffffff",
+      label: "Цвет границы клеток",
+      onChange: (val) => {
+        if (!settings) settings = { ...uwuDefaultSettings };
+        settings.cellsBordersColor = val;
+        saveSettings();
+      }
+    });
   }
   // ========================================================
 
@@ -4783,51 +5640,6 @@ if (targetSettings.test(window.location.href)) {
       }
     });
 
-  // ====================================================================================================================
-  //  . . . ТЕМА UWU . . .
-  // ====================================================================================================================
-  function applySettingsTheme(theme) {
-    let css;
-    const settingsBlock = document.getElementById("uwu-settings");
-    const settingsHeader = document.getElementById("uwusettings-header");
-
-    switch (theme) {
-      case "classic":
-        css = css_uwu_classic;
-        break;
-      case "dark":
-        css = css_uwu_dark;
-        const backgroundImageDark = window.getComputedStyle(
-          document.body
-        ).backgroundImage;
-        applyBackgroundImage(settingsHeader, backgroundImageDark);
-        settingsHeader.classList.add("header-rounded-image");
-        break;
-      case "glass":
-        css = css_uwu_glass;
-        const backgroundImageGlass = window.getComputedStyle(
-          document.body
-        ).backgroundImage;
-        applyBackgroundImage(settingsBlock, backgroundImageGlass);
-        settingsBlock.classList.add("main-rounded-image");
-        break;
-      default:
-        css = css_uwu_classic;
-        break;
-    }
-
-    const oldStyle = document.getElementById("css-uwu-theme");
-    if (oldStyle) {
-      oldStyle.remove();
-    }
-
-    document.head.insertAdjacentHTML(
-      "beforeend",
-      `<style id="css-uwu-theme">${css}</style>`
-    );
-  }
-
-  applySettingsTheme(settings.settingsTheme);
   // ====================================================================================================================
   //  . . . ШРИФТ ГРОМКОСТИ ЧАТА . . .
   // ====================================================================================================================
@@ -5574,109 +6386,170 @@ if (targetSettings.test(window.location.href)) {
   // ====================================================================================================================
   //  . . . ТЕМЫ И ЦВЕТА ИГРОВОЙ . . .
   // ====================================================================================================================
-  const colorInputs = document.querySelectorAll(
-    "#color-picker input[type='text']"
-  );
+  const pickersGrid = document.getElementById("theme-pickers-grid");
   const saveThemeButton = document.getElementById("saveThemeButton");
-  const themeSelect = document.getElementById("theme-select");
+  const themeSelectSelected = document.getElementById("theme-select-selected");
   const addThemeButton = document.getElementById("addThemeButton");
   const removeThemeButton = document.getElementById("removeThemeButton");
 
   let currentThemeName = getCurrentThemeName();
   let allThemes = getThemes();
 
-  function loadThemeToInputs(themeName) {
-    const theme = allThemes[themeName]?.colors;
-    colorInputs.forEach((input) => {
-      const colorKey = input.dataset.color;
-      input.value = theme?.[colorKey] || "";
+  const themeConfig = [
+    // 1. Foreground and background
+    { key: "backgroundColor", label: "Цвет фона страницы", category: "Основное и фон" },
+    { key: "textColor", label: "Цвет текста" },
+    { key: "linkColor", label: "Цвет ссылок" },
+
+    // 2. Blocks and chat
+    { key: "blocksColor", label: "Внешние блоки", category: "Блоки и чат", hint: "Внешние подложки действий, рта, параметров и навигации" },
+    { key: "subBlocksColor", label: "Вложенные блоки", hint: "Внутренние карточки истории и параметров." },
+    { key: "chatColor", label: "Основной цвет чата", hint: "Фон контейнера сообщений чата" },
+
+    // 3. Interface and navigation
+    { key: "moveNameBackground", label: "Цвет фона перехода", category: "Интерфейс и навигация" },
+    { key: "moveNameColor", label: "Цвет текста перехода" },
+    { key: "catTooltipBackground", label: "Фон подсказки «О Коте»" },
+    { key: "fightPanelBackground", label: "Фон панели Боевого режима" },
+    { key: "climbingPanelBackground", label: "Фон Минного Поля" },
+
+    // 4. Highlights
+    { key: "accentColor1", label: "Фон полей ввода", category: "Элементы управления и акценты" },
+    { key: "accentColor2", label: "Рамки, линии и разделители" },
+    { key: "accentColor3", label: "Уведомления и упоминания" },
+    { key: "accentColor4", label: "Фон кнопок" },
+  ];
+
+  /** @type {Object<string, GlassColorPicker>} */
+  const activePickers = {};
+
+  if (pickersGrid) {
+    pickersGrid.innerHTML = "";
+    themeConfig.forEach((item) => {
+      if (item.category) {
+        const catHeader = document.createElement("div");
+        catHeader.className = "gcp-category-header";
+        catHeader.style.cssText =
+          "grid-column: 1 / -1; margin-top: 14px; margin-bottom: 2px; font-size: 13px; font-weight: 700; color: #83e5ff; letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 4px;";
+        catHeader.textContent = item.category;
+        pickersGrid.appendChild(catHeader);
+      }
+
+      activePickers[item.key] = new GlassColorPicker(pickersGrid, {
+        label: item.label,
+        hint: item.hint || "",
+        onChange: () => {
+          if (isDefaultTheme(currentThemeName)) {
+            alert("Вы не можете изменять стандартные темы. Пожалуйста, создайте свою собственную тему.");
+            loadThemeToInputs(currentThemeName);
+          } else {
+            saveThemeFromInputs();
+          }
+        },
+      });
     });
   }
 
+  /**
+   * Populates theme pickers.
+   *
+   * @param {string} themeName - Name of the theme to load.
+   * @returns {void}
+   */
+  function loadThemeToInputs(themeName) {
+    const currentThemeColors = allThemes[themeName]?.colors || {};
+    themeConfig.forEach(({ key }) => {
+      activePickers[key]?.setValue(currentThemeColors[key] || "", false);
+    });
+  }
+
+  /**
+   * Extracts values.
+   *
+   * @returns {void}
+   */
   function saveThemeFromInputs() {
     const themeData = { colors: {} };
-    colorInputs.forEach((input) => {
-      const colorKey = input.dataset.color;
-      themeData.colors[colorKey] = input.value;
+    themeConfig.forEach(({ key }) => {
+      themeData.colors[key] = activePickers[key]?.getValue() || "";
     });
     allThemes[currentThemeName] = themeData;
     saveThemes(allThemes);
-    console.log(`Тема "${currentThemeName}" сохранена!`);
   }
 
   function updateThemeSelect() {
-    themeSelect.innerHTML = "";
-    Object.keys(allThemes).forEach((name) => {
-      const option = document.createElement("option");
-      option.value = name;
-      option.textContent = name;
-      themeSelect.appendChild(option);
-    });
-    themeSelect.value = currentThemeName;
-    removeThemeButton.style.display = Object.keys(defaultThemes).includes(
-      currentThemeName
-    )
-      ? "none"
-      : "inline";
+    if (themeSelectSelected) {
+      themeSelectSelected.textContent = currentThemeName;
+    }
+    if (removeThemeButton) {
+      removeThemeButton.style.display = isDefaultTheme(currentThemeName) ? "none" : "inline";
+    }
+    updateSaveButtonState();
   }
 
-  themeSelect.addEventListener("change", (event) => {
-    currentThemeName = event.target.value;
-    setCurrentThemeName(currentThemeName);
-    loadThemeToInputs(currentThemeName);
-    updateThemeSelect();
-    updateSaveButtonState();
-  });
+  if (themeSelectSelected) {
+    themeSelectSelected.onclick = (e) => {
+      e.stopPropagation();
+      const popover = CustomSelectPopover.getInstance();
 
-  addThemeButton.addEventListener("click", () => {
+      if (popover.isOpenFor(themeSelectSelected)) {
+        popover.close();
+        return;
+      }
+
+      const options = Object.keys(allThemes).map((name) => ({
+        id: name,
+        name: name,
+      }));
+
+      popover.open({
+        trigger: themeSelectSelected,
+        options,
+        selectedId: currentThemeName,
+        onSelect: (option) => {
+          currentThemeName = option.id;
+          setCurrentThemeName(currentThemeName);
+          loadThemeToInputs(currentThemeName);
+          updateThemeSelect();
+        },
+      });
+    };
+  }
+
+  addThemeButton?.addEventListener("click", () => {
     const newThemeName = prompt("Введите название новой темы:");
     if (newThemeName && !allThemes[newThemeName]) {
       allThemes[newThemeName] = { colors: {} };
       saveThemes(allThemes);
-      updateThemeSelect();
-      themeSelect.value = newThemeName;
       currentThemeName = newThemeName;
       setCurrentThemeName(currentThemeName);
       loadThemeToInputs(currentThemeName);
+      updateThemeSelect();
     }
   });
 
-  removeThemeButton.addEventListener("click", () => {
-    if (!Object.keys(defaultThemes).includes(currentThemeName)) {
+  removeThemeButton?.addEventListener("click", () => {
+    if (!isDefaultTheme(currentThemeName)) {
       delete allThemes[currentThemeName];
       saveThemes(allThemes);
       currentThemeName = "Тёмная Тема";
       setCurrentThemeName(currentThemeName);
-      updateThemeSelect();
       loadThemeToInputs(currentThemeName);
+      updateThemeSelect();
     }
   });
 
-  saveThemeButton.addEventListener("click", () => {
+  saveThemeButton?.addEventListener("click", () => {
     if (isDefaultTheme(currentThemeName)) {
-      alert(
-        "Вы не можете изменять стандартные темы. Пожалуйста, создайте свою собственную тему."
-      );
+      alert("Вы не можете изменять стандартные темы. Пожалуйста, создайте свою собственную тему.");
     } else {
       saveThemeFromInputs();
     }
   });
 
-  colorInputs.forEach((input) => {
-    input.addEventListener("input", () => {
-      if (isDefaultTheme(currentThemeName)) {
-        alert(
-          "Вы не можете изменять стандартные темы. Пожалуйста, создайте свою собственную тему."
-        );
-        loadThemeToInputs(currentThemeName);
-      } else {
-        saveThemeFromInputs();
-      }
-    });
-  });
-
   updateThemeSelect();
   loadThemeToInputs(currentThemeName);
+
   // ====================================================================================================================
   //  . . . РАБОТА ЦВЕТОВ НАВЫКОВ И ПАРАМЕТРОВ . . .
   // ====================================================================================================================
@@ -5706,27 +6579,12 @@ if (targetSettings.test(window.location.href)) {
     });
 
   function restoreColorPickers() {
-    for (const paramId in settings.parametersColors) {
-      const colors = settings.parametersColors[paramId];
-
-      const barFromInput = document.querySelector(
-        `#parameters-color-settings input[type="color"][data-param="${paramId}"][data-color-type="bar-from"]`
-      );
-      const barToInput = document.querySelector(
-        `#parameters-color-settings input[type="color"][data-param="${paramId}"][data-color-type="bar-to"]`
-      );
-      const bgFromInput = document.querySelector(
-        `#parameters-color-settings input[type="color"][data-param="${paramId}"][data-color-type="bg-from"]`
-      );
-      const bgToInput = document.querySelector(
-        `#parameters-color-settings input[type="color"][data-param="${paramId}"][data-color-type="bg-to"]`
-      );
-
-      if (barFromInput) barFromInput.value = colors[0];
-      if (barToInput) barToInput.value = colors[1];
-      if (bgFromInput) bgFromInput.value = colors[2];
-      if (bgToInput) bgToInput.value = colors[3];
-    }
+    paramsList.forEach((p) => {
+      const colors = settings.parametersColors[p.id] || ["#008000", "#008000", "#cccccc", "#cccccc"];
+      for (let i = 0; i < 4; i++) {
+        paramPickers[`${p.id}_${i}`]?.setValue(colors[i] || "", false);
+      }
+    });
   }
 
   restoreColorPickers();
@@ -5787,87 +6645,142 @@ if (targetSettings.test(window.location.href)) {
   // ====================================================================================================================
   //  . . . ПОДСВЕТКА РЕСУРСОВ . . .
   // ====================================================================================================================
+  const defaultHighlightResources = [
+    { name: "Травы", color: "#90EE90", highlight: false },
+    { name: "Мох", color: "#90EE90", highlight: false },
+    { name: "Паутина", color: "#90EE90", highlight: false },
+    { name: "Пыль", color: "#DDA0DD", highlight: false },
+    { name: "Ветки, вьюнки, костоправы", color: "#90EE90", highlight: false },
+    { name: "Травящие предметы", color: "#FF0000", highlight: false },
+    { name: "Шаманские штучки", color: "#00BFFF", highlight: false },
+  ];
+
+  const resourcesTableBody = document.getElementById("resources-table-body");
+  /** @type {Object<string, GlassColorPicker>} */
+  const resourcePickers = {};
+
   function saveHighlightSettings() {
-    const highlightResources = [];
-
-    document
-      .querySelectorAll(".uwu-table-highlight-Resources tbody tr")
-      .forEach((row) => {
-        const resourceName =
-          row.querySelector(".uwu-color-picker").dataset.resource;
-        const colorPicker = row.querySelector(".uwu-color-picker");
-        const checkbox = row.querySelector(".uwu-highlight-checkbox");
-
-        const resource = {
-          name: resourceName,
-          color: colorPicker.value,
-          highlight: checkbox.checked,
-        };
-
-        highlightResources.push(resource);
+    const list = [];
+    defaultHighlightResources.forEach((res) => {
+      const checkbox = document.querySelector(`.uwu-highlight-checkbox[data-resource="${res.name}"]`);
+      list.push({
+        name: res.name,
+        color: resourcePickers[res.name]?.getValue() || res.color,
+        highlight: checkbox ? checkbox.checked : false,
       });
-
-    uwuStorage.setItem("uwu_highlightResources", highlightResources);
+    });
+    uwuStorage.setItem("uwu_highlightResources", list);
   }
 
   function restoreHighlightSettings() {
-    const highlightResources = uwuStorage.getItem("uwu_highlightResources");
-
-    if (highlightResources) {
-      highlightResources.forEach((resource) => {
-        const colorPicker = document.querySelector(
-          `.uwu-color-picker[data-resource="${resource.name}"]`
-        );
-        const checkbox = document.querySelector(
-          `.uwu-highlight-checkbox[data-resource="${resource.name}"]`
-        );
-
-        if (colorPicker) colorPicker.value = resource.color;
-        if (checkbox) checkbox.checked = resource.highlight;
-      });
-    }
+    const saved = uwuStorage.getItem("uwu_highlightResources") || defaultHighlightResources;
+    saved.forEach((res) => {
+      resourcePickers[res.name]?.setValue(res.color, false);
+      const checkbox = document.querySelector(`.uwu-highlight-checkbox[data-resource="${res.name}"]`);
+      if (checkbox) checkbox.checked = !!res.highlight;
+    });
   }
 
-  restoreHighlightSettings();
+  if (resourcesTableBody) {
+    resourcesTableBody.innerHTML = "";
 
-  document.querySelectorAll(".uwu-color-picker").forEach((element) => {
-    element.addEventListener("input", saveHighlightSettings);
-  });
+    defaultHighlightResources.forEach((res) => {
+      const row = document.createElement("tr");
 
-  document.querySelectorAll(".uwu-highlight-checkbox").forEach((element) => {
-    element.addEventListener("change", saveHighlightSettings);
-  });
+      const nameCell = document.createElement("td");
+      nameCell.textContent = res.name;
+      row.appendChild(nameCell);
 
-  // ====================================================================================================================
-  //  . . . ЦВЕТА КОМАНДНЫХ БОЁВ . . .
-  // ====================================================================================================================
-  document
-    .querySelectorAll('#colorSettingsTable input[type="color"]')
-    .forEach((element) => {
-      element.addEventListener("change", () => {
-        const team = `team${element.dataset.team}`;
-        const part = element.dataset.part === "green" ? 0 : 1;
-        const colorValue = element.value;
-        settings.fightTeamsColors[team][part] = colorValue;
-        saveSettings();
+      const pickerCell = document.createElement("td");
+      resourcePickers[res.name] = new GlassColorPicker(pickerCell, {
+        mode: "swatch",
+        value: res.color,
+        label: `Цвет ресурса: ${res.name}`,
+        onChange: saveHighlightSettings,
       });
+      row.appendChild(pickerCell);
+
+      const checkCell = document.createElement("td");
+      checkCell.className = "uwu-checkbox-cell";
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = "uwu-highlight-checkbox";
+      checkbox.dataset.resource = res.name;
+      checkbox.addEventListener("change", saveHighlightSettings);
+      checkCell.appendChild(checkbox);
+      row.appendChild(checkCell);
+
+      resourcesTableBody.appendChild(row);
     });
 
-  function restoreColorTeamsPickers() {
-    document
-      .querySelectorAll('#colorSettingsTable input[type="color"]')
-      .forEach((element) => {
-        element.addEventListener("change", () => {
-          const team = `team${element.dataset.team}`;
-          const part = element.dataset.part === "green" ? 0 : 1;
-          const colorValue = element.value;
-          settings.fightTeamsColors[team][part] = colorValue;
-          saveSettings();
-        });
-      });
+    restoreHighlightSettings();
   }
 
-  restoreColorTeamsPickers();
+  // ====================================================================================================================
+  //  . . . ЦВЕТА КОМАНД БОЕВОГО РЕЖИМА . . .
+  // ====================================================================================================================
+  const fightTeamsTableBody = document.getElementById("fight-teams-table-body");
+  /** @type {Object<string, GlassColorPicker>} */
+  const teamPickers = {};
+
+  /**
+   * Restores stored battle team colors into color picker swatches.
+   */
+  function restoreColorTeamsPickers() {
+    [1, 2, 3, 4].forEach((num) => {
+      const teamKey = `team${num}`;
+      const colors = settings.fightTeamsColors?.[teamKey] || ["#41cd70", "#cd4141"];
+      teamPickers[`${num}_green`]?.setValue(colors[0], false);
+      teamPickers[`${num}_red`]?.setValue(colors[1], false);
+    });
+  }
+
+  if (fightTeamsTableBody) {
+    fightTeamsTableBody.innerHTML = "";
+
+    [1, 2, 3, 4].forEach((num) => {
+      const row = document.createElement("tr");
+
+      const nameCell = document.createElement("td");
+      nameCell.textContent = `Команда ${num}`;
+      row.appendChild(nameCell);
+
+      const greenCell = document.createElement("td");
+      teamPickers[`${num}_green`] = new GlassColorPicker(greenCell, {
+        mode: "swatch",
+        value: settings.fightTeamsColors?.[`team${num}`]?.[0] || "#41cd70",
+        label: `Команда ${num}: Энергия`,
+        onChange: (val) => {
+          if (!settings.fightTeamsColors[`team${num}`]) {
+            settings.fightTeamsColors[`team${num}`] = ["#41cd70", "#cd4141"];
+          }
+          settings.fightTeamsColors[`team${num}`][0] = val;
+          saveSettings();
+        },
+      });
+      row.appendChild(greenCell);
+
+      const redCell = document.createElement("td");
+      teamPickers[`${num}_red`] = new GlassColorPicker(redCell, {
+        mode: "swatch",
+        value: settings.fightTeamsColors?.[`team${num}`]?.[1] || "#cd4141",
+        label: `Команда ${num}: Снесено`,
+        onChange: (val) => {
+          if (!settings.fightTeamsColors[`team${num}`]) {
+            settings.fightTeamsColors[`team${num}`] = ["#41cd70", "#cd4141"];
+          }
+          settings.fightTeamsColors[`team${num}`][1] = val;
+          saveSettings();
+        },
+      });
+      row.appendChild(redCell);
+
+      fightTeamsTableBody.appendChild(row);
+    });
+
+    restoreColorTeamsPickers();
+  }
+
   // ====================================================================================================================
   //   . . . СБРОС НАСТРОЕК . . .
   // ====================================================================================================================
@@ -5875,6 +6788,7 @@ if (targetSettings.test(window.location.href)) {
     "uwu_settings",
     "uwu_version",
     "uwu_layoutSettings",
+    "uwu_hud_layout",
     "uwu_climbingPanelState",
     "uwu_moduleStates",
     "uwu_fightPanelPosition",
@@ -6115,14 +7029,6 @@ if (targetSettings.test(window.location.href)) {
     { id: "notificationBlockSound", options: notificationSounds },
     { id: "intervalTimerSound", options: notificationSounds },
     {
-      id: "showOtherCatsList",
-      options: [
-        { name: "Не отображать", id: "1" },
-        { name: "Компактно", id: "2" },
-        { name: "Целиком", id: "3" },
-      ]
-    },
-    {
       id: "weatherParticlesAmount",
       options: [
         { id: "normal", name: "Много частиц (Стандарт)" },
@@ -6142,14 +7048,6 @@ if (targetSettings.test(window.location.href)) {
         { id: "-1", name: "За блоками" },
         { id: "0", name: "Стандарт" },
         { id: "1", name: "Перед блоками" },
-      ]
-    },
-    {
-      id: "settingsTheme",
-      options: [
-        { id: "classic", name: "Классическая" },
-        { id: "dark", name: "Тёмная" },
-        { id: "glass", name: "Стеклянная" },
       ]
     },
     {
@@ -6213,38 +7111,156 @@ if (targetSettings.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . СОЗДАНИЕ ВЫПАДАЮЩИХ СПИСКОВ . . .
   // ====================================================================================================================
+  /**
+   * Singleton popover manager for custom select dropdowns attached directly to document body.
+   */
+  class CustomSelectPopover {
+    static instance = null;
+
+    static getInstance() {
+      if (!CustomSelectPopover.instance) {
+        CustomSelectPopover.instance = new CustomSelectPopover();
+      }
+      return CustomSelectPopover.instance;
+    }
+
+    constructor() {
+      this.activeTrigger = null;
+      this.onSelectCallback = null;
+
+      this.el = document.createElement("div");
+      this.el.className = "uwu-select-popover";
+      this.el.style.display = "none";
+      document.body.appendChild(this.el);
+
+      document.addEventListener("pointerdown", (e) => {
+        if (this.isOpen() && !this.el.contains(e.target) && !this.activeTrigger?.contains(e.target)) {
+          this.close();
+        }
+      });
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && this.isOpen()) {
+          this.close();
+        }
+      });
+    }
+
+    isOpen() {
+      return this.el.style.display !== "none";
+    }
+
+    isOpenFor(triggerEl) {
+      return this.isOpen() && this.activeTrigger === triggerEl;
+    }
+
+    /**
+     * Opens the floating dropdown menu relative to the trigger element coordinates.
+     *
+     * @param {Object} params - Configuration options.
+     * @param {HTMLElement} params.trigger - Trigger button element.
+     * @param {Array<{id: string, name: string}>} params.options - Dropdown choices.
+     * @param {string} params.selectedId - Currently selected option identifier.
+     * @param {Function} params.onSelect - Option selection callback.
+     */
+    open({ trigger, options, selectedId, onSelect }) {
+      this.activeTrigger = trigger;
+      this.onSelectCallback = onSelect;
+
+      this.el.innerHTML = "";
+      options.forEach((opt) => {
+        const itemEl = document.createElement("div");
+        itemEl.className = "uwu-select-popover__item";
+        if (opt.id === selectedId) itemEl.classList.add("is-selected");
+        itemEl.textContent = opt.name;
+
+        itemEl.addEventListener("click", () => {
+          if (typeof this.onSelectCallback === "function") {
+            this.onSelectCallback(opt);
+          }
+          this.close();
+        });
+
+        this.el.appendChild(itemEl);
+      });
+
+      this.el.style.display = "flex";
+     this.activeTrigger.classList.add("active");
+
+      // Viewport position calculation & boundary flipping
+      const rect = trigger.getBoundingClientRect();
+      const popoverHeight = Math.min(240, options.length * 36 + 12);
+      const minWidth = Math.max(160, rect.width);
+
+      let top = rect.bottom + 4;
+      let left = rect.left;
+
+      // Flip upwards if overflowing below viewport
+      if (top + popoverHeight > window.innerHeight - 10) {
+        top = Math.max(10, rect.top - popoverHeight - 4);
+      }
+
+      // Clamp horizontally within viewport
+      if (left + minWidth > window.innerWidth - 10) {
+        left = window.innerWidth - minWidth - 10;
+      }
+
+      this.el.style.minWidth = `${minWidth}px`;
+      this.el.style.left = `${Math.max(10, left)}px`;
+      this.el.style.top = `${top}px`;
+    }
+
+    close() {
+      this.activeTrigger?.classList.remove("active");
+      this.el.style.display = "none";
+      this.activeTrigger = null;
+      this.onSelectCallback = null;
+    }
+  }
+
+  /**
+   * Initializes a custom dropdown trigger bound to the global floating popover.
+   *
+   * @param {string} selectId - DOM ID of the custom select container.
+   * @param {Array<{id: string, name: string}>} options - Available dropdown choices.
+   * @returns {void}
+   */
   function createCustomSelect(selectId, options) {
     const selectContainer = document.getElementById(selectId);
+    if (!selectContainer) return;
+
     const selectedElement = selectContainer.querySelector(".select-selected");
-    const optionsContainer = selectContainer.querySelector(".select-items");
+    if (!selectedElement) return;
+
+    selectContainer._uwuOptions = options;
 
     if (settings && settings[selectId] !== undefined) {
-      const selectedOption = options.find(
-        (option) => option.id === settings[selectId]
-      );
-      if (selectedOption) {
-        selectedElement.textContent = selectedOption.name;
+      const currentOption = options.find((opt) => opt.id === settings[selectId]);
+      if (currentOption) {
+        selectedElement.textContent = currentOption.name;
       }
     }
 
-    options.forEach((option, index) => {
-      const optionElement = document.createElement("div");
-      optionElement.textContent = option.name;
-      optionElement.dataset.id = option.id;
+    selectedElement.onclick = (e) => {
+      e.stopPropagation();
+      const popover = CustomSelectPopover.getInstance();
 
-      optionElement.addEventListener("click", () => {
-        selectedElement.textContent = option.name;
-        settings[selectId] = option.id;
-        saveSettings();
-        selectContainer.classList.remove("active");
+      if (popover.isOpenFor(selectedElement)) {
+        popover.close();
+        return;
+      }
+
+      popover.open({
+        trigger: selectedElement,
+        options: selectContainer._uwuOptions || options,
+        selectedId: settings[selectId],
+        onSelect: (option) => {
+          selectedElement.textContent = option.name;
+          settings[selectId] = option.id;
+          saveSettings();
+        },
       });
-
-      optionsContainer.appendChild(optionElement);
-    });
-
-    selectedElement.addEventListener("click", () => {
-      selectContainer.classList.toggle("active");
-    });
+    };
   }
 
   // ====================================================================================================================
@@ -6321,7 +7337,7 @@ if (targetSettings.test(window.location.href)) {
   }
 
   /**
-   * Rebuilds all sound-related custom select dropdowns dynamically.
+   * Synchronizes sound options across all notification selectors.
    */
   function updateAllSoundSelects() {
     const soundSelectIds = [
@@ -6332,43 +7348,26 @@ if (targetSettings.test(window.location.href)) {
       "notificationInMouthSound",
       "notificationInFightModeSound",
       "notificationBlockSound",
-      "intervalTimerSound"
+      "intervalTimerSound",
     ];
-    
+
     const currentSounds = soundManager.getSoundList();
 
-    soundSelectIds.forEach(selectId => {
+    soundSelectIds.forEach((selectId) => {
       const selectContainer = document.getElementById(selectId);
       if (!selectContainer) return;
-      
-      const optionsContainer = selectContainer.querySelector(".select-items");
+
       const selectedElement = selectContainer.querySelector(".select-selected");
-      if (!optionsContainer || !selectedElement) return;
+      if (!selectedElement) return;
 
-      optionsContainer.innerHTML = "";
-      let foundCurrent = false;
+      selectContainer._uwuOptions = currentSounds;
 
-      currentSounds.forEach(option => {
-        const optionElement = document.createElement("div");
-        optionElement.textContent = option.name;
-        optionElement.dataset.id = option.id;
+      const currentVal = settings[selectId];
+      const match = currentSounds.find((opt) => opt.id === currentVal);
 
-        if (option.id === settings[selectId]) {
-          foundCurrent = true;
-          selectedElement.textContent = option.name;
-        }
-
-        optionElement.addEventListener("click", () => {
-          selectedElement.textContent = option.name;
-          settings[selectId] = option.id;
-          saveSettings();
-          selectContainer.classList.remove("active");
-        });
-
-        optionsContainer.appendChild(optionElement);
-      });
-
-      if (!foundCurrent && currentSounds.length > 0) {
+      if (match) {
+        selectedElement.textContent = match.name;
+      } else if (currentSounds.length > 0) {
         settings[selectId] = currentSounds[0].id;
         saveSettings();
         selectedElement.textContent = currentSounds[0].name;
@@ -6427,23 +7426,6 @@ if (targetSettings.test(window.location.href)) {
   renderCustomSoundsList();
 
   // ====================================================================================================================
-  //  . . . КНОПКА НОВОСТЕЙ . . .
-  // ====================================================================================================================
-  window.addEventListener("load", () => {
-    const newsButton = document.getElementById("news-button");
-    const newsList = document.getElementById("news-list");
-
-    if (newsButton && newsList) {
-      newsButton.addEventListener("click", () => {
-        if (newsList.style.display === "none") {
-          newsList.style.display = "block";
-        } else {
-          newsList.style.display = "none";
-        }
-      });
-    }
-  });
-  // ====================================================================================================================
   //   . . . КНОПКА ТЕСТА ЗВУКОВ . . .
   // ====================================================================================================================
   function addSoundTestButton(
@@ -6500,6 +7482,7 @@ if (targetSettings.test(window.location.href)) {
     "uwu_settings",
     "uwu_version",
     "uwu_layoutSettings",
+    "uwu_hud_layout",
     "uwu_climbingPanelState",
     "uwu_moduleStates",
     "uwu_fightPanelPosition",
@@ -6559,264 +7542,30 @@ if (targetSettings.test(window.location.href)) {
 
   loadSettings();
   updateExportField();
+
   // ====================================================================================================================
-  //  . . . РЕДИЗАЙН НАСТРОЕК КОСТЮМОВ . . .
+  //  . . . СБРОС КООРДИНАТ HUD . . .
   // ====================================================================================================================
-  if (settings.redesignCostumsSettings) {
-    function addStyles() {
-      const style = document.createElement("style");
-      style.innerHTML =
-        // css
-        `
-        .list-group-item {
-            display: grid !important;
-            grid-template-columns: auto 1fr;
-            grid-template-rows: auto auto;
-            align-items: center;
-            margin-bottom: 10px;
-            width: 280px !important;
-        }
-        .list-group-item img {
-            margin-right: 10px;
-            width: 50px;
-            height: 80px;
-        }
-        .costume-image-container {
-            grid-column: 1;
-            grid-row: 1 / span 2;
-            margin-right: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .list-group {
-          resize: vertical;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          width: 100%;
-        }
-        .list-group-item span {
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
-        .costume-id {
-            font-weight: bold;
-            margin-bottom: 5px;
-            grid-column: 2;
-            grid-row: 1;
-        }
-        .costume-text {
-            grid-column: 2;
-            grid-row: 2;
-        }
 
-        .col-3 {
-          display: flex;
-          flex-direction: row;
-          flex-wrap: wrap;
-        }
+  /**
+   * Binds the reset button in the settings panel to clear stored HUD layout coordinates.
+   *
+   * @returns {void}
+   */
+  function initHudSettingsReset() {
+    const resetBtn = document.getElementById("reset-hud-layout-btn");
+    if (!resetBtn) return;
 
-        .col-3 > button {
-          height: 22px;
-        }
-    `;
-      document.head.appendChild(style);
-    }
-
-    function addCostumePreview() {
-      const items = document.querySelectorAll(".list-group-item");
-      items.forEach((item) => {
-        const costumeId = item.textContent.trim().split(" ")[0];
-        const imageContainer = item.querySelector(".costume-image-container");
-        const img = imageContainer ? imageContainer.querySelector("img") : null;
-
-        if (
-          !imageContainer ||
-          !img ||
-          img.getAttribute("data-costume-id") !== costumeId
-        ) {
-          const imgUrl = `https://catwar.net/cw3/cats/0/costume/${costumeId}.png`;
-
-          if (!imageContainer) {
-            const newImageContainer = document.createElement("div");
-            newImageContainer.classList.add("costume-image-container");
-
-            const newImg = document.createElement("img");
-            newImg.src = imgUrl;
-            newImg.alt = `Costume ${costumeId}`;
-            newImg.setAttribute("data-costume-id", costumeId);
-
-            newImageContainer.appendChild(newImg);
-
-            item.insertBefore(newImageContainer, item.firstChild);
-          } else {
-            img.src = imgUrl;
-            img.setAttribute("data-costume-id", costumeId);
-          }
-        }
-      });
-    }
-
-    addStyles();
-    setupMutationObserver(".double-container", addCostumePreview, {
-      childList: true,
-      subtree: true,
+    resetBtn.addEventListener("click", () => {
+      if (confirm("Вы уверены, что хотите сбросить расположение и размеры всех окон интерфейса к значениям по умолчанию?")) {
+        uwuStorage.removeItem("uwu_hud_layout");
+        alert("Расположение окон интерфейса сброшено к исходному виду.");
+      }
     });
   }
-  // ====================================================================================================================
-  //  . . . МАКЕТ КАСТОМИЗАЦИИ ИГРОВОЙ . . .
-  // ====================================================================================================================
-  const blockNames = {
-    tr_info: "Информация",
-    tr_tos: "Погода",
-    tr_chat: "Чат",
-    tr_actions: "Действия",
-    tr_mouth: "Во рту",
-    // 'tr_sky': 'Небо',
-  };
-  const leftColumn = document.querySelector("#layout-customizer .column.left");
-  const rightColumn = document.querySelector(
-    "#layout-customizer .column.right"
-  );
 
-  function saveLayoutSettings() {
-    const leftBlocks = Array.from(leftColumn.querySelectorAll(".block")).map(
-      (block) => block.classList[1]
-    );
-    const rightBlocks = Array.from(rightColumn.querySelectorAll(".block")).map(
-      (block) => block.classList[1]
-    );
+  initHudSettingsReset();
 
-    const layoutSettings = {
-      leftBlocks,
-      rightBlocks,
-    };
-
-    uwuStorage.setItem("uwu_layoutSettings", layoutSettings);
-  }
-
-  function createBlockElement(blockId) {
-    const blockElement = document.createElement("div");
-    blockElement.classList.add("block", blockId);
-
-    const blockName = document.createElement("span");
-    blockName.textContent = blockNames[blockId];
-    blockElement.appendChild(blockName);
-
-    const controlsWrapper = document.createElement("div");
-    controlsWrapper.classList.add("controls");
-
-    if (blockId === "tr_info") {
-      const moveInfoButton = document.createElement("button");
-      moveInfoButton.textContent = "⏪Переместить⏩";
-      moveInfoButton.classList.add("move-info", "install-button");
-      moveInfoButton.addEventListener("click", () => {
-        swapColumns(blockElement);
-        saveLayoutSettings();
-      });
-      controlsWrapper.appendChild(moveInfoButton);
-    } else {
-      const moveUpButton = document.createElement("button");
-      moveUpButton.textContent = "🔼Вверх";
-      moveUpButton.classList.add("move-up", "install-button");
-      moveUpButton.addEventListener("click", () => {
-        const previousBlock = blockElement.previousElementSibling;
-        if (previousBlock) {
-          blockElement.parentNode.insertBefore(blockElement, previousBlock);
-          saveLayoutSettings();
-        }
-      });
-      controlsWrapper.appendChild(moveUpButton);
-
-      const moveDownButton = document.createElement("button");
-      moveDownButton.textContent = "🔽Вниз";
-      moveDownButton.classList.add("move-down", "install-button");
-      moveDownButton.addEventListener("click", () => {
-        const nextBlock = blockElement.nextElementSibling;
-        if (nextBlock) {
-          blockElement.parentNode.insertBefore(nextBlock, blockElement);
-          saveLayoutSettings();
-        }
-      });
-      controlsWrapper.appendChild(moveDownButton);
-    }
-
-    blockElement.appendChild(controlsWrapper);
-    return blockElement;
-  }
-
-  function swapColumns(blockElement) {
-    if (blockElement.parentNode === leftColumn) {
-      const rightColumnBlocks = Array.from(rightColumn.children);
-      rightColumn.innerHTML = "";
-      rightColumn.appendChild(blockElement);
-      rightColumnBlocks.forEach((block) => leftColumn.appendChild(block));
-    } else {
-      const leftColumnBlocks = Array.from(leftColumn.children);
-      leftColumn.innerHTML = "";
-      leftColumn.appendChild(blockElement);
-      leftColumnBlocks.forEach((block) => rightColumn.appendChild(block));
-    }
-    saveLayoutSettings();
-  }
-
-  const resetLayoutButton = document.getElementById("reset-layout-button");
-  resetLayoutButton.addEventListener("click", () => {
-    const confirmReset = confirm(
-      "Вы уверены, что хотите сбросить расположение блоков?"
-    );
-    if (confirmReset) {
-      const defaultSettings = getDefaultLayoutSettings();
-      uwuStorage.setItem("uwu_layoutSettings", defaultSettings);
-      location.reload();
-    }
-  });
-
-  function getDefaultLayoutSettings() {
-    return {
-      leftBlocks: ["tr_info"],
-      rightBlocks: ["tr_tos", "tr_chat", "tr_actions", "tr_mouth"],
-    };
-  }
-
-  function loadLayoutSettings() {
-    try {
-      const savedSettings = uwuStorage.getItem("uwu_layoutSettings");
-      if (savedSettings) {
-        const { leftBlocks, rightBlocks } = savedSettings;
-
-        leftColumn.innerHTML = "";
-        rightColumn.innerHTML = "";
-
-        leftBlocks.forEach((blockId) => {
-          const blockElement = createBlockElement(blockId);
-          leftColumn.appendChild(blockElement);
-        });
-
-        rightBlocks.forEach((blockId) => {
-          const blockElement = createBlockElement(blockId);
-          rightColumn.appendChild(blockElement);
-        });
-      } else {
-        const defaultSettings = getDefaultLayoutSettings();
-        uwuStorage.setItem("uwu_layoutSettings", defaultSettings);
-
-        defaultSettings.leftBlocks.forEach((blockId) => {
-          leftColumn.appendChild(createBlockElement(blockId));
-        });
-
-        defaultSettings.rightBlocks.forEach((blockId) => {
-          rightColumn.appendChild(createBlockElement(blockId));
-        });
-      }
-    } catch (error) {
-      console.error("Ошибка при загрузке настроек макета:", error);
-    }
-  }
-
-  loadLayoutSettings();
   // ====================================================================================================================
   //  . . . РЕДАКТОР ВКЛАДОК И ТАБЛИЦ МИННОГО ПОЛЯ . . .
   // ====================================================================================================================
@@ -7445,71 +8194,7 @@ if (!targetCW3.test(window.location.href)) {
 }
 
 if (targetCW3Kns.test(window.location.href)) {
-  // ====================================================================================================================
-  //  . . . ПОДГРУЗКА ЦВЕТОВЫХ ТЕМ . . .
-  // ====================================================================================================================
-  const currentThemeName = getCurrentThemeName();
-  const allThemes = getThemes();
-  const theme = allThemes[currentThemeName]?.colors || {};
-
-  // ====================================================================================================================
-  //   . . . ПОЛЬЗОВАТЕЛЬСКИЕ ТЕМЫ / ЦВЕТА . . .
-  // ====================================================================================================================
-  function applyTheme() {
-    const newStyle = document.createElement("style");
-    newStyle.innerHTML =
-      /* CSS */
-      `
-      body {
-        background: ${theme?.backgroundColor || ""};
-      }
-
-      #cages_overflow {
-        background: black;
-      } 
-
-      #blocks {
-        background-color: ${theme?.blocksColor || ""};
-      }
-
-      ::-webkit-scrollbar-track {
-        background-color: ${theme?.blocksColor || ""};
-      }
-
-      ::-webkit-scrollbar-thumb {
-        background-color: ${theme?.accentColor3 || ""};
-    }
-    
-      body, input, select, .ui-slider-handle {
-        color: ${theme?.textColor || ""};
-      }
-    
-      input, select, .ui-slider-horizontal {
-        background-color: ${theme?.accentColor1 || ""};
-        background: ${theme?.accentColor1 || ""};
-        border: solid 1px ${theme?.accentColor2 || ""};
-      }
-
-      .ui-widget-content .ui-state-default {
-        background: ${theme?.accentColor2 || ""};
-        border: solid 1px ${theme?.accentColor2 || ""};
-      } 
-
-      hr {
-        border: solid 1px ${theme?.accentColor2 || ""};
-      }
-    
-      a, a:hover {
-        color: ${theme?.linkColor || ""};
-      }
-
-      `;
-    document.head.appendChild(newStyle);
-  }
-
-  if (settings.userThemeKns) {
-    applyTheme();
-  }
+  // Тут что-то было, но теперь этого нет. Возможно, вам просто показалось 🥺
 }
 
 // ====================================================================================================================
@@ -7536,44 +8221,150 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . ПОЛЬЗОВАТЕЛЬСКИЕ ТЕМЫ / ЦВЕТА . . .
   // ====================================================================================================================
+  /**
+   * Injects comprehensive CSS rules to apply custom theme colors over CatWar's native design tokens.
+   *
+   * @returns {void}
+   */
   function applyTheme() {
+    const existingStyle = document.getElementById("uwu-user-theme-style");
+    if (existingStyle) {
+      existingStyle.remove();
+    }
+
     const newStyle = document.createElement("style");
+    newStyle.id = "uwu-user-theme-style";
     newStyle.innerHTML =
       /* CSS */
       `
+      /* === 1. CATWAR === */
+      :root, #app {
+        --cw3-page-bg: ${theme?.blocksColor || "transparent"} !important;
+        --cw3-page-text: ${theme?.textColor || "inherit"} !important;
+        --ds-page-text: ${theme?.textColor || "inherit"} !important;
+        --ds-page-link: ${theme?.linkColor || "inherit"} !important;
+        --ds-page-link-hover: ${theme?.accentColor3 || theme?.linkColor || "inherit"} !important;
+        --ds-info-text: ${theme?.textColor || "inherit"} !important;
+        --ds-info-link: ${theme?.linkColor || "inherit"} !important;
+        --ds-info-link-hover: ${theme?.accentColor3 || theme?.linkColor || "inherit"} !important;
+        --ds-input-bg: ${theme?.accentColor1 || "#111111"} !important;
+        --ds-input-text: ${theme?.textColor || "#d5d5d5"} !important;
+        --ds-primary: ${theme?.accentColor3 || "#fc872a"} !important;
+      }
+
+      /* === 2. BASE PAGE AND FIELD OVERRIDES === */
       body {
-        background: ${theme?.backgroundColor || ""};
+        background: ${theme?.backgroundColor || ""} !important;
+        background-color: ${theme?.backgroundColor || ""} !important;
+        color: ${theme?.textColor || ""} !important;
       }
 
       #cages_overflow {
-        background: black;
+        background: black !important;
+      }
+
+      #main_table {
+        background: transparent !important;
+        background-color: transparent !important;
+        border-color: transparent !important;
+      }
+
+      /* === 3. OUTER CONTAINER BLOCKS === */
+      #tr_actions,
+      #tr_mouth,
+      #tr_info,
+      #compact_actions,
+      #info_main {
+        background: ${theme?.blocksColor || "transparent"} !important;
+        background-color: ${theme?.blocksColor || "transparent"} !important;
+      }
+
+      #tr_tos > td,
+      #parameter.uwu-tile-block,
+      #history.uwu-tile-block,
+      #family.uwu-tile-block {
+        background-color: ${theme?.blocksColor || "transparent"} !important;
       } 
 
-      #tr_actions > td, #tr_mouth > td, #location, .small {
-        background-color: ${theme?.blocksColor || ""};
+      #tr_tos > td,
+      #tr_actions > td {
+        box-shadow: none !important;
+      }
+
+      /* === 4. CHAT === */
+      #tr_chat {
+        background-color: unset !important;
+      }
+
+      #tr_chat > td {
+        background-color: ${theme?.chatColor || "inherit"} !important;
+        color: ${theme?.textColor || "inherit"} !important;
+      }
+
+      /* === 5. NESTED SUB-BLOCKS & CARDS === */
+      #thdey,
+      #ctdey,
+      #compact_info,
+      #relatives_block,
+      #history_block,
+      #parameters_skills_block,
+      #buffdey {
+        background-color: ${theme?.subBlocksColor || "unset"} !important;
+        color: ${theme?.textColor || "inherit"} !important;
+      }
+
+      .game-topbar {
+        background: ${theme?.subBlocksColor || "unset"} !important;
+        color: ${theme?.textColor || "inherit"} !important;
+      }
+
+      .game-topbar-nav > a {
+        color: ${theme?.textColor || "inherit"} !important;
+      }
+
+      .game-topbar-nav > a:hover,
+      .game-topbar-nav > a:focus {
+        background: ${theme?.accentColor2 || "rgba(255, 255, 255, 0.1)"} !important;
+        color: ${theme?.accentColor3 || theme?.linkColor || "#fc872a"} !important;
+      }
+
+      #location, 
+      .small {
+        background-color: ${theme?.subBlocksColor || "unset"} !important;
       }
 
       #history_block > div {
         background-color: unset !important;
       }
 
-      #main_table, #tr_mouth, #tr_actions, #info_main {
-        background-color: unset;
-        background: none;
-      }
-    
-      #tr_chat {
-        background-color: ${theme?.chatColor || ""};
-      }
-    
+      /* === 6. INPUTS, BUTTONS & SLIDERS === */
       body, input, select, .ui-slider-handle, .hotkey {
-        color: ${theme?.textColor || ""};
+        color: ${theme?.textColor || ""} !important;
       }
-    
-      input, select, .ui-slider-horizontal {
-        background-color: ${theme?.accentColor1 || ""};
-        background: ${theme?.accentColor1 || ""};
-        border: solid 1px ${theme?.accentColor2 || ""};
+
+      input:not([type="button"]):not([type="submit"]):not([type="checkbox"]):not([type="range"]),
+      select,
+      textarea {
+        background-color: ${theme?.accentColor1 || "unset"} !important;
+        background: ${theme?.accentColor1 || "unset"} !important;
+        color: ${theme?.textColor || "inherit"} !important;
+        border: 1px solid ${theme?.accentColor2 || "transparent"} !important;
+      }
+
+      button.ui-btn,
+      input[type="button"],
+      input[type="submit"],
+      .hotkey,
+      .vc-btn {
+        background: ${theme?.accentColor4 || "unset"} !important;
+        background-color: ${theme?.accentColor4 || "unset"} !important;
+        color: ${theme?.textColor || "inherit"} !important;
+        border: 1px solid ${theme?.accentColor2 || "transparent"} !important;
+      }
+
+      .vc-btn:hover,
+      button.ui-btn:hover:not(:disabled) {
+        background: color-mix(in srgb, ${theme?.accentColor4 || "transparent"} 85%, white) !important;
       }
 
       .ui-widget-content .ui-state-default {
@@ -7585,11 +8376,7 @@ if (targetCW3.test(window.location.href)) {
         border: solid 1px ${theme?.accentColor2 || ""};
       }
 
-      .myname {
-        color: ${theme?.accentColor1 || ""};
-        background: ${theme?.accentColor3 || ""};
-      }
-
+      /* === 7. TOOLTIPS, MODALS & DIALOGS === */
       span.cat_tooltip {
         background: ${theme?.catTooltipBackground || ""} !important;
         color: ${theme?.textColor || ""} !important;
@@ -7599,37 +8386,14 @@ if (targetCW3.test(window.location.href)) {
       span.cat_tooltip > span.online {
         filter: brightness(2) contrast(150%);
       }
-      
-      .cat:hover .cat_tooltip a, .other_cats_list > a { 
-        color: ${theme?.linkColor || ""}; 
+
+      .cat_tooltip a,
+      .cat:hover .cat_tooltip a,
+      .other_cats_list > a { 
+        color: ${theme?.linkColor || ""} !important; 
       }
 
-      .move_name {
-        color: ${theme?.moveNameColor || ""};
-        background-color: ${theme?.moveNameBackground || ""} !important;
-      }
-    
-      a, a:hover {
-        color: ${theme?.linkColor || ""};
-      }
-
-      #fightPanel {
-        background-color: ${theme?.fightPanelBackground || ""};
-      }
-
-      .hotkey {
-        background-color: ${theme?.accentColor1 || ""};
-      }
-
-      #newchat, #newls {
-        color: ${theme?.accentColor3 || ""};
-      }
-
-      .cat-info {
-      background-color: ${theme?.catTooltipBackground || ""} !important;
-      color: ${theme?.textColor || ""} !important;
-      }
-
+      .cat-info,
       .modal-body,
       .vc-container {
         background: ${theme?.catTooltipBackground || ""} !important;
@@ -7638,17 +8402,47 @@ if (targetCW3.test(window.location.href)) {
       }
 
       .vc-title {
-        color: ${theme?.textColor || ""};
+        color: ${theme?.textColor || ""} !important;
       }
 
-      .vc-btn {
-        background-color: ${theme?.accentColor1 || ""};
-        background: ${theme?.accentColor1 || ""};
+      #fightPanel {
+        background-color: ${theme?.fightPanelBackground || ""} !important;
       }
 
-      .vc-btn:hover {
-        background-color: color-mix(in srgb, ${theme?.accentColor1 || "transparent"} 85%, white);
-        background: color-mix(in srgb, ${theme?.accentColor1 || "transparent"} 85%, white);
+      /* === 8. MOVEMENT & ACCENTS === */
+      .move_name {
+        color: ${theme?.moveNameColor || ""} !important;
+        background-color: ${theme?.moveNameBackground || ""} !important;
+      }
+
+      .hotkey {
+        background-color: ${theme?.accentColor1 || ""} !important;
+      }
+
+      .myname {
+        color: ${theme?.accentColor1 || ""};
+        background: ${theme?.accentColor3 || ""};
+      }
+
+      #newchat, #newls {
+        color: ${theme?.accentColor1 || "#ffffff"} !important;
+        background-color: ${theme?.accentColor3 || ""} !important;
+      }
+
+      /* === 9. LINKS & HEADINGS === */
+      a, a:hover {
+        color: ${theme?.linkColor || ""};
+      }
+
+      #info_main h2 a.toggle,
+      #info_main h2 a.toggle:link,
+      #info_main h2 a.toggle:visited {
+        color: ${theme?.linkColor || ""} !important;
+      }
+
+      #info_main h2 a.toggle:hover,
+      #info_main h2 a.toggle:focus {
+        color: ${theme?.accentColor3 || theme?.linkColor || ""} !important;
       }
       `;
     document.head.appendChild(newStyle);
@@ -7691,13 +8485,21 @@ if (targetCW3.test(window.location.href)) {
   //   . . . КОРРЕКЦИЯ ЦВЕТОВ И ШРИФТОВ ВАНИЛЬНОГО ЧАТА . . .
   // ====================================================================================================================
   function applyVanillaChatFixes() {
-    if (!settings.userTheme && !settings.disableCustomChatColors && !settings.useUserFonts) return;
+    if (
+      !settings.userTheme &&
+      !settings.disableCustomChatColors &&
+      !settings.useUserFonts
+    )
+      return;
 
     const style = document.createElement("style");
     style.id = "uwu-vanilla-chat-fixes";
     let css = "";
-    
-    const textColor = (settings.userTheme && theme && theme.textColor) ? theme.textColor : "inherit";
+
+    const textColor =
+      settings.userTheme && theme && theme.textColor
+        ? theme.textColor
+        : "inherit";
 
     if (settings.disableCustomChatColors) {
       css += `
@@ -7851,102 +8653,198 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //  . . . РАСШИРЕННЫЕ НАСТРОЙКИ . . .
   // ====================================================================================================================
-  const extendedSettingsButtonElement = document.createElement("div");
-  extendedSettingsButtonElement.innerHTML = extendedSettingsButton;
-  mainContainerElement.appendChild(extendedSettingsButtonElement);
+  /**
+   * Injects the UwU dropdown trigger button into CatWar's top navbar.
+   *
+   * @returns {void}
+   */
+  function setupNavbarUwUMenu() {
+    const nav = document.querySelector(".game-topbar-nav");
+    if (!nav || document.getElementById("uwu-navbar-btn")) return;
 
-  const panel = extendedSettingsButtonElement.querySelector(
-    "#uwu-extended-settings"
-  );
-  const extendedSettingsContainer = extendedSettingsButtonElement.querySelector(
-    "#extended-settings-container"
-  );
-  const button = extendedSettingsButtonElement.querySelector(
-    "#extended-settings-button"
-  );
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.id = "uwu-navbar-btn";
+    btn.className = "game-topbar-uwu-btn";
+    btn.title = "Меню CatWar UwU";
+    btn.innerHTML = `
+      <img src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/partly_sunny_rain.png" alt="UwU" />
+      <span>UwU ▾</span>
+    `;
 
-  extendedSettingsContainer.style.display = "none";
+    const popover = document.createElement("div");
+    popover.id = "uwu-nav-popover";
+    popover.className = "uwu-nav-popover";
+    popover.style.display = "none";
 
-  const shouldShowPanel = () => {
-    return (
-      settings.extendedSettingsPanel ||
-      settings.showSplashScreens ||
-      settings.showUpdateNotification ||
-      settings.manualWeatherPanel ||
-      settings.fastStyles
-    );
-  };
+    popover.innerHTML = /* HTML */ 
+    `
+      <div class="uwu-popover-header">
+        <div class="uwu-popover-title-badge">
+          <img src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/partly_sunny_rain.png" width="16" height="16" />
+          <span>CatWar UwU</span>
+        </div>
+        <span style="font-size: 11px; opacity: 0.5;">v${current_uwu_version}</span>
+      </div>
 
-  if (shouldShowPanel()) {
-    panel.style.display = "block";
-  } else {
-    panel.style.display = "none";
+      <div id="splash-screen-panel" style="display: none;"></div>
+
+      <label class="uwu-style-row" style="background: rgba(255,255,255,0.06); padding: 7px 10px; border-radius: 10px;">
+        <span style="font-weight: 600;">Редизайн интерфейса</span>
+        <div class="uwu-switch">
+          <input type="checkbox" id="uwu-toggle-layout-switch" ${settings.customLayout ? "checked" : ""}>
+          <span class="uwu-switch-slider"></span>
+        </div>
+      </label>
+
+      <button type="button" id="uwu-start-hud-btn" class="uwu-hud-trigger-btn"
+        ${!settings.customLayout ? "disabled style='opacity: 0.45; cursor: not-allowed;'" : ""}
+        title="${!settings.customLayout ? "Сначала включите редизайн интерфейса выше" : "Настроить положение и размер окон"}">
+        📐 Редактировать интерфейс
+      </button>
+
+      <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.6; margin-top: 2px;">
+        Быстрые стили
+      </div>
+      <div id="uwu-popover-fast-styles" class="uwu-fast-styles-box"></div>
+
+      <div id="uwu-popover-weather-container" style="display: none;"></div>
+
+      <a href="/settings" target="_blank" class="uwu-footer-link">
+        ⚙️ Все настройки мода →
+      </a>
+    `;
+
+    const fastStylesBox = popover.querySelector("#uwu-popover-fast-styles");
+    const manager = getFastStylesManager();
+
+    manager.items.forEach((item) => {
+      const row = document.createElement("label");
+      row.className = "uwu-style-row";
+
+      const spanLabel = document.createElement("span");
+      spanLabel.textContent = item.label;
+
+      const switchWrap = document.createElement("div");
+      switchWrap.className = "uwu-switch";
+
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.checked = manager.getState(item);
+
+      const slider = document.createElement("span");
+      slider.className = "uwu-switch-slider";
+
+      input.addEventListener("change", () => {
+        manager.set(item.key, input.checked);
+      });
+
+      switchWrap.appendChild(input);
+      switchWrap.appendChild(slider);
+
+      row.appendChild(spanLabel);
+      row.appendChild(switchWrap);
+      fastStylesBox.appendChild(row);
+    });
+
+    const layoutToggle = popover.querySelector("#uwu-toggle-layout-switch");
+    const hudEditBtn = popover.querySelector("#uwu-start-hud-btn");
+
+    layoutToggle.addEventListener("change", () => {
+      settings.customLayout = layoutToggle.checked;
+      saveSettings();
+      location.reload();
+    });
+
+    hudEditBtn.addEventListener("click", () => {
+      if (!settings.customLayout) return;
+
+      popover.style.display = "none";
+      btn.classList.remove("active");
+
+      if (
+        window.uwuHudEditor &&
+        typeof window.uwuHudEditor.startEditMode === "function"
+      ) {
+        window.uwuHudEditor.startEditMode();
+      }
+    });
+
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isHidden = popover.style.display === "none";
+      popover.style.display = isHidden ? "flex" : "none";
+      btn.classList.toggle("active", isHidden);
+      if (isHidden) btn.classList.remove("new-update");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!popover.contains(e.target) && e.target !== btn) {
+        popover.style.display = "none";
+        btn.classList.remove("active");
+      }
+    });
+
+    nav.appendChild(btn);
+    document.body.appendChild(popover);
+
+    initManualWeatherPanel();
+
+    const updatePopoverPos = () => {
+      const rect = btn.getBoundingClientRect();
+      popover.style.top = `${rect.bottom + 8}px`;
+      popover.style.left = `${Math.max(10, rect.left)}px`;
+    };
+    btn.addEventListener("click", updatePopoverPos);
+    window.addEventListener("resize", updatePopoverPos);
   }
 
-  button.addEventListener("click", () => {
-    extendedSettingsContainer.style.display =
-      extendedSettingsContainer.style.display === "none" ? "block" : "none";
+  setupSingleCallback(".game-topbar-nav", setupNavbarUwUMenu);
 
-    button.classList.remove("new-update");
-  });
   // ====================================================================================================================
   //  . . . СПЛЕШ СКРИН . . .
   // ====================================================================================================================
   if (settings.showSplashScreens) {
-    const randomPhraseBlock = document.createElement("div");
-    const splashPanel = extendedSettingsButtonElement.querySelector(
-      "#splash-screen-panel"
-    );
-    randomPhraseBlock.classList.add("random-phrase-block");
-    splashPanel.appendChild(randomPhraseBlock);
-
     function loadRandomPhrase(url) {
+      const splashPanel = document.getElementById("splash-screen-panel");
+      if (!splashPanel) return;
+
       fetch(url)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(`Ошибка загрузки: ${response.status}`);
-          }
-          return response.text();
-        })
+        .then((res) => (res.ok ? res.text() : Promise.reject(res.status)))
         .then((text) => {
           const phrases = text.split("\n").filter((line) => line.trim() !== "");
           const randomIndex = Math.floor(Math.random() * phrases.length);
-          randomPhraseBlock.innerHTML = parseColorCodes(phrases[randomIndex]);
+          splashPanel.innerHTML = `<p class="uwu-popover-splash">${parseColorCodes(phrases[randomIndex])}</p>`;
+          splashPanel.style.display = "block";
         })
-        .catch((error) => {
-          console.error("Ошибка при загрузке случайной фразы:", error);
-          randomPhraseBlock.textContent = "Не удалось загрузить фразу :(";
-        });
-    }
-
-    function parseColorCodes(text) {
-      const colorMap = {
-        "&0": "</span>", // - Сброс -
-        "&1": "<span style='color: blue;'>", // Синий
-        "&2": "<span style='color: green;'>", // Зеленый
-        "&3": "<span style='color: aqua;'>", // Бирюзовый
-        "&4": "<span style='color: red;'>", // Красный
-        "&5": "<span style='color: #dc00dc;'>", // Фиолетовый
-        "&6": "<span style='color: gold;'>", // Золотой
-        "&7": "<span style='color: pink;'>", // Розовый
-        "&8": "<span style='color: white;'>", // Белый
-        "&9": "<span style='color: black;'>", // Черный
-      };
-
-      text = "<b>" + text;
-
-      for (const code in colorMap) {
-        text = text.replace(new RegExp(code, "g"), colorMap[code]);
-      }
-
-      return text;
+        .catch((err) => console.warn("UwU | Ошибка загрузки сплэша:", err));
     }
 
     window.addEventListener("load", () => {
       loadRandomPhrase(
-        "https://raw.githubusercontent.com/Ibirtem/CatWar/main/texts/text.txt"
+        "https://raw.githubusercontent.com/Ibirtem/CatWar/main/texts/text.txt",
       );
     });
+  }
+
+  function parseColorCodes(text) {
+    const colorMap = {
+      "&0": "</span>", // - Сброс -
+      "&1": "<span style='color: blue;'>", // Синий
+      "&2": "<span style='color: green;'>", // Зеленый
+      "&3": "<span style='color: aqua;'>", // Бирюзовый
+      "&4": "<span style='color: red;'>", // Красный
+      "&5": "<span style='color: #dc00dc;'>", // Фиолетовый
+      "&6": "<span style='color: gold;'>", // Золотой
+      "&7": "<span style='color: pink;'>", // Розовый
+      "&8": "<span style='color: white;'>", // Белый
+      "&9": "<span style='color: black;'>", // Черный
+    };
+    text = "<b>" + text;
+    for (const code in colorMap) {
+      text = text.replace(new RegExp(code, "g"), colorMap[code]);
+    }
+    return text;
   }
   // ====================================================================================================================
   //  . . . ПЕРСОНАЛЬНЫЕ КОСТЮМЫ . . .
@@ -7961,7 +8859,7 @@ if (targetCW3.test(window.location.href)) {
         if (!items.cats) return;
 
         let styleElement = document.getElementById(
-          "uwu-personal-costume-style"
+          "uwu-personal-costume-style",
         );
         if (!styleElement) {
           styleElement = document.createElement("style");
@@ -8060,7 +8958,7 @@ if (targetCW3.test(window.location.href)) {
         },
         { childList: true, subtree: true },
         10,
-        500
+        500,
       );
 
       setupMutationObserver(
@@ -8068,7 +8966,7 @@ if (targetCW3.test(window.location.href)) {
         () => {
           setTimeout(checkMyPose, 100);
         },
-        { childList: true, subtree: true, characterData: true }
+        { childList: true, subtree: true, characterData: true },
       );
     }
   }
@@ -8140,7 +9038,7 @@ if (targetCW3.test(window.location.href)) {
                 <button class="uwu-button install-button" data-costume-idx="${idx}">Сохранить</button>
               </div>
             </div>
-          `
+          `,
             )
             .join("")}
         </div>
@@ -8153,7 +9051,7 @@ if (targetCW3.test(window.location.href)) {
         btn.addEventListener("click", async (e) => {
           const idx = parseInt(btn.getAttribute("data-costume-idx"), 10);
           const select = contentContainer.querySelector(
-            `select[data-costume-idx="${idx}"]`
+            `select[data-costume-idx="${idx}"]`,
           );
           const slotChoice = select.value;
           contentContainer.style.pointerEvents = "none";
@@ -8247,7 +9145,7 @@ if (targetCW3.test(window.location.href)) {
         createLockCheckbox();
         changePutButtonState();
       },
-      { attributes: true, attributeFilter: ["style"] }
+      { attributes: true, attributeFilter: ["style"] },
     );
 
     createLockCheckbox();
@@ -8255,19 +9153,18 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //  . . . УВЕДОМЛЕНИЕ ОБ ОБНОВЛЕНИИ . . .
   // ====================================================================================================================
+  /**
+   * Highlights the navbar UwU menu button when a new script version is detected.
+   *
+   * @param {string} oldVersion - Previous stored version string.
+   * @returns {void}
+   */
   function showUpdateNotification(oldVersion) {
-    const panel = document.getElementById("extended-settings-container");
-    const notificationBlock = document.createElement("div");
-    notificationBlock.classList.add("update-notification");
-    notificationBlock.innerHTML = `
-          <p>Скрипт/Мод UwU был обновлен с версии v${
-            oldVersion || "неизвестной"
-          } до версии v${current_uwu_version}!</p>
-          <p>Можете посетить <a href="https://catwar.net/settings" target="_blank">Настройки</a> для ознакомления с изменениями.</p>
-        `;
-    panel.appendChild(notificationBlock);
-    const button = extendedSettingsButtonElement.querySelector("button");
-    button.classList.add("new-update");
+    const btn = document.getElementById("uwu-navbar-btn");
+    if (btn) {
+      btn.classList.add("new-update");
+      btn.title = `CatWar UwU обновлен: v${oldVersion || "???"} → v${current_uwu_version}`;
+    }
   }
 
   window.addEventListener("load", () => {
@@ -8287,34 +9184,51 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //  . . . РУЧНОЕ УПРАВЛЕНИЕ ПОГОДОЙ . . .
   // ====================================================================================================================
-  if (settings.manualWeatherPanel) {
-    const panel = extendedSettingsButtonElement.querySelector(
-      "#extended-settings-container"
-    );
-    panel.innerHTML += manualWeatherPanel;
+  /**
+   * Injects manual weather controls into the navbar popover container.
+   * Binds manual triggers for auroras and firefly effects.
+   *
+   * @returns {void}
+   */
+  function initManualWeatherPanel() {
+    if (!settings.manualWeatherPanel) return;
+
+    const container = document.getElementById("uwu-popover-weather-container");
+    if (!container) return;
+
+    container.innerHTML = `
+      <details class="uwu-popover-details">
+        <summary>🌦️ Ручное управление погодой</summary>
+        <div id="manual-weather-inner" style="margin-top: 8px;">
+          ${manualWeatherPanel}
+        </div>
+      </details>
+    `;
+    container.style.display = "block";
 
     const manualAuroraOffButton = document.getElementById("manualAurora-Off");
     const manualAuroraBButton = document.getElementById("manualAurora-B");
     const manualAuroraGButton = document.getElementById("manualAurora-G");
-
     const fireflyOnButton = document.getElementById("manualFirefly-On");
 
-    manualAuroraOffButton.addEventListener("click", () => {
-      for (const auroraElement of auroras) {
-        removeAurora(auroraElement);
+    manualAuroraOffButton?.addEventListener("click", () => {
+      if (typeof auroras !== "undefined") {
+        for (const auroraElement of auroras) {
+          removeAurora(auroraElement);
+        }
       }
     });
 
-    manualAuroraBButton.addEventListener("click", () => {
-      createAurora("blue");
+    manualAuroraBButton?.addEventListener("click", () => {
+      if (typeof createAurora === "function") createAurora("blue");
     });
 
-    manualAuroraGButton.addEventListener("click", () => {
-      createAurora("green");
+    manualAuroraGButton?.addEventListener("click", () => {
+      if (typeof createAurora === "function") createAurora("green");
     });
 
-    fireflyOnButton.addEventListener("click", () => {
-      toggleFireflies();
+    fireflyOnButton?.addEventListener("click", () => {
+      if (typeof toggleFireflies === "function") toggleFireflies();
     });
   }
 
@@ -8373,7 +9287,7 @@ if (targetCW3.test(window.location.href)) {
     const timerStyles = document.createElement("style");
     timerStyles.innerHTML = /* CSS */ `
       #uwu-interval-timer-main-panel {
-        z-index: 11;
+        z-index: 1600;
         pointer-events: auto;
         width: 180px;
         position: absolute;
@@ -8561,8 +9475,8 @@ if (targetCW3.test(window.location.href)) {
       startStopBtn.classList.remove("install-button");
       startStopBtn.classList.add("remove-button");
 
-      targetTimestamp = Date.now() + (totalSeconds * 1000);
-      
+      targetTimestamp = Date.now() + totalSeconds * 1000;
+
       updateDisplay();
 
       timerId = setInterval(() => {
@@ -8571,13 +9485,13 @@ if (targetCW3.test(window.location.href)) {
 
         if (diff <= 0) {
           playSound();
-          
-          targetTimestamp = now + (totalSeconds * 1000);
+
+          targetTimestamp = now + totalSeconds * 1000;
           remainingSeconds = totalSeconds;
         } else {
           remainingSeconds = Math.ceil(diff / 1000);
         }
-        
+
         updateDisplay();
       }, 200);
 
@@ -8606,11 +9520,11 @@ if (targetCW3.test(window.location.href)) {
 
     function updateDisplay() {
       let displaySecs = isRunning ? remainingSeconds : 0;
-      
+
       const mins = Math.floor(displaySecs / 60);
       const secs = displaySecs % 60;
       const timeString = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-      
+
       countdownDisplay.textContent = timeString;
       headerCountdown.textContent = timeString;
     }
@@ -8618,7 +9532,7 @@ if (targetCW3.test(window.location.href)) {
     function playSound() {
       soundManager.playSound(
         settings.intervalTimerSound,
-        settings.intervalTimerVolume
+        settings.intervalTimerVolume,
       );
     }
 
@@ -8838,7 +9752,7 @@ if (targetCW3.test(window.location.href)) {
 
     /**
      * Formats a Date object into time and date components according to the selected timezone.
-     * 
+     *
      * @param {Date} date - The Date instance to format.
      * @param {boolean} isMoscow - Whether to force the "Europe/Moscow" timezone.
      * @returns {{hours: string, minutes: string, seconds: string, day: string, month: string, year: string, dayOfWeek: string, monthName: string}}
@@ -8862,11 +9776,23 @@ if (targetCW3.test(window.location.href)) {
         parts[type] = value;
       });
 
-      const dayOfWeek = parts.weekday ? parts.weekday.charAt(0).toUpperCase() + parts.weekday.slice(1) : "";
+      const dayOfWeek = parts.weekday
+        ? parts.weekday.charAt(0).toUpperCase() + parts.weekday.slice(1)
+        : "";
 
       const monthNames = [
-        "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-        "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+        "Январь",
+        "Февраль",
+        "Март",
+        "Апрель",
+        "Май",
+        "Июнь",
+        "Июль",
+        "Август",
+        "Сентябрь",
+        "Октябрь",
+        "Ноябрь",
+        "Декабрь",
       ];
       const monthIdx = parseInt(parts.month, 10) - 1;
       const monthName = monthNames[monthIdx] || "";
@@ -8885,11 +9811,20 @@ if (targetCW3.test(window.location.href)) {
 
     /**
      * Updates the clock UI elements using the provided time source.
-     * 
+     *
      * @param {Date} [timeSource=new Date()] - The Date object representing current time.
      */
     function updateClock(timeSource = new Date()) {
-      const { hours, minutes, seconds, day, month, year, dayOfWeek, monthName } = getDateTimeParts(timeSource, settings.clockMoscowTime);
+      const {
+        hours,
+        minutes,
+        seconds,
+        day,
+        month,
+        year,
+        dayOfWeek,
+        monthName,
+      } = getDateTimeParts(timeSource, settings.clockMoscowTime);
 
       timeElement.textContent = `${hours}:${minutes}:${seconds}`;
 
@@ -8921,6 +9856,54 @@ if (targetCW3.test(window.location.href)) {
     }
 
     /**
+     * Prompts the user with modal before the "first" network time request.
+     *
+     * @param {() => void} onConfirm - Callback invoked once user confirms the prompt.
+     * @returns {void}
+     */
+    function askOnlineTimePermission(onConfirm) {
+      if (document.getElementById("uwu-net-consent-modal")) return;
+
+      const modalHtml = /* HTML */ `
+        <div id="uwu-net-consent-modal" class="uwu-modal-overlay">
+          <div class="uwu-modal-card" style="max-width: 450px; text-align: center;">
+            <div class="uwu-modal-header" style="justify-content: center;">
+              <h3 style="margin: 0;">🌍 Часы CatWar UwU</h3>
+            </div>
+            <hr class="uwu-hr" />
+            <div class="uwu-modal-body" style="font-size: 13px; line-height: 1.5; padding: 10px 18px 18px;">
+              <p style="margin-top: 0;">
+                Вы включили Часы в CatWar UwU! Для точного времени идёт синхронизация с серверами <b>Google / Сбер / Яндекс</b>, и на это нужно ваше разрешение.
+              </p>
+
+              <div style="background: rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 10px; margin: 10px 0; border: 1px solid rgba(255, 255, 255, 0.15);">
+                Если сейчас появится всплывающее окно 'monkey плагина, выберите:<br>
+                <b style="color: #83e5ff; font-size: 14px;">«Всегда разрешать этот домен»</b><br>
+                <small style="opacity: 0.7;">(иначе часики перейдут на локальное время устройства (или будет неприятный спам новыми попытками))</small>
+              </div>
+
+              <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 8px; padding: 8px 12px; margin-bottom: 14px; font-size: 12px; color: #ffe082;">
+                ✨ <b>Примечание:</b> Если вы уже выдавали разрешение ранее, то повторное окно не появится и вам ничего делать не надо!
+              </div>
+
+              <button type="button" id="uwu-net-consent-btn" class="uwu-button install-button" style="width: 100%; padding: 8px 16px; font-weight: 700;">
+                Понятно, синхронизировать!
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.body.insertAdjacentHTML("beforeend", modalHtml);
+
+      document.getElementById("uwu-net-consent-btn")?.addEventListener("click", () => {
+        document.getElementById("uwu-net-consent-modal")?.remove();
+        uwuStorage.setItem("uwu_clock_net_consent", true);
+        onConfirm();
+      });
+    }
+
+    /**
      * Promisified wrapper for GM_xmlhttpRequest with error and timeout handling.
      * @param {Object} details - GM_xmlhttpRequest configuration options.
      * @param {string} details.method - HTTP method (e.g., 'GET', 'HEAD').
@@ -8943,7 +9926,11 @@ if (targetCW3.test(window.location.href)) {
               if (response.status >= 200 && response.status < 300) {
                 resolve(response);
               } else {
-                reject(new Error(`HTTP Error ${response.status}: ${response.statusText}`));
+                reject(
+                  new Error(
+                    `HTTP Error ${response.status}: ${response.statusText}`,
+                  ),
+                );
               }
             },
             onerror: (error) => reject(error),
@@ -8962,6 +9949,13 @@ if (targetCW3.test(window.location.href)) {
      * @returns {Promise<void>} Resolves after state update and timer initialization.
      */
     async function fetchInternetTime() {
+      if (!uwuStorage.getItem("uwu_clock_net_consent")) {
+        updateClockWithLocalTime();
+        startTimer();
+        askOnlineTimePermission(() => fetchInternetTime());
+        return;
+      }
+
       const timeProviders = [
         {
           name: "Google",
@@ -8978,7 +9972,9 @@ if (targetCW3.test(window.location.href)) {
                 return date;
               }
             }
-            throw new Error("Date header missing or invalid in Google response.");
+            throw new Error(
+              "Date header missing or invalid in Google response.",
+            );
           },
         },
         {
@@ -9150,7 +10146,7 @@ if (targetCW3.test(window.location.href)) {
 
     document.addEventListener(
       "visibilitychange",
-      handleFocusOrVisibilityChange
+      handleFocusOrVisibilityChange,
     );
     window.addEventListener("focus", handleFocusOrVisibilityChange);
 
@@ -9199,13 +10195,13 @@ if (targetCW3.test(window.location.href)) {
         !catTooltip.querySelector(".save-costume-button")
       ) {
         const costumeDivs = catElement.querySelectorAll(
-          "div[data-v-59afe5e8]:not(.first)"
+          "div[data-v-59afe5e8]:not(.first)",
         );
 
         const matchingCostumes = Array.from(costumeDivs).filter((div) =>
           div.style.backgroundImage
             .slice(5, -2)
-            .startsWith("/cw3/cats/0/costume/")
+            .startsWith("/cw3/cats/0/costume/"),
         );
 
         if (matchingCostumes.length > 0) {
@@ -9214,7 +10210,7 @@ if (targetCW3.test(window.location.href)) {
           saveCostume.classList.add("save-costume-button");
           saveCostume.addEventListener("click", () => {
             const costumeImages = matchingCostumes.map((costume) =>
-              costume.style.backgroundImage.slice(5, -2)
+              costume.style.backgroundImage.slice(5, -2),
             );
             createCostumeSavePopup(costumeImages);
           });
@@ -9238,7 +10234,7 @@ if (targetCW3.test(window.location.href)) {
       newMouth.classList.add("mouth", "uwu-sorted");
       originalMouth.parentNode.insertBefore(
         newMouth,
-        originalMouth.nextSibling
+        originalMouth.nextSibling,
       );
 
       originalMouth.style.display = "none";
@@ -9446,7 +10442,7 @@ if (targetCW3.test(window.location.href)) {
       .style.backgroundImage.slice(5, -2);
 
     const defectElements = Array.from(
-      cat.querySelectorAll(".d > div:not(.first)")
+      cat.querySelectorAll(".d > div:not(.first)"),
     );
 
     const uniqueDefects = new Set();
@@ -9506,7 +10502,7 @@ if (targetCW3.test(window.location.href)) {
           defectLine.appendChild(defectNameSpan);
           defectLine.insertAdjacentHTML(
             "beforeend",
-            ` (${defect.level} стадия, ${defectState})`
+            ` (${defect.level} стадия, ${defectState})`,
           );
 
           defectsContainer.appendChild(defectLine);
@@ -9538,10 +10534,21 @@ if (targetCW3.test(window.location.href)) {
   //  . . . ГРАНИЦЫ ЯЧЕЕК . . . cellsNumbers
   // ====================================================================================================================
   function updateCellsBordersStyle(checked) {
+    if (!settings) loadSettings();
+
     let styleElement = document.getElementById("cellsBordersStyle");
+    const thickness =
+      settings?.cellsBordersThickness ||
+      settingsMap?.uwu_settings?.cellsBordersThickness ||
+      "1";
+    const color =
+      settings?.cellsBordersColor ||
+      uwuDefaultSettings.cellsBordersColor ||
+      "#ffffff";
+
     const cellsBordersStyle = `
       .cage {
-        box-shadow: inset 0 0 0 0.${settingsMap.uwu_settings.cellsBordersThickness}px ${settings.cellsBordersColor};
+        box-shadow: inset 0 0 0 0.${thickness}px ${color};
       }
     `;
 
@@ -9609,16 +10616,21 @@ if (targetCW3.test(window.location.href)) {
   if (settings.showMightHistory) {
     const updateMightHistory = (newVal) => {
       if (!newVal || !newVal.tooltip) return;
-      
+
       const match = newVal.tooltip.match(/\((\d+)\/([^\)]+)\)/);
       if (!match) return;
-      
+
       const currentVal = parseInt(match[1], 10);
       const currentMaxRaw = match[2].trim();
-      const currentMax = isNaN(parseInt(currentMaxRaw, 10)) ? null : parseInt(currentMaxRaw, 10);
-      
+      const currentMax = isNaN(parseInt(currentMaxRaw, 10))
+        ? null
+        : parseInt(currentMaxRaw, 10);
+
       const rawHistoryData = uwuStorage.getItem("uwu_mightHistory");
-      let historyData = (rawHistoryData && typeof rawHistoryData === "object" && !Array.isArray(rawHistoryData))
+      let historyData =
+        rawHistoryData &&
+        typeof rawHistoryData === "object" &&
+        !Array.isArray(rawHistoryData)
           ? rawHistoryData
           : { logs: [] };
 
@@ -9630,20 +10642,29 @@ if (targetCW3.test(window.location.href)) {
         const now = new Date();
         historyData.lastVal = currentVal;
         historyData.lastMax = currentMax;
-        historyData.logs = [{
-          val: currentVal,
-          max: currentMaxRaw,
-          diff: "Старт",
-          time: `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-        }];
+        historyData.logs = [
+          {
+            val: currentVal,
+            max: currentMaxRaw,
+            diff: "Старт",
+            time: `${String(now.getDate()).padStart(2, "0")}.${String(now.getMonth() + 1).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`,
+          },
+        ];
         uwuStorage.setItem("uwu_mightHistory", historyData);
         return;
       }
 
-      if (historyData.lastVal !== currentVal || historyData.lastMax !== currentMax) {
+      if (
+        historyData.lastVal !== currentVal ||
+        historyData.lastMax !== currentMax
+      ) {
         let diff = 0;
-        if (typeof currentMax === 'number' && typeof historyData.lastMax === 'number' && currentMax > historyData.lastMax) {
-          diff = (historyData.lastMax - historyData.lastVal) + currentVal;
+        if (
+          typeof currentMax === "number" &&
+          typeof historyData.lastMax === "number" &&
+          currentMax > historyData.lastMax
+        ) {
+          diff = historyData.lastMax - historyData.lastVal + currentVal;
         } else {
           diff = currentVal - historyData.lastVal;
         }
@@ -9654,7 +10675,7 @@ if (targetCW3.test(window.location.href)) {
             val: currentVal,
             max: currentMaxRaw,
             diff: diff > 0 ? `+${diff}` : diff,
-            time: `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+            time: `${String(now.getDate()).padStart(2, "0")}.${String(now.getMonth() + 1).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`,
           });
 
           if (historyData.logs.length > 100) historyData.logs.pop();
@@ -9668,15 +10689,18 @@ if (targetCW3.test(window.location.href)) {
 
     const showMightHistoryModal = () => {
       let { catInfoElement, contentContainer } = createCatInfoContainer();
-      
+
       const rawHistoryData = uwuStorage.getItem("uwu_mightHistory");
-      const logs = (rawHistoryData && Array.isArray(rawHistoryData.logs)) ? rawHistoryData.logs : [];
-      
+      const logs =
+        rawHistoryData && Array.isArray(rawHistoryData.logs)
+          ? rawHistoryData.logs
+          : [];
+
       catInfoElement.style.width = "350px";
       contentContainer.style.paddingBottom = "10px";
 
       const escape = (str) => {
-        const div = document.createElement('div');
+        const div = document.createElement("div");
         div.textContent = str;
         return div.innerHTML;
       };
@@ -9684,53 +10708,72 @@ if (targetCW3.test(window.location.href)) {
       contentContainer.innerHTML = `
         <h2 style="letter-spacing: 2px; margin-bottom: 15px;">ИСТОРИЯ БУ</h2>
         <div style="max-height: 400px; overflow-y: auto; border-radius: 5px; background: rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05);">
-          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
             <thead>
               <tr style="border-bottom: 2px solid #ffffff1a; opacity: 0.7; position: sticky; top: 0; background: #222; z-index: 1;">
                 <th style="padding: 8px;">Дата</th><th style="padding: 8px;">БУ/Макс</th><th style="padding: 8px;">Прирост</th>
               </tr>
             </thead>
             <tbody>
-              ${logs.length ? logs.map(l => `
+              ${
+                logs.length
+                  ? logs
+                      .map(
+                        (l) => `
                 <tr style="border-bottom: 1px solid #ffffff05;">
                   <td style="padding: 6px; opacity: 0.8;">${escape(l.time)}</td>
                   <td style="padding: 6px;"><b>${escape(l.val)}</b><small>/${escape(l.max)}</small></td>
-                  <td style="padding: 6px; color: ${l.diff.toString().includes('+') ? '#41cd70' : (l.diff === 'Старт' ? '#83e5ff' : '#cd4141')}; font-weight: bold;">${escape(l.diff)}</td>
+                  <td style="padding: 6px; color: ${l.diff.toString().includes("+") ? "#41cd70" : l.diff === "Старт" ? "#83e5ff" : "#cd4141"}; font-weight: bold;">${escape(l.diff)}</td>
                 </tr>
-              `).join('') : '<tr><td colspan="3" style="padding: 20px; opacity: 0.5; text-align: center;">Истории пока нет...</td></tr>'}
+              `,
+                      )
+                      .join("")
+                  : '<tr><td colspan="3" style="padding: 20px; opacity: 0.5; text-align: center;">Истории пока нет...</td></tr>'
+              }
             </tbody>
           </table>
         </div>
         <div style="margin-top: 20px; display: flex; justify-content: center; width: 100%;">
-             ${logs.length ? '<button type="button" class="uwu-reset-might-btn uwu-button remove-button" style="padding: 5px 15px; font-size: 12px; cursor: pointer;">Очистить историю</button>' : ''}
+             ${logs.length ? '<button type="button" class="uwu-reset-might-btn uwu-button remove-button" style="padding: 5px 15px; font-size: 12px; cursor: pointer;">Очистить историю</button>' : ""}
         </div>
       `;
 
-      const resetBtn = contentContainer.querySelector('.uwu-reset-might-btn');
+      const resetBtn = contentContainer.querySelector(".uwu-reset-might-btn");
       if (resetBtn) {
-        resetBtn.addEventListener('click', (e) => {
-          if (confirm("Удалить все записи? Текущие значения станут новой точкой отсчета.")) {
-            const currentData = getVueData('parameter.data.might');
+        resetBtn.addEventListener("click", (e) => {
+          if (
+            confirm(
+              "Удалить все записи? Текущие значения станут новой точкой отсчета.",
+            )
+          ) {
+            const currentData = getVueData("parameter.data.might");
             const match = currentData?.tooltip?.match(/\((\d+)\/([^\)]+)\)/);
-            
+
             if (match) {
               const cVal = parseInt(match[1], 10);
               const cMaxRaw = match[2].trim();
-              const cMax = isNaN(parseInt(cMaxRaw, 10)) ? null : parseInt(cMaxRaw, 10);
+              const cMax = isNaN(parseInt(cMaxRaw, 10))
+                ? null
+                : parseInt(cMaxRaw, 10);
               const now = new Date();
 
-              uwuStorage.setItem("uwu_mightHistory", { 
-                lastVal: cVal, 
-                lastMax: cMax, 
-                logs: [{
-                  val: cVal, max: cMaxRaw, diff: "Старт",
-                  time: `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-                }] 
+              uwuStorage.setItem("uwu_mightHistory", {
+                lastVal: cVal,
+                lastMax: cMax,
+                logs: [
+                  {
+                    val: cVal,
+                    max: cMaxRaw,
+                    diff: "Старт",
+                    time: `${String(now.getDate()).padStart(2, "0")}.${String(now.getMonth() + 1).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`,
+                  },
+                ],
               });
             } else {
               uwuStorage.removeItem("uwu_mightHistory");
             }
-            if (globalContainer.contains(catInfoElement)) globalContainer.removeChild(catInfoElement);
+            if (globalContainer.contains(catInfoElement))
+              globalContainer.removeChild(catInfoElement);
           }
         });
       }
@@ -9739,23 +10782,27 @@ if (targetCW3.test(window.location.href)) {
     };
 
     setupSingleCallback("#parameters_skills_block", () => {
-      const parent = document.getElementById('parameters_skills_block');
-      if (!parent || document.getElementById('uwu-open-might-history')) return;
+      const parent = document.getElementById("parameters_skills_block");
+      if (!parent || document.getElementById("uwu-open-might-history")) return;
 
-      const btnLink = document.createElement('div');
-      btnLink.style.cssText = 'text-align: center; margin-top: 5px;';
+      const btnLink = document.createElement("div");
+      btnLink.style.cssText = "text-align: center; margin-top: 5px;";
       btnLink.innerHTML = `<a href="#" id="uwu-open-might-history" style="font-size: 11px; opacity: 0.6; text-decoration: underline; color: inherit;">История прокачки БУ</a>`;
       parent.appendChild(btnLink);
 
-      document.getElementById('uwu-open-might-history').onclick = (e) => {
+      document.getElementById("uwu-open-might-history").onclick = (e) => {
         e.preventDefault();
         showMightHistoryModal();
       };
     });
 
-    watchVueData('parameter.data.might', (newVal) => {
-      updateMightHistory(newVal);
-    }, { deep: true, immediate: true });
+    watchVueData(
+      "parameter.data.might",
+      (newVal) => {
+        updateMightHistory(newVal);
+      },
+      { deep: true, immediate: true },
+    );
   }
 
   // ====================================================================================================================
@@ -9784,26 +10831,26 @@ if (targetCW3.test(window.location.href)) {
 
   const maxWidthPx = 150;
 
+  /**
+   * Calculates and displays a modal dialog with precise parameter percentages and estimated recovery timers.
+   * Pulls live data directly from the reactive Vue state.
+   */
   function showParameterDetails() {
-    const parameters = [
+    const paramData = getVueData("parameter.data") || {};
+
+    const parametersConfig = [
       {
         id: "dream",
         name: "Бодрость",
-        formula: (redPixels) => {
-          if (redPixels <= 0) return 0;
-
-          const percentageLoss = Math.round(redPixels / 1.5);
+        formula: (percentageLoss) => {
+          if (percentageLoss <= 0) return 0;
           let totalTime = 0;
-
           for (let i = 1; i <= percentageLoss; i++) {
             if (i <= 2) {
-              // Первые два процента добавляют по 20 секунд
               totalTime += 20;
             } else if (i % 2 !== 0) {
-              // Нечётные проценты (3-й, 5-й и т.д.) добавляют 40 секунд
               totalTime += 40;
             } else {
-              // Чётные проценты (4-й, 6-й и т.д.) добавляют 20 секунд
               totalTime += 20;
             }
           }
@@ -9813,94 +10860,72 @@ if (targetCW3.test(window.location.href)) {
       {
         id: "hunger",
         name: "Голод",
-        formula: (percentage) => Math.ceil(((100 - percentage) / 150) * 9) * 15,
+        formula: (percentageLoss) =>
+          percentageLoss > 0 ? Math.ceil((percentageLoss / 100) * 9) * 15 : 0,
       },
-      { id: "thirst", name: "Жажда", timePerPixel: 60, formula: null },
-      { id: "need", name: "Нужда", timePerPixel: 30, formula: null },
-      {
-        id: "health",
-        name: "Здоровье",
-        formula: null,
-      },
+      { id: "thirst", name: "Жажда", timePerPercent: 90 },
+      { id: "need", name: "Нужда", timePerPercent: 45 },
+      { id: "health", name: "Здоровье" },
       {
         id: "clean",
         name: "Чистота",
-        timePerPixel: null,
-        formula: (redPixels) => {
-          if (redPixels <= 0) return 0;
-          return (200 / 3) * redPixels;
-        },
+        formula: (percentageLoss) => percentageLoss * 100,
       },
     ];
 
     let { catInfoElement, contentContainer } = createCatInfoContainer();
     contentContainer.classList.add("parameter-details-container");
 
-    parameters.forEach(({ id, name, formula, timePerPixel }) => {
-      const parameterElement = document.getElementById(id);
-      if (parameterElement) {
-        const barFill = parameterElement.querySelector(".bar-fill");
-        const barData = parameterElement.querySelector(".bar-data");
+    parametersConfig.forEach(({ id, name, formula, timePerPercent }) => {
+      const rawParam = paramData[id];
+      let percentage = 0;
 
-        if (!barFill || !barData) {
-          console.warn(`Элементы бара не найдены для параметра с ID "${id}".`);
-          return;
-        }
-
-        const percentageString = barData.textContent.match(/\d+%$/);
-        if (!percentageString) {
-          console.warn(
-            `Не удалось извлечь процент из текста для параметра с ID "${id}".`
-          );
-          return;
-        }
-
-        const percentage = parseInt(percentageString[0], 10);
-
-        const effectivePercentage = ["hunger", "thirst", "need"].includes(id)
-          ? 100 - percentage
-          : percentage;
-        const reversePercentage = 100 - effectivePercentage;
-
-        const pixelWidth = (effectivePercentage / 100) * maxWidthPx;
-        const reversePixelWidth = maxWidthPx - pixelWidth;
-
-        let timeInfo = "";
-        let totalTimeSeconds;
-
-        if (formula) {
-          totalTimeSeconds = formula(reversePixelWidth);
-        } else if (timePerPixel) {
-          totalTimeSeconds = reversePixelWidth * timePerPixel;
-        }
-
-        if (totalTimeSeconds !== undefined) {
-          const hours = Math.floor(totalTimeSeconds / 3600);
-          const minutes = Math.floor((totalTimeSeconds % 3600) / 60);
-          const seconds = Math.ceil(totalTimeSeconds % 60);
-
-          if (hours > 0) {
-            timeInfo = ` (> ${hours} ч ${minutes} мин)`;
-          } else if (minutes > 0) {
-            timeInfo = ` (${minutes} мин ${seconds} сек)`;
-          } else {
-            timeInfo = ` (${seconds} сек)`;
-          }
-        }
-
-        const detailLine = document.createElement("p");
-        detailLine.innerHTML = `<strong>${name}:</strong> <span style="color: #00cc00;">${effectivePercentage}%</span> / <span style="color: red;">${reversePercentage}%</span>`;
-        detailLine.style.marginBottom = "0";
-        contentContainer.appendChild(detailLine);
-
-        if (timeInfo) {
-          const detailLineTime = document.createElement("p");
-          detailLineTime.innerHTML = `≈${timeInfo}`;
-          detailLineTime.style.marginTop = "0";
-          contentContainer.appendChild(detailLineTime);
-        }
+      if (rawParam && typeof rawParam.barWidth === "number") {
+        percentage = rawParam.barWidth;
       } else {
-        console.warn(`Параметр с ID "${id}" не найден.`);
+        // Fallback to DOM if Vue state is unavailable
+        const el = document.getElementById(id);
+        const text = el?.querySelector(".bar-data")?.textContent || "";
+        const match = text.match(/(\d+)%/);
+        percentage = match ? parseInt(match[1], 10) : 0;
+      }
+
+      const effectivePercentage = Math.max(0, Math.min(100, Math.round(percentage)));
+      const reversePercentage = 100 - effectivePercentage;
+
+      let timeInfo = "";
+      let totalTimeSeconds;
+
+      if (formula) {
+        totalTimeSeconds = formula(reversePercentage);
+      } else if (timePerPercent) {
+        totalTimeSeconds = reversePercentage * timePerPercent;
+      }
+
+      if (totalTimeSeconds !== undefined && reversePercentage > 0) {
+        const hours = Math.floor(totalTimeSeconds / 3600);
+        const minutes = Math.floor((totalTimeSeconds % 3600) / 60);
+        const seconds = Math.ceil(totalTimeSeconds % 60);
+
+        if (hours > 0) {
+          timeInfo = ` (> ${hours} ч ${minutes} мин)`;
+        } else if (minutes > 0) {
+          timeInfo = ` (${minutes} мин ${seconds} сек)`;
+        } else {
+          timeInfo = ` (${seconds} сек)`;
+        }
+      }
+
+      const detailLine = document.createElement("p");
+      detailLine.innerHTML = `<strong>${name}:</strong> <span style="color: #00cc00;">${effectivePercentage}%</span> / <span style="color: red;">${reversePercentage}%</span>`;
+      detailLine.style.marginBottom = "0";
+      contentContainer.appendChild(detailLine);
+
+      if (timeInfo) {
+        const detailLineTime = document.createElement("p");
+        detailLineTime.innerHTML = `≈${timeInfo}`;
+        detailLineTime.style.marginTop = "0";
+        contentContainer.appendChild(detailLineTime);
       }
     });
 
@@ -9916,24 +10941,36 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   if (settings.showExactSkillsValues) {
     const updateExactSkills = () => {
-      const paramData = getVueData('parameter.data');
+      const paramData = getVueData("parameter.data");
       if (!paramData) return;
 
-      const skills = ['smell', 'dig', 'swim', 'might', 'tree', 'observ', 'heal', 'power', 'pet_faith'];
+      const skills = [
+        "smell",
+        "dig",
+        "swim",
+        "might",
+        "tree",
+        "observ",
+        "heal",
+        "power",
+        "pet_faith",
+      ];
 
-      skills.forEach(skillId => {
+      skills.forEach((skillId) => {
         const skillInfo = paramData[skillId];
         if (skillInfo && skillInfo.tooltip && !skillInfo.isHidden) {
           const skillElement = document.getElementById(skillId);
           if (skillElement) {
-            const bar = skillElement.querySelector('.bar');
+            const bar = skillElement.querySelector(".bar");
             if (bar) {
-              let barData = bar.querySelector('.bar-data') || (() => {
-                const el = document.createElement('div');
-                el.className = 'bar-data';
-                bar.appendChild(el);
-                return el;
-              })();
+              let barData =
+                bar.querySelector(".bar-data") ||
+                (() => {
+                  const el = document.createElement("div");
+                  el.className = "bar-data";
+                  bar.appendChild(el);
+                  return el;
+                })();
 
               const match = skillInfo.tooltip.match(/\((.*?)\)/);
               const newValue = match ? match[1] : skillInfo.tooltip;
@@ -9947,7 +10984,10 @@ if (targetCW3.test(window.location.href)) {
       });
     };
 
-    watchVueData('parameter.data', updateExactSkills, { deep: true, immediate: true });
+    watchVueData("parameter.data", updateExactSkills, {
+      deep: true,
+      immediate: true,
+    });
 
     const css_skillsBarData = document.createElement("style");
     css_skillsBarData.innerHTML = `
@@ -9981,7 +11021,7 @@ if (targetCW3.test(window.location.href)) {
           .vlm${i} > .nick.is-notification:after {
             content: " [${i}]";
           }
-        `
+        `,
       ).join("");
 
       const styleElement = document.createElement("style");
@@ -10016,7 +11056,7 @@ if (targetCW3.test(window.location.href)) {
             if (!lastPlayedEntry || !refreshRegex.test(lastPlayedEntry)) {
               soundManager.playSound(
                 settings.climbingRefreshNotificationSound,
-                settings.climbingRefreshNotificationVolume
+                settings.climbingRefreshNotificationVolume,
               );
             }
           }
@@ -10051,6 +11091,73 @@ if (targetCW3.test(window.location.href)) {
     let currentX;
     let currentY;
     let wasDragging = false;
+
+    /**
+     * Attaches asynchronous, non-blocking two-step confirmation with cooldown and countdown to a button.
+     * Prevents accidental clicks by disabling the button for 1s, then exposes a 3s confirmation window.
+     *
+     * @param {HTMLButtonElement} button - Target button element to manage.
+     * @param {() => void} onConfirm - Callback triggered upon successful second click.
+     * @returns {() => void} Cleanup function that resets pending timers and restores default state.
+     */
+    function attachTwoStepClearConfirmation(button, onConfirm) {
+      const defaultText = "Очистить всё поле/таблицу";
+      let lockTimer = null;
+      let countdownTimer = null;
+      let isReadyForConfirm = false;
+
+      const resetState = () => {
+        clearTimeout(lockTimer);
+        clearInterval(countdownTimer);
+        lockTimer = null;
+        countdownTimer = null;
+        isReadyForConfirm = false;
+
+        button.disabled = false;
+        button.textContent = defaultText;
+        button.classList.remove("remove-button");
+      };
+
+      button.addEventListener("click", () => {
+        if (isReadyForConfirm) {
+          resetState();
+          onConfirm();
+          return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Подождите... (1с)";
+        button.style.setProperty("background-color", "rgba(50, 15, 15, 0.75)", "important");
+        button.style.setProperty("opacity", "0.55", "important");
+        button.style.setProperty("cursor", "not-allowed", "important");
+        button.style.setProperty("filter", "grayscale(30%)", "important");
+
+        lockTimer = setTimeout(() => {
+          isReadyForConfirm = true;
+          button.disabled = false;
+
+          button.style.removeProperty("background-color");
+          button.style.removeProperty("opacity");
+          button.style.removeProperty("filter");
+          button.style.setProperty("cursor", "pointer", "important");
+          button.classList.add("remove-button");
+
+          let remainingSeconds = 3;
+          button.textContent = `Точно очистить? (${remainingSeconds}с)`;
+
+          countdownTimer = setInterval(() => {
+            remainingSeconds--;
+            if (remainingSeconds > 0) {
+              button.textContent = `Точно очистить? (${remainingSeconds}с)`;
+            } else {
+              resetState();
+            }
+          }, 1000);
+        }, 1000);
+      });
+
+      return resetState;
+    }
 
     function saveClimbingPanelStatus() {
       const status = {
@@ -10123,7 +11230,7 @@ if (targetCW3.test(window.location.href)) {
     function transferColors() {
       const transferCheckbox = document.getElementById("uwu-transferCheckbox");
       let styleTag = document.getElementById(
-        "uwu-climbing-panel-dynamic-styles"
+        "uwu-climbing-panel-dynamic-styles",
       );
 
       if (!styleTag) {
@@ -10138,7 +11245,7 @@ if (targetCW3.test(window.location.href)) {
       }
 
       const climbingPanelCells = Array.from(
-        document.querySelectorAll("#uwu-climbingPanel td")
+        document.querySelectorAll("#uwu-climbingPanel td"),
       );
 
       let newCssRules = "";
@@ -10158,7 +11265,7 @@ if (targetCW3.test(window.location.href)) {
 
     function clearColors() {
       const styleTag = document.getElementById(
-        "uwu-climbing-panel-dynamic-styles"
+        "uwu-climbing-panel-dynamic-styles",
       );
       if (styleTag) {
         styleTag.innerHTML = "";
@@ -10279,7 +11386,7 @@ if (targetCW3.test(window.location.href)) {
       const globalContainer = document.getElementById("uwu-global-container");
       globalContainer.insertAdjacentHTML(
         "beforeend",
-        uwuClimbingPanelContainer
+        uwuClimbingPanelContainer,
       );
 
       const transferCheckbox = document.getElementById("uwu-transferCheckbox");
@@ -10309,7 +11416,7 @@ if (targetCW3.test(window.location.href)) {
 
     function updateInputButtonsStyle() {
       const inputButtons = document.querySelectorAll(
-        "#uwu-inputButtons button"
+        "#uwu-inputButtons button",
       );
       inputButtons.forEach((button) => {
         button.classList.toggle("active", button.value === activeInputValue);
@@ -10439,7 +11546,7 @@ if (targetCW3.test(window.location.href)) {
             }
 
             tableButton.addEventListener("click", () =>
-              this.switchTable(index)
+              this.switchTable(index),
             );
 
             const tableContainer = document.createElement("div");
@@ -10485,8 +11592,9 @@ if (targetCW3.test(window.location.href)) {
         const clearButton = document.createElement("button");
         clearButton.textContent = "Очистить всё поле/таблицу";
         clearButton.id = "button-clear-table";
-        clearButton.addEventListener("click", clearTable);
         tableContainer.appendChild(clearButton);
+
+        attachTwoStepClearConfirmation(clearButton, clearTable);
       },
 
       renderNoTableMessage() {
@@ -10553,18 +11661,18 @@ if (targetCW3.test(window.location.href)) {
 
     const climbingMainPanel = document.getElementById("uwu-climbingMainPanel");
     const climbingPanelButton = document.getElementById(
-      "uwu-climbingPanelButton"
+      "uwu-climbingPanelButton",
     );
     const climbingPanelContainer = document.getElementById(
-      "uwu-climbingPanelContainer"
+      "uwu-climbingPanelContainer",
     );
     const transferCheckbox = document.getElementById("uwu-transferCheckbox");
 
     let touchStartTime;
     let touchStartX;
     let touchStartY;
-    const CLICK_THRESHOLD = 200;
-    const MOVE_THRESHOLD = 10;
+    const CLICK_THRESHOLD = 250;
+    const MOVE_THRESHOLD = 12;
 
     function handleTouchStart(e) {
       touchStartTime = Date.now();
@@ -10577,7 +11685,6 @@ if (targetCW3.test(window.location.href)) {
     function handleTouchEnd(e) {
       dragEnd(e);
 
-      // Проверяем, был ли это клик
       const touchEndTime = Date.now();
       const touchDuration = touchEndTime - touchStartTime;
 
@@ -10585,7 +11692,7 @@ if (targetCW3.test(window.location.href)) {
         const touch = e.changedTouches[0];
         const moveDistance = Math.sqrt(
           Math.pow(touch.clientX - touchStartX, 2) +
-            Math.pow(touch.clientY - touchStartY, 2)
+            Math.pow(touch.clientY - touchStartY, 2),
         );
 
         if (
@@ -10599,32 +11706,51 @@ if (targetCW3.test(window.location.href)) {
     }
 
     function dragStart(e) {
-      const touch = e.touches ? e.touches[0] : e;
+      const isTouch = e.type.startsWith("touch");
+      const pointer = isTouch ? e.touches[0] : e;
 
       const savedStatus = uwuStorage.getItem("uwu_climbingPanelStatus");
       initialX =
-        touch.clientX -
+        pointer.clientX -
         (savedStatus ? savedStatus.x : climbingMainPanel.offsetLeft);
       initialY =
-        touch.clientY -
+        pointer.clientY -
         (savedStatus ? savedStatus.y : climbingMainPanel.offsetTop);
 
       if (e.target === climbingPanelButton) {
         isDragging = true;
         wasDragging = false;
+        
+        touchStartX = pointer.clientX;
+        touchStartY = pointer.clientY;
       }
 
-      if (e.type === "touchstart") {
+      if (isTouch) {
         e.preventDefault();
       }
     }
 
     function drag(e) {
       if (isDragging) {
-        const touch = e.touches ? e.touches[0] : e;
+        const isTouch = e.type.startsWith("touch");
+        const pointer = isTouch ? e.touches[0] : e;
 
-        currentX = touch.clientX - initialX;
-        currentY = touch.clientY - initialY;
+        if (!wasDragging) {
+          const moveDistance = Math.sqrt(
+            Math.pow(pointer.clientX - touchStartX, 2) +
+            Math.pow(pointer.clientY - touchStartY, 2)
+          );
+          
+          const currentThreshold = isTouch ? 12 : 0;
+
+          if (moveDistance < currentThreshold) {
+            return;
+          }
+          wasDragging = true; 
+        }
+
+        currentX = pointer.clientX - initialX;
+        currentY = pointer.clientY - initialY;
 
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
@@ -10639,9 +11765,9 @@ if (targetCW3.test(window.location.href)) {
 
         setPosition(currentX, currentY, climbingMainPanel);
 
-        wasDragging = true;
-
-        e.preventDefault();
+        if (isTouch) {
+          e.preventDefault();
+        }
       }
     }
 
@@ -10714,14 +11840,14 @@ if (targetCW3.test(window.location.href)) {
     setTimeout(loadClimbingPanelStatus, 10);
 
     const climbingPanelContent = document.getElementById(
-      "uwu-climbingPanelContent"
+      "uwu-climbingPanelContent",
     );
     const buttonContainer = document.getElementById("uwu-buttonContainer");
     const inputButtonsContainer = document.getElementById("uwu-inputButtons");
     const buttonRow1 = document.getElementById("uwu-buttonRow1");
     const buttonRow2 = document.getElementById("uwu-buttonRow2");
     const functionButtonsContainer = document.getElementById(
-      "uwu-functionButtonsContainer"
+      "uwu-functionButtonsContainer",
     );
     const tableContainer = document.getElementById("uwu-tableContainer");
     const clearTableButton = document.getElementById("button-clear-table");
@@ -10771,7 +11897,7 @@ if (targetCW3.test(window.location.href)) {
       }
 
       #uwu-climbingMainPanel {
-        z-index: 2;
+        z-index: 1600;
         pointer-events: auto;
         width: 260px;
         position: absolute;
@@ -11006,204 +12132,192 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . БЫСТРЫЕ СТИЛИ . . .
   // ====================================================================================================================
-  const settingsContainer = document.getElementById(
-    "extended-settings-container"
-  );
-  if (!settingsContainer) {
-    console.error("Контейнер #extended-settings-container не найден");
-    return;
-  }
+  /**
+   * Retrieves the singleton instance of the Fast Styles Manager.
+   *
+   * @returns {{
+   *   items: Array<{ key: string, label: string, apply: (on: boolean) => void }>,
+   *   init: () => void,
+   *   set: (key: string, value: boolean) => void,
+   *   getStylesMap: () => Record<string, boolean>
+   * }}
+   */
+  function getFastStylesManager() {
+    if (window.__uwuFastStylesManager) {
+      return window.__uwuFastStylesManager;
+    }
 
-  const sharedFastStyleCallback = function (checked) {
-    const styleId = "uwu-fast-style-" + this.key;
-    if (checked) {
-      if (!document.getElementById(styleId)) {
-        const style = document.createElement("style");
-        style.id = styleId;
-        style.innerHTML = this.style;
-        document.head.appendChild(style);
-      }
-    } else {
-      const existingStyle = document.getElementById(styleId);
-      if (existingStyle) {
-        document.head.removeChild(existingStyle);
+    function toggleCss(key, css, enable) {
+      const styleId = `uwu-fast-style-${key}`;
+      const existing = document.getElementById(styleId);
+      if (enable) {
+        if (!existing) {
+          const style = document.createElement("style");
+          style.id = styleId;
+          style.textContent = css;
+          document.head.appendChild(style);
+        }
+      } else {
+        existing?.remove();
       }
     }
-  };
 
-  const checkboxes = [
-    {
-      label: "Не показывать всплывающее окно 'О коте'",
-      key: "hideCatTooltip",
-      storageKey: "uwu_fastStyles",
-      style: ".cat_tooltip { display: none !important; }",
-      callback: sharedFastStyleCallback,
-    },
-    {
-      label: "Скрыть Игровое поле",
-      key: "hideGameField",
-      storageKey: "uwu_fastStyles",
-      style: "#cages_overflow { visibility: hidden !important; }",
-      callback: sharedFastStyleCallback,
-    },
-    {
-      label: "Скрыть фон Игрового Поля",
-      key: "hideGameFieldBackground",
-      storageKey: "uwu_fastStyles",
-      style: "#cages_div { background-image: none !important; }",
-      callback: sharedFastStyleCallback,
-    },
-    {
-      label: "Скрыть Небо",
-      key: "hideSky",
-      storageKey: "uwu_fastStyles",
-      style: "#tr_sky { display: none !important; }",
-      callback: sharedFastStyleCallback,
-    },
-    {
-      label: "Всегда день/ярко",
-      key: "alwaysDay",
-      storageKey: "uwu_settings",
-      callback: function (checked) {
-        updateAlwaysDayStyle(checked);
+    const items = [
+      {
+        key: "hideCatTooltip",
+        storage: "uwu_fastStyles",
+        label: "Не показывать окно 'О коте'",
+        apply: (on) =>
+          toggleCss(
+            "hideCatTooltip",
+            ".cat_tooltip { display: none !important; }",
+            on,
+          ),
       },
-    },
-    {
-      label: "Границы клеток",
-      key: "cellsBorders",
-      storageKey: "uwu_settings",
-      callback: function (checked) {
-        updateCellsBordersStyle(checked);
+      {
+        key: "hideGameField",
+        storage: "uwu_fastStyles",
+        label: "Скрыть Игровое поле",
+        apply: (on) =>
+          toggleCss(
+            "hideGameField",
+            "#act { visibility: hidden !important; }",
+            on,
+          ),
       },
-    },
-    {
-      label: "Непрозрачные коты",
-      key: "opaqueCats",
-      storageKey: "uwu_fastStyles",
-      style: ".cat > div { opacity: 1 !important; }",
-      callback: sharedFastStyleCallback,
-    },
-  ];
+      {
+        key: "hideGameFieldBackground",
+        storage: "uwu_fastStyles",
+        label: "Скрыть фон локации",
+        apply: (on) =>
+          toggleCss(
+            "hideGameFieldBackground",
+            "#cages_div { background-image: none !important; }",
+            on,
+          ),
+      },
+      {
+        key: "hideSky",
+        storage: "uwu_fastStyles",
+        label: "Скрыть Небо",
+        apply: (on) =>
+          toggleCss("hideSky", "#tr_sky { display: none !important; }", on),
+      },
+      {
+        key: "alwaysDay",
+        storage: "uwu_settings",
+        label: "Всегда день/ярко",
+        apply: (on) => {
+          if (typeof updateAlwaysDayStyle === "function")
+            updateAlwaysDayStyle(on);
+        },
+      },
+      {
+        key: "cellsBorders",
+        storage: "uwu_settings",
+        label: "Границы клеток",
+        apply: (on) => {
+          if (typeof updateCellsBordersStyle === "function")
+            updateCellsBordersStyle(on);
+        },
+      },
+      {
+        key: "opaqueCats",
+        storage: "uwu_fastStyles",
+        label: "Непрозрачные коты",
+        apply: (on) =>
+          toggleCss("opaqueCats", ".cat > div { opacity: 1 !important; }", on),
+      },
+    ];
 
-  const loadSettings = (storageKey) => {
-    const savedSettings = uwuStorage.getItem(storageKey);
-    return savedSettings ? savedSettings : {};
-  };
-
-  const saveSettings = (storageKey, settings) => {
-    uwuStorage.setItem(storageKey, settings);
-  };
-
-  const settingsMap = {
-    uwu_fastStyles: loadSettings("uwu_fastStyles"),
-    uwu_settings: loadSettings("uwu_settings"),
-  };
-
-  const applyStyles = () => {
-    checkboxes.forEach((checkbox) => {
-      if (settingsMap[checkbox.storageKey][checkbox.key] === true) {
-        checkbox.callback.call(checkbox, true);
+    function getState(item) {
+      if (item.storage === "uwu_settings") {
+        return !!settings[item.key];
       }
-    });
-  };
+      const fastMap = uwuStorage.getItem("uwu_fastStyles") || {};
+      return !!fastMap[item.key];
+    }
 
-  if (settings.fastStyles) {
-    const settingsDiv = document.createElement("div");
-    settingsDiv.id = "fast-Styles-container";
-    settingsDiv.classList.add("extended-settings-block");
+    function set(key, value) {
+      const item = items.find((i) => i.key === key);
+      if (!item) return;
 
-    checkboxes.forEach((checkbox) => {
-      const label = document.createElement("div");
-      const input = document.createElement("input");
-      input.type = "checkbox";
-      input.name = checkbox.key;
-
-      const storedValue = settingsMap[checkbox.storageKey][checkbox.key];
-      if (storedValue === true) {
-        input.checked = true;
-        checkbox.callback.call(checkbox, true);
+      if (item.storage === "uwu_settings") {
+        settings[key] = value;
+        saveSettings();
+      } else {
+        const fastMap = uwuStorage.getItem("uwu_fastStyles") || {};
+        fastMap[key] = value;
+        uwuStorage.setItem("uwu_fastStyles", fastMap);
       }
 
-      input.addEventListener("change", function () {
-        settingsMap[checkbox.storageKey][checkbox.key] = this.checked;
-        saveSettings(checkbox.storageKey, settingsMap[checkbox.storageKey]);
-        checkbox.callback.call(checkbox, this.checked);
+      item.apply(value);
+    }
+
+    function init() {
+      items.forEach((item) => {
+        if (getState(item)) {
+          item.apply(true);
+        }
       });
+    }
 
-      label.appendChild(input);
-      label.appendChild(document.createTextNode(checkbox.label));
-      settingsDiv.appendChild(label);
-    });
-
-    settingsContainer.appendChild(settingsDiv);
-
-    const style = document.createElement("style");
-    style.innerHTML = `
-      .extended-settings-block {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .extended-settings-block div {
-        display: flex;
-       align-items: center;
-      }
-    `;
-    document.head.appendChild(style);
-  } else {
-    applyStyles();
+    window.__uwuFastStylesManager = { items, init, set, getState };
+    return window.__uwuFastStylesManager;
   }
+
+  getFastStylesManager().init();
+
   // ====================================================================================================================
   //   . . . БЫСТРЫЕ ССЫЛКИ В ИГРОВОЙ . . .
   // ====================================================================================================================
-  const quickLinks = {
-    quickLink1: {
-      href: "/settings",
-      text: "Настройки",
-    },
-    quickLink2: {
-      href: "/ls?id=0",
-      text: "Памятка",
-    },
-    quickLink3: {
-      href: "/blogs",
-      text: "Блоги",
-    },
-    quickLink4: {
-      href: "/sniff",
-      text: "Лента",
-    },
-  };
+  /**
+   * Injects configured default and custom quick links into the native navigation bar.
+   *
+   * @returns {void}
+   */
+  function setupQuickLinks() {
+    const navElement = document.querySelector(".game-topbar-nav");
+    if (!navElement || navElement.querySelector(".uwu-quick-link")) return;
 
-  const spanElement = document.querySelector("span.small");
+    const quickLinksConfig = {
+      quickLink2: { href: "/ls?id=0", text: "Памятка" },
+      quickLink3: { href: "/blogs", text: "Блоги" },
+      quickLink4: { href: "/sniff", text: "Лента" },
+    };
 
-  Object.entries(quickLinks).forEach(([key, link]) => {
-    if (settings[key]) {
-      const newLink = document.createElement("a");
-      newLink.href = link.href;
-      newLink.textContent = link.text;
+    const linksToAppend = [];
 
-      const pipe = document.createTextNode(" | ");
-      spanElement.appendChild(pipe);
-      spanElement.appendChild(newLink);
+    Object.entries(quickLinksConfig).forEach(([key, link]) => {
+      if (settings[key]) {
+        linksToAppend.push(link);
+      }
+    });
+
+    if (settings.userQuickLinks) {
+      settings.userQuickLinks
+        .split(",")
+        .map((entry) => entry.trim())
+        .filter(Boolean)
+        .forEach((userLink) => {
+          const [href, ...labelParts] = userLink.split(" ");
+          const text = labelParts.join(" ").trim();
+          if (href && text) {
+            linksToAppend.push({ href, text });
+          }
+        });
     }
-  });
 
-  if (settings.userQuickLinks) {
-    const userLinksArray = settings.userQuickLinks.split(", ");
-
-    userLinksArray.forEach((userLink) => {
-      const [href, text] = userLink.trim().split(" ");
-
-      const newLink = document.createElement("a");
-      newLink.href = href;
-      newLink.textContent = text;
-
-      const pipe = document.createTextNode(" | ");
-      spanElement.appendChild(pipe);
-      spanElement.appendChild(newLink);
+    linksToAppend.forEach(({ href, text }) => {
+      const linkEl = document.createElement("a");
+      linkEl.href = href;
+      linkEl.textContent = text;
+      linkEl.classList.add("uwu-quick-link");
+      navElement.appendChild(linkEl);
     });
   }
+
+  setupSingleCallback(".game-topbar-nav", setupQuickLinks);
   // ====================================================================================================================
   //  . . . ПОДСВЕТКА РЕСУРСОВ . . .
   // ====================================================================================================================
@@ -11316,7 +12430,7 @@ if (targetCW3.test(window.location.href)) {
         if (!style) return;
 
         const oldHighlights = cageItem.querySelectorAll(
-          "style.uwu_itemHighlight"
+          "style.uwu_itemHighlight",
         );
         oldHighlights.forEach((oldHighlight) => oldHighlight.remove());
 
@@ -11336,20 +12450,20 @@ if (targetCW3.test(window.location.href)) {
             items.forEach((itemName) => {
               const backgroundImages =
                 style.match(
-                  /url\("things\/(.*?)\.png"\) (\d+)% (\d+)% no-repeat/g
+                  /url\("things\/(.*?)\.png"\) (\d+)% (\d+)% no-repeat/g,
                 ) || [];
 
               backgroundImages.forEach((backgroundImage) => {
                 if (backgroundImage.includes(`things/${itemName}.png`)) {
                   const positionMatch = backgroundImage.match(
-                    /(url\("things\/(.*?)\.png"\)) (\d+)% (\d+)% no-repeat/
+                    /(url\("things\/(.*?)\.png"\)) (\d+)% (\d+)% no-repeat/,
                   );
                   const imageUrl = positionMatch ? positionMatch[1] : "";
                   const positionX = positionMatch ? positionMatch[3] : "0";
                   const positionY = positionMatch ? positionMatch[4] : "0";
 
                   highlightedItems.push(
-                    `${imageUrl} ${positionX}% ${positionY}% no-repeat`
+                    `${imageUrl} ${positionX}% ${positionY}% no-repeat`,
                   );
                 }
               });
@@ -11461,7 +12575,7 @@ if (targetCW3.test(window.location.href)) {
       { attributes: true, attributeFilter: ["style"] },
       8,
       500,
-      10
+      10,
     );
   }
 
@@ -11476,6 +12590,13 @@ if (targetCW3.test(window.location.href)) {
   const defaultBackgroundImageUrl =
     "https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/parametersBackgroundImageURL.png";
 
+  /**
+   * Generates CSS rules for parameter and skill bars.
+   * Disabling scaleX transformations to prevent texture distortion.
+   * catwar i hate ur scaleX styles. pls bring me back my simple width...
+   *
+   * @returns {string} Compiled CSS stylesheet text.
+   */
   function generateParameterStyles() {
     let cssStyles = "";
 
@@ -11488,7 +12609,12 @@ if (targetCW3.test(window.location.href)) {
     const otherFirstCellBackground = `linear-gradient(to right, ${otherColors[0]}, ${otherColors[1]})`;
     const otherLastCellBackground = `linear-gradient(to right, ${otherColors[2]}, ${otherColors[3]})`;
 
-    cssStyles += `#parameters_skills_block .bar-fill { background: ${otherFirstCellBackground}; }\n`;
+    cssStyles += `
+      #parameters_skills_block .bar-fill {
+        background: ${otherFirstCellBackground};
+        transform: none !important;
+        transition: width 0.2s ease !important;
+      }\n`;
     cssStyles += `#parameters_skills_block .bar { background: ${otherLastCellBackground}; }\n`;
 
     const backgroundImageURL = settings.parametersUserBackgroundImage
@@ -11522,6 +12648,11 @@ if (targetCW3.test(window.location.href)) {
     return cssStyles;
   }
 
+  /**
+   * Injects or updates the custom parameter CSS in document head.
+   *
+   * @returns {void}
+   */
   function applyParameterColors() {
     const existingStyleTag = document.getElementById("custom-parameter-styles");
     if (existingStyleTag) {
@@ -11536,8 +12667,60 @@ if (targetCW3.test(window.location.href)) {
     document.head.appendChild(styleTag);
   }
 
+  /**
+   * Synchronizes parameter and skill progress bar widths directly with CatWar's Vue.
+   *
+   * @param {Record<string, { barWidth?: number }>} paramData - The reactive parameter data object from Vue.
+   * @returns {void}
+   */
+  function syncParameterBarWidths(paramData) {
+    if (!paramData || typeof paramData !== "object") return;
+
+    for (const [paramId, data] of Object.entries(paramData)) {
+      if (!data || typeof data.barWidth !== "number") continue;
+
+      const container = document.getElementById(paramId);
+      const barFill = container?.querySelector(".bar-fill");
+      if (barFill) {
+        const targetWidth = `${data.barWidth}%`;
+        if (barFill.style.width !== targetWidth) {
+          barFill.style.width = targetWidth;
+        }
+      }
+    }
+
+    document
+      .querySelectorAll("#parameters_skills_block .bar-fill")
+      .forEach((barFill) => {
+        if (!barFill.style.width && barFill.style.transform) {
+          const match = barFill.style.transform.match(/scaleX\(([\d.]+)\)/);
+          if (match) {
+            barFill.style.width = `${parseFloat(match[1]) * 100}%`;
+          }
+        }
+      });
+  }
+
+  /**
+   * Binds the reactive watcher to Vue's parameter.data once the UI container is mounted.
+   *
+   * @returns {void}
+   */
+  function initParameterBarsWidthSync() {
+    setupSingleCallback("#parameters_skills_block", () => {
+      watchVueData(
+        "parameter.data",
+        (newVal) => {
+          syncParameterBarWidths(newVal);
+        },
+        { deep: true, immediate: true }
+      );
+    });
+  }
+
   if (settings.userParametersTheme) {
     applyParameterColors();
+    initParameterBarsWidthSync();
   }
 
   function applyParametersTextShadow() {
@@ -11550,6 +12733,7 @@ if (targetCW3.test(window.location.href)) {
   }
 
   applyParametersTextShadow();
+
   // ====================================================================================================================
   //   . . . ПОЛЬЗОВАТЕЛЬСКИЙ ШРИФТ . . .
   // ====================================================================================================================
@@ -11561,7 +12745,7 @@ if (targetCW3.test(window.location.href)) {
       const link = document.createElement("link");
       link.rel = "stylesheet";
       link.href = `https://fonts.googleapis.com/css?family=${encodeURIComponent(
-        fontFamily
+        fontFamily,
       )}`;
       document.head.appendChild(link);
     }
@@ -11634,6 +12818,45 @@ if (targetCW3.test(window.location.href)) {
     applyFonts();
   }
   // ====================================================================================================================
+  //   . . . АВТОСОХРАНЕНИЕ РЕСАЙЗА ЧАТА . . .
+  // ====================================================================================================================
+
+  /**
+   * Observes user-driven resizing on whichever chat container is active
+   * (#uwu_chat_msg if modern chat is mounted, otherwise native #chat_msg)
+   * and updated height to script settings.
+   *
+   * @returns {void}
+   */
+  function initChatAutoResizePersistence() {
+    const chatContainer = document.getElementById("uwu_chat_msg") || document.getElementById("chat_msg");
+    if (!chatContainer) return;
+
+    let lastHeight = chatContainer.offsetHeight;
+    let saveTimeout = null;
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const newHeight = Math.round(entry.contentRect.height);
+        if (newHeight > 60 && Math.abs(newHeight - lastHeight) > 2) {
+          lastHeight = newHeight;
+          document.documentElement.style.setProperty("--uwu-chat-height", `${newHeight}px`);
+
+          clearTimeout(saveTimeout);
+          saveTimeout = setTimeout(() => {
+            settings.chatHeight = String(newHeight);
+            saveSettings();
+          }, 300);
+        }
+      }
+    });
+
+    observer.observe(chatContainer);
+  }
+
+  setupSingleCallback("#tr_chat", initChatAutoResizePersistence);
+
+  // ====================================================================================================================
   //   . . . СКРЫТИЕ РОДСТВЕННЫХ СВЯЗЕЙ . . .
   // ====================================================================================================================
   if (settings.hideRelativesByDefault) {
@@ -11644,338 +12867,1859 @@ if (targetCW3.test(window.location.href)) {
       }
     });
   }
+
   // ====================================================================================================================
   //   . . . РЕДИЗАЙН ИГРОВОЙ . . .
   // ====================================================================================================================
-  if (settings.customLayout) {
-    // ==================================================================
-    function prependOtherCatsListContent() {
-      const otherCatsList = document.querySelector(".other_cats_list");
-      const smallContainer = document.querySelector(".small");
+  /**
+   * Manages the dynamic and pre-compiled stylesheets for the custom HUD layout.
+   */
+  const uwuCustomLayoutCssManager = {
+    baseStyleId: "uwu-custom-layout-style",
+    compiledStyleId: "uwu-custom-layout-compiled",
 
-      if (!otherCatsList || !smallContainer) return;
+    autoHeightTiles: [
+      "tr_chat",
+      "tr_actions",
+      "tr_mouth",
+      "tr_tos",
+      "parameter",
+      "history",
+      "family",
+    ],
 
-      const catsListContent = otherCatsList.innerHTML;
-
-      switch (settings.showOtherCatsList) {
-        case "1":
-          break;
-        case "2":
-          const clickableBlockHTML =
-            '<span style="display: inline; cursor: pointer;"><a href="#" style="display: inline; pointer-events: none;">Душевые коты</a></span>';
-          smallContainer.insertAdjacentHTML(
-            "afterbegin",
-            clickableBlockHTML + " || "
-          );
-
-          const clickableBlock = smallContainer.firstChild;
-
-          const catsListContainer = document.createElement("span");
-          catsListContainer.id = "catsListContainer";
-          catsListContainer.innerHTML = ": " + catsListContent;
-          catsListContainer.style.display = "none";
-          smallContainer.insertBefore(
-            catsListContainer,
-            smallContainer.firstChild.nextSibling
-          );
-
-          clickableBlock.addEventListener("click", (event) => {
-            event.preventDefault();
-            if (catsListContainer.style.display === "none") {
-              catsListContainer.style.display = "inline";
-            } else {
-              catsListContainer.style.display = "none";
-            }
-          });
-          break;
-        case "3":
-          smallContainer.insertAdjacentHTML(
-            "afterbegin",
-            catsListContent + " || "
-          );
-          break;
-        default:
-          break;
+    /**
+     * Normalizes and quantizes a tile slot width ratio to 10% steps within [20, 100].
+     *
+     * @param {TileSlot} slot - Target slot data model.
+     * @returns {number} Width ratio percentage (20 to 100, step 10).
+     */
+    getSlotWidthRatio(slot) {
+      if (!slot) return 100;
+      if (typeof slot.widthRatio === "number" && !isNaN(slot.widthRatio)) {
+        return Math.max(20, Math.min(100, Math.round(slot.widthRatio / 10) * 10));
       }
+      if (slot.widthMode === "50%") return 50;
+      if (slot.widthMode === "33%") return 30;
+      return 100;
+    },
+
+    /**
+     * Compiles layout state into scoped CSS rules, preventing conflicts with dragging clones.
+     *
+     * @param {HudLayoutState} layout - Complete layout schema.
+     * @returns {string} Compiled CSS text.
+     */
+    compile(layout) {
+      if (!layout) return "";
+
+      const gap = typeof layout.gap === "number" ? layout.gap : 10;
+      const radius = typeof layout.radius === "number" ? layout.radius : 10;
+      const leftGrow = typeof layout.leftGrow === "number" ? layout.leftGrow : 5;
+      const rightGrow = typeof layout.rightGrow === "number" ? layout.rightGrow : 5;
+
+      const skySlot = [...(layout.left || []), ...(layout.right || [])].find((s) => s.id === "tr_sky");
+      const skyHeight = skySlot && typeof skySlot.height === "number" && skySlot.height > 0 ? skySlot.height : 120;
+
+      let css = `
+        :root {
+          --uwu-tile-gap: ${gap}px;
+          --uwu-tile-rb: ${radius}px;
+          --uwu-left-grow: ${leftGrow};
+          --uwu-right-grow: ${rightGrow};
+          --uwu-chat-height: ${settings.chatHeight || 275}px;
+          --uwu-history-height: ${settings.historyHeight || 215}px;
+          --uwu-items-height: ${settings.itemListHeight || 180}px;
+          --uwu-sky-height: ${skyHeight}px;
+        }
+      `;
+
+      const allSlots = [...(layout.left || []), ...(layout.right || [])];
+      allSlots.forEach((slot) => {
+        if (!slot || !slot.id) return;
+        const ratio = this.getSlotWidthRatio(slot);
+        let widthExpr = "100%";
+        if (ratio < 100) {
+          const multiplier = (1 - ratio / 100).toFixed(2);
+          widthExpr = `calc(${ratio}% - (var(--uwu-tile-gap, 10px) * ${multiplier}))`;
+        }
+
+        css += `.uwu-dock-zone > #${slot.id}.uwu-tile-block { width: ${widthExpr} !important; }\n`;
+
+        if (slot.align === "right") {
+          css += `.uwu-dock-zone > #${slot.id}.uwu-tile-block { margin-left: auto !important; margin-right: 0 !important; }\n`;
+        }
+
+        if (slot.id === "tr_sky") {
+          css += `.uwu-dock-zone > #tr_sky.uwu-tile-block #sky { height: var(--uwu-sky-height, 120px) !important; }\n`;
+        } else if (!this.autoHeightTiles.includes(slot.id) && typeof slot.height === "number" && slot.height > 0) {
+          css += `.uwu-dock-zone > #${slot.id}.uwu-tile-block { height: ${slot.height}px !important; }\n`;
+        }
+      });
+
+      return css;
+    },
+
+    /**
+     * Injects or updates the compiled CSS stylesheet in document head.
+     *
+     * @param {HudLayoutState} layout - Current layout schema.
+     * @returns {void}
+     */
+    applyCompiled(layout) {
+      let style = document.getElementById(this.compiledStyleId);
+      if (!style) {
+        style = document.createElement("style");
+        style.id = this.compiledStyleId;
+        document.head.appendChild(style);
+      }
+      style.textContent = this.compile(layout);
+    },
+
+    /**
+     * Injects base structural CSS rules for HUD containers.
+     *
+     * @returns {void}
+     */
+    enable() {
+      if (document.getElementById(this.baseStyleId)) return;
+
+      const style = document.createElement("style");
+      style.id = this.baseStyleId;
+      style.textContent = `
+        /* === FIXES AND RESETS CATWAR VANILLA CSS STYLES === */
+        h2 {
+          margin: 4px 0 6px 0;
+        }
+
+        #app > div.game-topbar {
+          margin: 0;
+        }
+
+        #chat_form {
+          margin: 0;
+        }
+
+        #tr_chat > td {
+          padding: 8px;
+          border-radius: var(--uwu-tile-rb, 8px);
+        }
+
+        #tr_actions > td,
+        #tr_tos > td,
+        #act {
+          box-shadow: unset !important;
+        }
+
+        #tr_tos > td,
+        #location {
+          background-color: unset !important;
+        }
+
+        /* ===================== BOUNDS ===================== */
+        #app {
+          min-height: 100dvh;
+          height: 100dvh;
+          width: 100% !important;
+          max-width: unset !important;
+          margin: 0 !important;
+          display: block !important;
+        }
+
+        .game-topbar {
+          max-width: 100% !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
+        }
+
+        body {
+          overflow-y: scroll;
+          overflow-x: auto;
+        }
+
+        #app > br {
+          display: none !important;
+        }
+
+        /* ===================== FLEX-TILE DOCK CONTAINER ===================== */
+        #main_table {
+          width: 100%;
+          max-width: unset;
+          border-spacing: 0;
+          margin: 0;
+          background: transparent !important;
+        }
+
+        #main_table > tbody {
+          display: flex;
+          flex-direction: row;
+          align-items: flex-start;
+          gap: var(--uwu-tile-gap, 8px);
+          width: 100%;
+          margin: 0;
+          padding: var(--uwu-tile-gap, 8px);
+          box-sizing: border-box;
+        }
+
+        /* Dock Zones (Left & Right columns) */
+        .uwu-dock-zone {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+          align-content: flex-start;
+          gap: var(--uwu-tile-gap, 8px);
+          box-sizing: border-box;
+          min-width: 220px;
+        }
+
+        #uwu-dock-left {
+          flex: var(--uwu-left-grow, 5) 1 0px !important;
+          width: auto !important;
+        }
+
+        #uwu-dock-right {
+          flex: var(--uwu-right-grow, 5) 1 0px !important;
+          width: auto !important;
+        }
+
+        .uwu-tile-w-grip {
+          position: absolute;
+          top: 10px;
+          bottom: 24px;
+          width: 6px;
+          cursor: ew-resize;
+          background: #858585bd;
+          border-radius: 999px;
+          transition: all 0.2s ease;
+          z-index: 10003;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .uwu-tile-w-grip--left {
+          left: 8px;
+        }
+
+        .uwu-tile-w-grip--right {
+          right: 8px;
+        }
+
+        .uwu-tile-w-grip::after {
+          content: "";
+          width: 2px;
+          height: 34px;
+          max-height: calc(100% - 12px);
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.5);
+          transition: background-color 0.2s ease;
+        }
+
+        .uwu-tile-w-grip:hover,
+        .uwu-tile-w-grip.active {
+          background: #83e5ff;
+        }
+
+        .uwu-tile-w-grip:hover::after,
+        .uwu-tile-w-grip.active::after {
+          background: #000000;
+        }
+
+        .uwu-dock-zone--empty {
+          display: none;
+        }
+
+        .uwu-dock-center {
+          flex: 0 0 1000px !important;
+          width: 1000px !important;
+          max-width: 1000px !important;
+          box-sizing: border-box !important;
+        }
+
+        .uwu-dock-center,
+        #tr_field {
+          flex: 0 0 1000px;
+          width: 1000px;
+          height: 1000px;
+        }
+
+        #black_points.in-topbar {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          margin-left: auto;
+          margin-right: 0;
+          margin-bottom: 0px;
+          margin-top: 0px;
+          background: transparent;
+          font-size: 13px;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+
+        #black_points.in-topbar + .game-location {
+          margin-left: 6px !important;
+        }
+
+        #cages_overflow,
+        #cages_div,
+        #cages {
+          width: 1000px;
+          height: 1000px;
+        }
+
+        .uwu-tile-block {
+          display: block !important;
+          position: relative !important;
+          box-sizing: border-box !important;
+        }
+
+        .uwu-tile-block > td {
+          display: block;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        .uwu-tile--w100 { width: 100%; }
+        .uwu-tile--w50  { width: calc(50% - (var(--uwu-tile-gap, 8px) / 2)); }
+        .uwu-tile--w33  { width: calc(33.333% - (var(--uwu-tile-gap, 8px) * 2 / 3)); }
+
+        /* Internal widget scrollbars */
+        #tr_chat.uwu-tile-block {
+          height: auto !important;
+        }
+
+        /* ===================== CHAT CONTAINER LAYOUT ===================== */
+        #chat_msg,
+        #uwu_chat_msg {
+          height: var(--uwu-chat-height, 275px);
+          resize: vertical;
+          overflow-y: auto;
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box !important;
+        }
+
+        #uwu_chat_msg {
+          display: flex;
+        }
+
+        #tr_chat:has(#uwu_chat_msg) #chat_msg {
+          display: none !important;
+        }
+
+        #chat_msg .chat_text {
+          width: auto !important;
+          max-width: 100% !important;
+          display: inline-block !important;
+          box-sizing: border-box !important;
+        }
+
+        #chat_msg table {
+          width: 100% !important;
+          table-layout: auto !important;
+        }
+
+        #chat_msg .profile_actions_cell {
+          width: 1% !important;
+          white-space: nowrap !important;
+          vertical-align: top !important;
+        }
+
+        .uwu-chat-msg-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          width: 100%;
+          box-sizing: border-box;
+        }
+
+        .uwu-chat-actions {
+          display: flex;
+          width: 44px;
+          justify-content: flex-end;
+          flex-shrink: 0;
+          margin-right: 2px;
+          user-select: none;
+        }
+
+        .uwu-chat-time {
+          opacity: 0.5;
+          font-size: 0.85em;
+          margin-right: 4px;
+          font-family: monospace;
+        }
+
+        .uwu-chat-id {
+          opacity: 0.6;
+          font-size: 0.85em;
+        }
+
+        #uwu_chat_msg > hr {
+          width: 100%;
+          margin: 5px 0;
+          border: none;
+          border-top: 1px solid var(--uwu-border, rgba(255, 255, 255, 0.1));
+        }
+
+        #uwu_chat_msg .chat_text {
+          padding: 0;
+        }
+
+        #history_block {
+          height: var(--uwu-history-height, 215px);
+          resize: vertical;
+          overflow-y: auto;
+          box-sizing: border-box;
+        }
+
+        #itemList {
+          max-height: var(--uwu-items-height, 180px);
+          overflow-y: auto;
+          display: flex;
+          flex-wrap: wrap;
+          box-sizing: border-box;
+        }
+
+        #family { display: block !important; overflow-y: auto !important; }
+
+        /* ===================== EDIT MODE UI & DROPZONES ===================== */
+        .uwu-editing .uwu-dock-zone--empty {
+          display: flex !important;
+          flex: 0 0 68px !important;
+          width: 68px !important;
+          min-width: 68px !important;
+          max-width: 68px !important;
+          align-self: stretch;
+          min-height: 380px;
+          border: 2px dashed rgba(131, 229, 255, 0.4) !important;
+          border-radius: var(--uwu-tile-rb, 8px) !important;
+          align-items: center;
+          justify-content: center;
+          background: rgba(131, 229, 255, 0.03) !important;
+          box-sizing: border-box;
+          padding: 16px 0;
+          cursor: pointer;
+          user-select: none;
+          transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .uwu-editing .uwu-dock-zone--empty:hover {
+          background: rgba(131, 229, 255, 0.08) !important;
+          border-color: #83e5ff !important;
+        }
+
+        .uwu-editing .uwu-dock-zone--empty:after {
+          content: "Перетащите сюда";
+          writing-mode: vertical-rl;
+          text-orientation: mixed;
+          letter-spacing: 2px;
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+          color: rgba(131, 229, 255, 0.65);
+          pointer-events: none;
+          transition: color 0.2s ease;
+        }
+
+        .uwu-editing .uwu-dock-zone--empty:hover:after {
+          color: #ffffff;
+        }
+
+        .uwu-dock-zone--empty + .uwu-zone-splitter,
+        .uwu-zone-splitter:has(+ #uwu-dock-right.uwu-dock-zone--empty) {
+          display: none !important;
+        }
+
+        .uwu-drop-placeholder {
+          box-sizing: border-box;
+          border: 2px dashed #41cd70;
+          background: rgba(65, 205, 112, 0.12);
+          transition: width 0.2s cubic-bezier(0.2, 0, 0, 1),
+                      height 0.18s ease;
+          pointer-events: none;
+          border-radius: var(--uwu-tile-rb, 8px);
+          min-height: 60px !important;
+          max-height: 140px !important;
+        }
+
+        .uwu-editing .uwu-tile-block {
+          transition: width 0.2s cubic-bezier(0.2, 0, 0, 1),
+                      transform 0.18s cubic-bezier(0.2, 0, 0, 1),
+                      opacity 0.15s ease !important;
+        }
+
+        .uwu-tile-overlay {
+          position: absolute;
+          inset: 0;
+          z-index: 10000;
+          border: 2px dashed #83e5ff;
+          background: rgba(131, 229, 255, 0.08);
+          box-sizing: border-box;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          padding: 6px 8px;
+          cursor: grab;
+          pointer-events: auto !important;
+        }
+
+        .uwu-tile-overlay:active {
+          cursor: grabbing;
+        }
+
+        .uwu-tile-title-tag {
+          background: rgba(0, 0, 0, 0.8);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 6px;
+          padding: 2px 8px;
+          font-size: 11px;
+          font-weight: 700;
+          color: #83e5ff;
+          pointer-events: none;
+        }
+
+        .uwu-tile-mode-btn {
+          background: rgba(0, 0, 0, 0.8);
+          border: 1px solid rgba(131, 229, 255, 0.4);
+          border-radius: 6px;
+          padding: 2px 7px;
+          font-size: 11px;
+          font-weight: 700;
+          color: #ffffff;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          margin-right: 14px;
+        }
+
+        .uwu-tile-mode-btn:hover {
+          background: #83e5ff;
+          color: #000000;
+        }
+
+        .uwu-tile-h-grip {
+          position: absolute;
+          bottom: 10px;
+          left: 10px;
+          right: 24px;
+          height: 6px;
+          cursor: ns-resize;
+          background: #858585bd;
+          border-radius: 999px;
+          transition: all 0.2s ease;
+          z-index: 10002;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .uwu-tile-h-grip::after {
+          content: "";
+          width: 34px;
+          height: 2px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.5);
+          transition: background-color 0.2s ease;
+        }
+
+        .uwu-tile-h-grip:hover,
+        .uwu-tile-h-grip.active {
+          background: #83e5ff;
+        }
+
+        .uwu-tile-h-grip:hover::after,
+        .uwu-tile-h-grip.active::after {
+          background: #000000;
+        }
+
+        .uwu-zone-splitter {
+          width: 6px;
+          cursor: ew-resize;
+          background: rgba(255, 255, 255, 0.15);
+          border-radius: 3px;
+          align-self: stretch;
+          min-height: 400px;
+          transition: background-color 0.2s;
+          user-select: none;
+          flex-shrink: 0;
+        }
+
+        .uwu-zone-splitter:hover,
+        .uwu-zone-splitter.active {
+          background: #83e5ff;
+          box-shadow: 0 0 8px #83e5ff;
+        }
+
+        #block_deys {
+          flex-wrap: wrap;
+        }
+        #block_deys > #deys {
+          width: auto !important;
+        }
+
+        #deys_mit {
+          width: auto !important;
+        }
+
+        .uwu-drag-ghost {
+          position: fixed !important;
+          pointer-events: none !important;
+          z-index: 1000000 !important;
+          opacity: 0.88 !important;
+          box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), 0 0 0 2px #83e5ff !important;
+          transform: scale(1.02) rotate(1deg) !important;
+          will-change: left, top;
+          cursor: grabbing !important;
+        }
+
+        #tr_info {
+          display: none !important;
+        }
+
+        #tr_actions.uwu-tile-block,
+        #tr_mouth.uwu-tile-block,
+        #parameter.uwu-tile-block,
+        #history.uwu-tile-block,
+        #family.uwu-tile-block {
+          padding: 8px;
+          height: auto !important;
+          border-radius: var(--uwu-tile-rb, 8px);
+        }
+
+        #tr_chat.uwu-tile-block,
+        #tos {
+          border-radius: var(--uwu-tile-rb, 8px);
+        }
+
+        #parameter.uwu-tile-block,
+        #history.uwu-tile-block,
+        #family.uwu-tile-block {
+          background-color: var(--cw3-page-bg, rgba(var(--ds-info-rgb, 255, 255, 255), 0.55));
+        }
+
+        #mix {
+          padding-top: 8px !important;
+          gap: 0 !important;
+        }
+
+        #mix > button {
+          margin: 0 !important;
+        }
+
+        /* ===================== SKY TILE ===================== */
+        #tr_sky.uwu-tile-block {
+          padding: 0 !important;
+          overflow: hidden !important;
+          border-radius: var(--uwu-tile-rb, 8px);
+          height: auto !important;
+        }
+
+        #tr_sky.uwu-tile-block > td {
+          padding: 0 !important;
+          width: 100% !important;
+          border-radius: inherit;
+        }
+
+        #tr_sky.uwu-tile-block #sky {
+          width: 100% !important;
+          max-width: 100% !important;
+          height: var(--uwu-sky-height, 120px);
+          background-size: cover;
+          background-position: center;
+          border-radius: inherit;
+        }
+      `;
+      document.head.appendChild(style);
+    },
+
+    /**
+     * Removes all layout stylesheets from head.
+     *
+     * @returns {void}
+     */
+    disable() {
+      document.getElementById(this.baseStyleId)?.remove();
+      document.getElementById(this.compiledStyleId)?.remove();
+    },
+  };
+
+  /**
+   * @typedef {Object} TileSlot
+   * @property {string} id - Block DOM identifier (e.g. "tr_chat", "parameter").
+   * @property {number} [widthRatio=100] - Quantized percentage width (20 to 100, step 10).
+   * @property {string} [widthMode="100%"] - Legacy string representation of slot width.
+   * @property {number} height - Block height in pixels.
+   */
+
+  /**
+   * @typedef {Object} HudLayoutState
+   * @property {number} [leftGrow=5] - Fluid flex-grow proportion for the left dock column.
+   * @property {number} [rightGrow=5] - Fluid flex-grow proportion for the right dock column.
+   * @property {number} [leftWidth=420] - Fallback pixel width for left column.
+   * @property {number} [rightWidth=460] - Fallback pixel width for right column.
+   * @property {number} gap - Inter-tile and column gap in pixels.
+   * @property {number} radius - Border radius applied to tile cards in pixels.
+   * @property {TileSlot[]} left - Ordered slots positioned in the left dock zone.
+   * @property {TileSlot[]} right - Ordered slots positioned in the right dock zone.
+   */
+
+  /**
+   * Modular Flex-Tile Layout Engine.
+   * Features:
+   * - Native proportional column scaling (flex-grow) across browser zoom levels.
+   * - 10% quantized slot resizing with live preview.
+   * - Automatic 50/50 side-by-side row splitting upon edge drop.
+   * - Extraction of docked tiles back into full-width rows.
+   */
+  window.uwuHudEditor = (() => {
+    const BLOCK_NAMES = {
+      tr_field: "Поле Игровой (1000x1000)",
+      tr_sky: "Небо",
+      tr_chat: "Чат",
+      tr_actions: "Действия",
+      tr_mouth: "Рот (Инвентарь)",
+      parameter: "Персонаж (Параметры)",
+      history: "История",
+      family: "Родственные связи",
+      tr_tos: "Погода и Время",
+    };
+
+    let isEditMode = false;
+
+    const getSlotWidthRatio = (slot) => uwuCustomLayoutCssManager.getSlotWidthRatio(slot);
+
+    /**
+     * Generates the canonical default HUD layout configuration.
+     *
+     * @returns {HudLayoutState} Clean baseline layout state.
+     */
+    function getDefaultLayout() {
+      return {
+        leftGrow: 5,
+        rightGrow: 5,
+        gap: 10,
+        radius: 10,
+        left: [
+          { id: "tr_sky", widthRatio: 100, height: 50 },
+          { id: "parameter", widthRatio: 100, height: 0 },
+          { id: "history", widthRatio: 100, height: 0 },
+          { id: "family", widthRatio: 100, height: 0 },
+        ],
+        right: [
+          { id: "tr_tos", widthRatio: 100, height: 42 },
+          { id: "tr_chat", widthRatio: 100, height: 320 },
+          { id: "tr_actions", widthRatio: 100, height: 210 },
+          { id: "tr_mouth", widthRatio: 100, height: 180 },
+        ],
+      };
     }
 
-    setupSingleCallback(".other_cats_list", prependOtherCatsListContent);
-    // ==================================================================
-    function applyLayoutSettings() {
-      const savedSettings = uwuStorage.getItem("uwu_layoutSettings");
-      if (savedSettings) {
-        const { leftBlocks, rightBlocks } = savedSettings;
+    /**
+     * Retrieves saved layout from storage or returns the default configuration.
+     *
+     * @returns {HudLayoutState}
+     */
+    function getLayout() {
+      const saved = uwuStorage.getItem("uwu_hud_layout");
 
-        const mainTable = document.getElementById("main_table");
-        const tbody = mainTable.getElementsByTagName("tbody")[0];
-        const blocks = Array.from(tbody.children);
+      if (saved && Array.isArray(saved.left) && Array.isArray(saved.right)) {
+        return {
+          leftGrow: typeof saved.leftGrow === "number" ? saved.leftGrow : 5,
+          rightGrow: typeof saved.rightGrow === "number" ? saved.rightGrow : 5,
+          gap: typeof saved.gap === "number" && !isNaN(saved.gap) ? Math.max(0, saved.gap) : 10,
+          radius: typeof saved.radius === "number" && !isNaN(saved.radius) ? Math.max(0, saved.radius) : 10,
+          left: saved.left,
+          right: saved.right,
+        };
+      }
 
-        resetBlockStyles(tbody);
+      return getDefaultLayout();
+    }
 
-        const gridAreaTemplate = generateGridTemplate(leftBlocks, rightBlocks);
+    /**
+     * Ensures Left, Center, and Right Dock Zones exist inside tbody.
+     *
+     * @param {HTMLTableSectionElement} tbody - Target table body.
+     * @returns {{ leftZone: HTMLElement, centerZone: HTMLElement, rightZone: HTMLElement }}
+     */
+    function ensureDockZones(tbody) {
+      let lz = document.getElementById("uwu-dock-left");
+      let cz = document.getElementById("uwu-dock-center");
+      let rz = document.getElementById("uwu-dock-right");
 
-        // console.log(gridAreaTemplate);
+      if (!cz) {
+        cz = document.createElement("div");
+        cz.id = "uwu-dock-center";
+        cz.className = "uwu-dock-center";
+        const field = document.getElementById("tr_field");
+        if (field) cz.appendChild(field);
+      } else {
+        const field = document.getElementById("tr_field");
+        if (field && field.parentElement !== cz) {
+          cz.appendChild(field);
+        }
+      }
 
-        tbody.style.display = "grid";
-        tbody.style.gridTemplateAreas = gridAreaTemplate;
-        tbody.style.gridTemplateColumns = "1fr auto 1fr";
-        tbody.style.gridTemplateRows = generateGridRowStyles(
-          leftBlocks,
-          rightBlocks
-        );
+      if (!lz) {
+        lz = document.createElement("div");
+        lz.id = "uwu-dock-left";
+        lz.className = "uwu-dock-zone";
+      }
 
-        blocks.forEach((block) => {
-          if (block.id) {
-            block.style.gridArea = block.id;
+      if (!rz) {
+        rz = document.createElement("div");
+        rz.id = "uwu-dock-right";
+        rz.className = "uwu-dock-zone";
+      }
+
+      if (tbody.firstChild !== lz) {
+        tbody.prepend(lz);
+        lz.after(cz);
+        cz.after(rz);
+      }
+
+      return { leftZone: lz, centerZone: cz, rightZone: rz };
+    }
+
+    /**
+     * Reads the actual computed border-radius from a block or its main inner <td> element.
+     *
+     * @param {HTMLElement} el - Block element (typically <tr>).
+     * @returns {string} Computed border-radius string (e.g., "10px" or "0px").
+     */
+    function getEffectiveBorderRadius(el) {
+      const target = el.querySelector("td") || el;
+      const radius = getComputedStyle(target).borderRadius;
+      return radius && radius !== "0px" ? radius : "0px";
+    }
+
+    /** List of tile block IDs that manage their height automatically based on game context. */
+    const AUTO_HEIGHT_TILES = [
+      "tr_chat",
+      "tr_actions",
+      "tr_mouth",
+      "tr_tos",
+      "parameter",
+      "history",
+      "family",
+    ];
+
+    /**
+     * Applies layout configuration to DOM elements.
+     *
+     * @returns {void}
+     */
+    function applyLayout() {
+      if (!settings.customLayout) return;
+
+      uwuCustomLayoutCssManager.enable();
+      const tbody = document.querySelector("#main_table > tbody");
+      if (!tbody) return;
+
+      const layout = getLayout();
+      uwuCustomLayoutCssManager.applyCompiled(layout);
+
+      const { leftZone, centerZone, rightZone } = ensureDockZones(tbody);
+
+      leftZone.classList.toggle("uwu-dock-zone--empty", layout.left.length === 0);
+      rightZone.classList.toggle("uwu-dock-zone--empty", layout.right.length === 0);
+
+      const applySlot = (slot, zoneEl) => {
+        const el = document.getElementById(slot.id);
+        if (!el) return;
+
+        if (slot.id === "tr_sky" && settings.skyInHeader) {
+          el.style.setProperty("display", "none", "important");
+          return;
+        }
+
+        el.classList.add("uwu-tile-block");
+        el.dataset.widthRatio = String(getSlotWidthRatio(slot));
+
+        el.style.removeProperty("width");
+        if (slot.id !== "tr_sky") {
+          el.style.removeProperty("height");
+        }
+
+        zoneEl.appendChild(el);
+      };
+
+      layout.left.forEach((slot) => applySlot(slot, leftZone));
+      layout.right.forEach((slot) => applySlot(slot, rightZone));
+    }
+
+    /**
+     * Cycles block slot width mode: 100% -> 50% -> 33% -> 100%.
+     *
+     * @param {TileSlot} slot - Block slot state object.
+     * @param {HTMLElement} blockEl - Target DOM block element.
+     * @param {HTMLElement} btnEl - Mode toggle button element.
+     */
+    function cycleWidthMode(slot, blockEl, btnEl) {
+      if (slot.widthMode === "100%") slot.widthMode = "50%";
+      else if (slot.widthMode === "50%") slot.widthMode = "33%";
+      else slot.widthMode = "100%";
+
+      blockEl.classList.remove(
+        "uwu-tile--w100",
+        "uwu-tile--w50",
+        "uwu-tile--w33",
+      );
+      if (slot.widthMode === "50%") blockEl.classList.add("uwu-tile--w50");
+      else if (slot.widthMode === "33%") blockEl.classList.add("uwu-tile--w33");
+      else blockEl.classList.add("uwu-tile--w100");
+
+      btnEl.textContent = slot.widthMode;
+    }
+
+    /**
+     * Enters the interactive tile editor mode and sets up modular editor components.
+     *
+     * @returns {void}
+     */
+    function startEditMode() {
+      if (isEditMode) return;
+      isEditMode = true;
+
+      applyLayout();
+      document.body.classList.add("uwu-editing");
+
+      const layout = getLayout();
+      const leftZone = document.getElementById("uwu-dock-left");
+      const rightZone = document.getElementById("uwu-dock-right");
+      const centerZone = document.getElementById("uwu-dock-center");
+
+      const toolbar = createEditorToolbar(layout, {
+        onSave: () => stopEditMode(true),
+        onCancel: () => stopEditMode(false),
+        onReset: () => {
+          if (confirm("Сбросить раскладку к классическому стандарту?")) {
+            uwuStorage.removeItem("uwu_hud_layout");
+            applyLayout();
+            stopEditMode(false);
           }
-        });
-      }
-    }
+        },
+      });
+      document.body.appendChild(toolbar);
 
-    function generateGridRowStyles(leftBlocks, rightBlocks) {
-      const numRows = Math.max(leftBlocks.length, rightBlocks.length);
-      let rowStyles = [];
+      createZoneSplitters(centerZone, leftZone, rightZone, (leftGrow, rightGrow) => {
+        layout.leftGrow = leftGrow;
+        layout.rightGrow = rightGrow;
+      });
 
-      for (let i = 0; i < numRows; i++) {
-        let rowHeight = "auto";
-        rowStyles.push(rowHeight);
-      }
+      const allSlots = [...layout.left, ...layout.right];
+      allSlots.forEach((slot) => {
+        const blockEl = document.getElementById(slot.id);
+        if (!blockEl) return;
 
-      const rowStylesString = rowStyles.join(" ");
-      return rowStylesString;
-    }
-
-    function generateGridTemplate(leftBlocks, rightBlocks) {
-      const numRows = Math.max(leftBlocks.length, rightBlocks.length);
-      let template = "";
-      let lastLeftBlockId = "";
-      let lastRightBlockId = "";
-      let isFirstRow = true;
-
-      for (let i = 0; i < numRows; i++) {
-        const leftBlockId = leftBlocks[i] || lastLeftBlockId;
-        const rightBlockId = rightBlocks[i] || lastRightBlockId;
-
-        if (isFirstRow) {
-          template += `"${leftBlockId} tr_field ${rightBlockId}" `;
-          isFirstRow = false;
-        } else {
-          template += `"${
-            leftBlockId === lastLeftBlockId ? "." : leftBlockId
-          } . ${rightBlockId === lastRightBlockId ? "." : rightBlockId}" `;
-        }
-
-        if (leftBlockId) {
-          lastLeftBlockId = leftBlockId;
-        }
-        if (rightBlockId) {
-          lastRightBlockId = rightBlockId;
-        }
-      }
-
-      return template;
-    }
-
-    function resetBlockStyles(parent) {
-      const blocks = parent.querySelectorAll("tr > *");
-      blocks.forEach((block) => {
-        block.style.gridArea = "";
+        const overlay = createTileOverlay(slot, blockEl);
+        bindSmoothTileDrag(blockEl, overlay, leftZone, rightZone);
+        blockEl.appendChild(overlay);
       });
     }
 
-    // Больше фикс стилей.
-    const fixStyle = document.createElement("style");
-    fixStyle.innerHTML =
-      /* CSS */
-      `
-      #main_table {
-        width: 100%;
-        max-width: unset;
-        height: 100%;
+    /**
+     * Calculates and applies inline width with exact gap deduction and edge anchoring.
+     * Formula: P% - (gap * (1 - P / 100))
+     *
+     * @param {HTMLElement} element - DOM element to size.
+     * @param {number} ratio - Width percentage ratio (20 to 100).
+     * @param {"left"|"right"} [align="left"] - Horizontal alignment anchor.
+     * @returns {void}
+     */
+    function applySlotWidth(element, ratio, align = "left") {
+      if (!element) return;
+      const normalized = Math.max(20, Math.min(100, Math.round(ratio / 10) * 10));
 
-        background: none;
-        border-spacing: 0px !important;
-        margin-top: 0px !important;
-      }
+      if (normalized >= 100) {
+        element.style.setProperty("width", "100%", "important");
+        element.style.removeProperty("margin-left");
+        element.style.removeProperty("margin-right");
+        element.dataset.align = "left";
+      } else {
+        const gapMultiplier = (1 - normalized / 100).toFixed(2);
+        element.style.setProperty(
+          "width",
+          `calc(${normalized}% - (var(--uwu-tile-gap, 10px) * ${gapMultiplier}))`,
+          "important"
+        );
 
-      #app > br {
-        display: none;
+        if (align === "right") {
+          element.style.setProperty("margin-left", "auto", "important");
+          element.style.setProperty("margin-right", "0", "important");
+          element.dataset.align = "right";
+        } else {
+          element.style.removeProperty("margin-left");
+          element.style.removeProperty("margin-right");
+          element.dataset.align = "left";
+        }
       }
-
-      #app {
-        width: 100%;
-        height: 100%;
-        display: flex !important;
-        flex-direction: column;
-        gap: 5px;
-      }
-      
-      #chat_msg, #cws_chat_msg {
-        height: ${settings.chatHeight}px;
-        width: auto;
-      }
-
-      #history_block > div { 
-        visibility: hidden; 
-      }
-
-      #history_block {
-        display: block;
-        height: ${settings.historyHeight}px; 
-        overflow-y: auto;
-        resize: vertical;
-      }
-
-      #family { 
-        display: block;
-        overflow-y: auto;
-        resize: vertical;
-      }
-
-      .infos {
-        width: auto;
-      }
-
-      #cages_overflow {
-        background: black;
-      }
-
-      .chat_text {
-        width: auto !important;
-        overflow-wrap: anywhere;
-      }
-
-      #chat_form {
-        margin: unset;
-        margin: 5px;
-      }
-
-      #volume {
-        margin: 5px;
-      }
-
-      #app > p:last-of-type {
-        position: fixed;
-        bottom: 0px;
-        margin: 8px;
-      }
-
-      h2 {
-        margin-top: 5px;
-        margin-bottom: 10px;
-      }
-
-      #itemList {
-        overflow-y: auto;
-        max-height: ${settings.itemListHeight || 180}px;
-        display: flex;
-        flex-wrap: wrap;
-      }
-
-      #location {
-        visibility: visible;
-        position: fixed;
-        right: 0px;
-        top: 0px;
-        font-size: 1.5rem;
-        background-color: ${theme?.blocksColor};
-        z-index: 1;
-      }
-
-      .small {
-        width: fit-content;
-        position: relative;
-        left: 0px;
-        top: 0px;
-        font-size: ${fontSize?.fontSizeSmall || 16}px;
-        z-index: 1;
-      }
-
-      body {
-        overflow-y: scroll;
-      }
-
-      #tr_chat, #tr_actions > td, #tr_mouth > td, #location, .small, #info_main > tbody > tr > td {
-        padding: 5px !important;
-      }
-
-      #tr_chat > td {
-        display: contents;
-      }
-
-      #chat_msg, #cws_chat_msg {
-        height: ${theme?.chatHeight}px;
-        resize: vertical;
-      }
-
-      #tr_field, #tr_info {
-        height: 10px;
-      }
-
-      #newchat, #newls {
-        background-color: transparent;
-      }
-
-      .other_cats_list {
-        display: none;
-      }
-
-      #deys {
-        width: auto !important;
-      }
-      
-      #block_deys {
-        flex-wrap: wrap;
-        justify-content: space-between;
-      }
-
-      #deys_mit {
-        width: min-content !important;
-      }
-      
-      #mit { 
-        width: auto !important;
-      }
-    `;
-    document.head.appendChild(fixStyle);
-    applyLayoutSettings();
-
-    const paragraph = document.querySelector("#app > p > b");
-    paragraph.textContent = "ТБ:";
-
-    function applyLayoutSettingsForInfoMain() {
-      const infoMainTable = document.getElementById("info_main");
-      if (!infoMainTable) {
-        return;
-      }
-
-      const tableRow = infoMainTable.querySelector("tr");
-      if (!tableRow) {
-        return;
-      }
-
-      const tds = tableRow.getElementsByTagName("td");
-      if (tds.length < 3) {
-        return;
-      }
-
-      for (const td of tds) {
-        td.style.gridArea = "";
-      }
-
-      tableRow.style.display = "grid";
-      // хахахах поглядите на смешного строчного
-      tableRow.style.gridTemplateAreas = `"parameter"
-                                          "history"
-                                          "family"`;
-
-      tds[0].style.gridArea = "family";
-      tds[1].style.gridArea = "history";
-      tds[2].style.gridArea = "parameter";
     }
 
-    applyLayoutSettingsForInfoMain();
+    /**
+     * Creates and binds the top HUD editor toolbar.
+     *
+     * @param {HudLayoutState} layout - Current layout configuration state.
+     * @param {Object} actions - Action callbacks for toolbar buttons.
+     * @param {() => void} actions.onSave - Triggered when saving changes.
+     * @param {() => void} actions.onCancel - Triggered when discarding changes.
+     * @param {() => void} actions.onReset - Triggered when resetting layout to default.
+     * @returns {HTMLElement} The constructed toolbar DOM element.
+     */
+    function createEditorToolbar(layout, { onSave, onCancel, onReset }) {
+      const toolbar = document.createElement("div");
+      toolbar.id = "uwu-hud-toolbar";
+      toolbar.className = "uwu-hud-toolbar";
+
+      const currentGap = typeof layout.gap === "number" ? layout.gap : 8;
+      const currentRadius = typeof layout.radius === "number" ? layout.radius : 8;
+
+      toolbar.innerHTML = `
+        <span>🛠️ <b>Редактор слотов</b></span>
+        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; margin-left: 4px; user-select: none;">
+          Отступы:
+          <input type="number" id="uwu-hud-gap-input" min="0" max="40" value="${currentGap}" style="width: 46px; padding: 2px 4px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; text-align: center; font: inherit;"> px
+        </label>
+        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; margin-left: 6px; user-select: none;">
+          Скругление:
+          <input type="number" id="uwu-hud-radius-input" min="0" max="40" value="${currentRadius}" style="width: 46px; padding: 2px 4px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; text-align: center; font: inherit;"> px
+        </label>
+        <button type="button" id="uwu-hud-reset-btn" class="uwu-button remove-button" style="padding: 4px 10px;">↺ Сброс</button>
+        <button type="button" id="uwu-hud-save-btn" class="uwu-button install-button" style="padding: 4px 12px; font-weight: bold;">💾 Сохранить</button>
+        <button type="button" id="uwu-hud-cancel-btn" class="uwu-button" style="padding: 4px 10px; opacity: 0.8;">✖ Отмена</button>
+      `;
+
+      toolbar.querySelector("#uwu-hud-gap-input").addEventListener("input", (e) => {
+        const raw = parseInt(e.target.value, 10);
+        const val = isNaN(raw) ? 0 : Math.max(0, raw);
+        document.documentElement.style.setProperty("--uwu-tile-gap", `${val}px`);
+        layout.gap = val;
+      });
+
+      toolbar.querySelector("#uwu-hud-radius-input").addEventListener("input", (e) => {
+        const raw = parseInt(e.target.value, 10);
+        const val = isNaN(raw) ? 0 : Math.max(0, raw);
+        document.documentElement.style.setProperty("--uwu-tile-rb", `${val}px`);
+        layout.radius = val;
+      });
+
+      toolbar.querySelector("#uwu-hud-save-btn").onclick = onSave;
+      toolbar.querySelector("#uwu-hud-cancel-btn").onclick = onCancel;
+      toolbar.querySelector("#uwu-hud-reset-btn").onclick = onReset;
+
+      return toolbar;
+    }
+
+    /**
+     * Builds interactive column width splitters placed adjacent to the center game field.
+     *
+     * @param {HTMLElement} centerZone - Center field container element.
+     * @param {HTMLElement} leftZone - Left dock column element.
+     * @param {HTMLElement} rightZone - Right dock column element.
+     * @param {(isLeft: boolean, newWidth: number) => void} onResize - Callback invoked with new column width.
+     * @returns {HTMLElement[]} List of created splitter elements.
+     */
+    function createZoneSplitters(centerZone, leftZone, rightZone, onResize) {
+      const createSplitter = () => {
+        const sp = document.createElement("div");
+        sp.className = "uwu-zone-splitter";
+        sp.title = "Потяните влево/вправо для перераспределения пропорций колонок";
+
+        sp.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          sp.classList.add("active");
+
+          const startX = e.clientX;
+          const initLeftW = leftZone.offsetWidth;
+          const initRightW = rightZone.offsetWidth;
+          const totalAvailableWidth = initLeftW + initRightW;
+
+          const onMove = (moveEvent) => {
+            const deltaX = moveEvent.clientX - startX;
+            const currentLeft = Math.max(200, initLeftW + deltaX);
+            const currentRight = Math.max(200, initRightW - deltaX);
+            const total = currentLeft + currentRight;
+
+            const leftGrow = Number(((currentLeft / total) * 10).toFixed(2));
+            const rightGrow = Number((10 - leftGrow).toFixed(2));
+
+            document.documentElement.style.setProperty("--uwu-left-grow", String(leftGrow));
+            document.documentElement.style.setProperty("--uwu-right-grow", String(rightGrow));
+
+            leftZone.style.flex = `${leftGrow} 1 0px`;
+            rightZone.style.flex = `${rightGrow} 1 0px`;
+
+            onResize(leftGrow, rightGrow);
+          };
+
+          const onUp = () => {
+            sp.classList.remove("active");
+            window.removeEventListener("mousemove", onMove);
+            window.removeEventListener("mouseup", onUp);
+          };
+
+          window.addEventListener("mousemove", onMove);
+          window.addEventListener("mouseup", onUp);
+        });
+
+        return sp;
+      };
+
+      const leftSplitter = createSplitter();
+      const rightSplitter = createSplitter();
+
+      centerZone.before(leftSplitter);
+      centerZone.after(rightSplitter);
+
+      return [leftSplitter, rightSplitter];
+    }
+
+    /**
+     * Determines the optimal drop target zone and relative dock placement for the dragged tile.
+     *
+     * @param {number} clientX - Pointer horizontal screen coordinate.
+     * @param {number} clientY - Pointer vertical screen coordinate.
+     * @param {HTMLElement} leftZone - Left dock column container.
+     * @param {HTMLElement} rightZone - Right dock column container.
+     * @param {HTMLElement} draggedEl - Tile block currently being dragged.
+     * @param {HTMLElement} placeholder - Active layout placeholder indicator.
+     * @param {HTMLElement|null} activeDockSibling - Currently active side-docked target sibling.
+     * @returns {{ zone: HTMLElement, beforeSibling: HTMLElement|null, dockType: "left"|"right"|"vertical-before"|"vertical-after", targetSibling: HTMLElement|null }|null} Drop target descriptor.
+     */
+    function findDropTarget(clientX, clientY, leftZone, rightZone, draggedEl, placeholder, activeDockSibling) {
+      const hoveredEl = document.elementFromPoint(clientX, clientY);
+      let zone = hoveredEl?.closest(".uwu-dock-zone");
+
+      if (!zone || (zone !== leftZone && zone !== rightZone)) {
+        const lRect = leftZone.getBoundingClientRect();
+        const rRect = rightZone.getBoundingClientRect();
+        if (clientX >= lRect.left && clientX <= lRect.right && clientY >= lRect.top && clientY <= lRect.bottom) {
+          zone = leftZone;
+        } else if (clientX >= rRect.left && clientX <= rRect.right && clientY >= rRect.top && clientY <= rRect.bottom) {
+          zone = rightZone;
+        } else {
+          return null;
+        }
+      }
+
+      const getNextSibling = (el) => {
+        let next = el.nextElementSibling;
+        while (next && (next === placeholder || next === draggedEl)) {
+          next = next.nextElementSibling;
+        }
+        return next;
+      };
+
+      if (placeholder.parentElement === zone) {
+        const pRect = placeholder.getBoundingClientRect();
+        if (
+          clientX >= pRect.left - 10 &&
+          clientX <= pRect.right + 10 &&
+          clientY >= pRect.top - 6 &&
+          clientY <= pRect.bottom + 6
+        ) {
+          return {
+            zone,
+            beforeSibling: getNextSibling(placeholder),
+            dockType: "vertical-before",
+            targetSibling: null,
+          };
+        }
+      }
+
+      if (activeDockSibling && activeDockSibling.parentElement === zone) {
+        const pRect = placeholder.getBoundingClientRect();
+        const sRect = activeDockSibling.getBoundingClientRect();
+        const rowLeft = Math.min(pRect.left, sRect.left);
+        const rowRight = Math.max(pRect.right, sRect.right);
+        const rowTop = Math.min(pRect.top, sRect.top);
+        const rowBottom = Math.max(pRect.bottom, sRect.bottom);
+
+        const inRow =
+          clientY >= rowTop - 14 &&
+          clientY <= rowBottom + 14 &&
+          clientX >= rowLeft - 25 &&
+          clientX <= rowRight + 25;
+
+        if (inRow) {
+          const midX = (rowLeft + rowRight) / 2;
+          const isLeft = clientX < midX;
+          const dockType = isLeft ? "left" : "right";
+          const beforeSibling = isLeft ? activeDockSibling : getNextSibling(activeDockSibling);
+
+          return {
+            zone,
+            beforeSibling,
+            dockType,
+            targetSibling: activeDockSibling,
+          };
+        }
+      }
+
+      const siblings = Array.from(zone.children).filter(
+        (child) =>
+          child.classList.contains("uwu-tile-block") &&
+          child !== draggedEl &&
+          child !== placeholder
+      );
+
+      if (siblings.length === 0) {
+        return { zone, beforeSibling: null, dockType: "vertical-after", targetSibling: null };
+      }
+
+      let targetSibling = null;
+      for (const child of siblings) {
+        const cRect = child.getBoundingClientRect();
+        if (
+          clientX >= cRect.left &&
+          clientX <= cRect.right &&
+          clientY >= cRect.top &&
+          clientY <= cRect.bottom
+        ) {
+          targetSibling = child;
+          break;
+        }
+      }
+
+      if (targetSibling) {
+        const cRect = targetSibling.getBoundingClientRect();
+        const relX = (clientX - cRect.left) / cRect.width;
+        const relY = (clientY - cRect.top) / cRect.height;
+
+        let dockType = "vertical-after";
+        let beforeSibling = null;
+
+        if (relY < 0.22) {
+          dockType = "vertical-before";
+          beforeSibling = targetSibling;
+        } else if (relY > 0.78) {
+          dockType = "vertical-after";
+          beforeSibling = getNextSibling(targetSibling);
+        } else if (relX < 0.35) {
+          dockType = "left";
+          beforeSibling = targetSibling;
+        } else if (relX > 0.65) {
+          dockType = "right";
+          beforeSibling = getNextSibling(targetSibling);
+        } else {
+          if (relY < 0.5) {
+            dockType = "vertical-before";
+            beforeSibling = targetSibling;
+          } else {
+            dockType = "vertical-after";
+            beforeSibling = getNextSibling(targetSibling);
+          }
+        }
+
+        return { zone, beforeSibling, dockType, targetSibling };
+      }
+
+      for (const child of siblings) {
+        const cRect = child.getBoundingClientRect();
+        if (clientY < cRect.top + cRect.height / 2) {
+          return {
+            zone,
+            beforeSibling: child,
+            dockType: "vertical-before",
+            targetSibling: null,
+          };
+        }
+      }
+
+      return { zone, beforeSibling: null, dockType: "vertical-after", targetSibling: null };
+    }
+
+    /**
+     * Builds the DOM structure for the tile overlay and returns its interactive control nodes.
+     *
+     * @param {TileSlot} slot - Tile data model.
+     * @param {HTMLElement} blockEl - Target tile DOM element.
+     * @param {number} currentRatio - Initial width percentage ratio.
+     * @param {boolean} hasHeightGrip - Whether the block allows vertical resizing.
+     * @returns {{ overlay: HTMLElement, modeBtn: HTMLElement, leftWGrip: HTMLElement, rightWGrip: HTMLElement, hGrip: HTMLElement|null }}
+     */
+    function buildOverlayDom(slot, blockEl, currentRatio, hasHeightGrip) {
+      const overlay = document.createElement("div");
+      overlay.className = "uwu-tile-overlay";
+      overlay.dataset.blockId = slot.id;
+
+      overlay.innerHTML = `
+        <div class="uwu-tile-w-grip uwu-tile-w-grip--left" title="Потяните влево/вправо для изменения ширины (шаг 10%)"></div>
+        <span class="uwu-tile-title-tag">${BLOCK_NAMES[slot.id] || slot.id}</span>
+        <button type="button" class="uwu-tile-mode-btn" title="Клик: быстрое переключение">${currentRatio}%</button>
+        <div class="uwu-tile-w-grip uwu-tile-w-grip--right" title="Потяните влево/вправо для изменения ширины (шаг 10%)"></div>
+        ${hasHeightGrip ? '<div class="uwu-tile-h-grip" title="Потяните для изменения высоты"></div>' : ""}
+      `;
+
+      return {
+        overlay,
+        modeBtn: overlay.querySelector(".uwu-tile-mode-btn"),
+        leftWGrip: overlay.querySelector(".uwu-tile-w-grip--left"),
+        rightWGrip: overlay.querySelector(".uwu-tile-w-grip--right"),
+        hGrip: overlay.querySelector(".uwu-tile-h-grip"),
+      };
+    }
+
+    /**
+     * Binds click handler to cycle width presets (100% -> 50% -> 30%).
+     *
+     * @param {HTMLElement} modeBtn - Percentage display toggle button.
+     * @param {TileSlot} slot - Tile data model.
+     * @param {HTMLElement} blockEl - Target tile DOM element.
+     * @returns {void}
+     */
+    function bindModeCycle(modeBtn, slot, blockEl) {
+      modeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const cycle = [100, 50, 30];
+        const cur = parseInt(blockEl.dataset.widthRatio || "100", 10);
+        const nextIdx = (cycle.indexOf(cur) + 1) % cycle.length;
+        const nextRatio = cycle[nextIdx] || 100;
+        const align = blockEl.dataset.align === "right" && nextRatio < 100 ? "right" : "left";
+
+        applySlotWidth(blockEl, nextRatio, align);
+        blockEl.dataset.widthRatio = String(nextRatio);
+        modeBtn.textContent = `${nextRatio}%`;
+        slot.widthRatio = nextRatio;
+        slot.widthMode = `${nextRatio}%`;
+        slot.align = align;
+      });
+    }
+
+    /**
+     * Binds mouse resize interaction to the height grip handle.
+     *
+     * @param {HTMLElement|null} hGrip - Bottom resize handle element.
+     * @param {TileSlot} slot - Tile data model.
+     * @param {HTMLElement} blockEl - Target tile DOM element.
+     * @returns {void}
+     */
+    function bindHeightResize(hGrip, slot, blockEl) {
+      if (!hGrip) return;
+
+      hGrip.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        hGrip.classList.add("active");
+
+        const startY = e.clientY;
+        const isChat = slot.id === "tr_chat";
+        const chatMsgEl = isChat
+          ? (document.getElementById("uwu_chat_msg") || document.getElementById("chat_msg"))
+          : null;
+        const initH = isChat && chatMsgEl ? chatMsgEl.offsetHeight : blockEl.offsetHeight;
+
+        const onMove = (me) => {
+          const newH = Math.max(50, initH + (me.clientY - startY));
+          if (isChat && chatMsgEl) {
+            chatMsgEl.style.height = `${newH}px`;
+            document.documentElement.style.setProperty("--uwu-chat-height", `${newH}px`);
+            settings.chatHeight = String(newH);
+          } else if (slot.id === "tr_sky") {
+            const skyEl = blockEl.querySelector("#sky");
+            if (skyEl) skyEl.style.height = `${newH}px`;
+            document.documentElement.style.setProperty("--uwu-sky-height", `${newH}px`);
+            blockEl.style.height = `${newH}px`;
+            slot.height = newH;
+          } else {
+            blockEl.style.height = `${newH}px`;
+            slot.height = newH;
+          }
+        };
+
+        const onUp = () => {
+          hGrip.classList.remove("active");
+          if (isChat) saveSettings();
+          window.removeEventListener("mousemove", onMove);
+          window.removeEventListener("mouseup", onUp);
+        };
+
+        window.addEventListener("mousemove", onMove);
+        window.addEventListener("mouseup", onUp);
+      });
+    }
+
+    /**
+     * Binds bilateral width handles with linked pair splitter logic and edge anchoring.
+     *
+     * @param {HTMLElement} leftGrip - Left resize handle.
+     * @param {HTMLElement} rightGrip - Right resize handle.
+     * @param {HTMLElement} modeBtn - Percentage button for UI updates.
+     * @param {TileSlot} slot - Tile data model.
+     * @param {HTMLElement} blockEl - Target tile DOM element.
+     * @returns {void}
+     */
+    function bindWidthResize(leftGrip, rightGrip, modeBtn, slot, blockEl) {
+      const attachGrip = (gripEl, direction) => {
+        gripEl.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          gripEl.classList.add("active");
+
+          const startX = e.clientX;
+          const parentZone = blockEl.parentElement;
+          const zoneWidth = parentZone.clientWidth;
+
+          const prev = blockEl.previousElementSibling;
+          const next = blockEl.nextElementSibling;
+          const isRowPartner = (el) =>
+            el &&
+            el.classList.contains("uwu-tile-block") &&
+            Math.abs(el.offsetTop - blockEl.offsetTop) < 25;
+
+          const hasLeftPartner = direction === "left" && isRowPartner(prev);
+          const hasRightPartner = direction === "right" && isRowPartner(next);
+          const partner = hasLeftPartner ? prev : hasRightPartner ? next : null;
+
+          const initRatio = parseInt(blockEl.dataset.widthRatio || "100", 10);
+          const partnerInitRatio = partner
+            ? parseInt(partner.dataset.widthRatio || "100", 10)
+            : 0;
+          const totalPairRatio = partner ? initRatio + partnerInitRatio : 100;
+
+          const onMove = (me) => {
+            const rawDeltaRatio = ((me.clientX - startX) / zoneWidth) * 100;
+            const stepDelta = Math.round(rawDeltaRatio / 10) * 10;
+
+            if (partner) {
+              const deltaForCurrent = direction === "left" ? -stepDelta : stepDelta;
+              const minRatio = 20;
+              const maxRatio = totalPairRatio - minRatio;
+
+              const targetRatio = Math.max(minRatio, Math.min(maxRatio, initRatio + deltaForCurrent));
+              const targetPartnerRatio = totalPairRatio - targetRatio;
+
+              applySlotWidth(blockEl, targetRatio, blockEl.dataset.align || "left");
+              blockEl.dataset.widthRatio = String(targetRatio);
+              modeBtn.textContent = `${targetRatio}%`;
+              slot.widthRatio = targetRatio;
+              slot.widthMode = `${targetRatio}%`;
+
+              applySlotWidth(partner, targetPartnerRatio, partner.dataset.align || "left");
+              partner.dataset.widthRatio = String(targetPartnerRatio);
+              const partnerBtn = partner.querySelector(".uwu-tile-mode-btn");
+              if (partnerBtn) partnerBtn.textContent = `${targetPartnerRatio}%`;
+
+              const partnerSlot = [
+                ...(uwuHudEditor.getLayout().left || []),
+                ...(uwuHudEditor.getLayout().right || []),
+              ].find((s) => s.id === partner.id);
+              if (partnerSlot) {
+                partnerSlot.widthRatio = targetPartnerRatio;
+                partnerSlot.widthMode = `${targetPartnerRatio}%`;
+              }
+            } else {
+              if (direction === "left") {
+                const targetRatio = Math.max(20, Math.min(100, initRatio - stepDelta));
+                const align = targetRatio >= 100 ? "left" : "right";
+
+                applySlotWidth(blockEl, targetRatio, align);
+                blockEl.dataset.widthRatio = String(targetRatio);
+                blockEl.dataset.align = align;
+                modeBtn.textContent = `${targetRatio}%`;
+                slot.widthRatio = targetRatio;
+                slot.widthMode = `${targetRatio}%`;
+                slot.align = align;
+              } else {
+                const targetRatio = Math.max(20, Math.min(100, initRatio + stepDelta));
+
+                applySlotWidth(blockEl, targetRatio, "left");
+                blockEl.dataset.widthRatio = String(targetRatio);
+                blockEl.dataset.align = "left";
+                modeBtn.textContent = `${targetRatio}%`;
+                slot.widthRatio = targetRatio;
+                slot.widthMode = `${targetRatio}%`;
+                slot.align = "left";
+              }
+            }
+          };
+
+          const onUp = () => {
+            gripEl.classList.remove("active");
+            window.removeEventListener("mousemove", onMove);
+            window.removeEventListener("mouseup", onUp);
+          };
+
+          window.addEventListener("mousemove", onMove);
+          window.addEventListener("mouseup", onUp);
+        });
+      };
+
+      attachGrip(leftGrip, "left");
+      attachGrip(rightGrip, "right");
+    }
+
+    /**
+     * Orchestrates tile overlay creation and binds modular resize/cycle behaviors.
+     *
+     * @param {TileSlot} slot - Layout slot model.
+     * @param {HTMLElement} blockEl - Target tile DOM element.
+     * @returns {HTMLElement} The assembled overlay container element.
+     */
+    function createTileOverlay(slot, blockEl) {
+      const currentRatio = getSlotWidthRatio(slot);
+      blockEl.dataset.widthRatio = String(currentRatio);
+      if (slot.align === "right") {
+        blockEl.dataset.align = "right";
+      }
+
+      const hasHeightGrip = ![
+        "tr_actions",
+        "tr_mouth",
+        "tr_tos",
+        "parameter",
+        "history",
+        "family",
+      ].includes(slot.id);
+
+      const { overlay, modeBtn, leftWGrip, rightWGrip, hGrip } = buildOverlayDom(
+        slot,
+        blockEl,
+        currentRatio,
+        hasHeightGrip
+      );
+
+      bindModeCycle(modeBtn, slot, blockEl);
+      bindWidthResize(leftWGrip, rightWGrip, modeBtn, slot, blockEl);
+      bindHeightResize(hGrip, slot, blockEl);
+
+      return overlay;
+    }
+
+    /**
+     * Dynamically updates the empty state class of dock zones based on present tiles and active placeholder.
+     *
+     * @param {HTMLElement} leftZone - Left dock column container.
+     * @param {HTMLElement} rightZone - Right dock column container.
+     * @param {HTMLElement|null} placeholder - Active drag placeholder element.
+     * @returns {void}
+     */
+    function updateEmptyZoneStates(leftZone, rightZone, placeholder) {
+      const isLeftEmpty =
+        Array.from(leftZone.children).filter(
+          (c) => c.classList.contains("uwu-tile-block") && c.style.display !== "none"
+        ).length === 0 && !leftZone.contains(placeholder);
+
+      const isRightEmpty =
+        Array.from(rightZone.children).filter(
+          (c) => c.classList.contains("uwu-tile-block") && c.style.display !== "none"
+        ).length === 0 && !rightZone.contains(placeholder);
+
+      leftZone.classList.toggle("uwu-dock-zone--empty", isLeftEmpty);
+      rightZone.classList.toggle("uwu-dock-zone--empty", isRightEmpty);
+    }
+
+    /**
+     * Binds pointer drag interaction to a tile block.
+     *
+     * @param {HTMLElement} blockEl - The tile element to be dragged.
+     * @param {HTMLElement} overlay - Grab handle overlay on the tile.
+     * @param {HTMLElement} leftZone - Left column container.
+     * @param {HTMLElement} rightZone - Right column container.
+     * @returns {void}
+     */
+    function bindSmoothTileDrag(blockEl, overlay, leftZone, rightZone) {
+      overlay.addEventListener("mousedown", (e) => {
+        if (
+          e.target.classList.contains("uwu-tile-mode-btn") ||
+          e.target.classList.contains("uwu-tile-h-grip") ||
+          e.target.classList.contains("uwu-tile-w-grip") ||
+          e.target.closest(".uwu-tile-w-grip") ||
+          e.target.closest(".uwu-tile-h-grip")
+        ) {
+          return;
+        }
+        e.preventDefault();
+
+        const rect = blockEl.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        const offsetY = e.clientY - rect.top;
+
+        const clampPlaceholderHeight = (h) => Math.max(60, Math.min(140, Math.round(h || 80)));
+
+        const initialBlockHeight = blockEl.offsetHeight || rect.height || 100;
+        const basePlaceholderHeight = clampPlaceholderHeight(initialBlockHeight);
+
+        let formerPartner = null;
+        if (parseInt(blockEl.dataset.widthRatio || "100", 10) <= 50) {
+          const prev = blockEl.previousElementSibling;
+          const next = blockEl.nextElementSibling;
+          if (prev && prev.classList.contains("uwu-tile-block") && parseInt(prev.dataset.widthRatio || "100", 10) <= 50) {
+            formerPartner = prev;
+          } else if (next && next.classList.contains("uwu-tile-block") && parseInt(next.dataset.widthRatio || "100", 10) <= 50) {
+            formerPartner = next;
+          }
+        }
+
+        if (formerPartner) {
+          applySlotWidth(formerPartner, 100);
+          formerPartner.dataset.widthRatio = "100";
+          const partnerBtn = formerPartner.querySelector(".uwu-tile-mode-btn");
+          if (partnerBtn) partnerBtn.textContent = "100%";
+        }
+
+        const ghost = blockEl.cloneNode(true);
+        ghost.classList.add("uwu-drag-ghost");
+        ghost.querySelectorAll(".uwu-tile-overlay").forEach((o) => o.remove());
+        ghost.style.width = `${rect.width}px`;
+        ghost.style.height = `${rect.height}px`;
+        ghost.style.left = `${rect.left}px`;
+        ghost.style.top = `${rect.top}px`;
+        document.body.appendChild(ghost);
+
+        const placeholder = document.createElement("div");
+        placeholder.className = "uwu-drop-placeholder";
+        applySlotWidth(placeholder, 100);
+        placeholder.style.height = `${basePlaceholderHeight}px`;
+
+        blockEl.before(placeholder);
+        blockEl.style.setProperty("display", "none", "important");
+
+        updateEmptyZoneStates(leftZone, rightZone, placeholder);
+
+        let currentDropTarget = null;
+        let activeDockSibling = null;
+
+        const restoreSiblingWidth = (sibling) => {
+          if (!sibling) return;
+          const originalRatio = parseInt(sibling.dataset.widthRatio || "100", 10);
+          applySlotWidth(sibling, originalRatio, sibling.dataset.align || "left");
+        };
+
+        const onMouseMove = (me) => {
+          ghost.style.left = `${me.clientX - offsetX}px`;
+          ghost.style.top = `${me.clientY - offsetY}px`;
+
+          const target = findDropTarget(
+            me.clientX,
+            me.clientY,
+            leftZone,
+            rightZone,
+            blockEl,
+            placeholder,
+            activeDockSibling
+          );
+          currentDropTarget = target;
+
+          if (!target) {
+            if (activeDockSibling) {
+              restoreSiblingWidth(activeDockSibling);
+              activeDockSibling = null;
+            }
+            return;
+          }
+
+          const isSideDock =
+            (target.dockType === "left" || target.dockType === "right") &&
+            target.targetSibling;
+
+          if (isSideDock) {
+            const sibling = target.targetSibling;
+
+            if (activeDockSibling && activeDockSibling !== sibling) {
+              restoreSiblingWidth(activeDockSibling);
+            }
+
+            activeDockSibling = sibling;
+
+            applySlotWidth(sibling, 50);
+            applySlotWidth(placeholder, 50);
+            placeholder.style.height = `${clampPlaceholderHeight(sibling.offsetHeight)}px`;
+
+            if (target.dockType === "left") {
+              if (placeholder.nextElementSibling !== sibling) {
+                sibling.before(placeholder);
+              }
+            } else {
+              if (placeholder.previousElementSibling !== sibling) {
+                sibling.after(placeholder);
+              }
+            }
+          } else {
+            if (activeDockSibling) {
+              restoreSiblingWidth(activeDockSibling);
+              activeDockSibling = null;
+            }
+
+            applySlotWidth(placeholder, 100);
+            placeholder.style.height = `${basePlaceholderHeight}px`;
+
+            if (target.beforeSibling) {
+              if (placeholder.nextElementSibling !== target.beforeSibling) {
+                target.beforeSibling.before(placeholder);
+              }
+            } else if (target.zone.lastElementChild !== placeholder) {
+              target.zone.appendChild(placeholder);
+            }
+          }
+
+          updateEmptyZoneStates(leftZone, rightZone, placeholder);
+        };
+
+        const onMouseUp = () => {
+          window.removeEventListener("mousemove", onMouseMove);
+          window.removeEventListener("mouseup", onMouseUp);
+
+          placeholder.before(blockEl);
+          placeholder.remove();
+          ghost.remove();
+          blockEl.style.removeProperty("display");
+
+          const isSideDock =
+            currentDropTarget &&
+            (currentDropTarget.dockType === "left" || currentDropTarget.dockType === "right") &&
+            currentDropTarget.targetSibling;
+
+          if (isSideDock) {
+            const targetSibling = currentDropTarget.targetSibling;
+            if (targetSibling && targetSibling !== blockEl) {
+              applySlotWidth(blockEl, 50);
+              applySlotWidth(targetSibling, 50);
+              blockEl.dataset.widthRatio = "50";
+              targetSibling.dataset.widthRatio = "50";
+
+              const updateBtn = (el) => {
+                const btn = el.querySelector(".uwu-tile-mode-btn");
+                if (btn) btn.textContent = "50%";
+              };
+              updateBtn(blockEl);
+              updateBtn(targetSibling);
+            }
+          } else {
+            applySlotWidth(blockEl, 100);
+            blockEl.dataset.widthRatio = "100";
+            const modeBtn = blockEl.querySelector(".uwu-tile-mode-btn");
+            if (modeBtn) modeBtn.textContent = "100%";
+
+            if (activeDockSibling) {
+              restoreSiblingWidth(activeDockSibling);
+            }
+          }
+
+          activeDockSibling = null;
+          currentDropTarget = null;
+
+          updateEmptyZoneStates(leftZone, rightZone, null);
+        };
+
+        window.addEventListener("mousemove", onMouseMove);
+        window.addEventListener("mouseup", onMouseUp);
+      });
+    }
+
+    /**
+     * Exits Edit Mode and optionally persists layout order and heights.
+     *
+     * @param {boolean} [save=true] - Whether to save current changes.
+     * @returns {void}
+     */
+    function stopEditMode(save = true) {
+      isEditMode = false;
+      document.body.classList.remove("uwu-editing");
+
+      const rawGap = parseInt(document.getElementById("uwu-hud-gap-input")?.value, 10);
+      const gapVal = isNaN(rawGap) ? 8 : Math.max(0, rawGap);
+
+      const rawRadius = parseInt(document.getElementById("uwu-hud-radius-input")?.value, 10);
+      const radiusVal = isNaN(rawRadius) ? 8 : Math.max(0, rawRadius);
+
+      document.getElementById("uwu-hud-toolbar")?.remove();
+      document.querySelectorAll(".uwu-tile-overlay").forEach((o) => o.remove());
+      document.querySelectorAll(".uwu-zone-splitter").forEach((s) => s.remove());
+      document.querySelector(".uwu-drop-placeholder")?.remove();
+
+      // Clear any temporary inline resize styles from drag handles
+      document.querySelectorAll(".uwu-tile-block").forEach((el) => {
+        el.style.removeProperty("width");
+        if (el.id !== "tr_sky") el.style.removeProperty("height");
+      });
+
+      if (save) {
+        const lz = document.getElementById("uwu-dock-left");
+        const rz = document.getElementById("uwu-dock-right");
+
+        const lGrow = parseFloat(document.documentElement.style.getPropertyValue("--uwu-left-grow")) || 5;
+        const rGrow = parseFloat(document.documentElement.style.getPropertyValue("--uwu-right-grow")) || 5;
+
+        const collectSlots = (zone) => {
+          if (!zone) return [];
+          return Array.from(zone.children)
+            .filter((el) => el.classList.contains("uwu-tile-block"))
+            .map((el) => ({
+              id: el.id,
+              widthRatio: parseInt(el.dataset.widthRatio || "100", 10),
+              align: el.dataset.align === "right" ? "right" : "left",
+              height: el.offsetHeight,
+            }));
+        };
+
+        const finalLayout = {
+          leftGrow: lGrow,
+          rightGrow: rGrow,
+          gap: gapVal,
+          radius: radiusVal,
+          left: collectSlots(lz),
+          right: collectSlots(rz),
+        };
+
+        uwuStorage.setItem("uwu_hud_layout", finalLayout);
+        uwuCustomLayoutCssManager.applyCompiled(finalLayout);
+        applyLayout();
+      } else {
+        applyLayout();
+      }
+    }
+
+    return {
+      startEditMode,
+      stopEditMode,
+      applyLayout,
+      getLayout,
+    };
+  })();
+
+  if (targetCW3.test(window.location.href) && settings.customLayout) {
+    uwuCustomLayoutCssManager.enable();
+    uwuCustomLayoutCssManager.applyCompiled(window.uwuHudEditor.getLayout());
+
+    setupMutationObserver(
+      "#main_table > tbody",
+      () => {
+        const tbody = document.querySelector("#main_table > tbody");
+        if (!tbody) return;
+
+        const hasStrayRows = Array.from(tbody.children).some(
+          (child) => child.tagName === "TR" && child.id !== "tr_field"
+        );
+
+        if (hasStrayRows || !document.getElementById("uwu-dock-left")) {
+          window.uwuHudEditor.applyLayout();
+        }
+      },
+      { childList: true },
+      15,
+      300,
+      50
+    );
   }
+
+  /**
+   * Relocates and condenses the Dark Points (ТБ) counter into the topbar.
+   *
+   * @returns {void}
+   */
+  function initTopbarDarkPoints() {
+    const bp = document.getElementById("black_points");
+    const locationEl = document.querySelector(".game-location");
+    if (!bp || !locationEl || bp.classList.contains("in-topbar")) return;
+
+    const count = bp.querySelector("#black")?.textContent || "0";
+    bp.className = "in-topbar";
+    bp.innerHTML = `<b>ТБ:</b> <span id="black">${count}</span>`;
+    locationEl.before(bp);
+  }
+
+  setupSingleCallback(".game-topbar", initTopbarDarkPoints);
 
   // ====================================================================================================================
   //   . . . ПОДСКАЗЫВАТЬ ОСТАВШЕЕСЯ ВРЕМЯ ДО НЮХА . . .
@@ -12091,7 +14835,7 @@ if (targetCW3.test(window.location.href)) {
                   updateVisualTimerDisplay();
                   smellTimerInterval = setInterval(
                     updateVisualTimerDisplay,
-                    1000
+                    1000,
                   );
                   saveVisualTimerState();
                   return;
@@ -12132,7 +14876,7 @@ if (targetCW3.test(window.location.href)) {
         } catch (e) {
           console.error(
             "Ошибка разбора сохраненного состояния визуального таймера:",
-            e
+            e,
           );
           uwuStorage.removeItem(visualTimerStateKey);
         }
@@ -12165,7 +14909,7 @@ if (targetCW3.test(window.location.href)) {
 
       const htmlContent = errorElement.innerHTML;
       const smellCooldownMatch = htmlContent.match(
-        /Следующее обнюхивание будет доступно через (.*?)(\.|<br|$)/
+        /Следующее обнюхивание будет доступно через (.*?)(\.|<br|$)/,
       );
       const cooldownExpiredMatch = htmlContent.includes("Час уже прошёл");
 
@@ -12199,7 +14943,7 @@ if (targetCW3.test(window.location.href)) {
       if (smallElement && !document.getElementById("uwu_sniff_timer")) {
         smallElement.insertAdjacentHTML(
           "beforeend",
-          '<span id="uwu_sniff_timer" value="0"></span>'
+          '<span id="uwu_sniff_timer" value="0"></span>',
         );
       }
     }
@@ -12214,7 +14958,7 @@ if (targetCW3.test(window.location.href)) {
         subtree: true,
       },
       8,
-      500
+      500,
     );
 
     setupMutationObserver(
@@ -12226,7 +14970,7 @@ if (targetCW3.test(window.location.href)) {
         characterData: true,
       },
       8,
-      500
+      500,
     );
 
     setupMutationObserver(
@@ -12238,7 +14982,7 @@ if (targetCW3.test(window.location.href)) {
         characterData: true,
       },
       8,
-      500
+      500,
     );
   }
 
@@ -12309,7 +15053,6 @@ if (targetCW3.test(window.location.href)) {
 
     /**
      * Updates the cleaner log based on new history data.
-     * Data fetching has been moved from DOM (outerHTML) to Vue reactive state.
      *
      * @param {string} newHistory - The new full history string retrieved from Vue.
      */
@@ -12317,12 +15060,12 @@ if (targetCW3.test(window.location.href)) {
       const historyBlock = document.querySelector("#history");
       if (!historyBlock) return;
 
-      const locationSpan = historyBlock.querySelector("#location");
+      const locationSpan = document.getElementById("location");
       const currentLocation = locationSpan
-        ? locationSpan.textContent.trim()
+        ? (locationSpan.getAttribute("title") || locationSpan.textContent).trim()
         : "";
 
-      if (currentLocation === "[ Загружается… ]") {
+      if (!currentLocation || currentLocation.includes("Загружается")) {
         return;
       }
 
@@ -12512,7 +15255,7 @@ if (targetCW3.test(window.location.href)) {
     function addCatLinksToLog(log, catNamesAndIds) {
       let logWithLinks = log;
       const nameToIdMap = new Map(
-        catNamesAndIds.map((cat) => [cat.name, cat.id])
+        catNamesAndIds.map((cat) => [cat.name, cat.id]),
       );
 
       logWithLinks = logWithLinks.replace(/\[([^\]]+)\]/g, (match, content) => {
@@ -12523,7 +15266,7 @@ if (targetCW3.test(window.location.href)) {
           if (id) {
             return nameWithId.replace(
               name,
-              `<a href="/cat${id}" target="_blank">${name}</a>`
+              `<a href="/cat${id}" target="_blank">${name}</a>`,
             );
           }
           return nameWithId;
@@ -12551,7 +15294,7 @@ if (targetCW3.test(window.location.href)) {
             if (color === "#006400" || color === "#333333") return false;
             if (color === "#A52A2A") return true;
           }
-          
+
           const statusText = statusSpan.textContent
             .replace(/[\[\]]/g, "")
             .trim();
@@ -12579,7 +15322,7 @@ if (targetCW3.test(window.location.href)) {
           const catId = extractCatId(action);
           const actionText = action.replace(
             /<a href="\/cat\d+">([^<]+)<\/a>/,
-            `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
+            `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`,
           );
           if (relevantAction.type === "action") {
             cleaningLogBuffer += `${actionText} на локации "${location}". `;
@@ -12594,7 +15337,7 @@ if (targetCW3.test(window.location.href)) {
           }
           cleaningLogContent.innerHTML = addCatLinksToLog(
             cleaningLogBuffer,
-            catNamesAndIds
+            catNamesAndIds,
           );
           return;
         }
@@ -12640,7 +15383,7 @@ if (targetCW3.test(window.location.href)) {
           }
           cleaningLogContent.innerHTML = addCatLinksToLog(
             cleaningLogBuffer,
-            catNamesAndIds
+            catNamesAndIds,
           );
           return;
         }
@@ -12656,7 +15399,7 @@ if (targetCW3.test(window.location.href)) {
           logLines.join(". ") + (logLines.length > 0 ? "." : "");
         cleaningLogContent.innerHTML = addCatLinksToLog(
           cleaningLogBuffer,
-          catNamesAndIds
+          catNamesAndIds,
         );
       }
 
@@ -12689,7 +15432,7 @@ if (targetCW3.test(window.location.href)) {
               catsInGroup = catsInGroup.filter((c) => c !== catIdentifier);
               logLines[i] = line.replace(
                 /\[([^\]]+)\]/,
-                `[${catsInGroup.join(", ")}]`
+                `[${catsInGroup.join(", ")}]`,
               );
             } else {
               logLines.splice(i, 1);
@@ -12714,7 +15457,7 @@ if (targetCW3.test(window.location.href)) {
                 catsInGroup = catsInGroup.filter((c) => c !== catIdentifier);
                 logLines[i] = line.replace(
                   /\[([^\]]+)\]/,
-                  `[${catsInGroup.join(", ")}]`
+                  `[${catsInGroup.join(", ")}]`,
                 );
               } else {
                 logLines.splice(i, 1);
@@ -12731,20 +15474,20 @@ if (targetCW3.test(window.location.href)) {
           logLines.join(". ") + (logLines.length > 0 ? "." : "");
 
         const pickupCounter = document.getElementById(
-          "uwu-cleaningLog-counter-pickup"
+          "uwu-cleaningLog-counter-pickup",
         );
         const putdownCounter = document.getElementById(
-          "uwu-cleaningLog-counter-putdown"
+          "uwu-cleaningLog-counter-putdown",
         );
         pickupCounter.textContent = parseInt(pickupCounter.textContent) - 1;
         putdownCounter.textContent = parseInt(putdownCounter.textContent) - 1;
 
         const cleaningLogContent = document.getElementById(
-          "uwu-cleaningLog-content"
+          "uwu-cleaningLog-content",
         );
         cleaningLogContent.innerHTML = addCatLinksToLog(
           cleaningLogBuffer,
-          catNamesAndIds
+          catNamesAndIds,
         );
 
         uwuStorage.setItem("uwu_cleaningLogSmart", {
@@ -12782,13 +15525,13 @@ if (targetCW3.test(window.location.href)) {
         logLines.push(
           `Проверен [${catName}${
             settings.cleaningLogShowID ? ` ${catId}` : ""
-          }] на локации "${location}"`
+          }] на локации "${location}"`,
         );
       } else {
         logLines.push(
           `Кот не спит [${catName}${
             settings.cleaningLogShowID ? ` ${catId}` : ""
-          }]`
+          }]`,
         );
       }
       if (!catNamesAndIds.some((cat) => cat.id === catId)) {
@@ -12802,7 +15545,7 @@ if (targetCW3.test(window.location.href)) {
 
     function processPutdownAction(logLines, catName, catId, location) {
       const catPattern = new RegExp(
-        `\\[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}\\]`
+        `\\[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}\\]`,
       );
 
       // 1. Ищем последнее и предпоследнее предложения.
@@ -12838,14 +15581,14 @@ if (targetCW3.test(window.location.href)) {
       ) {
         logLines[lastSentenceIndex] = lastSentence.replace(
           /]/,
-          `, ${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`
+          `, ${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`,
         );
       } else {
         // 4. Если нет, добавляем новое предложение с "Опущен".
         logLines.push(
           `Опущен [${catName}${
             settings.cleaningLogShowID ? ` ${catId}` : ""
-          }] на локации "${location}"`
+          }] на локации "${location}"`,
         );
       }
       if (!catNamesAndIds.some((cat) => cat.id === catId)) {
@@ -12853,7 +15596,7 @@ if (targetCW3.test(window.location.href)) {
       }
 
       const putdownCounter = document.getElementById(
-        "uwu-cleaningLog-counter-putdown"
+        "uwu-cleaningLog-counter-putdown",
       );
       putdownCounter.textContent = parseInt(putdownCounter.textContent) + 1;
       lastDroppedCatInfo = { catName, catId };
@@ -12865,7 +15608,7 @@ if (targetCW3.test(window.location.href)) {
     function processPickupAction(logLines, catName, catId, location) {
       const catIdentifier = `[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}]`;
       const catPattern = new RegExp(
-        `\\[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}\\]`
+        `\\[${catName}${settings.cleaningLogShowID ? ` ${catId}` : ""}\\]`,
       );
 
       // 1. Ищем последнее и предпоследнее предложения.
@@ -12898,12 +15641,11 @@ if (targetCW3.test(window.location.href)) {
           penultimateSentenceIndex >= 0 &&
           logLines[penultimateSentenceIndex].includes("Проверен и поднят") &&
           logLines[penultimateSentenceIndex].includes(
-            `на локации "${location}"`
+            `на локации "${location}"`,
           ) &&
           !logLines[penultimateSentenceIndex].includes(catIdentifier)
         ) {
-          const currentCatMatch =
-            lastSentence.match(/\[(.*?)\]/);
+          const currentCatMatch = lastSentence.match(/\[(.*?)\]/);
           if (currentCatMatch) {
             // Добавляем имя текущего кота к предпоследнему предложению.
             const existingCatsMatch =
@@ -12927,27 +15669,29 @@ if (targetCW3.test(window.location.href)) {
           // 5. Создаем новое предложение "Проверен и поднят".
           logLines[lastSentenceIndex] = lastSentence.replace(
             "Проверен",
-            "Проверен и поднят"
+            "Проверен и поднят",
           );
         }
 
         // Увеличиваем счетчик только если кот был успешно проверен и поднят
         const pickupCounter = document.getElementById(
-          "uwu-cleaningLog-counter-pickup"
+          "uwu-cleaningLog-counter-pickup",
         );
         pickupCounter.textContent = parseInt(pickupCounter.textContent) + 1;
-
       } else {
         // 6. Если "Проверен" с именем кота нет.
         const forgotText = `Вы забыли проверить кота ${catIdentifier}`;
 
-        if (lastSentence.includes("Кот не спит") && lastSentence.includes(catIdentifier)) {
+        if (
+          lastSentence.includes("Кот не спит") &&
+          lastSentence.includes(catIdentifier)
+        ) {
           logLines[lastSentenceIndex] = forgotText;
         } else if (!lastSentence.includes(forgotText)) {
           logLines.push(forgotText);
         }
       }
-      
+
       if (!catNamesAndIds.some((cat) => cat.id === catId)) {
         catNamesAndIds.push({ name: catName, id: catId });
       }
@@ -12973,7 +15717,7 @@ if (targetCW3.test(window.location.href)) {
           logLines.join(". ") + (logLines.length > 0 ? "." : "");
         cleaningLogContent.innerHTML = addCatLinksToLog(
           cleaningLogBuffer,
-          catNamesAndIds
+          catNamesAndIds,
         );
       }
       lastDroppedCatInfo = null;
@@ -12988,11 +15732,15 @@ if (targetCW3.test(window.location.href)) {
         createCleaningLogBlock(historyBlock);
       }
 
-      watchVueData('cat.history', (newHistory) => {
-        if (newHistory) {
-          cleaningLogUpdate(newHistory);
-        }
-      }, { deep: false, immediate: true });
+      watchVueData(
+        "cat.history",
+        (newHistory) => {
+          if (newHistory) {
+            cleaningLogUpdate(newHistory);
+          }
+        },
+        { deep: false, immediate: true },
+      );
     });
 
     const cleaningLogStyle = document.createElement("style");
@@ -13088,7 +15836,7 @@ if (targetCW3.test(window.location.href)) {
 
       if (lastSession && lastSession.type === catchingState.actionType) {
         const indexToRemove = lastSession.summary.findIndex(
-          (c) => c.itemId === itemId && c.time === time
+          (c) => c.itemId === itemId && c.time === time,
         );
 
         if (indexToRemove > -1) {
@@ -13229,11 +15977,11 @@ if (targetCW3.test(window.location.href)) {
 
         const startTime = new Date(session.startTime).toLocaleTimeString(
           "ru-RU",
-          { hour: "2-digit", minute: "2-digit" }
+          { hour: "2-digit", minute: "2-digit" },
         );
         const lastTime = new Date(session.lastActionTime).toLocaleTimeString(
           "ru-RU",
-          { hour: "2-digit", minute: "2-digit" }
+          { hour: "2-digit", minute: "2-digit" },
         );
 
         const verb =
@@ -13438,7 +16186,7 @@ if (targetCW3.test(window.location.href)) {
 
       const toggleButton = document.getElementById("uwu-catchingLog-toggle");
       const contentWrapper = document.getElementById(
-        "uwu-catchingLog-content-wrapper"
+        "uwu-catchingLog-content-wrapper",
       );
 
       if (logStates.catching) {
@@ -13477,37 +16225,46 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . ЛИЧНЫЕ СООБЩЕНИЯ . . .
   // ====================================================================================================================
-  let previousCount = 0;
+  /**
+   * Observes the private message navigation link for the unread message counter badge.
+   * Triggers an audio alert when the unread count increases.
+   */
+  function initPmNotification() {
+    const lsLink = document.querySelector(".game-topbar-nav a[href='/ls']");
+    if (!lsLink) return;
+
+    let previousCount = 0;
+
+    const existingBadge = lsLink.querySelector("#newls");
+    if (existingBadge) {
+      previousCount =
+        parseInt(existingBadge.textContent.replace(/\D/g, ""), 10) || 0;
+    }
+
+    const observer = new MutationObserver(() => {
+      const badge = lsLink.querySelector("#newls");
+      const currentCount = badge
+        ? parseInt(badge.textContent.replace(/\D/g, ""), 10) || 0
+        : 0;
+
+      if (currentCount > previousCount) {
+        soundManager.playSound(
+          settings.notificationPMSound,
+          settings.notificationPMVolume,
+        );
+      }
+      previousCount = currentCount;
+    });
+
+    observer.observe(lsLink, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+  }
 
   if (settings.notificationPM) {
-    const newlsElement = document.getElementById("newls");
-    if (newlsElement) {
-      const observer = new MutationObserver(handleNewlsChange);
-      observer.observe(newlsElement, {
-        characterData: true,
-        subtree: true,
-      });
-    }
-
-    function handleNewlsChange(mutations) {
-      if (mutations.length > 0) {
-        const currentText = newlsElement.textContent;
-        const currentCount = parseInt(
-          currentText.match(/\(\d+\)/)?.[0].slice(1, -1) || 0,
-          10
-        );
-
-        if (!isNaN(currentCount) && currentCount > previousCount) {
-          soundManager.playSound(
-            settings.notificationPMSound,
-            settings.notificationPMVolume
-          );
-          previousCount = currentCount;
-        } else if (!isNaN(currentCount)) {
-          previousCount = currentCount;
-        }
-      }
-    }
+    setupSingleCallback(".game-topbar-nav a[href='/ls']", initPmNotification);
   }
 
   // ====================================================================================================================
@@ -13516,7 +16273,7 @@ if (targetCW3.test(window.location.href)) {
 
   /**
    * @class ActionState
-   * @description Parses and normalizes raw action strings from Vue. 
+   * @description Parses and normalizes raw action strings from Vue.
    */
   const ActionState = {
     isActive: false,
@@ -13545,8 +16302,10 @@ if (targetCW3.test(window.location.href)) {
         }
 
         this.isActive = true;
-        
-        const timeMatch = actionMess.match(/(?:(\d+)\s*ч\s*)?(?:(\d+)\s*мин\s*)?(\d+)\s*с/);
+
+        const timeMatch = actionMess.match(
+          /(?:(\d+)\s*ч\s*)?(?:(\d+)\s*мин\s*)?(\d+)\s*с/,
+        );
         if (timeMatch) {
           const h = parseInt(timeMatch[1] || 0, 10);
           const m = parseInt(timeMatch[2] || 0, 10);
@@ -13557,16 +16316,21 @@ if (targetCW3.test(window.location.href)) {
 
         if (actionMessTemplate && actionMessTemplate.includes("&&")) {
           let cleanAction = actionMessTemplate.replace("&&", "").trim();
-          if (cleanAction.endsWith('.')) cleanAction = cleanAction.slice(0, -1).trim();
+          if (cleanAction.endsWith("."))
+            cleanAction = cleanAction.slice(0, -1).trim();
           this.actionName = cleanAction;
         } else {
-          const actionTextMatch = actionMess.match(/^(.+?)\s+(\d+\s*(?:ч\s*)?\d+\s*мин\s*\d+\s*с|\d+\s*мин\s*\d+\s*с|\d+\s*с)\.\s*(Отменить)?$/);
-          this.actionName = actionTextMatch ? actionTextMatch[1].trim() : actionMess;
+          const actionTextMatch = actionMess.match(
+            /^(.+?)\s+(\d+\s*(?:ч\s*)?\d+\s*мин\s*\d+\s*с|\d+\s*мин\s*\d+\s*с|\d+\s*с)\.\s*(Отменить)?$/,
+          );
+          this.actionName = actionTextMatch
+            ? actionTextMatch[1].trim()
+            : actionMess;
         }
       } catch (error) {
         console.error("UwU | ActionState parse error:", error);
       }
-    }
+    },
   };
 
   /**
@@ -13575,7 +16339,7 @@ if (targetCW3.test(window.location.href)) {
    */
   const BrowserTabManager = {
     baseTitle: "Игровая / CatWar",
-    
+
     update() {
       if (!settings.duplicateTimeInBrowserTab) return;
 
@@ -13598,12 +16362,12 @@ if (targetCW3.test(window.location.href)) {
       } catch (error) {
         console.error("UwU | BrowserTabManager update error:", error);
       }
-    }
+    },
   };
 
   /**
    * @class ActionSoundManager
-   * @description Handles audio alerts for action completion. 
+   * @description Handles audio alerts for action completion.
    */
   const ActionSoundManager = {
     actionStartTime: null,
@@ -13611,7 +16375,11 @@ if (targetCW3.test(window.location.href)) {
     wasActive: false,
 
     update() {
-      if (!settings.notificationActionEnd && !settings.notificationActionEndEarly) return;
+      if (
+        !settings.notificationActionEnd &&
+        !settings.notificationActionEndEarly
+      )
+        return;
 
       try {
         const isCurrentlyActive = ActionState.isActive;
@@ -13623,19 +16391,35 @@ if (targetCW3.test(window.location.href)) {
           this.wasActive = true;
         }
 
-        if (isCurrentlyActive && settings.notificationActionEndEarly && !this.earlyNotified) {
+        if (
+          isCurrentlyActive &&
+          settings.notificationActionEndEarly &&
+          !this.earlyNotified
+        ) {
           if (secs <= 3 && secs > 0) {
-            soundManager.playSound(settings.notificationActionEndSound, settings.notificationActionEndVolume);
+            soundManager.playSound(
+              settings.notificationActionEndSound,
+              settings.notificationActionEndVolume,
+            );
             this.earlyNotified = true;
           }
         }
 
         if (!isCurrentlyActive && this.wasActive) {
           const actionEndTime = Date.now();
-          const actionDuration = this.actionStartTime ? (actionEndTime - this.actionStartTime) : 0;
+          const actionDuration = this.actionStartTime
+            ? actionEndTime - this.actionStartTime
+            : 0;
 
-          if (actionDuration >= 6000 && !this.earlyNotified && settings.notificationActionEnd) {
-            soundManager.playSound(settings.notificationActionEndSound, settings.notificationActionEndVolume);
+          if (
+            actionDuration >= 6000 &&
+            !this.earlyNotified &&
+            settings.notificationActionEnd
+          ) {
+            soundManager.playSound(
+              settings.notificationActionEndSound,
+              settings.notificationActionEndVolume,
+            );
           }
 
           this.actionStartTime = null;
@@ -13644,9 +16428,9 @@ if (targetCW3.test(window.location.href)) {
         }
       } catch (error) {
         console.error("UwU | ActionSoundManager update error:", error);
-        this.wasActive = false; 
+        this.wasActive = false;
       }
-    }
+    },
   };
 
   /**
@@ -13663,37 +16447,44 @@ if (targetCW3.test(window.location.href)) {
         const isCurrentlyPickedUp = ActionState.isPickedUp;
 
         if (isCurrentlyPickedUp && !this.wasPickedUp) {
-          soundManager.playSound(settings.notificationInMouthSound, settings.notificationInMouthVolume);
+          soundManager.playSound(
+            settings.notificationInMouthSound,
+            settings.notificationInMouthVolume,
+          );
         }
 
         this.wasPickedUp = isCurrentlyPickedUp;
       } catch (error) {
         console.error("UwU | InMouthSoundManager update error:", error);
       }
-    }
+    },
   };
 
   /**
    * @class MainActionObserver
-   * @description The single subscriber to the Vue reactivity system. 
-   * Broadcasts state changes to all managers safely.
+   * @description The single subscriber to the Vue reactivity system.
+   * Broadcasts state changes to all managers.
    */
   const MainActionObserver = {
     init() {
-      watchVueData('cat.actionMess', (newMess) => {
-        try {
-          const template = getVueData('cat.actionMessTemplate') || "";
-          
-          ActionState.parse(newMess, template);
+      watchVueData(
+        "cat.actionMess",
+        (newMess) => {
+          try {
+            const template = getVueData("cat.actionMessTemplate") || "";
 
-          BrowserTabManager.update();
-          ActionSoundManager.update();
-          InMouthSoundManager.update();
-        } catch (error) {
-          console.error("UwU | MainActionObserver watcher error:", error);
-        }
-      }, { deep: false, immediate: true }); 
-    }
+            ActionState.parse(newMess, template);
+
+            BrowserTabManager.update();
+            ActionSoundManager.update();
+            InMouthSoundManager.update();
+          } catch (error) {
+            console.error("UwU | MainActionObserver watcher error:", error);
+          }
+        },
+        { deep: false, immediate: true },
+      );
+    },
   };
 
   MainActionObserver.init();
@@ -13701,204 +16492,131 @@ if (targetCW3.test(window.location.href)) {
   // ====================================================================================================================
   //   . . . ВВЕЛИ В БОЕВУЮ СТОЙКУ . . .
   // ====================================================================================================================
-  if (settings.notificationInFightMode) {
+  /**
+   * Observes history updates to detect incoming attacks.
+   */
+  function initFightModeNotification() {
     const attackRegex = /в боевую стойку, поскольку на меня напал/;
-    let previousHistory = "";
 
-    const updateHistory = () => {
-      const istElement = document.getElementById("ist");
-      const currentHistory = istElement.innerHTML;
+    watchVueData(
+      "cat.history",
+      (newHistory, oldHistory) => {
+        if (
+          typeof newHistory !== "string" ||
+          !oldHistory ||
+          typeof oldHistory !== "string"
+        ) {
+          return;
+        }
 
-      if (currentHistory !== previousHistory) {
-        previousHistory = currentHistory;
+        if (newHistory === oldHistory) return;
 
-        const entries = currentHistory.split(".");
-        const lastEntry = entries[entries.length - 2];
+        let addedChunk = "";
 
-        if (lastEntry !== undefined && attackRegex.test(lastEntry)) {
+        if (newHistory.startsWith(oldHistory)) {
+          addedChunk = newHistory.slice(oldHistory.length);
+        } else {
+          const sentences = newHistory.trim().split(".").filter(Boolean);
+          addedChunk =
+            sentences.length > 0 ? sentences[sentences.length - 1] : "";
+        }
+
+        if (attackRegex.test(addedChunk)) {
           soundManager.playSound(
             settings.notificationInFightModeSound,
-            settings.notificationInFightModeVolume
+            settings.notificationInFightModeVolume,
           );
         }
-      }
-    };
-
-    const historyBlock = document.getElementById("history_block");
-    const observer = new MutationObserver(() => {
-      updateHistory();
-    });
-
-    const config = {
-      childList: true,
-      subtree: true,
-      characterData: true,
-    };
-    observer.observe(historyBlock, config);
+      },
+      { deep: false, immediate: false },
+    );
   }
+
+  if (settings.notificationInFightMode) {
+    initFightModeNotification();
+  }
+
   // ====================================================================================================================
   // мяу мяу мяу мяу мяу мяу мяу мяу мяу мяу мяу мяу
   // ====================================================================================================================
-  //   . . . СОВРЕМЕННЫЙ (НОВЫЙ) ЧАТ . . .
+  //   . . . РАСШИРЕННЫЙ ЧАТ UWU . . .
   // ====================================================================================================================
-
-  if (settings.newChat) {
-    const chatRanksCache = new Map();
-    const processedMessageIds = new Set();
-
-    function updateChatRankAsync(catId, rankElement) {
-      if (!rankElement || catId === ". . .") return;
-
-      if (chatRanksCache.has(catId)) {
-        rankElement.innerHTML = chatRanksCache.get(catId);
-        return;
-      }
-
-      setTimeout(() => {
-        try {
-          const profileLink = document.querySelector(
-            `.cat_tooltip a[href="/cat${catId}"]`,
-          );
-          if (profileLink) {
-            const tooltip = profileLink.closest(".cat_tooltip");
-            const rankNodes = tooltip.querySelectorAll("div > small > i");
-
-            if (rankNodes.length > 0) {
-              const actualRankNode = rankNodes[rankNodes.length - 1];
-              const rankTextContent = actualRankNode.textContent.trim();
-
-              if (rankTextContent !== "") {
-                const rankHtml = ` <small><i>(${rankTextContent})</i></small> `;
-                chatRanksCache.set(catId, rankHtml);
-                rankElement.innerHTML = rankHtml;
-              } else {
-                chatRanksCache.set(catId, "");
-              }
-            } else {
-              chatRanksCache.set(catId, "");
-            }
-          } else {
-            rankElement.innerHTML = "";
-          }
-        } catch (error) {
-          console.error(`UwU | Error fetching rank for cat ${catId}:`, error);
-        }
-      }, 0);
+  /**
+   * Injects CSS rules to ensure vanilla chat text and fonts.
+   *
+   * @returns {void}
+   */
+  function applyVanillaChatStyles() {
+    if (!settings.userTheme && !settings.disableCustomChatColors && !settings.useUserFonts) {
+      return;
     }
 
-    const chatForm = document.getElementById("chat_form");
-    
-    if (chatForm) {
-      const newChatContainer = document.createElement("div");
-      newChatContainer.id = "uwu_chat_msg";
-      chatForm.parentNode.insertBefore(newChatContainer, chatForm.nextSibling);
+    let style = document.getElementById("uwu-vanilla-chat-styles");
+    if (!style) {
+      style = document.createElement("style");
+      style.id = "uwu-vanilla-chat-styles";
+      document.head.appendChild(style);
+    }
 
-    /**
-     * Single event delegation for the entire chat container.
-     */
-    newChatContainer.addEventListener("click", function (event) {
-      try {
-        const target = event.target;
+    const textColor = settings.userTheme && theme?.textColor ? theme.textColor : "inherit";
+    let css = "";
 
-        const nickElement = target.closest(".nick");
-        if (nickElement) {
-          event.preventDefault();
-          
-          const textArea = document.querySelector("textarea#text, textarea#text-hide, input#text");
-          if (!textArea) return;
-          
-          let nick = nickElement.textContent;
-          if (settings.addCommaAfterNick) nick += ", ";
-          
-          textArea.value += nick;
-          textArea.focus();
-          return;
+    if (settings.disableCustomChatColors) {
+      css += `
+        #chat_msg [style*="color" i],
+        #chat_msg font[color] {
+          color: ${textColor} !important;
         }
-
-        const reportButton = target.closest(".msg_report");
-        if (reportButton) {
-          event.preventDefault();
-
-          try {
-            const chatContext = getVueData("chat");
-            if (chatContext && typeof chatContext.report === "function") {
-              chatContext.report({ target: reportButton });
-            } else {
-              console.error(
-                "UwU | chat.report function is missing in Vue state. Unable to report message.",
-              );
-            }
-          } catch (error) {
-            console.error("UwU | Error invoking report function:", error);
-          }
-          return;
+      `;
+    } else if (settings.userTheme) {
+      css += `
+        #chat_msg [style*="rgb(17, 17, 17)" i],
+        #chat_msg [style*="rgb(17,17,17)" i],
+        #chat_msg [style*="#111111" i] {
+          color: ${textColor} !important;
         }
-      } catch (error) {
-        console.error("UwU | Chat click delegation error:", error);
-      }
-    });
+      `;
+    }
 
+    if (settings.useUserFonts) {
+      css += `
+        #chat_msg [style*="verdana" i] {
+          font-family: inherit !important;
+        }
+      `;
+    }
+
+    style.textContent = css;
+  }
+
+  applyVanillaChatStyles();
+
+  /**
+   * Generating inline CSS font and color styles for messages.
+   */
+  const ChatStyleFormatter = {
     /**
-     * Analyzes the message text for user-defined notification names.
+     * Formats typography and color definitions according to message payload and user theme settings.
      *
-     * @param {string} text - The raw HTML message text.
-     * @returns {{text: string, isMentioned: boolean}} Processed text with highlighted mentions and a trigger flag.
+     * @param {Object} msgData - Raw message data from Vue.
+     * @returns {{ textStyle: string, nickStyle: string }}
      */
-    function processMentions(text) {
-      let processedText = text;
-      let isMentioned = false;
-
-      try {
-        if (settings.namesForNotification) {
-          const names = settings.namesForNotification
-            .trim()
-            .split(/\s*,\s*/)
-            .filter((name) => name);
-
-          names.forEach((name) => {
-            const regex = new RegExp(
-              `(^|\\s|[.,!?])(${name})(?=$|\\s|[.,!?])`,
-              "gi",
-            );
-            processedText = processedText.replace(regex, (match, p1, p2) => {
-              isMentioned = true;
-              return `${p1}<span class="myname">${p2}</span>`;
-            });
-          });
-        }
-
-        if (!isMentioned && text.includes('class="myname"')) {
-          isMentioned = true;
-        }
-      } catch (error) {
-        console.error("UwU | Error processing mentions:", error);
-      }
-
-      return { text: processedText, isMentioned };
-    }
-
-    /**
-     * Extracts and formats CSS styles for chat text and nicknames.
-     * Handles custom fonts and inline colors, respecting user theme settings.
-     * 
-     * @param {Object} msgData - The message payload.
-     * @returns {{textStyle: string, nickStyle: string}}
-     */
-    function getChatStyles(msgData) {
+    getStyles(msgData) {
       let textStyle = "";
-      let nickStyle = msgData.textTransformation === 'italic' ? 'font-style: italic; ' : '';
+      let nickStyle = msgData.textTransformation === "italic" ? "font-style: italic; " : "";
 
       if (msgData.font) {
-        const cleanFont = msgData.font.replace(/['"]/g, '').trim();
-        if (cleanFont.toLowerCase() !== 'verdana') {
+        const cleanFont = msgData.font.replace(/['"]/g, "").trim();
+        if (cleanFont.toLowerCase() !== "verdana") {
           textStyle += `font-family: '${cleanFont}'; `;
           nickStyle += `font-family: '${cleanFont}'; `;
         }
       }
 
-      const isVanillaColor = !msgData.color || 
-                             msgData.color.toLowerCase() === '#111111' || 
-                             msgData.color.replace(/\s/g, '') === 'rgb(17,17,17)';
+      const isVanillaColor =
+        !msgData.color ||
+        msgData.color.toLowerCase() === "#111111" ||
+        msgData.color.replace(/\s/g, "") === "rgb(17,17,17)";
 
       if (!isVanillaColor && !settings.disableCustomChatColors) {
         textStyle += `color: ${msgData.color}; `;
@@ -13909,417 +16627,455 @@ if (targetCW3.test(window.location.href)) {
       }
 
       return { textStyle, nickStyle };
-    }
+    },
+  };
 
+  /**
+   * Service responsible for detecting mentions and highlighting names in text.
+   */
+  const ChatMentionProcessor = {
     /**
-     * Determines if a message is a system notification (e.g., italic or wrapped in brackets).
+     * Scans text for user-configured nicknames, wraps matches in highlighting tags,
+     * and triggers notification sound if mentioned.
      *
-     * @param {Object} msgData - The message payload.
-     * @returns {boolean}
+     * @param {string} text - Message text.
+     * @returns {{ text: string, isMentioned: boolean }}
      */
-    function isChatNotification(msgData) {
-      return (
-        msgData.textTransformation === "italic" ||
-        (msgData.text &&
-          msgData.text.trim().startsWith("[") &&
-          msgData.text.trim().endsWith("]"))
-      );
-    }
+    process(text) {
+      let processedText = text;
+      let isMentioned = false;
 
-    /**
-     * Formats the message timestamp into a readable HTML string.
-     *
-     * @param {number} [timeSeconds] - Unix timestamp of the message.
-     * @returns {string} Formatted time string or empty string.
-     */
-    function formatChatTime(timeSeconds) {
-      if (!settings.showChatTime || !timeSeconds) return "";
-      const date = new Date(timeSeconds * 1000);
-      const hours = String(date.getHours()).padStart(2, "0");
-      const minutes = String(date.getMinutes()).padStart(2, "0");
-      return `<span class="uwu-chat-time">[${hours}:${minutes}]</span> `;
-    }
+      if (settings.namesForNotification) {
+        const names = settings.namesForNotification
+          .split(",")
+          .map((n) => n.trim())
+          .filter(Boolean);
 
-    /**
-     * Transforms the raw Vue message payload into an injected HTML string.
-     *
-     * @param {Object} msgData - The message payload from 'chat.messages'.
-     * @param {number} msgData.id - Unique message identifier.
-     * @param {string} msgData.text - Message content.
-     * @param {number} [msgData.volume] - Notification volume (0-10).
-     * @param {number} msgData.cat - Sender's profile ID.
-     * @param {string} msgData.login - Sender's nickname.
-     * @param {number} [msgData.time] - Unix timestamp of the message (server-side).
-     * @param {string} [msgData.textTransformation] - Optional CSS modifier (e.g., 'italic').
-     * @param {string}[msgData.font] - Custom font for the message.
-     * @returns {{html: string, rankSpanId: string, catId: string|number}}
-     */
-    function buildMessageHTML(msgData) {
-      const { text, isMentioned } = processMentions(msgData.text);
-
-      if (isMentioned) {
-        soundManager.playSound(
-          settings.myNameNotificationSound,
-          settings.notificationMyNameVolume,
-        );
+        names.forEach((name) => {
+          const safeName = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          const regex = new RegExp(`(^|\\s|[.,!?])(${safeName})(?=$|\\s|[.,!?])`, "gi");
+          if (regex.test(processedText)) {
+            isMentioned = true;
+            processedText = processedText.replace(regex, `$1<span class="myname">$2</span>`);
+          }
+        });
       }
 
-      const volumeClass =
-        msgData.volume !== undefined ? `vlm${msgData.volume}` : "vlm5";
-      const { textStyle, nickStyle } = getChatStyles(msgData);
+      if (!isMentioned && text.includes('class="myname"')) {
+        isMentioned = true;
+      }
 
-      const nickClass = isChatNotification(msgData)
-        ? "nick is-notification"
-        : "nick";
-      const catId = msgData.cat || ". . .";
-      const nickName = msgData.login || "Неизвестный";
-      const rankSpanId = `uwu-rank-${msgData.id || Date.now()}-${Math.floor(Math.random() * 10000)}`;
-      const timeStr = formatChatTime(msgData.time);
+      if (isMentioned) {
+        soundManager.playSound(settings.myNameNotificationSound, settings.notificationMyNameVolume);
+      }
 
-      const html = `
+      return { text: processedText, isMentioned };
+    },
+  };
+
+  /**
+   * Initializes the standalone Modern Chat engine and binds Vue reactive subscriptions.
+   *
+   * @returns {void}
+   */
+  function initModernChat() {
+    if (!settings.newChat) return;
+
+    const chatForm = document.getElementById("chat_form");
+    const trChatTd = document.querySelector("#tr_chat > td");
+    if (!chatForm || !trChatTd) return;
+
+    document.getElementById("uwu_chat_msg")?.remove();
+
+    const chatContainer = document.createElement("div");
+    chatContainer.id = "uwu_chat_msg";
+    chatContainer.style.flexDirection = settings.reverseChat ? "column-reverse" : "column";
+
+    if (settings.reverseChat) {
+      trChatTd.appendChild(chatContainer);
+      trChatTd.appendChild(chatForm);
+    } else {
+      trChatTd.prepend(chatForm);
+      chatForm.after(chatContainer);
+    }
+
+    const chatRanksCache = new Map();
+    const processedMessageIds = new Set();
+
+    /**
+     * Asynchronously fetches cat ranks from DOM tooltips and updates target span.
+     *
+     * @param {string|number} catId - Target cat profile identifier.
+     * @param {HTMLElement} rankSpan - Element to populate.
+     */
+    function updateChatRankAsync(catId, rankSpan) {
+      if (!rankSpan || !catId || catId === ". . .") return;
+
+      const strId = String(catId);
+      if (chatRanksCache.has(strId)) {
+        rankSpan.innerHTML = chatRanksCache.get(strId);
+        return;
+      }
+
+      setTimeout(() => {
+        try {
+          const profileLink = document.querySelector(`.cat_tooltip a[href="/cat${strId}"]`);
+          if (profileLink) {
+            const tooltip = profileLink.closest(".cat_tooltip");
+            const rankNode = tooltip?.querySelector("small > i");
+            const rankText = rankNode?.textContent?.trim();
+
+            if (rankText) {
+              const rankHtml = ` <small><i>(${rankText})</i></small> `;
+              chatRanksCache.set(strId, rankHtml);
+              rankSpan.innerHTML = rankHtml;
+              return;
+            }
+          }
+          chatRanksCache.set(strId, "");
+        } catch (err) {
+          console.error(`UwU | Rank lookup error for cat ${strId}:`, err);
+        }
+      }, 100);
+    }
+
+    chatContainer.addEventListener("click", (event) => {
+      const target = event.target;
+
+      const nickEl = target.closest(".nick");
+      if (nickEl) {
+        event.preventDefault();
+        const input = document.querySelector("#txt textarea#text, #txt input#text");
+        if (!input) return;
+
+        const nick = nickEl.textContent.trim();
+        input.value += `${nick}, `;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.focus();
+        return;
+      }
+
+      const reportBtn = target.closest(".msg_report");
+      if (reportBtn) {
+        event.preventDefault();
+        try {
+          const chatContext = getVueData("chat");
+          if (chatContext && typeof chatContext.report === "function") {
+            chatContext.report({ target: reportBtn });
+          }
+        } catch (err) {
+          console.error("UwU | Chat report dispatch error:", err);
+        }
+      }
+    });
+
+    /**
+     * Renders a single message payload into the Modern Chat container.
+     *
+     * @param {Object} msg - The message object from Vue.
+     */
+    function renderMessage(msg) {
+      const { text } = ChatMentionProcessor.process(msg.text || "");
+      const { textStyle, nickStyle } = ChatStyleFormatter.getStyles(msg);
+
+      const volumeClass = msg.volume !== undefined ? `vlm${msg.volume}` : "vlm5";
+      const isNotification =
+        msg.textTransformation === "italic" ||
+        (msg.text && msg.text.trim().startsWith("[") && msg.text.trim().endsWith("]"));
+      const nickClass = isNotification ? "nick is-notification" : "nick";
+
+      const catId = msg.cat || ". . .";
+      const nickName = msg.login || "Неизвестный";
+      const rankSpanId = `uwu-rank-${msg.id || Date.now()}-${Math.floor(Math.random() * 10000)}`;
+
+      let timeStr = "";
+      if (settings.showChatTime && msg.time) {
+        const d = new Date(msg.time * 1000);
+        timeStr = `<span class="uwu-chat-time">[${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}]</span> `;
+      }
+
+      const idHtml = settings.showChatId ? ` <i class="uwu-chat-id">[${catId}]</i>` : "";
+
+      const rowHtml = `
         <hr>
-        <div id="msg">
+        <div class="uwu-chat-msg-row">
           <div class="chat_text ${volumeClass}">
-            ${timeStr}<span style="${textStyle}">${text}</span> - <b class="${nickClass}" style="${nickStyle}">${nickName}</b><span id="${rankSpanId}"></span> <i>[${catId}]</i>
+            ${timeStr}<span style="${textStyle}">${text}</span> - <b class="${nickClass}" style="${nickStyle}">${nickName}</b><span id="${rankSpanId}"></span>${idHtml}
           </div>
-          <div style="display: flex; width: 42px; justify-content: flex-end; margin-right: 2px;">
+          <div class="uwu-chat-actions">
             <a href="/cat${catId}" title="Перейти в профиль" target="_blank" rel="noopener noreferrer">➝</a>&nbsp;|&nbsp;
-            <a href="#" title="Пожаловаться на нарушение ОПИ" class="msg_report" data-id="${msgData.id}" data-login="${nickName}">X</a>
+            <a href="#" title="Пожаловаться на нарушение ОПИ" class="msg_report" data-id="${msg.id}" data-login="${nickName}">X</a>
           </div>
         </div>
       `;
 
-      return { html, rankSpanId, catId };
-    }
+      chatContainer.insertAdjacentHTML("afterbegin", rowHtml);
 
-    function injectMessageToDOM(msgData) {
-      try {
-        const { html, rankSpanId, catId } = buildMessageHTML(msgData);
-
-        newChatContainer.insertAdjacentHTML("afterbegin", html);
-
-        if (settings.showChatRanks) {
-          updateChatRankAsync(catId, document.getElementById(rankSpanId));
-        }
-      } catch (error) {
-        console.error(
-          `UwU | Message rendering failed for ID ${msgData && msgData.id}:`,
-          error,
-        );
+      if (settings.showChatRanks) {
+        updateChatRankAsync(catId, document.getElementById(rankSpanId));
       }
     }
 
     watchVueData(
       "chat.messages",
-      (newMessages) => {
-        try {
-          if (!newMessages || !Array.isArray(newMessages)) return;
+      (messages) => {
+        if (!Array.isArray(messages)) return;
 
-          const batch = newMessages.filter(
-            (msg) => msg && msg.id && !processedMessageIds.has(msg.id),
-          );
-          if (batch.length === 0) return;
+        const newBatch = messages.filter((m) => m && m.id && !processedMessageIds.has(m.id));
+        if (newBatch.length === 0) return;
 
-          batch.sort((a, b) => a.id - b.id);
+        newBatch.sort((a, b) => a.id - b.id);
 
-          batch.forEach((msg) => {
-            processedMessageIds.add(msg.id);
-            injectMessageToDOM(msg);
-          });
+        newBatch.forEach((msg) => {
+          processedMessageIds.add(msg.id);
+          renderMessage(msg);
+        });
 
-          // Мы удаляем оригинальные сообщения, чтобы сам CatWar не пытался с ними возиться
-          // (а он это делает ОЧЕНЬ плохо) и не нагружал лишний раз игровую.
-          const originalChat = document.getElementById("chat_msg");
-          if (originalChat && originalChat.innerHTML !== "") {
-            originalChat.innerHTML = "";
-          }
-        } catch (error) {
-          console.error("UwU | Chat messages watcher error:", error);
+        // Purge original chat DOM nodes to eliminate vanilla lags
+        const originalChat = document.getElementById("chat_msg");
+        if (originalChat && originalChat.hasChildNodes()) {
+          originalChat.textContent = "";
         }
       },
-      { deep: true, immediate: true },
+      { deep: true, immediate: true }
     );
 
-    const uwuChatMsg = document.createElement("style");
-    uwuChatMsg.innerHTML = `
-        #uwu_chat_msg {
-          height: ${settings.chatHeight}px;
-          resize: vertical;
-          overflow-y: auto;
-          display: flex;
-          flex-direction: ${settings.reverseChat ? "column-reverse" : "column"};
-        }
-
-        .uwu-chat-time {
-          opacity: 0.5;
-          font-size: 0.85em;
-          margin-right: 4px;
-          font-family: monospace;
-        }
-  
-        #chat_msg {
-          display: none !important; 
-        }
-  
-        #msg {
-          display: flex;
-          justify-content: space-between;
-        }
-
-        #uwu_chat_msg > hr {
-          width: -webkit-fill-available;
-          width: -moz-available;
-        }
-     `;
-    document.head.appendChild(uwuChatMsg);
-      
-    } else {
-      console.warn("UwU | chat_form не найден. Современный чат не будет инициализирован.");
-    }
+    initChatAutoResizePersistence();
   }
 
-  // ====================================================================================================================
-  //   . . . НОВЫЙ ВВОД ЧАТА . . .
-  // ====================================================================================================================
-  const chatForm = document.getElementById("chat_form");
-  const trChatTd = document.querySelector("#tr_chat > td");
+  setupSingleCallback("#tr_chat", initModernChat);
 
-  function updateChatFormPosition() {
-    if (settings.reverseChat) {
-      trChatTd.appendChild(chatForm);
-    } else {
-      trChatTd.prepend(chatForm);
-    }
-  }
-  updateChatFormPosition();
+  // ====================================================================================================================
+  //   . . . ПОЛЕ ВВОДА ЧАТА И СЧЁТЧИК СИМВОЛОВ . . .
+  // ====================================================================================================================
 
-  if (settings.newChatInput) {
+  /**
+   * Replaces the native single-line input with an auto-expanding multiline textarea.
+   *
+   * @returns {void}
+   */
+  function setupChatInput() {
+    if (!settings.newChatInput) return;
+
     const txtSpan = document.getElementById("txt");
-    const selectField = txtSpan.querySelector("select#text");
+    const chatForm = document.getElementById("chat_form");
+    if (!txtSpan || !chatForm) return;
 
-    let textarea;
+    const originalInput = txtSpan.querySelector("input#text");
+    if (!originalInput) return;
 
-    function initTextarea(id, value) {
-      const textarea = document.createElement("textarea");
-      textarea.id = id;
-      textarea.maxLength = 255;
-      textarea.style.height = "auto";
-      textarea.style.width = "100%";
-      textarea.style.resize = "vertical";
-      textarea.value = value || "";
-      return textarea;
-    }
+    if (document.getElementById("text-textarea")) return;
 
-    if (selectField) {
-      textarea =
-        document.getElementById("text-hide") || initTextarea("text-hide");
-      textarea.style.display = "none";
-    } else {
-      const inputField = txtSpan.querySelector("input#text");
+    const textarea = document.createElement("textarea");
+    textarea.id = "text-textarea";
+    textarea.maxLength = 255;
+    textarea.className = "ui-input";
+    textarea.style.cssText = "height: auto; width: 100%; resize: vertical; box-sizing: border-box;";
+    textarea.value = originalInput.value || "";
 
-      textarea = initTextarea("text", inputField ? inputField.value : "");
-      txtSpan.insertBefore(textarea, inputField);
-    }
+    originalInput.style.display = "none";
+    txtSpan.insertBefore(textarea, originalInput);
 
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === "childList") {
-          const selectField = txtSpan.querySelector("select#text");
-          if (selectField) {
-            textarea.style.display = "none";
-            textarea.id = "text-hide";
-          } else {
-            textarea.style.display = "";
-            textarea.id = "text";
+    /**
+     * Synchronizes textarea contents into CatWar's native input and triggers Vue events.
+     */
+    const syncToOriginal = () => {
+      originalInput.value = textarea.value;
+      originalInput.dispatchEvent(new Event("input", { bubbles: true }));
+      originalInput.dispatchEvent(new Event("change", { bubbles: true }));
+    };
+
+    textarea.addEventListener("input", syncToOriginal);
+
+    const inputProto = Object.getPrototypeOf(originalInput);
+    const originalDescriptor = Object.getOwnPropertyDescriptor(inputProto, "value");
+
+    if (originalDescriptor && originalDescriptor.set) {
+      Object.defineProperty(originalInput, "value", {
+        get() {
+          return originalDescriptor.get.call(this);
+        },
+        set(val) {
+          originalDescriptor.set.call(this, val);
+          if (val === "" && textarea.value !== "") {
+            textarea.value = "";
+            chatForm.dispatchEvent(new Event("input", { bubbles: true }));
           }
-        }
+        },
+        configurable: true,
       });
+    }
+
+    chatForm.addEventListener("submit", () => {
+      setTimeout(() => {
+        if (originalInput.value === "") {
+          textarea.value = "";
+          chatForm.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+      }, 15);
     });
 
-    observer.observe(txtSpan, { childList: true });
-
-    // Make Enter great again!
-    textarea.addEventListener("keydown", function (event) {
+    textarea.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         if (event.shiftKey) {
           event.preventDefault();
-          textarea.value += "\n";
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+          textarea.value = textarea.value.substring(0, start) + "\n" + textarea.value.substring(end);
+          textarea.selectionStart = textarea.selectionEnd = start + 1;
+          syncToOriginal();
         } else {
           event.preventDefault();
-          const sendButton = document.getElementById("msg_send");
-          sendButton.click();
+          const trimmed = textarea.value.trim();
+          if (!trimmed) return;
+
+          syncToOriginal();
+
+          const sendBtn = document.getElementById("msg_send");
+          if (sendBtn) {
+            sendBtn.click();
+          } else {
+            chatForm.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+          }
+
+          setTimeout(() => {
+            if (originalInput.value === "") {
+              textarea.value = "";
+              chatForm.dispatchEvent(new Event("input", { bubbles: true }));
+            }
+          }, 30);
         }
       }
     });
 
-    const NewChatDesign = document.createElement("style");
-    NewChatDesign.innerHTML = `
-  input#text {
-    display: none;
-  }
-
-  #text, #text-hide {
-    color: ${theme?.textColor};
-    background: ${theme?.accentColor1};
-    border: solid 1px ${theme?.accentColor2};
-    font-family: Verdana;
-  }
-`;
-    document.head.appendChild(NewChatDesign);
-  }
-
-  // ====================================================================================================================
-  //   . . . СЧЁТЧИК СИМВОЛОВ В ЧАТЕ . . .
-  // ====================================================================================================================
-
-  if (settings.newChatInput && settings.showChatCharCounter) {
-    function setupCharCounter() {
-      const chatForm = document.getElementById("chat_form");
-      const textarea = chatForm.querySelector("textarea#text");
-      const volumeLabel = chatForm.querySelector("b");
-
-      if (
-        !textarea ||
-        !volumeLabel ||
-        document.getElementById("uwu-char-counter")
-      ) {
-        return;
+    const syncBotDialogueVisibility = () => {
+      const botSelect = txtSpan.querySelector("select#text");
+      if (botSelect) {
+        textarea.style.display = "none";
+      } else {
+        textarea.style.display = "";
       }
+    };
 
-      const counterElement = document.createElement("span");
-      counterElement.id = "uwu-char-counter";
-      counterElement.style.margin = "0 8px";
-
-      volumeLabel.parentNode.insertBefore(counterElement, volumeLabel);
-      volumeLabel.parentNode.insertBefore(
-        document.createTextNode(" | "),
-        volumeLabel
-      );
-
-      function updateCounter() {
-        const currentLength = textarea.value.length;
-        const maxLength = textarea.maxLength;
-        counterElement.textContent = `${currentLength}/${maxLength}`;
+    const botObserver = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type === "childList") {
+          syncBotDialogueVisibility();
+          break;
+        }
       }
+    });
 
-      textarea.addEventListener("input", updateCounter);
-      updateCounter();
-    }
-
-    setupSingleCallback("#chat_form", setupCharCounter);
-  }
-  // ====================================================================================================================
-  //   . . . РЕДИЗАЙНЫ + + ЗАКРУГЛЕНИЕ БЛОКОВ . . .
-  // ====================================================================================================================
-  const sliceInfoStyle = document.createElement("style");
-
-  if (settings.sliceInfoBlock) {
-    sliceInfoStyle.innerHTML = `
-      #info_main > tbody > tr > td {
-        background-color: ${theme?.blocksColor || ""};
-        margin-bottom: 5px;
-      }
-    `;
-    document.head.appendChild(sliceInfoStyle);
-  } else {
-    sliceInfoStyle.innerHTML = `
-      #tr_info > td {
-        background-color: ${theme?.blocksColor || ""};
-      }
-    `;
-    document.head.appendChild(sliceInfoStyle);
+    botObserver.observe(txtSpan, { childList: true });
+    syncBotDialogueVisibility();
   }
 
-  const edgeTrimBlocksStyle = document.createElement("style");
-  if (settings.edgeTrimBlocks) {
-    edgeTrimBlocksStyle.innerHTML =
-      // css
-      `
-    #info_main > tbody > tr > td {
-      width: fit-content;
-      border-radius: 10px;
-      margin-bottom: 10px;
-    }
-    
-    #info_main,
-    #tos,
-    #cages_overflow,
-    #cages_div {
-      border-radius: 10px;
-    }
-    
-    #main_table > tbody > #tr_actions,
-    #main_table > tbody > #tr_mouth,
-    #main_table > tbody > #tr_chat,
-    #main_table > tbody > #tr_tos,
-    #main_table > tbody > #tr_info {
-      margin: 0px 10px 10px 10px;
-    }
-    
-    #tr_chat,
-    #tr_actions > td,
-    #tr_mouth > td,
-    #location,
-    #tr_info > td {
-      border-radius: 10px;
+  /**
+   * Injects a live character length counter adjacent to the volume slider.
+   *
+   * @returns {void}
+   */
+  function setupCharCounter() {
+    if (!settings.showChatCharCounter) return;
+
+    const chatForm = document.getElementById("chat_form");
+    if (!chatForm || document.getElementById("uwu-char-counter")) return;
+
+    const volumeLabel = chatForm.querySelector("b");
+    if (!volumeLabel) return;
+
+    const counterElement = document.createElement("span");
+    counterElement.id = "uwu-char-counter";
+    counterElement.style.cssText = "margin: 0 8px; opacity: 0.75; font-size: 12px;";
+
+    volumeLabel.parentNode.insertBefore(counterElement, volumeLabel);
+    volumeLabel.parentNode.insertBefore(document.createTextNode(" | "), volumeLabel);
+
+    function updateCounter() {
+      const field = chatForm.querySelector("textarea#text-textarea, input#text");
+      if (!field) return;
+      counterElement.textContent = `${field.value.length}/${field.maxLength || 255}`;
     }
 
-    .small {
-      border-top-left-radius: 0px;
-      border-top-right-radius: 0px;
-      border-bottom-right-radius: 10px;
-      border-bottom-left-radius: 10px;
-    }
-    `;
-    document.head.appendChild(edgeTrimBlocksStyle);
+    chatForm.addEventListener("input", updateCounter);
+    updateCounter();
   }
+
+  setupSingleCallback("#chat_form", () => {
+    setupChatInput();
+    setupCharCounter();
+  });
 
   // ====================================================================================================================
   //  . . . ЗВУК БЛОКИРОВАНИЯ / ОТЖАТИЯ . . .
   // ====================================================================================================================
-  if (settings.notificationBlock) {
-    function playSoundOnSrcAttributeChange() {
-      soundManager.playSound(
-        settings.notificationBlockSound,
-        settings.notificationBlockVolume
-      );
-    }
+  /**
+   * Observes the combat block toggle icon (#block) and triggers audio alerts on state change.
+   */
+  function initBlockNotification() {
+    const blockElement = document.getElementById("block");
+    if (!blockElement) return;
 
-    setupMutationObserver(
-      "#block",
-      () => {
-        const blockElement = document.querySelector("#block");
+    let lastSrc = blockElement.getAttribute("src");
 
-        if (blockElement) {
-          const srcObserver = new MutationObserver(
-            playSoundOnSrcAttributeChange
-          );
-          srcObserver.observe(blockElement, {
-            attributes: true,
-            attributeFilter: ["src"],
-          });
-        } else {
-          console.warn("Элемент #block не найден.");
+    const blockObserver = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (
+          mutation.type === "attributes" &&
+          mutation.attributeName === "src"
+        ) {
+          const currentSrc = blockElement.getAttribute("src");
+          if (currentSrc !== lastSrc) {
+            lastSrc = currentSrc;
+            soundManager.playSound(
+              settings.notificationBlockSound,
+              settings.notificationBlockVolume,
+            );
+          }
         }
-      },
-      { attributes: true },
-      8,
-      500
-    );
+      }
+    });
+
+    blockObserver.observe(blockElement, {
+      attributes: true,
+      attributeFilter: ["src"],
+    });
   }
+
+  if (settings.notificationBlock) {
+    setupSingleCallback("#block", initBlockNotification);
+  }
+
   // ====================================================================================================================
   //  . . . КОМАНДЫ В БОЕВОМ РЕЖИМЕ . . .
   // ====================================================================================================================
-  if (settings.fightTeams) {
+  /**
+   * Integrates team color management and cage arrow coloring into battle panel.
+   */
+  function initFightTeams() {
+    const fightPanel = document.getElementById("fightPanel");
+    if (!fightPanel || document.getElementById("updateTableButton")) return;
+
     const colors = settings.fightTeamsColors;
     const uwu_fightTeamsCats = uwuStorage.getItem("uwu_fightTeamsCats") || {};
+    const resizeHandle = document.getElementById("fight_panel_resize");
 
-    const fightPanel = document.getElementById("fightPanel");
-    const buttonHTML =
-      '<button id="updateTableButton" style="width: 100%; box-sizing: border-box;">Обновить команды</button>';
-    fightPanel.insertAdjacentHTML("beforeend", buttonHTML);
+    fightPanel.style.setProperty("min-height", "fit-content", "important");
 
-    document.getElementById("updateTableButton").onclick = () => {
+    const button = document.createElement("button");
+    button.id = "updateTableButton";
+    button.className = "ui-btn";
+    button.style.cssText =
+      "width: 100%; box-sizing: border-box; margin: 4px 0 12px 0; flex-shrink: 0;";
+    button.textContent = "Обновить команды";
+
+    if (resizeHandle) {
+      resizeHandle.before(button);
+    } else {
+      fightPanel.appendChild(button);
+    }
+
+    button.onclick = () => {
       if (!document.getElementById("uwu-team-settings")) {
         createTeamTable();
       }
@@ -14327,41 +17083,41 @@ if (targetCW3.test(window.location.href)) {
     };
 
     function createTeamTable() {
-      const tableHTML =
-        /* HTML */
-        `
-          <div
-            id="uwu-team-settings"
-            style="height: ${settings.fightTeamsPanelHight ||
-            "auto"}px; box-sizing: border-box; overflow-y: scroll; overflow-x: hidden; resize: vertical;"
-          >
-            <table
-              id="uwu-team-settings-table"
-              style="width: 100%; border-collapse: collapse;"
-            >
-              <thead>
-                <tr>
-                  <th style="border: 1px solid #000; padding: 5px;">Имя</th>
-                  <th style="border: 1px solid #000; padding: 5px;">Команда</th>
-                </tr>
-              </thead>
-              <tbody id="teamTableBody"></tbody>
-            </table>
-          </div>
-        `;
-      const updateButton = document.getElementById("updateTableButton");
-      updateButton.insertAdjacentHTML("beforebegin", tableHTML);
+      const tableContainer = document.createElement("div");
+      tableContainer.id = "uwu-team-settings";
+      tableContainer.style.cssText = `
+        height: ${settings.fightTeamsPanelHight || 100}px;
+        box-sizing: border-box;
+        overflow-y: auto;
+        overflow-x: hidden;
+        resize: vertical;
+        margin-bottom: 6px;
+        flex-shrink: 0;
+      `;
+      tableContainer.innerHTML = `
+        <table id="uwu-team-settings-table" style="width: 100%; border-collapse: collapse; font-size: 12px;">
+          <thead>
+            <tr style="background: rgba(0,0,0,0.2);">
+              <th style="border: 1px solid rgba(255,255,255,0.1); padding: 4px;">Имя</th>
+              <th style="border: 1px solid rgba(255,255,255,0.1); padding: 4px;">Команда</th>
+            </tr>
+          </thead>
+          <tbody id="teamTableBody"></tbody>
+        </table>
+      `;
+      button.before(tableContainer);
     }
 
     function updateTeamTable() {
       const tbody = document.getElementById("teamTableBody");
+      if (!tbody) return;
       tbody.innerHTML = "";
       const cages = document.querySelectorAll("#cages .cage");
 
       cages.forEach((cage) => {
         const catName = cage.querySelector(".cat_tooltip a")?.textContent;
         const arrow = cage.querySelector(
-          ".arrow.arrow-paws, .arrow.arrow-claws, .arrow arrow-teeth"
+          ".arrow.arrow-paws, .arrow.arrow-claws, .arrow.arrow-teeth",
         );
 
         if (catName && arrow) {
@@ -14379,7 +17135,7 @@ if (targetCW3.test(window.location.href)) {
                   style="
                     background-color: ${colors[team][0]}; 
                     flex: 1; 
-                    height: 20px; 
+                    height: 18px; 
                     border: 1px solid #333; 
                     padding: 0; 
                     margin: 0; 
@@ -14393,9 +17149,9 @@ if (targetCW3.test(window.location.href)) {
 
           const rowHTML = `
             <tr>
-              <td style="border: 1px solid #000; padding: 5px; vertical-align: middle;">${catName}</td>
+              <td style="border: 1px solid rgba(255,255,255,0.1); padding: 4px; vertical-align: middle;">${catName}</td>
               <td style="
-                  border: 1px solid #000; 
+                  border: 1px solid rgba(255,255,255,0.1); 
                   padding: 4px; 
                   display: flex; 
                   justify-content: space-between; 
@@ -14415,254 +17171,178 @@ if (targetCW3.test(window.location.href)) {
       });
 
       const teamColorButtons = document.querySelectorAll(".team-color-button");
-      teamColorButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-          const arrowId = button.getAttribute("data-arrow-id");
-          const team = button.getAttribute("data-team");
+      teamColorButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const arrowId = btn.getAttribute("data-arrow-id");
+          const team = btn.getAttribute("data-team");
           applyTeamColors(arrowId, team);
         });
       });
     }
 
     function applyTeamColors(arrowId, team) {
-      const styleElement = document.createElement("style");
-      const cssRule = `
+      let styleElement = document.getElementById(`team-color-${arrowId}`);
+      if (!styleElement) {
+        styleElement = document.createElement("style");
+        styleElement.id = `team-color-${arrowId}`;
+        document.head.appendChild(styleElement);
+      }
+      styleElement.textContent = `
         #${arrowId} .arrow_green { background-color: ${colors[team][0]} !important; }
         #${arrowId} .arrow_red { background-color: ${colors[team][1]} !important; }
       `;
-      styleElement.appendChild(document.createTextNode(cssRule));
-      document.head.appendChild(styleElement);
 
       uwu_fightTeamsCats[arrowId] = team;
       uwuStorage.setItem("uwu_fightTeamsCats", uwu_fightTeamsCats);
     }
   }
-  // ====================================================================================================================
-  //   . . . ПЕРЕТАСКИВАНИЕ ПАНЕЛИ БОЕВОГО РЕЖИМА . . .
-  // ====================================================================================================================
-  if (settings.draggingFightPanel) {
-    const dragDiv = document.createElement("div");
-    dragDiv.style.cursor = "move";
-    dragDiv.style.display = "inline-block";
 
-    const dragImage = document.createElement("img");
-    dragImage.src =
-      "https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/drag-move.png";
-    dragImage.style.width = "24px";
-    dragImage.style.height = "24px";
-    dragImage.style.pointerEvents = "none";
-    dragDiv.appendChild(dragImage);
-
-    const fightPanel = document.getElementById("fightPanel");
-    const firstImage = fightPanel.querySelector("img");
-
-    const parentDiv = firstImage.parentElement;
-    parentDiv.insertBefore(dragDiv, firstImage);
-
-    let mouseX = 0;
-    let mouseY = 0;
-    let panelX = 0;
-    let panelY = 0;
-    let isDragging = false;
-
-    function saveFightPanelPosition(x, y) {
-      uwuStorage.setItem("uwu_fightPanelPosition", { x, y });
-    }
-
-    function loadFightPanelPosition() {
-      const savedPosition = uwuStorage.getItem("uwu_fightPanelPosition");
-      if (savedPosition) {
-        const position = savedPosition;
-        panelX = position.x;
-        panelY = position.y;
-      }
-    }
-
-    function setFightPanelPosition(x, y) {
-      const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
-      const panelWidth = fightPanel.offsetWidth;
-      const panelHeight = fightPanel.offsetHeight;
-
-      const maxX = windowWidth - panelWidth;
-      x = Math.max(0, Math.min(x, maxX));
-
-      const maxY = windowHeight - panelHeight;
-      y = Math.max(0, Math.min(y, maxY));
-
-      fightPanel.style.left = `${x}px`;
-      fightPanel.style.top = `${y}px`;
-
-      saveFightPanelPosition(x, y);
-    }
-
-    dragDiv.addEventListener("mousedown", (e) => {
-      e.preventDefault();
-      isDragging = true;
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-
-      loadFightPanelPosition();
-
-      document.body.style.userSelect = "none";
-    });
-
-    document.addEventListener("mousemove", (e) => {
-      if (isDragging) {
-        e.preventDefault();
-
-        const dx = e.clientX - mouseX;
-        const dy = e.clientY - mouseY;
-
-        setFightPanelPosition(panelX + dx, panelY + dy);
-      }
-    });
-
-    document.addEventListener("mouseup", () => {
-      isDragging = false;
-
-      document.body.style.userSelect = "auto";
-    });
-
-    loadFightPanelPosition();
-    setFightPanelPosition(panelX, panelY);
+  if (settings.fightTeams) {
+    setupSingleCallback("#fightPanel", initFightTeams);
   }
+
   // ====================================================================================================================
-  //   . . . СОКРАЩЕНИЕ ЛОГА БОЕВОГО РЕЖИМА . . .
+  //   . . . КОМПАКТНЫЙ ЛОГ БОЕВОГО РЕЖИМА . . .
   // ====================================================================================================================
-  // TODO - Перепроверить на адекватность решения.
+
+  /**
+   * Compacts consecutive identical fight log actions into a single row with an incremental counter.
+   */
+  function initCompactFightLog() {
+    const fightLog = document.getElementById("fightLog");
+    if (!fightLog) return;
+
+    fightLog.style.display = "none";
+
+    let compactedFightLog = document.getElementById("uwu-Compacted-Fight-Log");
+    if (!compactedFightLog) {
+      compactedFightLog = document.createElement("div");
+      compactedFightLog.id = "uwu-Compacted-Fight-Log";
+      fightLog.parentNode.insertBefore(compactedFightLog, fightLog);
+    }
+
+    /**
+     * Checks whether an incoming log span matches the latest compacted entry in target, mode, and styling.
+     *
+     * @param {HTMLElement|null} latestRow - The topmost row in the compacted fight log.
+     * @param {HTMLElement} newEntry - The native span element received from CatWar's fight log.
+     * @param {string} originalText - Cleaned text content of the action without multipliers.
+     * @param {string} innerContent - Cleaned inner HTML content of the action.
+     * @returns {boolean} True if the entries share identical target, mode classes, styles, and datasets.
+     */
+    function isSameFightAction(latestRow, newEntry, originalText, innerContent) {
+      if (!latestRow || !newEntry) return false;
+
+      const latestTextSpan = latestRow.querySelector(".text");
+      if (!latestTextSpan) return false;
+
+      const sameText = latestTextSpan.textContent.trim() === originalText;
+      const sameHtml = latestTextSpan.innerHTML.trim() === innerContent;
+      if (!sameText || !sameHtml) return false;
+
+      const latestClasses = Array.from(latestRow.classList).sort().join(" ");
+      const newClasses = Array.from(newEntry.classList).sort().join(" ");
+      if (latestClasses !== newClasses) return false;
+
+      const latestStyle = (latestRow.getAttribute("style") || "").trim().toLowerCase().replace(/;\s*$/, "");
+      const newStyle = (newEntry.getAttribute("style") || "").trim().toLowerCase().replace(/;\s*$/, "");
+      if (latestStyle !== newStyle) return false;
+
+      const latestDatasetKeys = Object.keys(latestRow.dataset);
+      const newDatasetKeys = Object.keys(newEntry.dataset);
+      if (latestDatasetKeys.length !== newDatasetKeys.length) return false;
+      for (const key of newDatasetKeys) {
+        if (latestRow.dataset[key] !== newEntry.dataset[key]) return false;
+      }
+
+      return true;
+    }
+
+    /**
+     * Drains queued raw entries from CatWar's log into the compacted log view.
+     *
+     * @returns {void}
+     */
+    function drainLogQueue() {
+      const childNodes = Array.from(fightLog.childNodes);
+      const entries = childNodes.filter((entry) => entry.tagName === "SPAN");
+
+      childNodes.forEach((node) => {
+        if (node.tagName !== "SPAN") node.remove();
+      });
+
+      if (entries.length === 0) return;
+
+      entries.forEach((entry) => {
+        const text = entry.textContent.trim();
+        const textMatch = text.match(/^(.*?)\s+x(\d+)$/);
+        const originalText = textMatch ? textMatch[1].trim() : text;
+        const count = textMatch ? parseInt(textMatch[2], 10) : 1;
+
+        let innerContent = entry.innerHTML.trim();
+        if (textMatch && textMatch[2]) {
+          innerContent = innerContent.replace(/\s+x\d+$/, "").trim();
+        }
+
+        const latestEntry = compactedFightLog.firstElementChild;
+
+        if (isSameFightAction(latestEntry, entry, originalText, innerContent)) {
+          const countLabel = latestEntry.querySelector(".count");
+          const existingCount = parseInt(
+            countLabel?.textContent.match(/x(\d+)/)?.[1] || "1",
+            10,
+          );
+          if (countLabel) {
+            countLabel.textContent = ` x${existingCount + count}`;
+          }
+        } else {
+          const row = document.createElement("div");
+
+          Array.from(entry.attributes).forEach((attr) => {
+            if (attr.name !== "id") {
+              row.setAttribute(attr.name, attr.value);
+            }
+          });
+
+          row.innerHTML = `<span class="text">${innerContent}</span><label class="count"> x${count}</label>`;
+          compactedFightLog.insertAdjacentElement("afterbegin", row);
+        }
+
+        entry.remove();
+      });
+    }
+
+    const observer = new MutationObserver(drainLogQueue);
+    observer.observe(fightLog, { childList: true });
+    drainLogQueue();
+  }
+
   if (settings.compactFightLog) {
+    setupSingleCallback("#fightLog", initCompactFightLog);
+
     const compactLogStyle = document.createElement("style");
-    compactLogStyle.innerHTML =
-      /* CSS */
-      `
+    compactLogStyle.id = "uwu-compact-fight-log-style";
+    compactLogStyle.innerHTML = `
       #uwu-Compacted-Fight-Log {
-        width: 100%;
-        box-sizing: border-box;
-        overflow-x: hidden;
+        flex: 1 1 auto;
+        min-height: 70px;
         overflow-y: auto;
+        margin: 4px;
+        box-sizing: border-box;
         overflow-wrap: anywhere;
         word-break: break-word;
         white-space: normal;
         padding: 2px;
       }
-      
       #uwu-Compacted-Fight-Log > div {
         width: 100%;
         box-sizing: border-box;
+        margin-bottom: 2px;
       }
     `;
-
     document.head.appendChild(compactLogStyle);
-    function compactFightLog() {
-      const fightLog = document.getElementById("fightLog");
-      fightLog.style.display = "none";
-
-      let compactedFightLog = document.getElementById(
-        "uwu-Compacted-Fight-Log"
-      );
-      if (!compactedFightLog) {
-        compactedFightLog = document.createElement("div");
-        compactedFightLog.id = "uwu-Compacted-Fight-Log";
-        compactedFightLog.style.height = settings.fightPanelHeight + "px";
-        fightLog.parentNode.insertBefore(compactedFightLog, fightLog);
-      }
-
-      const logEntries = Array.from(fightLog.childNodes).filter(
-        (entry) => entry.tagName === "SPAN"
-      );
-
-      if (logEntries.length > 0) {
-        const firstEntry = logEntries[0];
-        const text = firstEntry.textContent.trim();
-        const match = text.match(/^(.*) x(\d+)$/);
-        const originalText = match ? match[1] : text;
-        const count = match ? parseInt(match[2], 10) : 1;
-
-        const latestEntry = compactedFightLog.firstElementChild;
-
-        if (latestEntry) {
-          const latestTextSpan = latestEntry.querySelector(".text");
-
-          if (
-            latestTextSpan &&
-            latestTextSpan.textContent.trim() === originalText
-          ) {
-            const countLabel = latestEntry.querySelector(".count");
-            const existingCount = parseInt(
-              countLabel.textContent.match(/x(\d+)$/)[1],
-              10
-            );
-            countLabel.textContent = ` x${existingCount + count}`;
-          } else {
-            const newEntryHTML = createEntryHTML(
-              firstEntry.className,
-              originalText,
-              count
-            );
-            compactedFightLog.insertAdjacentHTML("afterbegin", newEntryHTML);
-          }
-        } else {
-          const newEntryHTML = createEntryHTML(
-            firstEntry.className,
-            originalText,
-            count
-          );
-          compactedFightLog.insertAdjacentHTML("afterbegin", newEntryHTML);
-        }
-
-        fightLog.removeChild(firstEntry);
-      }
-    }
-
-    function createEntryHTML(className, originalText, count) {
-      return `
-        <div class="${className}">
-          <span class="text">${originalText}</span>
-          <label class="count"> x${count}</label>
-        </div>
-      `;
-    }
-
-    setupMutationObserver(
-      "#fightLog",
-      compactFightLog,
-      {
-        attributes: true,
-        childList: true,
-      },
-      8,
-      500,
-      10
-    );
   }
-  // ====================================================================================================================
-  //   . . . ИЗМЕНЯЕМАЯ ВЫСОТА ПАНЕЛИ БОЕВОГО РЕЖИМА . . .
-  // ====================================================================================================================
-  if (settings.fightPanelAdjustableHeight) {
-    const uwuFightLog = document.createElement("style");
-    uwuFightLog.innerHTML = `
-      #fightPanel {
-        height: auto;
-      }
 
-      #fightLog {
-        resize: vertical;
-        overflow-y: scroll;
-      }
-      
-      #uwu-Compacted-Fight-Log {
-        resize: vertical;
-        overflow-y: scroll;
-      } 
-      `;
-    document.head.appendChild(uwuFightLog);
-
-    const fightLogElement = document.getElementById("fightLog");
-    if (fightLogElement) {
-      fightLogElement.style.height = `${settings.fightPanelHeight || 70}px`;
-    }
-  }
   // ====================================================================================================================
   //   . . . ВСЕГДА ДЕНЬ В ИГРОВОЙ . . .
   // ====================================================================================================================
@@ -14714,7 +17394,7 @@ if (targetCW3.test(window.location.href)) {
     skyDiv.id = "skyDuplicate";
 
     const globalContainerElement = document.getElementById(
-      "uwu-global-container"
+      "uwu-global-container",
     );
     globalContainerElement.appendChild(skyDiv);
 
@@ -14760,7 +17440,7 @@ if (targetCW3.test(window.location.href)) {
       { attributes: true, attributeFilter: ["style"] },
       8,
       500,
-      10
+      10,
     );
   }
   // ====================================================================================================================
@@ -14809,16 +17489,18 @@ if (targetCW3.test(window.location.href)) {
     if (settings.weatherEnabled) {
       const match = skyStyle.match(/\/(\d+)\.png/);
       if (match) {
-        const skyNumber = parseInt(match[1]);
+        const skyNumber = parseInt(match[1], 10);
 
         switch (skyNumber) {
           case 2:
           case 4:
             currentWeather = settings.minecraftStyle ? "pixelRain" : "rain";
+            uwuStorage.setItem("uwu_lastActiveWeather", "rain");
             break;
           case 7:
           case 8:
             currentWeather = settings.minecraftStyle ? "pixelSnow" : "snow";
+            uwuStorage.setItem("uwu_lastActiveWeather", "snow");
             break;
           case 22:
             currentWeather = "northernLights";
@@ -14911,13 +17593,9 @@ if (targetCW3.test(window.location.href)) {
 
   function getTemperature() {
     const temperatureElement = document.querySelector("#tos");
-    const temperatureElementHTML = temperatureElement.outerHTML;
-    const backgroundValue = /background:\s*([a-zA-Z0-9#()]+);/.exec(
-      temperatureElementHTML
-    );
+    if (!temperatureElement) return;
 
-    if (backgroundValue && backgroundValue.length > 1) {
-      const foundBackground = backgroundValue[1];
+    const styleAttr = temperatureElement.getAttribute("style") || "";
 
       const temperatureRanges = [
         {
@@ -14998,12 +17676,32 @@ if (targetCW3.test(window.location.href)) {
         },
       ];
 
+      const extractedColors = [];
+    
+    const hexRegex = /#[0-9a-fA-F]{6}\b/ig;
+    let match;
+    while ((match = hexRegex.exec(styleAttr)) !== null) {
+      extractedColors.push(match[0].toUpperCase());
+    }
+    
+    const rgbRegex = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/ig;
+    while ((match = rgbRegex.exec(styleAttr)) !== null) {
+      const r = parseInt(match[1], 10).toString(16).padStart(2, '0');
+      const g = parseInt(match[2], 10).toString(16).padStart(2, '0');
+      const b = parseInt(match[3], 10).toString(16).padStart(2, '0');
+      extractedColors.push(`#${r}${g}${b}`.toUpperCase());
+    }
+
+    if (extractedColors.length > 0) {
       let foundTemperature = null;
 
       for (const range of temperatureRanges) {
-        if (range.colors.includes(foundBackground)) {
-          foundTemperature = range;
-          break;
+        if (foundTemperature) break;
+        for (const extColor of extractedColors) {
+          if (range.colors.includes(extColor)) {
+            foundTemperature = range;
+            break;
+          }
         }
       }
 
@@ -15014,7 +17712,7 @@ if (targetCW3.test(window.location.href)) {
         currentTemperature = 1;
         temperatureDescription =
           "Неизвестная температура. Разработчик скорее всего уже в курсе и в скором времени выпустит правку.";
-        console.warn("Неизвестная температура:", foundBackground);
+        console.warn("UwU | Неизвестная температура. Извлеченные цвета:", extractedColors);
       }
 
       switch (currentTemperature) {
@@ -15044,6 +17742,7 @@ if (targetCW3.test(window.location.href)) {
       // console.log("...я временно потерял бекграунд температуры🌡️...");
     }
   }
+
   // ====================================================================================================================
   if (!settings.manualWeatherPanel) {
     setupMutationObserver("#sky", getSkyType);
@@ -15059,7 +17758,7 @@ if (targetCW3.test(window.location.href)) {
       },
       8,
       500,
-      20
+      20,
     );
 
     setupMutationObserver("img[src*='symbole/season']", getSeason, {
@@ -15139,7 +17838,7 @@ if (targetCW3.test(window.location.href)) {
             console.error(`Чёта не скачалось: ${image.url}`);
             reject();
           };
-        })
+        }),
       );
     }
 
@@ -15164,7 +17863,7 @@ if (targetCW3.test(window.location.href)) {
 
   function setWeatherPerformanceMode() {
     const isLow = settings.weatherParticlesAmount === "low";
-    
+
     rainNumParticles = isLow ? 4 : 10;
     snowTimerValue = isLow ? 240 : 120;
     desiredNumberOfFireflies = isLow ? 6 : 10;
@@ -15216,7 +17915,7 @@ if (targetCW3.test(window.location.href)) {
       raindrop.length,
       0,
       Math.PI,
-      2 * Math.PI
+      2 * Math.PI,
     );
     weatherCtx.fillStyle = "rgba(150, 150, 150, 0.4)";
     weatherCtx.fill();
@@ -15308,7 +18007,7 @@ if (targetCW3.test(window.location.href)) {
       pixelRaindrop.x,
       pixelRaindrop.y,
       imageWidth * scaleFactor,
-      imageHeight * scaleFactor
+      imageHeight * scaleFactor,
     );
   }
   // ====================================================================================================================
@@ -15392,7 +18091,7 @@ if (targetCW3.test(window.location.href)) {
           pixelSnowflake.x,
           pixelSnowflake.y,
           pixelSnowflake.size,
-          pixelSnowflake.image
+          pixelSnowflake.image,
         );
       }
     }
@@ -15442,7 +18141,7 @@ if (targetCW3.test(window.location.href)) {
         }
       } else {
         console.warn(
-          "Element to be removed is not a child of weatherContainer."
+          "Element to be removed is not a child of weatherContainer.",
         );
       }
     }, 6000);
@@ -15582,6 +18281,7 @@ if (targetCW3.test(window.location.href)) {
       currentHour === "night" &&
       currentSeason === "summer"
     ) {
+      uwuStorage.setItem("uwu_lastActiveWeather", "fireflies");
       if (fireflies.length === 0) {
         for (let i = 0; i < desiredNumberOfFireflies; i++) {
           fireflies.push(generateFirefly());
@@ -15715,7 +18415,7 @@ if (targetCW3.test(window.location.href)) {
         pixelSnowflake.x,
         pixelSnowflake.y,
         pixelSnowflake.size,
-        pixelSnowflake.image
+        pixelSnowflake.image,
       );
     }
 
@@ -15732,7 +18432,7 @@ if (targetCW3.test(window.location.href)) {
       if (pixelRaindrop.y >= weatherCanvas.height - pixelRaindrop.size) {
         pixelRaindrops.splice(i, 1);
         pixelSplashes.push(
-          generateSplash(pixelRaindrop.x, weatherCanvas.height - 24)
+          generateSplash(pixelRaindrop.x, weatherCanvas.height - 24),
         );
       }
     }
@@ -15748,7 +18448,7 @@ if (targetCW3.test(window.location.href)) {
         splash.y,
         splash.size / 1.2 / weatherModifier,
         0,
-        Math.PI * 2
+        Math.PI * 2,
       );
       weatherCtx.fillStyle = "rgba(150, 150, 150, 0.4)";
       weatherCtx.fill();
@@ -15763,7 +18463,7 @@ if (targetCW3.test(window.location.href)) {
         pixelSplash.x,
         pixelSplash.y,
         pixelSplash.size * weatherModifier * 2,
-        pixelSplash.size * weatherModifier * 2
+        pixelSplash.size * weatherModifier * 2,
       );
     }
 
@@ -16918,7 +19618,7 @@ function setupActivityCalc() {
     document.getElementById("to-fall-container").style.display = "none";
   } else {
     const timeFall = new Date(
-      Date.now() + (progress.doneFromZero - 1575) * 5 * 3600000
+      Date.now() + (progress.doneFromZero - 1575) * HOURLY_ACTIVITY_DECREASE_DIVISOR * 3600000
     );
     document.getElementById("to-fall").innerHTML =
       timeFall.getDate() +
@@ -17433,7 +20133,6 @@ function initializeTemplates() {
       }
 
       #uwu-templates-list {
-        max-height: 220px;
         overflow-x: auto;
         border-radius: 20px;
         background-color: #2e2e2e;
@@ -17687,8 +20386,10 @@ initializeTemplates();
 if (targetLs.test(window.location.href) && settings.savingLS) {
 
   /**
-   * Отображает сохраненное сообщение в контейнере.
-   * @param {string} lsId - ID сообщения для отображения.
+   * Displays offline saved message payload matching CatWar's detailed view.
+   *
+   * @param {string} lsId - Target message identifier.
+   * @returns {void}
    */
   function displaySavedMessage(lsId) {
     const container = document.getElementById("uwu-saved-ls-container");
@@ -17698,40 +20399,47 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
     const ls = savedLs[lsId];
 
     if (!ls) {
-      container.innerHTML =
-        "<h3>Ошибка: Сохранённое сообщение не найдено.</h3><p><a href='#' id='uwu-back-to-saved-list'>Назад к списку</a></p>";
-      document
-        .getElementById("uwu-back-to-saved-list")
-        .addEventListener("click", showSavedMessagesInterface);
+      container.innerHTML = `
+        <div class="ls-list-wrap ui-soft-box" style="padding: 20px; text-align: center;">
+          <h3>Ошибка: Сохранённое сообщение не найдено.</h3>
+          <button type="button" id="uwu-back-to-saved-list" class="ui-btn ui-btn--tiny" style="margin-top: 10px;">← Назад к списку</button>
+        </div>
+      `;
+      document.getElementById("uwu-back-to-saved-list")?.addEventListener("click", showSavedMessagesInterface);
       return;
     }
 
     const typeLabel = ls.type === 0 ? "Отправитель" : "Получатель";
-    const catLink = `<a href="/cat${ls.catId}" id="msg_login">${ls.catName}</a>`;
+    const catLink = `<a href="/cat${ls.catId}" id="msg_login" target="_blank" rel="noopener noreferrer">${ls.catName}</a>`;
 
-    const messageHTML = `
-      <p><a href="#" id="uwu-back-to-saved-list">← Назад к сохранённым</a></p>
-      <table id="msg_table" border="1">
-        <tbody>
-          <tr>
-            <td colspan="2"><span id="msg_subject">${ls.subject}</span></td>
-          </tr>
-          <tr>
-            <td valign="top" id="msg_info">
-              ${typeLabel}: ${catLink}<br>
-              ${ls.date}<br>
-              <i>(сохранённая оффлайн-копия)</i>
-            </td>
-            <td><div class="parsed">${ls.text}</div></td>
-          </tr>
-        </tbody>
-      </table>
+    container.innerHTML = `
+      <div class="ls-list-wrap ui-soft-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <button type="button" id="uwu-back-to-saved-list" class="ui-btn ui-btn--tiny">
+            ← Назад к сохранённым
+          </button>
+          <span style="font-size: 11px; opacity: 0.55; text-transform: uppercase; letter-spacing: 0.5px;">Офлайн-копия</span>
+        </div>
+
+        <table id="msg_table" border="1" style="width: 100%;">
+          <tbody>
+            <tr>
+              <td colspan="2"><span id="msg_subject"><b>${ls.subject}</b></span></td>
+            </tr>
+            <tr>
+              <td valign="top" id="msg_info" style="width: 220px;">
+                ${typeLabel}: ${catLink}<br>
+                ${ls.date}<br>
+                <small style="opacity: 0.65; display: block; margin-top: 6px;">Сохранено: ${ls.savedate}</small>
+              </td>
+              <td><div class="parsed">${ls.text}</div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     `;
 
-    container.innerHTML = messageHTML;
-    document
-      .getElementById("uwu-back-to-saved-list")
-      .addEventListener("click", showSavedMessagesInterface);
+    document.getElementById("uwu-back-to-saved-list")?.addEventListener("click", showSavedMessagesInterface);
   }
 
   /**
@@ -17817,7 +20525,9 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
   }
 
   /**
-   * Добавляет кнопки управления сохранением на страницу просмотра ЛС.
+   * Injects save and delete controls into the native message viewer toolbar.
+   *
+   * @returns {void}
    */
   function addSaveButtonsToMessagePage() {
     const subjectSpan = document.getElementById("msg_subject");
@@ -17826,40 +20536,37 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
     const subjectTd = subjectSpan.closest("td");
     if (!subjectTd) return;
 
-    const oldButtons = document.getElementById("uwu-ls-buttons");
-    if (oldButtons) oldButtons.remove();
+    document.getElementById("uwu-ls-buttons")?.remove();
 
     const lsId = parseInt(window.location.href.split("=")[1], 10);
     const savedLs = uwuStorage.getItem("uwu_saved_ls") || {};
-    const isSaved = savedLs.hasOwnProperty(lsId);
+    const isSaved = Object.prototype.hasOwnProperty.call(savedLs, lsId);
 
     const buttonsContainer = document.createElement("span");
     buttonsContainer.id = "uwu-ls-buttons";
-    buttonsContainer.style.float = "right";
-    buttonsContainer.style.display = "inline-block";
+    buttonsContainer.style.cssText = "float: right; display: inline-flex; align-items: center; gap: 6px;";
 
-    const saveButton = document.createElement("input");
+    if (isSaved) {
+      const savedDate = document.createElement("small");
+      savedDate.textContent = `Сохранено: ${savedLs[lsId].savedate}`;
+      savedDate.style.cssText = "opacity: 0.65; margin-right: 6px;";
+      buttonsContainer.appendChild(savedDate);
+    }
+
+    const saveButton = document.createElement("button");
     saveButton.type = "button";
-    saveButton.value = isSaved ? "Обновить" : "Сохранить";
-    saveButton.className = "uwu-button install-button";
-    saveButton.style.marginLeft = "5px";
+    saveButton.textContent = isSaved ? "Обновить" : "Сохранить";
+    saveButton.className = "ui-btn ui-btn--tiny ui-btn--primary";
     saveButton.onclick = saveCurrentLS;
-
     buttonsContainer.appendChild(saveButton);
 
     if (isSaved) {
-      const deleteButton = document.createElement("input");
+      const deleteButton = document.createElement("button");
       deleteButton.type = "button";
-      deleteButton.value = "Удалить";
-      deleteButton.className = "uwu-button remove-button";
-      deleteButton.style.marginLeft = "5px";
+      deleteButton.textContent = "Удалить";
+      deleteButton.className = "ui-btn ui-btn--tiny ui-btn--danger";
       deleteButton.onclick = () => deleteSavedLS(lsId);
       buttonsContainer.appendChild(deleteButton);
-
-      const savedDate = document.createElement("i");
-      savedDate.textContent = `Сохранено: ${savedLs[lsId].savedate}`;
-      savedDate.style.marginRight = "10px";
-      buttonsContainer.prepend(savedDate);
     }
 
     subjectTd.appendChild(buttonsContainer);
@@ -17908,43 +20615,31 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
     document.getElementById("uwu-saved-ls-tab")?.classList.remove("active");
   }
 
-  /**
-   * Внедряет CSS-стили для интерфейса сохранения ЛС.
-   */
   function injectLSSyles() {
     if (document.getElementById("uwu-ls-styles")) return;
 
-    const css =
-      /* CSS */
-      `
-       #uwu-saved-ls-tab {
-        padding: 2px 8px;
-        border-radius: 10px;
-        background-color: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        transition: background-color 0.3s ease;
-        text-decoration: none !important;
+    const css = /* CSS */ `
+      #uwu-saved-ls-container {
+        margin-top: 10px;
       }
-      #uwu-saved-ls-tab:hover, #uwu-saved-ls-tab.active {
-        background-color: rgba(255, 255, 255, 0.2);
+      #uwu-saved-ls-container .ui-soft-box {
+        padding: 14px;
+        border-radius: 12px;
+        box-sizing: border-box;
       }
-
-      #uwu-saved-ls-container .messList {
-        table-layout: fixed;
-        width: 100%;
+      .uwu-ls-storage-bar-wrap {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        opacity: 0.75;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--ui-line, rgba(255, 255, 255, 0.08));
       }
-      
-      #uwu-saved-ls-container .messList a {
-        color: #0000cd;
-      }
-      
-      #uwu-saved-ls-container .messList th:nth-child(1) { width: 50%; }
-      #uwu-saved-ls-container .messList th:nth-child(2) { width: 25%; }
-      #uwu-saved-ls-container .messList th:nth-child(3) { width: 20%; }
-      #uwu-saved-ls-container .messList th:nth-child(4) { width: 5%; }
-
-      #uwu-saved-ls-container .delete-saved-ls {
-        padding: 1px 7px;
+      .uwu-ls-filter-btn.active {
+        background: var(--ui-accent, rgba(131, 229, 255, 0.25)) !important;
+        font-weight: 700;
       }
     `;
     const styleElement = document.createElement("style");
@@ -17954,103 +20649,136 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
   }
 
   /**
-   * Отрисовывает список сохраненных сообщений в указанном контейнере.
-   * @param {HTMLElement} container - Элемент для отрисовки.
+   * Calculates accurate UTF-8 byte consumption of stored private messages.
+   *
+   * @returns {{ bytes: number, formatted: string, percent: string }} Storage metrics.
+   */
+  function getSavedLsStorageUsage() {
+    const savedLs = uwuStorage.getItem("uwu_saved_ls") || {};
+    const serialized = JSON.stringify(savedLs);
+    const bytes = new TextEncoder().encode(serialized).length;
+
+    const totalQuotaBytes = 5 * 1024 * 1024;
+    const percent = Math.min(100, (bytes / totalQuotaBytes) * 100).toFixed(1);
+
+    let formatted = "";
+    if (bytes < 1024) {
+      formatted = `${bytes} Б`;
+    } else if (bytes < 1024 * 1024) {
+      formatted = `${(bytes / 1024).toFixed(1)} КБ`;
+    } else {
+      formatted = `${(bytes / (1024 * 1024)).toFixed(2)} МБ`;
+    }
+
+    return { bytes, formatted, percent };
+  }
+
+  /**
+   * Renders the saved messages list adopting CatWar's layout.
+   *
+   * @param {HTMLElement} container - DOM mount target.
+   * @returns {void}
    */
   function renderSavedMessagesList(container) {
-    const savedLsRaw = uwuStorage.getItem("uwu_saved_ls");
-    const savedLs = savedLsRaw || {};
+    const savedLs = uwuStorage.getItem("uwu_saved_ls") || {};
     const keys = Object.keys(savedLs);
+    const storage = getSavedLsStorageUsage();
 
-    const storageSize = savedLsRaw
-      ? (new TextEncoder().encode(savedLsRaw).length / 1024 / 1024).toFixed(2)
-      : 0;
+    const escapeHtml = (str) => {
+      const d = document.createElement("div");
+      d.textContent = str || "";
+      return d.innerHTML;
+    };
 
     if (keys.length === 0) {
-      container.innerHTML = "<h3>У вас нет сохранённых сообщений.</h3>";
+      container.innerHTML = `
+        <div class="ls-list-wrap ui-soft-box" style="text-align: center; padding: 30px;">
+          <h3 style="margin: 0 0 8px 0; opacity: 0.85;">У вас нет сохранённых сообщений</h3>
+          <p style="font-size: 13px; opacity: 0.5; margin: 0;">
+            Откройте любое письмо и нажмите «Сохранить», чтобы оно появилось здесь.
+          </p>
+        </div>
+      `;
       return;
     }
 
-    let inboxHTML = "";
-    let outboxHTML = "";
+    keys.sort((a, b) => new Date(savedLs[b].savedate) - new Date(savedLs[a].savedate));
 
-    keys.sort(
-      (a, b) => new Date(savedLs[b].savedate) - new Date(savedLs[a].savedate)
-    );
-
-    keys.forEach((key) => {
+    const rowsHtml = keys.map((key) => {
       const ls = savedLs[key];
-      const rowHTML =
-        /* HTML */
-        `
-          <tr class="msg_read">
-            <td>
-              <a href="#" class="uwu-saved-msg-open" data-id="${key}"
-                >${ls.subject}</a
-              >
-            </td>
-            <td><a href="/cat${ls.catId}">${ls.catName}</a></td>
-            <td>${ls.savedate}</td>
-            <td>
-              <input
-                type="button"
-                value="X"
-                class="uwu-button remove-button delete-saved-ls"
-                data-id="${key}"
-                title="Удалить"
-              />
-            </td>
-          </tr>
-        `;
-      if (ls.type === 0) {
-        inboxHTML += rowHTML;
-      } else {
-        outboxHTML += rowHTML;
-      }
+      const isInbox = ls.type === 0;
+      const typeLabel = isInbox ? "Входящее" : "Исходящее";
+      const interlocutorLabel = isInbox ? "От" : "Кому";
+
+      return `
+        <tr class="msg_read uwu-saved-row" data-type="${isInbox ? "inbox" : "outbox"}">
+          <td>
+            <a href="#" class="uwu-saved-msg-open" data-id="${key}">${escapeHtml(ls.subject || "(Без темы)")}</a>
+          </td>
+          <td>
+            <a href="/cat${ls.catId}" target="_blank" rel="noopener noreferrer">${escapeHtml(ls.catName)}</a>
+            <small style="opacity: 0.55; display: block; font-size: 11px;">${interlocutorLabel} • ${typeLabel}</small>
+          </td>
+          <td><small style="opacity: 0.75;">${escapeHtml(ls.savedate || ls.date)}</small></td>
+          <td style="text-align: center;">
+            <button type="button" class="ui-btn ui-btn--tiny ui-btn--danger delete-saved-ls" data-id="${key}" title="Удалить из сохранённых" style="padding: 2px 7px;">
+              ✕
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    container.innerHTML = `
+      <div class="ls-list-wrap ui-soft-box">
+        <div class="uwu-ls-storage-bar-wrap">
+          <div style="display: flex; gap: 6px;">
+            <button type="button" class="ui-btn ui-btn--tiny uwu-ls-filter-btn active" data-filter="all">Все (${keys.length})</button>
+            <button type="button" class="ui-btn ui-btn--tiny uwu-ls-filter-btn" data-filter="inbox">Входящие</button>
+            <button type="button" class="ui-btn ui-btn--tiny uwu-ls-filter-btn" data-filter="outbox">Отправленные</button>
+          </div>
+          <span>Использовано: <b>${storage.formatted}</b> из 5.00 МБ (${storage.percent}%)</span>
+        </div>
+
+        <table border="1" id="messList">
+          <thead>
+            <tr>
+              <th style="width: 45%;">Тема</th>
+              <th style="width: 25%;">Собеседник</th>
+              <th style="width: 20%;">Дата сохранения</th>
+              <th style="width: 10%; text-align: center;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    // Filter tabs logic
+    container.querySelectorAll(".uwu-ls-filter-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        container.querySelectorAll(".uwu-ls-filter-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        const filter = btn.dataset.filter;
+        container.querySelectorAll(".uwu-saved-row").forEach((row) => {
+          if (filter === "all" || row.dataset.type === filter) {
+            row.style.display = "";
+          } else {
+            row.style.display = "none";
+          }
+        });
+      });
     });
 
-    container.innerHTML =
-      /* HTML */
-      `
-        <p style="text-align: center; color: #888;">
-          Использовано примерно ${storageSize} из 5.00 МБ дискового
-          пространства.
-        </p>
-        <h2>Входящие</h2>
-        <table class="messList">
-          <tbody>
-            <tr>
-              <th>Тема</th>
-              <th>Отправитель</th>
-              <th>Дата сохранения</th>
-              <th></th>
-            </tr>
-            ${inboxHTML}
-          </tbody>
-        </table>
-        <br />
-        <h2>Отправленные</h2>
-        <table class="messList">
-          <tbody>
-            <tr>
-              <th>Тема</th>
-              <th>Получатель</th>
-              <th>Дата сохранения</th>
-              <th></th>
-            </tr>
-            ${outboxHTML}
-          </tbody>
-        </table>
-      `;
-
-    container.querySelectorAll(".delete-saved-ls").forEach((button) => {
-      button.addEventListener("click", (e) => {
-        const lsId = e.target.dataset.id;
-        if (
-          confirm(
-            "Вы уверены, что хотите удалить эту переписку из сохранённых?"
-          )
-        ) {
+    // Action handlers
+    container.querySelectorAll(".delete-saved-ls").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const lsId = btn.dataset.id;
+        if (confirm("Вы уверены, что хотите удалить эту переписку из сохранённых?")) {
           deleteSavedLS(lsId, true);
           renderSavedMessagesList(container);
         }
@@ -18060,28 +20788,29 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
     container.querySelectorAll(".uwu-saved-msg-open").forEach((link) => {
       link.addEventListener("click", (e) => {
         e.preventDefault();
-        const lsId = e.target.dataset.id;
-        displaySavedMessage(lsId);
+        displaySavedMessage(link.dataset.id);
       });
     });
   }
 
   /**
-   * Добавляет вкладку "Сохранённые" в меню ЛС.
+   * Injects the Saved tab into the native folder navigation list.
+   *
+   * @returns {void}
    */
   function addSavedMessagesTab() {
-    const linksContainer = document.getElementById("links");
-    if (!linksContainer || document.getElementById("uwu-saved-ls-tab")) return;
+    const tabsContainer = document.querySelector("#links .tabs");
+    if (!tabsContainer || document.getElementById("uwu-saved-ls-tab")) return;
 
-    linksContainer.insertAdjacentHTML(
+    tabsContainer.insertAdjacentHTML(
       "beforeend",
-      ` | <a href="#" id="uwu-saved-ls-tab">Сохранённые (<span id="uwu-saved-ls-count">0</span>)</a>`
+      `<a href="#" class="tab folder" id="uwu-saved-ls-tab" role="tab">Сохранённые (<span id="uwu-saved-ls-count">0</span>)</a>`
     );
 
     const savedTab = document.getElementById("uwu-saved-ls-tab");
     savedTab.addEventListener("click", showSavedMessagesInterface);
 
-    linksContainer.querySelectorAll("a:not(#uwu-saved-ls-tab)").forEach((a) => {
+    tabsContainer.querySelectorAll(".tab:not(#uwu-saved-ls-tab)").forEach((a) => {
       a.addEventListener("click", () => {
         if (!a.href.includes("ls?id=")) {
           hideSavedMessagesInterface();
@@ -18424,328 +21153,4 @@ if (targetBlogsea.test(window.location.href) && settings.blogseaRedesign) {
     }
 
   setupMutationObserver("#branch", applyBlogseaRedesign, { childList: true, subtree: true });
-}
-
-// ====================================================================================================================
-//   . . . РЕДИЗАЙН БЛОГОВ И ЛЕНТЫ . . .
-// ====================================================================================================================
-if ((targetBlog.test(window.location.href) || targetSniff.test(window.location.href)) && settings.blogsRedesign) {
-  function applyBlogsNavRedesign() {
-    const pageFormDiv = document.querySelector('#page_form > div');
-    if (!pageFormDiv || pageFormDiv.querySelector('.uwu-blogs-header-wrapper')) return;
-
-    const urlParams = new URLSearchParams(window.location.search);
-    let currentPage = parseInt(urlParams.get('page')) || 1;
-
-    const headerWrapper = document.createElement('div');
-    headerWrapper.className = 'uwu-blogs-header-wrapper';
-
-    const topRow = document.createElement('div');
-    topRow.className = 'uwu-header-top-row';
-
-    const pagContainer = document.createElement('div');
-    pagContainer.className = 'uwu-pagination-container';
-
-    const actionContainer = document.createElement('div');
-    actionContainer.className = 'uwu-action-container';
-
-    const filterContainer = document.createElement('div');
-    filterContainer.className = 'uwu-filter-container';
-
-    const prevSpan = document.getElementById('prev_page_span');
-    const nextSpan = document.getElementById('next_page_span');
-    const prevLink = document.getElementById('prev_page');
-    const nextLink = document.getElementById('next_page');
-    
-    const pageLabel = document.createElement('div');
-    pageLabel.className = 'uwu-page-label';
-    pageLabel.textContent = `Страница ${currentPage}`;
-
-    if (prevLink) {
-        prevLink.innerHTML = '← Назад';
-        prevLink.addEventListener('click', () => {
-            currentPage = Math.max(1, currentPage - 1);
-            pageLabel.textContent = `Страница ${currentPage}`;
-        });
-    }
-    if (nextLink) {
-        nextLink.innerHTML = 'Вперёд →';
-        nextLink.addEventListener('click', () => {
-            currentPage++;
-            pageLabel.textContent = `Страница ${currentPage}`;
-        });
-    }
-
-    if (prevSpan) pagContainer.appendChild(prevSpan);
-    pagContainer.appendChild(pageLabel);
-    if (nextSpan) pagContainer.appendChild(nextSpan);
-
-    const anchors = Array.from(pageFormDiv.querySelectorAll('a'));
-    anchors.forEach(a => {
-        if (a.id === 'prev_page' || a.id === 'next_page') return; 
-        
-        if (a.textContent.includes('Создать')) {
-            a.innerHTML = '✍️ Создать';
-            actionContainer.appendChild(a);
-        } else if (a.textContent.includes('Поиск')) {
-            a.innerHTML = '🔍 Поиск';
-            filterContainer.appendChild(a);
-        } else {
-            filterContainer.appendChild(a);
-        }
-    });
-
-    const notApproved = document.getElementById('notApproved');
-    if (notApproved) {
-        filterContainer.appendChild(notApproved);
-    }
-
-    pageFormDiv.innerHTML = '';
-    
-    topRow.appendChild(pagContainer);
-    if (actionContainer.childNodes.length > 0) {
-        topRow.appendChild(actionContainer);
-    }
-    
-    headerWrapper.appendChild(topRow);
-    if (filterContainer.childNodes.length > 0) {
-        headerWrapper.appendChild(filterContainer);
-    }
-
-    pageFormDiv.appendChild(headerWrapper);
-
-    if (!document.getElementById('uwu-blogs-redesign-styles')) {
-        const style = document.createElement("style");
-        style.id = "uwu-blogs-redesign-styles";
-        style.innerHTML = /* CSS */`
-            .uwu-blogs-header-wrapper {
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
-                margin-bottom: 20px;
-            }
-
-            .uwu-header-top-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                flex-wrap: wrap;
-                gap: 10px;
-            }
-
-            .uwu-pagination-container {
-                display: flex;
-                align-items: center;
-                background: rgba(127, 127, 127, 0.15);
-                border: 1px solid rgba(127, 127, 127, 0.2);
-                border-radius: 12px;
-                padding: 4px;
-            }
-
-            #prev_page_span, #next_page_span, #notApproved {
-                font-size: 0 !important;
-                color: transparent !important;
-                display: inline-flex !important;
-                align-items: center;
-            }
-
-            .uwu-page-label {
-                opacity: 0.8;
-                font-weight: 600;
-                padding: 0 15px;
-                user-select: none;
-            }
-
-            #prev_page, #next_page {
-                background: rgba(127, 127, 127, 0.1);
-                padding: 6px 14px;
-                border-radius: 8px;
-                text-decoration: none !important;
-                font-size: 13px !important;
-                font-weight: normal !important;
-                transition: background-color 0.2s ease, transform 0.2s ease;
-            }
-
-            #prev_page:hover, #next_page:hover {
-                background: rgba(127, 127, 127, 0.25);
-                transform: translateY(-1px);
-            }
-
-            .uwu-action-container a {
-                display: inline-flex;
-                background: rgba(127, 127, 127, 0.2);
-                border: 1px solid rgba(127, 127, 127, 0.3);
-                padding: 8px 16px;
-                border-radius: 12px;
-                text-decoration: none;
-                font-weight: 600;
-                transition: all 0.2s ease;
-            }
-
-            .uwu-action-container a:hover {
-                background: rgba(127, 127, 127, 0.3);
-                transform: translateY(-2px);
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            }
-
-            .uwu-filter-container {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 8px;
-                background: rgba(127, 127, 127, 0.1);
-                padding: 10px;
-                border-radius: 12px;
-                border: 1px solid rgba(127, 127, 127, 0.2);
-            }
-
-            .uwu-filter-container a {
-                background: rgba(127, 127, 127, 0.1);
-                border: 1px solid rgba(127, 127, 127, 0.15);
-                padding: 6px 12px;
-                border-radius: 8px;
-                text-decoration: none;
-                transition: all 0.2s ease;
-            }
-
-            .uwu-filter-container a:hover, 
-            .uwu-filter-container a.active {
-                background: rgba(127, 127, 127, 0.25);
-                border-color: rgba(127, 127, 127, 0.3);
-            }
-            
-            .blog, .comment {
-                background: rgba(127, 127, 127, 0.08);
-                border: 1px solid rgba(127, 127, 127, 0.2);
-                border-radius: 12px;
-                padding: 16px;
-                margin-bottom: 16px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-                transition: transform 0.2s ease, border-color 0.2s ease;
-                position: relative;
-            }
-
-            .blog:hover, .comment:hover {
-                border-color: rgba(127, 127, 127, 0.3);
-            }
-
-            .blog-title, .comment-title {
-                font-size: 17px;
-                font-weight: 600;
-                margin: 0 0 6px 0 !important;
-                line-height: 1.3;
-            }
-
-            .comment-title {
-                font-size: 14px;
-                padding-right: 60px;
-            }
-
-            .blog-title a, .comment-title a {
-                text-decoration: none !important;
-                transition: opacity 0.2s ease;
-            }
-
-            .blog-title a:hover, .comment-title a:hover {
-                opacity: 0.7;
-            }
-
-            .blog-info, .comment-info {
-                font-size: 11px;
-                opacity: 0.6;
-                margin: 0 0 12px 0 !important;
-                padding-bottom: 12px;
-                border-bottom: 1px solid rgba(127, 127, 127, 0.2);
-            }
-
-            .blog-info a, .comment-info a {
-                font-weight: 500;
-                text-decoration: none;
-            }
-
-            .blog-info a:hover, .comment-info a:hover {
-                opacity: 0.8;
-                text-decoration: underline;
-            }
-
-            .blog-tags {
-                font-size: 11px;
-                margin-bottom: 12px !important;
-                display: flex;
-                flex-wrap: wrap;
-                gap: 6px;
-                align-items: center;
-            }
-
-            .blog-tags .tag {
-                background: rgba(127, 127, 127, 0.15);
-                padding: 4px 8px;
-                border-radius: 6px;
-                color: inherit !important;
-                text-decoration: none !important;
-                border: 1px solid transparent;
-                transition: all 0.2s ease;
-            }
-
-            .blog-tags .tag:hover {
-                background: rgba(127, 127, 127, 0.25);
-                border-color: rgba(127, 127, 127, 0.3);
-            }
-
-            .blog > hr.line, .comment > hr.line {
-                display: none !important;
-            }
-
-            .blog-read {
-                margin-top: 12px !important;
-            }
-            
-            .blog-read a {
-                display: inline-block;
-                font-weight: 600;
-                color: inherit !important;
-                background: rgba(127, 127, 127, 0.15);
-                padding: 6px 12px;
-                border-radius: 8px;
-                text-decoration: none !important;
-                transition: background 0.2s ease;
-            }
-
-            .blog-read a:hover {
-                background: rgba(127, 127, 127, 0.25);
-            }
-            
-            .comment p:has(> .comment-delete) {
-                margin: 0;
-            }
-
-            .comment-delete {
-                position: absolute;
-                top: 16px;
-                right: 16px;
-                font-size: 11px;
-                color: inherit !important;
-                background: rgba(127, 127, 127, 0.1);
-                border: 1px solid rgba(127, 127, 127, 0.2);
-                padding: 4px 8px;
-                border-radius: 6px;
-                text-decoration: none !important;
-                opacity: 0.5;
-                transition: all 0.2s ease;
-            }
-            
-            .comment:hover .comment-delete {
-                opacity: 0.8;
-            }
-            
-            .comment-delete:hover {
-                background: rgba(255, 100, 100, 0.2);
-                border-color: rgba(255, 100, 100, 0.4);
-                opacity: 1;
-            }
-        `;
-        document.head.appendChild(style);
-    }
-  }
-
-  setupMutationObserver("#blog-links", applyBlogsNavRedesign, { childList: true, subtree: true });
 }
