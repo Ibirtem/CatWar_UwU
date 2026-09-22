@@ -133,7 +133,6 @@ const uwuDefaultSettings = {
   gameFieldBackgroundUser: false,
   gameFieldBackgroundUserImageURL: "",
   userTheme: false,
-  userThemeKns: false,
   glassStyle: false,
   hideRelativesByDefault: false,
   twoColumnParameters: false,
@@ -840,14 +839,6 @@ const uwusettings =
               <div id="theme-pickers-grid" class="gcp-grid"></div>
               <div style="flex: 0 0 100%; margin-top: 14px;">
                 <button id="saveThemeButton" class="uwu-button install-button">Сохранить тему</button>
-              </div>
-            </div>
-
-            <div class="uwu-settings-card__item">
-              <p>Распространяет выбранную цветовую тему на страницу Конструктора окрасов (КНС).</p>
-              <div class="uwu-settings-card__row">
-                <input type="checkbox" id="user-theme-kns" data-setting="userThemeKns" />
-                <label for="user-theme-kns">Цвета в конструкторе окрасов</label>
               </div>
             </div>
 
@@ -2181,6 +2172,7 @@ const newsPanel =
           <p>— Чуть подправлен расчёт падения перехода активности.</p>
           <p>— Лог чистильщика теперь снова пишет локацию.</p>
           <p>— Чуть починен расчёт размера сохранённых сообщений.</p>
+          <p>— Удалён "Цвета в конструкторе окрасов" из-за неактуальности и ненадобности.</p>
           <hr class="uwu-hr" />
           <p class="uwu-modal-date">Дата выпуска: 23.09.26</p>
         </div>
@@ -8202,97 +8194,7 @@ if (!targetCW3.test(window.location.href)) {
 }
 
 if (targetCW3Kns.test(window.location.href)) {
-  // ====================================================================================================================
-  //  . . . ПОДГРУЗКА ЦВЕТОВЫХ ТЕМ . . .
-  // ====================================================================================================================
-  const currentThemeName = getCurrentThemeName();
-  const allThemes = getThemes();
-  const theme = allThemes[currentThemeName]?.colors || {};
-
-  // ====================================================================================================================
-  //   . . . ПОЛЬЗОВАТЕЛЬСКИЕ ТЕМЫ / ЦВЕТА . . .
-  // ====================================================================================================================
-  /**
-   * Applies the custom color scheme to the coat constructor (KNS) interface.
-   *
-   * @returns {void}
-   */
-  function applyTheme() {
-    const existingStyle = document.getElementById("uwu-theme-kns-style");
-    if (existingStyle) {
-      existingStyle.remove();
-    }
-
-    const subBlocks = theme?.subBlocksColorColor || theme?.blocksColor || "";
-
-    const newStyle = document.createElement("style");
-    newStyle.id = "uwu-theme-kns-style";
-    newStyle.innerHTML =
-      /* CSS */
-      `
-      :root, #app {
-        --cw3-page-bg: ${theme?.blocksColor || "transparent"} !important;
-        --cw3-page-text: ${theme?.textColor || "inherit"} !important;
-        --ds-page-text: ${theme?.textColor || "inherit"} !important;
-        --ds-page-link: ${theme?.linkColor || "inherit"} !important;
-        --ds-info-text: ${theme?.textColor || "inherit"} !important;
-        --ds-input-bg: ${theme?.accentColor1 || "#111111"} !important;
-        --ds-input-text: ${theme?.textColor || "#d5d5d5"} !important;
-      }
-
-      body {
-        background: ${theme?.backgroundColor || ""};
-      }
-
-      #cages_overflow {
-        background: black;
-      } 
-
-      #blocks {
-        background-color: ${theme?.blocksColor || ""};
-      }
-
-      .block-inner, fieldset {
-        background-color: ${theme?.subBlocksColor || "unset"} !important;
-      }
-
-      ::-webkit-scrollbar-track {
-        background-color: ${theme?.blocksColor || ""};
-      }
-
-      ::-webkit-scrollbar-thumb {
-        background-color: ${theme?.accentColor3 || ""};
-      }
-    
-      body, input, select, .ui-slider-handle {
-        color: ${theme?.textColor || ""};
-      }
-    
-      input, select, .ui-slider-horizontal {
-        background-color: ${theme?.accentColor1 || ""};
-        background: ${theme?.accentColor1 || ""};
-        border: solid 1px ${theme?.accentColor2 || ""};
-      }
-
-      .ui-widget-content .ui-state-default {
-        background: ${theme?.accentColor2 || ""};
-        border: solid 1px ${theme?.accentColor2 || ""};
-      } 
-
-      hr {
-        border: solid 1px ${theme?.accentColor2 || ""};
-      }
-    
-      a, a:hover {
-        color: ${theme?.linkColor || ""};
-      }
-      `;
-    document.head.appendChild(newStyle);
-  }
-
-  if (settings.userThemeKns) {
-    applyTheme();
-  }
+  // Тут что-то было, но теперь этого нет. Возможно, вам просто показалось 🥺
 }
 
 // ====================================================================================================================
