@@ -2138,6 +2138,7 @@ const newsPanel =
             настройку.</p>
           <p>— Теперь вы случайно не очистите всё поле/таблицу в Минном поле. Вам нужно будет прожать ещё разок на кнопку для подтверждения!</p>
           <p>— А ещё Минное поле станет чуть легче открывать на тач-экранах!</p>
+          <p>— Теперь если вы включили часы в игровой, то они первично вас предупредят об том, что нужно выдать специальное разрешение для уточнений точного онлайн времени! Оно единоразовое и не будет появляться.</p>
           <hr class="uwu-hr" />
           <h4>Внешний вид</h4>
           <p>— Панель БР: вырезаны лишние костыли драга и высоты (Они теперь тоже
@@ -2174,6 +2175,10 @@ const newsPanel =
             перманентно существуют и работают в выпадающем меню UwU в Игровой.</p>
           <p>— Переписан и улучшен генератор выпадающих списков. Теперь больше возможностей и меньше проблем от браузерных списков!</p>
           <p>— Исправлена логика сокращения ударов в БР. Теперь удары в разных режимах не будут складываться.</p>
+          <p>— "Скрыть Игровое поле" теперь реально скрывает игровое поле.</p>
+          <p>— Починен, возможно, столетний баг с тем, что не читалась температура Игровой. Возможно починились светлячки, и точно починились динамичные размеры частиц.</p>
+          <p>— Чуть подправлен расчёт падения перехода активности.</p>
+          <p>— Лог чистильщика теперь снова пишет локацию.</p>
           <hr class="uwu-hr" />
           <p class="uwu-modal-date">Дата выпуска: ??.??.26</p>
         </div>
@@ -2312,6 +2317,10 @@ const css_uwu_main = `
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+#uwu-settings-nav-item > span.settings-nav-icon > img {
+  background-color: unset;
 }
 
 /* ===================== TOGGLE SWITCHES ===================== */
@@ -3843,7 +3852,7 @@ details {
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 9px 14px;
+  padding: 8px 10px;
   border-radius: 12px;
   background: rgba(131, 229, 255, 0.25);
   border: 1px solid rgba(131, 229, 255, 0.4);
@@ -9943,6 +9952,54 @@ if (targetCW3.test(window.location.href)) {
     }
 
     /**
+     * Prompts the user with modal before the "first" network time request.
+     *
+     * @param {() => void} onConfirm - Callback invoked once user confirms the prompt.
+     * @returns {void}
+     */
+    function askOnlineTimePermission(onConfirm) {
+      if (document.getElementById("uwu-net-consent-modal")) return;
+
+      const modalHtml = /* HTML */ `
+        <div id="uwu-net-consent-modal" class="uwu-modal-overlay">
+          <div class="uwu-modal-card" style="max-width: 450px; text-align: center;">
+            <div class="uwu-modal-header" style="justify-content: center;">
+              <h3 style="margin: 0;">🌍 Часы CatWar UwU</h3>
+            </div>
+            <hr class="uwu-hr" />
+            <div class="uwu-modal-body" style="font-size: 13px; line-height: 1.5; padding: 10px 18px 18px;">
+              <p style="margin-top: 0;">
+                Вы включили Часы в CatWar UwU! Для точного времени идёт синхронизация с серверами <b>Google / Сбер / Яндекс</b>, и на это нужно ваше разрешение.
+              </p>
+
+              <div style="background: rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 10px; margin: 10px 0; border: 1px solid rgba(255, 255, 255, 0.15);">
+                Если сейчас появится всплывающее окно 'monkey плагина, выберите:<br>
+                <b style="color: #83e5ff; font-size: 14px;">«Всегда разрешать этот домен»</b><br>
+                <small style="opacity: 0.7;">(иначе часики перейдут на локальное время устройства (или будет неприятный спам новыми попытками))</small>
+              </div>
+
+              <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 8px; padding: 8px 12px; margin-bottom: 14px; font-size: 12px; color: #ffe082;">
+                ✨ <b>Примечание:</b> Если вы уже выдавали разрешение ранее, то повторное окно не появится и вам ничего делать не надо!
+              </div>
+
+              <button type="button" id="uwu-net-consent-btn" class="uwu-button install-button" style="width: 100%; padding: 8px 16px; font-weight: 700;">
+                Понятно, синхронизировать!
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.body.insertAdjacentHTML("beforeend", modalHtml);
+
+      document.getElementById("uwu-net-consent-btn")?.addEventListener("click", () => {
+        document.getElementById("uwu-net-consent-modal")?.remove();
+        uwuStorage.setItem("uwu_clock_net_consent", true);
+        onConfirm();
+      });
+    }
+
+    /**
      * Promisified wrapper for GM_xmlhttpRequest with error and timeout handling.
      * @param {Object} details - GM_xmlhttpRequest configuration options.
      * @param {string} details.method - HTTP method (e.g., 'GET', 'HEAD').
@@ -9988,6 +10045,13 @@ if (targetCW3.test(window.location.href)) {
      * @returns {Promise<void>} Resolves after state update and timer initialization.
      */
     async function fetchInternetTime() {
+      if (!uwuStorage.getItem("uwu_clock_net_consent")) {
+        updateClockWithLocalTime();
+        startTimer();
+        askOnlineTimePermission(() => fetchInternetTime());
+        return;
+      }
+
       const timeProviders = [
         {
           name: "Google",
@@ -12213,7 +12277,7 @@ if (targetCW3.test(window.location.href)) {
         apply: (on) =>
           toggleCss(
             "hideGameField",
-            "#cages_overflow { visibility: hidden !important; }",
+            "#act { visibility: hidden !important; }",
             on,
           ),
       },
@@ -14034,6 +14098,31 @@ if (targetCW3.test(window.location.href)) {
         }
       }
 
+      const getNextSibling = (el) => {
+        let next = el.nextElementSibling;
+        while (next && (next === placeholder || next === draggedEl)) {
+          next = next.nextElementSibling;
+        }
+        return next;
+      };
+
+      if (placeholder.parentElement === zone) {
+        const pRect = placeholder.getBoundingClientRect();
+        if (
+          clientX >= pRect.left - 10 &&
+          clientX <= pRect.right + 10 &&
+          clientY >= pRect.top - 6 &&
+          clientY <= pRect.bottom + 6
+        ) {
+          return {
+            zone,
+            beforeSibling: getNextSibling(placeholder),
+            dockType: "vertical-before",
+            targetSibling: null,
+          };
+        }
+      }
+
       if (activeDockSibling && activeDockSibling.parentElement === zone) {
         const pRect = placeholder.getBoundingClientRect();
         const sRect = activeDockSibling.getBoundingClientRect();
@@ -14052,7 +14141,7 @@ if (targetCW3.test(window.location.href)) {
           const midX = (rowLeft + rowRight) / 2;
           const isLeft = clientX < midX;
           const dockType = isLeft ? "left" : "right";
-          const beforeSibling = isLeft ? activeDockSibling : activeDockSibling.nextElementSibling;
+          const beforeSibling = isLeft ? activeDockSibling : getNextSibling(activeDockSibling);
 
           return {
             zone,
@@ -14101,34 +14190,36 @@ if (targetCW3.test(window.location.href)) {
           beforeSibling = targetSibling;
         } else if (relY > 0.78) {
           dockType = "vertical-after";
-          beforeSibling = targetSibling.nextElementSibling;
+          beforeSibling = getNextSibling(targetSibling);
         } else if (relX < 0.35) {
           dockType = "left";
           beforeSibling = targetSibling;
         } else if (relX > 0.65) {
           dockType = "right";
-          beforeSibling = targetSibling.nextElementSibling;
+          beforeSibling = getNextSibling(targetSibling);
         } else {
           if (relY < 0.5) {
             dockType = "vertical-before";
             beforeSibling = targetSibling;
           } else {
             dockType = "vertical-after";
-            beforeSibling = targetSibling.nextElementSibling;
+            beforeSibling = getNextSibling(targetSibling);
           }
         }
 
         return { zone, beforeSibling, dockType, targetSibling };
       }
 
-      const firstRect = siblings[0].getBoundingClientRect();
-      if (clientY < firstRect.top) {
-        return { zone, beforeSibling: siblings[0], dockType: "vertical-before", targetSibling: null };
-      }
-
-      const lastRect = siblings[siblings.length - 1].getBoundingClientRect();
-      if (clientY > lastRect.bottom) {
-        return { zone, beforeSibling: null, dockType: "vertical-after", targetSibling: null };
+      for (const child of siblings) {
+        const cRect = child.getBoundingClientRect();
+        if (clientY < cRect.top + cRect.height / 2) {
+          return {
+            zone,
+            beforeSibling: child,
+            dockType: "vertical-before",
+            targetSibling: null,
+          };
+        }
       }
 
       return { zone, beforeSibling: null, dockType: "vertical-after", targetSibling: null };
@@ -15065,12 +15156,12 @@ if (targetCW3.test(window.location.href)) {
       const historyBlock = document.querySelector("#history");
       if (!historyBlock) return;
 
-      const locationSpan = historyBlock.querySelector("#location");
+      const locationSpan = document.getElementById("location");
       const currentLocation = locationSpan
-        ? locationSpan.textContent.trim()
+        ? (locationSpan.getAttribute("title") || locationSpan.textContent).trim()
         : "";
 
-      if (currentLocation === "[ Загружается… ]") {
+      if (!currentLocation || currentLocation.includes("Загружается")) {
         return;
       }
 
@@ -17598,13 +17689,9 @@ if (targetCW3.test(window.location.href)) {
 
   function getTemperature() {
     const temperatureElement = document.querySelector("#tos");
-    const temperatureElementHTML = temperatureElement.outerHTML;
-    const backgroundValue = /background:\s*([a-zA-Z0-9#()]+);/.exec(
-      temperatureElementHTML,
-    );
+    if (!temperatureElement) return;
 
-    if (backgroundValue && backgroundValue.length > 1) {
-      const foundBackground = backgroundValue[1];
+    const styleAttr = temperatureElement.getAttribute("style") || "";
 
       const temperatureRanges = [
         {
@@ -17685,12 +17772,32 @@ if (targetCW3.test(window.location.href)) {
         },
       ];
 
+      const extractedColors = [];
+    
+    const hexRegex = /#[0-9a-fA-F]{6}\b/ig;
+    let match;
+    while ((match = hexRegex.exec(styleAttr)) !== null) {
+      extractedColors.push(match[0].toUpperCase());
+    }
+    
+    const rgbRegex = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/ig;
+    while ((match = rgbRegex.exec(styleAttr)) !== null) {
+      const r = parseInt(match[1], 10).toString(16).padStart(2, '0');
+      const g = parseInt(match[2], 10).toString(16).padStart(2, '0');
+      const b = parseInt(match[3], 10).toString(16).padStart(2, '0');
+      extractedColors.push(`#${r}${g}${b}`.toUpperCase());
+    }
+
+    if (extractedColors.length > 0) {
       let foundTemperature = null;
 
       for (const range of temperatureRanges) {
-        if (range.colors.includes(foundBackground)) {
-          foundTemperature = range;
-          break;
+        if (foundTemperature) break;
+        for (const extColor of extractedColors) {
+          if (range.colors.includes(extColor)) {
+            foundTemperature = range;
+            break;
+          }
         }
       }
 
@@ -17701,7 +17808,7 @@ if (targetCW3.test(window.location.href)) {
         currentTemperature = 1;
         temperatureDescription =
           "Неизвестная температура. Разработчик скорее всего уже в курсе и в скором времени выпустит правку.";
-        console.warn("Неизвестная температура:", foundBackground);
+        console.warn("UwU | Неизвестная температура. Извлеченные цвета:", extractedColors);
       }
 
       switch (currentTemperature) {
@@ -17731,6 +17838,7 @@ if (targetCW3.test(window.location.href)) {
       // console.log("...я временно потерял бекграунд температуры🌡️...");
     }
   }
+
   // ====================================================================================================================
   if (!settings.manualWeatherPanel) {
     setupMutationObserver("#sky", getSkyType);
@@ -19606,7 +19714,7 @@ function setupActivityCalc() {
     document.getElementById("to-fall-container").style.display = "none";
   } else {
     const timeFall = new Date(
-      Date.now() + (progress.doneFromZero - 1575) * 5 * 3600000
+      Date.now() + (progress.doneFromZero - 1575) * HOURLY_ACTIVITY_DECREASE_DIVISOR * 3600000
     );
     document.getElementById("to-fall").innerHTML =
       timeFall.getDate() +
@@ -20604,7 +20712,7 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
     const css =
       /* CSS */
       `
-       #uwu-saved-ls-tab {
+       #links > #uwu-saved-ls-tab {
         padding: 2px 8px;
         border-radius: 10px;
         background-color: rgba(255, 255, 255, 0.05);
@@ -20612,7 +20720,8 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
         transition: background-color 0.3s ease;
         text-decoration: none !important;
       }
-      #uwu-saved-ls-tab:hover, #uwu-saved-ls-tab.active {
+      #links > #uwu-saved-ls-tab:hover, 
+      #links > #uwu-saved-ls-tab.active {
         background-color: rgba(255, 255, 255, 0.2);
       }
 
@@ -20760,10 +20869,14 @@ if (targetLs.test(window.location.href) && settings.savingLS) {
     const linksContainer = document.getElementById("links");
     if (!linksContainer || document.getElementById("uwu-saved-ls-tab")) return;
 
-    linksContainer.insertAdjacentHTML(
-      "beforeend",
-      ` | <a href="#" id="uwu-saved-ls-tab">Сохранённые (<span id="uwu-saved-ls-count">0</span>)</a>`
-    );
+    const tabsContainer = linksContainer.querySelector(".tabs");
+
+    if (tabsContainer) {
+      tabsContainer.insertAdjacentHTML(
+        "beforeend",
+        `<a href="#" class="tab folder" id="uwu-saved-ls-tab" role="tab">Сохранённые (<span id="uwu-saved-ls-count">0</span>)</a>`
+      );
+    }
 
     const savedTab = document.getElementById("uwu-saved-ls-tab");
     savedTab.addEventListener("click", showSavedMessagesInterface);
