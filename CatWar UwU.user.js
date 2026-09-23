@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v2.0.0-09.26
+// @version      v2.0.1-09.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -2173,6 +2173,12 @@ const newsPanel =
           <p>— Лог чистильщика теперь снова пишет локацию.</p>
           <p>— Чуть починен расчёт размера сохранённых сообщений.</p>
           <p>— Удалён "Цвета в конструкторе окрасов" из-за неактуальности и ненадобности.</p>
+          <hr class="uwu-hr" />
+          <h4>—— Фиксы и исправления v2.0.1</h4>
+          <p>—— Починен Современный чат на мобильном дизайне Игровой.</p>
+          <p>—— Обращение (Клик по имени кота в чате) теперь снова вставляется в альтернативную строку ввода сообщений.</p>
+          <p>—— ТБ теперь отображают актуальное значение (Наверное).</p>
+          <p>—— Кнопка "Все настройки мода" теперь реально перебрасывает на страницу Настроек CatWar'а сотображаемыми сразу Настройками UwU.</p>
           <hr class="uwu-hr" />
           <p class="uwu-modal-date">Дата выпуска: 23.09.26</p>
         </div>
@@ -5056,42 +5062,45 @@ function setupNativeSettingsIntegration(settingsElement) {
   const body = document.querySelector(".settings-body");
 
   if (!nav || !body) {
-    const fallbackContainer =
-      document.querySelector("#branch") ||
-      document.querySelector("#site_table");
-    fallbackContainer?.appendChild(settingsElement);
+    setTimeout(() => setupNativeSettingsIntegration(settingsElement), 50);
     return;
   }
 
-  const uwuNavBtn = document.createElement("button");
-  uwuNavBtn.type = "button";
-  uwuNavBtn.className = "settings-nav-item";
-  uwuNavBtn.id = "uwu-settings-nav-item";
-  uwuNavBtn.innerHTML = `
-    <span aria-hidden="true" class="settings-nav-icon">
-      <img src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/partly_sunny_rain.png" alt="UwU" class="settings-nav-icon__svg" style="object-fit: contain;">
-    </span>
-    <span class="settings-nav-label">CatWar UwU</span>
-  `;
+  let uwuNavBtn = document.getElementById("uwu-settings-nav-item");
+  if (!uwuNavBtn) {
+    uwuNavBtn = document.createElement("button");
+    uwuNavBtn.type = "button";
+    uwuNavBtn.className = "settings-nav-item";
+    uwuNavBtn.id = "uwu-settings-nav-item";
+    uwuNavBtn.innerHTML = `
+      <span aria-hidden="true" class="settings-nav-icon">
+        <img src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/partly_sunny_rain.png" alt="UwU" class="settings-nav-icon__svg" style="object-fit: contain;">
+      </span>
+      <span class="settings-nav-label">CatWar UwU</span>
+    `;
+    nav.appendChild(uwuNavBtn);
+  }
 
   let isUwuActive = false;
+  let userInteracted = false;
 
   /**
    * Activates the UwU tab, highlights the nav button, and hides Vue setting panels.
    */
   function activateUwuTab() {
     isUwuActive = true;
-    nav
-      .querySelectorAll(".settings-nav-item")
-      .forEach((btn) => btn.classList.remove("active"));
+
+    nav.querySelectorAll(".settings-nav-item").forEach((btn) => {
+      if (btn !== uwuNavBtn) btn.classList.remove("active");
+    });
     uwuNavBtn.classList.add("active");
 
     Array.from(body.children).forEach((child) => {
       if (child !== settingsElement) {
-        child.style.display = "none";
+        child.style.setProperty("display", "none", "important");
       }
     });
-    settingsElement.style.display = "block";
+    settingsElement.style.setProperty("display", "block", "important");
   }
 
   /**
@@ -5101,37 +5110,50 @@ function setupNativeSettingsIntegration(settingsElement) {
     if (!isUwuActive) return;
     isUwuActive = false;
     uwuNavBtn.classList.remove("active");
-    settingsElement.style.display = "none";
+    settingsElement.style.setProperty("display", "none", "important");
 
     Array.from(body.children).forEach((child) => {
       if (child !== settingsElement) {
-        child.style.display = "";
+        child.style.removeProperty("display");
       }
     });
   }
 
-  uwuNavBtn.addEventListener("click", (e) => {
+  uwuNavBtn.onclick = (e) => {
     e.preventDefault();
+    userInteracted = true;
     activateUwuTab();
-  });
+  };
 
   nav.addEventListener("click", (e) => {
     const nativeBtn = e.target.closest(".settings-nav-item");
-    if (nativeBtn && nativeBtn !== uwuNavBtn) {
+    if (nativeBtn && nativeBtn !== uwuNavBtn && e.isTrusted) {
+      userInteracted = true;
       deactivateUwuTab();
     }
   });
 
-  settingsElement.style.display = "none";
-  nav.appendChild(uwuNavBtn);
-  body.appendChild(settingsElement);
+  if (!body.contains(settingsElement)) {
+    settingsElement.style.setProperty("display", "none", "important");
+    body.appendChild(settingsElement);
+  }
 
   const navObserver = new MutationObserver(() => {
     if (!nav.contains(uwuNavBtn)) {
       nav.appendChild(uwuNavBtn);
     }
+    if (isUwuActive) {
+      nav.querySelectorAll(".settings-nav-item").forEach((btn) => {
+        if (btn !== uwuNavBtn && btn.classList.contains("active")) {
+          btn.classList.remove("active");
+        }
+      });
+      if (!uwuNavBtn.classList.contains("active")) {
+        uwuNavBtn.classList.add("active");
+      }
+    }
   });
-  navObserver.observe(nav, { childList: true });
+  navObserver.observe(nav, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
 
   const bodyObserver = new MutationObserver(() => {
     if (!body.contains(settingsElement)) {
@@ -5139,13 +5161,32 @@ function setupNativeSettingsIntegration(settingsElement) {
     }
     if (isUwuActive) {
       Array.from(body.children).forEach((child) => {
-        if (child !== settingsElement) {
-          child.style.display = "none";
+        if (child !== settingsElement && child.style.display !== "none") {
+          child.style.setProperty("display", "none", "important");
         }
       });
+      if (settingsElement.style.display !== "block") {
+        settingsElement.style.setProperty("display", "block", "important");
+      }
     }
   });
-  bodyObserver.observe(body, { childList: true });
+  bodyObserver.observe(body, { childList: true, subtree: true });
+
+  const pendingTimestamp = uwuStorage.getItem("uwu_pending_settings_open");
+  const isFreshToken = pendingTimestamp && (Date.now() - Number(pendingTimestamp) < 15000);
+
+  if (isFreshToken) {
+    uwuStorage.removeItem("uwu_pending_settings_open");
+    activateUwuTab();
+
+    [50, 150, 300, 600].forEach((delay) => {
+      setTimeout(() => {
+        if (!userInteracted) {
+          activateUwuTab();
+        }
+      }, delay);
+    });
+  }
 }
 
 /**
@@ -8714,6 +8755,11 @@ if (targetCW3.test(window.location.href)) {
         ⚙️ Все настройки мода →
       </a>
     `;
+
+    const settingsLink = popover.querySelector(".uwu-footer-link");
+    settingsLink?.addEventListener("click", () => {
+      uwuStorage.setItem("uwu_pending_settings_open", Date.now());
+    });
 
     const fastStylesBox = popover.querySelector("#uwu-popover-fast-styles");
     const manager = getFastStylesManager();
@@ -12830,7 +12876,8 @@ if (targetCW3.test(window.location.href)) {
    */
   function initChatAutoResizePersistence() {
     const chatContainer = document.getElementById("uwu_chat_msg") || document.getElementById("chat_msg");
-    if (!chatContainer) return;
+    if (!chatContainer || chatContainer._uwuResizeObserved) return;
+    chatContainer._uwuResizeObserved = true;
 
     let lastHeight = chatContainer.offsetHeight;
     let saveTimeout = null;
@@ -13143,6 +13190,11 @@ if (targetCW3.test(window.location.href)) {
           height: 1000px;
         }
 
+        #black_points:not(.in-topbar) {
+          display: none !important;
+        }
+
+        #uwu-topbar-black-points.in-topbar,
         #black_points.in-topbar {
           display: inline-flex;
           align-items: center;
@@ -13157,6 +13209,7 @@ if (targetCW3.test(window.location.href)) {
           flex-shrink: 0;
         }
 
+        #uwu-topbar-black-points.in-topbar + .game-location,
         #black_points.in-topbar + .game-location {
           margin-left: 6px !important;
         }
@@ -13184,28 +13237,18 @@ if (targetCW3.test(window.location.href)) {
         .uwu-tile--w50  { width: calc(50% - (var(--uwu-tile-gap, 8px) / 2)); }
         .uwu-tile--w33  { width: calc(33.333% - (var(--uwu-tile-gap, 8px) * 2 / 3)); }
 
-        /* Internal widget scrollbars */
+        /* ===================== CHAT CONTAINER LAYOUT ===================== */
         #tr_chat.uwu-tile-block {
           height: auto !important;
         }
 
-        /* ===================== CHAT CONTAINER LAYOUT ===================== */
-        #chat_msg,
-        #uwu_chat_msg {
+        #chat_msg {
           height: var(--uwu-chat-height, 275px);
           resize: vertical;
           overflow-y: auto;
           width: 100% !important;
           max-width: 100% !important;
           box-sizing: border-box !important;
-        }
-
-        #uwu_chat_msg {
-          display: flex;
-        }
-
-        #tr_chat:has(#uwu_chat_msg) #chat_msg {
-          display: none !important;
         }
 
         #chat_msg .chat_text {
@@ -13224,46 +13267,6 @@ if (targetCW3.test(window.location.href)) {
           width: 1% !important;
           white-space: nowrap !important;
           vertical-align: top !important;
-        }
-
-        .uwu-chat-msg-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: baseline;
-          width: 100%;
-          box-sizing: border-box;
-        }
-
-        .uwu-chat-actions {
-          display: flex;
-          width: 44px;
-          justify-content: flex-end;
-          flex-shrink: 0;
-          margin-right: 2px;
-          user-select: none;
-        }
-
-        .uwu-chat-time {
-          opacity: 0.5;
-          font-size: 0.85em;
-          margin-right: 4px;
-          font-family: monospace;
-        }
-
-        .uwu-chat-id {
-          opacity: 0.6;
-          font-size: 0.85em;
-        }
-
-        #uwu_chat_msg > hr {
-          width: 100%;
-          margin: 5px 0;
-          border: none;
-          border-top: 1px solid var(--uwu-border, rgba(255, 255, 255, 0.1));
-        }
-
-        #uwu_chat_msg .chat_text {
-          padding: 0;
         }
 
         #history_block {
@@ -14704,22 +14707,49 @@ if (targetCW3.test(window.location.href)) {
   }
 
   /**
-   * Relocates and condenses the Dark Points (ТБ) counter into the topbar.
+   * Duplicates the Dark Points (ТБ) counter into the top navigation bar.
    *
    * @returns {void}
    */
   function initTopbarDarkPoints() {
-    const bp = document.getElementById("black_points");
-    const locationEl = document.querySelector(".game-location");
-    if (!bp || !locationEl || bp.classList.contains("in-topbar")) return;
+    const locationEl = document.querySelector(".game-topbar .game-location");
+    if (!locationEl) return;
 
-    const count = bp.querySelector("#black")?.textContent || "0";
-    bp.className = "in-topbar";
-    bp.innerHTML = `<b>ТБ:</b> <span id="black">${count}</span>`;
-    locationEl.before(bp);
+    let topbarBp = document.getElementById("uwu-topbar-black-points");
+    if (!topbarBp) {
+      topbarBp = document.createElement("span");
+      topbarBp.id = "uwu-topbar-black-points";
+      topbarBp.className = "in-topbar";
+      topbarBp.innerHTML = `<b>ТБ:</b> <span id="uwu-topbar-black-val">0</span>`;
+      locationEl.before(topbarBp);
+    }
+
+    const valSpan = topbarBp.querySelector("#uwu-topbar-black-val");
+
+    setupMutationObserver(
+      "#black_points",
+      () => {
+        const bp = document.getElementById("black_points");
+        if (!bp) return;
+
+        bp.style.setProperty("display", "none", "important");
+
+        const raw = bp.querySelector("#black")?.textContent || bp.textContent || "0";
+        const match = raw.match(/\d+/);
+        if (match && valSpan) {
+          valSpan.textContent = match[0];
+        }
+      },
+      { childList: true, characterData: true, subtree: true },
+      20,
+      500,
+      50
+    );
   }
 
-  setupSingleCallback(".game-topbar", initTopbarDarkPoints);
+  if (settings.customLayout) {
+    setupSingleCallback(".game-topbar", initTopbarDarkPoints);
+  }
 
   // ====================================================================================================================
   //   . . . ПОДСКАЗЫВАТЬ ОСТАВШЕЕСЯ ВРЕМЯ ДО НЮХА . . .
@@ -16592,6 +16622,93 @@ if (targetCW3.test(window.location.href)) {
   applyVanillaChatStyles();
 
   /**
+   * Injects CSS for Modern Chat.
+   *
+   * @returns {void}
+   */
+  function ensureModernChatStyles() {
+    let style = document.getElementById("uwu-modern-chat-styles");
+    if (!style) {
+      style = document.createElement("style");
+      style.id = "uwu-modern-chat-styles";
+      document.head.appendChild(style);
+    }
+
+    const chatHeight = parseInt(settings.chatHeight, 10) || 275;
+
+    style.textContent = `
+      :root {
+        --uwu-chat-height: ${chatHeight}px;
+      }
+
+      #uwu_chat_msg ~ #chat_msg,
+      #uwu_chat_msg + #chat_msg,
+      #tr_chat:has(#uwu_chat_msg) #chat_msg {
+        display: none !important;
+      }
+
+      #uwu_chat_msg {
+        display: flex;
+        height: var(--uwu-chat-height, 275px);
+        resize: vertical;
+        overflow-y: auto;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .uwu-chat-msg-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        width: 100%;
+        box-sizing: border-box;
+        flex-shrink: 0;
+        gap: 6px;
+      }
+
+      .uwu-chat-msg-row .chat_text {
+        flex: 1 1 auto;
+        min-width: 0;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        padding: 0;
+      }
+
+      .uwu-chat-actions {
+        display: flex;
+        width: 44px;
+        justify-content: flex-end;
+        flex-shrink: 0;
+        margin-right: 2px;
+        user-select: none;
+      }
+
+      .uwu-chat-time {
+        opacity: 0.5;
+        font-size: 0.85em;
+        margin-right: 4px;
+        font-family: monospace;
+        white-space: nowrap;
+      }
+
+      .uwu-chat-id {
+        opacity: 0.6;
+        font-size: 0.85em;
+        white-space: nowrap;
+      }
+
+      #uwu_chat_msg > hr {
+        width: 100%;
+        margin: 5px 0;
+        border: none;
+        border-top: 1px solid var(--uwu-border, rgba(255, 255, 255, 0.1));
+        flex-shrink: 0;
+      }
+    `;
+  }
+
+  /**
    * Generating inline CSS font and color styles for messages.
    */
   const ChatStyleFormatter = {
@@ -16685,6 +16802,13 @@ if (targetCW3.test(window.location.href)) {
     const trChatTd = document.querySelector("#tr_chat > td");
     if (!chatForm || !trChatTd) return;
 
+    ensureModernChatStyles();
+
+    const originalChat = document.getElementById("chat_msg");
+    if (originalChat) {
+      originalChat.style.setProperty("display", "none", "important");
+    }
+
     document.getElementById("uwu_chat_msg")?.remove();
 
     const chatContainer = document.createElement("div");
@@ -16745,13 +16869,16 @@ if (targetCW3.test(window.location.href)) {
       const nickEl = target.closest(".nick");
       if (nickEl) {
         event.preventDefault();
-        const input = document.querySelector("#txt textarea#text, #txt input#text");
+        const input = document.querySelector("#txt textarea#text-textarea, #txt textarea, #txt input#text");
         if (!input) return;
 
         const nick = nickEl.textContent.trim();
         input.value += `${nick}, `;
         input.dispatchEvent(new Event("input", { bubbles: true }));
         input.focus();
+        if (input.setSelectionRange) {
+          input.setSelectionRange(input.value.length, input.value.length);
+        }
         return;
       }
 
@@ -16816,7 +16943,7 @@ if (targetCW3.test(window.location.href)) {
       }
     }
 
-    watchVueData(
+      watchVueData(
       "chat.messages",
       (messages) => {
         if (!Array.isArray(messages)) return;
@@ -16831,10 +16958,12 @@ if (targetCW3.test(window.location.href)) {
           renderMessage(msg);
         });
 
-        // Purge original chat DOM nodes to eliminate vanilla lags
         const originalChat = document.getElementById("chat_msg");
-        if (originalChat && originalChat.hasChildNodes()) {
-          originalChat.textContent = "";
+        if (originalChat) {
+          originalChat.style.setProperty("display", "none", "important");
+          if (originalChat.hasChildNodes()) {
+            originalChat.textContent = "";
+          }
         }
       },
       { deep: true, immediate: true }
@@ -16880,12 +17009,18 @@ if (targetCW3.test(window.location.href)) {
      * Synchronizes textarea contents into CatWar's native input and triggers Vue events.
      */
     const syncToOriginal = () => {
-      originalInput.value = textarea.value;
-      originalInput.dispatchEvent(new Event("input", { bubbles: true }));
-      originalInput.dispatchEvent(new Event("change", { bubbles: true }));
+      if (originalInput.value !== textarea.value) {
+        originalInput.value = textarea.value;
+        originalInput.dispatchEvent(new Event("input", { bubbles: true }));
+        originalInput.dispatchEvent(new Event("change", { bubbles: true }));
+      }
     };
 
     textarea.addEventListener("input", syncToOriginal);
+
+    originalInput.addEventListener("focus", () => {
+      textarea.focus();
+    });
 
     const inputProto = Object.getPrototypeOf(originalInput);
     const originalDescriptor = Object.getOwnPropertyDescriptor(inputProto, "value");
@@ -16897,9 +17032,11 @@ if (targetCW3.test(window.location.href)) {
         },
         set(val) {
           originalDescriptor.set.call(this, val);
-          if (val === "" && textarea.value !== "") {
-            textarea.value = "";
+          const strVal = String(val ?? "");
+          if (textarea.value !== strVal) {
+            textarea.value = strVal;
             chatForm.dispatchEvent(new Event("input", { bubbles: true }));
+            textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
           }
         },
         configurable: true,
