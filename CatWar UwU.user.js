@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v2.0.1-09.26
+// @version      v2.1.0-09.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -2109,78 +2109,17 @@ const newsPanel =
         <hr class="uwu-hr" />
         <div class="uwu-modal-body">
           <h4>Главное</h4>
-          <p>— Теперь Настройки UwU "нативненько" встроены к остальным навигационным
-            кнопкам в общих Настройках!</p>
-          <p>— А так же новейшее переоформление Настроек UwU! Надеюсь вам чуточку
-            понравится... К примеру мини-погода в панельки навигации...</p>
-          <p>— Новости и детали обновления теперь в небольшой кнопочке в
-            Навигационной панели Настроек UwU.</p>
-          <p>— Полный редизайн карточки "Темы и цвета Игровой". Теперь чуть более
-            понятно, читаемей, на один акцент больше и просто круче! Ну и теперь цвета снова работают в Игровой!</p>
-          <p>— Написан свой ColorPicker для крутых фич: поддержка прозрачности,
-            история цветов и легкого встраивания. Теперь никаких левых ссылок на
-            левые сайты! Все старые браузерные пикеры в моде заменены на него!</p>
-          <p>— Полная перепись Редизайна Игровой! Теперь это полноценный модульный
-            HUD-редактор. Можно перетаскивать блоки как угодно, и куда угодно,
-            играясь с их положением и размерами как вам вздумается. Включается он
-            кнопкой «Редактировать интерфейс» прямо в выпадающем меню UwU на верхней
-            навигационной панели Игровой (Ну или в Настройках мода, но редактировать всё равно надо в Игровой).</p>
-          <p>— Показ ID котов в чате вынесен в отдельную самостоятельную
-            настройку.</p>
-          <p>— Теперь вы случайно не очистите всё поле/таблицу в Минном поле. Вам нужно будет прожать ещё разок на кнопку для подтверждения!</p>
-          <p>— А ещё Минное поле станет чуть легче открывать на тач-экранах!</p>
-          <p>— Теперь если вы включили часы в игровой, то они первично вас предупредят об том, что нужно выдать специальное разрешение для уточнений точного онлайн времени! Оно единоразовое и не будет появляться.</p>
+          <p>— Снова всё работает и починено.</p>
           <hr class="uwu-hr" />
           <h4>Внешний вид</h4>
-          <p>— Панель БР: вырезаны лишние костыли драга и высоты (Они теперь тоже
-            нативные).</p>
-          <p>— Очищены устаревшие пункты в настройках.</p>
-          <p>— Удалены все лишние и ненужные темы настроек UwU... Простите, если
-            кто-то пользовался. Но, возможно, в будущем что-то вернётся на
-            кастомайз!</p>
-          <p>— Функции Современного чата вынесены в отдельный блок для визуального
-            понимания и удобства.</p>
-          <p>— Удалены редизайны постов в блогах/лентах и страницы костюмов из-за
-            неактуальности.</p>
-          <p>— Узоры теперь не сжимаются некрасиво на Параметрах и Навыках.</p>
-          <p>— Небо теперь снова видно и работает в Редизайне Игровой!</p>
-          <p>— Подчищена старая и неактуальная надпись про будущие приколы в Управлении Погодой.</p>
-          <p>— Дизайн сохранённых сообщений адаптирован под редизайн CatWar'а.</p>
+          <p>— </p>
           <hr class="uwu-hr" />
           <h4>Изменения кода</h4>
-          <p>— Быстрые ссылки починены и адаптированы под новую шапку Игровой.</p>
-          <p>— Удален функционал-прикол с Отображением душевых котов из-за
-            неактуальности.</p>
-          <p>— Счётчик символов работает и с ванильной строкой (И вроде просто
-            починен).</p>
-          <p>— Возвращена подпись громкости уведомлений для Минного поля.</p>
-          <p>— Починен звук получения нового ЛС.</p>
-          <p>— Звуковое уведомление о Боевой стойке теперь через Vue.</p>
-          <p>— "Подробнее о параметрах" теперь тоже читают из Vue.</p>
-          <p>— Добавлен Мини генератор погодных частиц. Используется для фона шапки
-            Хедера Настроек UwU.</p>
-          <p>— Минное поле и Таймер напоминалка теперь не застревает под Навигационной панелькой в
-            Игровой.</p>
-          <p>— Ссылка в Игровой на "Настройки" удалена из-за неактуальности.</p>
-          <p>— Удалены "Быстрые стили" из-за неактуальности, ибо
-            "расширенное меню Игровой" теперь отстуствует. Все галочки теперь
-            перманентно существуют и работают в выпадающем меню UwU в Игровой.</p>
-          <p>— Переписан и улучшен генератор выпадающих списков. Теперь больше возможностей и меньше проблем от браузерных списков!</p>
-          <p>— Исправлена логика сокращения ударов в БР. Теперь удары в разных режимах не будут складываться.</p>
-          <p>— "Скрыть Игровое поле" теперь реально скрывает игровое поле.</p>
-          <p>— Починен, возможно, столетний баг с тем, что не читалась температура Игровой. Возможно починились светлячки, и точно починились динамичные размеры частиц.</p>
-          <p>— Чуть подправлен расчёт падения перехода активности.</p>
-          <p>— Лог чистильщика теперь снова пишет локацию.</p>
-          <p>— Чуть починен расчёт размера сохранённых сообщений.</p>
-          <p>— Удалён "Цвета в конструкторе окрасов" из-за неактуальности и ненадобности.</p>
+          <p>— Возможно, теперь игровая не должна лагать от включённых Нумераций клеток.</p>
+          <p>— CatWar поменял table игровую на div, наконец-то. 
+          Исправились на новые реали. Редизайны снова работают.</p>
           <hr class="uwu-hr" />
-          <h4>—— Фиксы и исправления v2.0.1</h4>
-          <p>—— Починен Современный чат на мобильном дизайне Игровой.</p>
-          <p>—— Обращение (Клик по имени кота в чате) теперь снова вставляется в альтернативную строку ввода сообщений.</p>
-          <p>—— ТБ теперь отображают актуальное значение (Наверное).</p>
-          <p>—— Кнопка "Все настройки мода" теперь реально перебрасывает на страницу Настроек CatWar'а сотображаемыми сразу Настройками UwU.</p>
-          <hr class="uwu-hr" />
-          <p class="uwu-modal-date">Дата выпуска: 23.09.26</p>
+          <p class="uwu-modal-date">Дата выпуска: ??.10.26</p>
         </div>
       </div>
     </div>
@@ -8320,24 +8259,21 @@ if (targetCW3.test(window.location.href)) {
         background-color: ${theme?.blocksColor || "transparent"} !important;
       }
 
-      #tr_tos > td,
+      #tr_tos,
+      #app:not(.compact) #tr_tos,
       #parameter.uwu-tile-block,
       #history.uwu-tile-block,
       #family.uwu-tile-block {
         background-color: ${theme?.blocksColor || "transparent"} !important;
-      } 
+      }
 
-      #tr_tos > td,
-      #tr_actions > td {
+      #tr_tos,
+      #tr_actions {
         box-shadow: none !important;
       }
 
       /* === 4. CHAT === */
       #tr_chat {
-        background-color: unset !important;
-      }
-
-      #tr_chat > td {
         background-color: ${theme?.chatColor || "inherit"} !important;
         color: ${theme?.textColor || "inherit"} !important;
       }
@@ -8477,12 +8413,17 @@ if (targetCW3.test(window.location.href)) {
 
       #info_main h2 a.toggle,
       #info_main h2 a.toggle:link,
-      #info_main h2 a.toggle:visited {
+      #info_main h2 a.toggle:visited,
+      .infos h2 a.toggle,
+      .infos h2 a.toggle:link,
+      .infos h2 a.toggle:visited {
         color: ${theme?.linkColor || ""} !important;
       }
 
       #info_main h2 a.toggle:hover,
-      #info_main h2 a.toggle:focus {
+      #info_main h2 a.toggle:focus,
+      .infos h2 a.toggle:hover,
+      .infos h2 a.toggle:focus {
         color: ${theme?.accentColor3 || theme?.linkColor || ""} !important;
       }
       `;
@@ -8499,14 +8440,19 @@ if (targetCW3.test(window.location.href)) {
   function applyGlassStyle() {
     const glassCss = `
       #tr_chat,
-      #tr_actions > td,
-      #tr_mouth > td, .small,
-      #info_main > tbody > tr > td,
+      #tr_actions,
+      #tr_mouth,
+      #tr_tos,
+      .small,
+      #info_main,
+      #parameter.uwu-tile-block,
+      #history.uwu-tile-block,
+      #family.uwu-tile-block,
       #uwu-clock,
       #uwu-interval-timer-main-panel,
       .modal-body,
-      #fightPanel, 
-      span.cat_tooltip, 
+      #fightPanel,
+      span.cat_tooltip,
       .cat-info {
           backdrop-filter: blur(16px) !important;
           -webkit-backdrop-filter: blur(16px) !important;
@@ -9780,11 +9726,14 @@ if (targetCW3.test(window.location.href)) {
       container.appendChild(clockElement);
       document.head.appendChild(flyStyle);
     } else if (settings.clockPosition === "tos") {
-      const trTos = document.getElementById("tr_tos").querySelector("tbody tr");
-      const newTd = document.createElement("td");
-      newTd.appendChild(clockElement);
-      trTos.appendChild(newTd);
-      document.head.appendChild(tosStyle);
+      const trTosRow = document.querySelector("#tr_tos .tos-row");
+      if (trTosRow) {
+        const newCell = document.createElement("div");
+        newCell.className = "tos-cell";
+        newCell.appendChild(clockElement);
+        trTosRow.appendChild(newCell);
+        document.head.appendChild(tosStyle);
+      }
     }
 
     let useInternetTime = false;
@@ -10615,39 +10564,64 @@ if (targetCW3.test(window.location.href)) {
   //  . . . НУМЕРАЦИЯ ЯЧЕЕК . . .
   // ====================================================================================================================
   if (settings.cellsNumbers) {
-    function createCellNumbers(style) {
-      let css =
-        /* CSS */
-        `
+    /**
+     * @param {string} color - Source color string (named, hex, or rgb/rgba).
+     * @param {number} opacity - Alpha channel value between 0 and 1.
+     * @returns {string} Formatted CSS color with baked alpha transparency.
+     */
+    function resolveCellNumberColor(color, opacity) {
+      if (color === "white") return `rgba(255, 255, 255, ${opacity})`;
+      if (color === "black") return `rgba(0, 0, 0, ${opacity})`;
+      if (typeof color === "string" && color.startsWith("#")) {
+        let hex = color.slice(1);
+        if (hex.length === 3) hex = hex.split("").map((c) => c + c).join("");
+        const r = parseInt(hex.substring(0, 2), 16) || 255;
+        const g = parseInt(hex.substring(2, 4), 16) || 255;
+        const b = parseInt(hex.substring(4, 6), 16) || 255;
+        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+      }
+      return `color-mix(in srgb, ${color} ${Math.round(opacity * 100)}%, transparent)`;
+    }
+
+    /**
+     * @param {Object} [style={}] - Styling configuration options.
+     * @param {string} [style.color="white"] - Text color value.
+     * @param {number} [style.opacity=0.8] - Opacity blended directly into the color channel.
+     * @returns {void}
+     */
+    function createCellNumbers(style = {}) {
+      const targetColor = resolveCellNumberColor(style.color || "white", style.opacity ?? 0.8);
+
+      const css = /* CSS */ `
         #cages_div { position: relative; }
-        #cages > tbody > tr > td { position: relative; }
+        #cages > tbody > tr {
+          counter-reset: cage-col;
+        }
+        #cages > tbody > tr > td {
+          position: relative;
+          counter-increment: cage-col;
+        }
         #cages > tbody > tr > td::after { 
-          content: attr(data-cell-num);
+          content: counter(cage-col);
           position: absolute; 
           z-index: 2;
           top: 5px; 
           right: 5px;
-          color: ${style.color || "#000"}; 
-          opacity: ${style.opacity || 0.4}; 
+          color: ${targetColor};
           font-size: 16px; 
           font-weight: bold;
+          pointer-events: none !important;
+          user-select: none !important;
         }
       `;
 
-      let cagesNums = document.createElement("style");
-      cagesNums.id = "cages_nums";
-      cagesNums.innerHTML = css;
-      document.head.appendChild(cagesNums);
-
-      let table = document.getElementById("cages");
-      if (!table) return;
-      let rows = table.querySelectorAll("tbody > tr");
-      for (let i = 0; i < rows.length; i++) {
-        let cells = rows[i].querySelectorAll("td");
-        for (let j = 0; j < cells.length; j++) {
-          cells[j].setAttribute("data-cell-num", (j + 1).toString());
-        }
+      let cagesNums = document.getElementById("cages_nums");
+      if (!cagesNums) {
+        cagesNums = document.createElement("style");
+        cagesNums.id = "cages_nums";
+        document.head.appendChild(cagesNums);
       }
+      cagesNums.textContent = css;
     }
 
     createCellNumbers({
@@ -13047,20 +13021,29 @@ if (targetCW3.test(window.location.href)) {
           margin: 0;
         }
 
-        #tr_chat > td {
+        #tr_chat.uwu-tile-block {
           padding: 8px;
           border-radius: var(--uwu-tile-rb, 8px);
         }
 
-        #tr_actions > td,
-        #tr_tos > td,
+        #tr_actions,
+        #tr_tos,
         #act {
           box-shadow: unset !important;
         }
 
-        #tr_tos > td,
         #location {
           background-color: unset !important;
+        }
+
+        .uwu-tile-block {
+          display: block !important;
+          position: relative !important;
+          box-sizing: border-box !important;
+        }
+
+        .uwu-dock-zone > .uwu-tile-block {
+          flex: 0 0 auto !important;
         }
 
         /* ===================== BOUNDS ===================== */
@@ -13090,22 +13073,17 @@ if (targetCW3.test(window.location.href)) {
 
         /* ===================== FLEX-TILE DOCK CONTAINER ===================== */
         #main_table {
-          width: 100%;
-          max-width: unset;
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: flex-start !important;
+          gap: var(--uwu-tile-gap, 8px) !important;
+          width: 100% !important;
+          max-width: unset !important;
           border-spacing: 0;
-          margin: 0;
+          margin: 0 !important;
+          padding: var(--uwu-tile-gap, 8px) !important;
+          box-sizing: border-box !important;
           background: transparent !important;
-        }
-
-        #main_table > tbody {
-          display: flex;
-          flex-direction: row;
-          align-items: flex-start;
-          gap: var(--uwu-tile-gap, 8px);
-          width: 100%;
-          margin: 0;
-          padding: var(--uwu-tile-gap, 8px);
-          box-sizing: border-box;
         }
 
         /* Dock Zones (Left & Right columns) */
@@ -13227,12 +13205,6 @@ if (targetCW3.test(window.location.href)) {
           box-sizing: border-box !important;
         }
 
-        .uwu-tile-block > td {
-          display: block;
-          padding: 0;
-          box-sizing: border-box;
-        }
-
         .uwu-tile--w100 { width: 100%; }
         .uwu-tile--w50  { width: calc(50% - (var(--uwu-tile-gap, 8px) / 2)); }
         .uwu-tile--w33  { width: calc(33.333% - (var(--uwu-tile-gap, 8px) * 2 / 3)); }
@@ -13258,15 +13230,8 @@ if (targetCW3.test(window.location.href)) {
           box-sizing: border-box !important;
         }
 
-        #chat_msg table {
-          width: 100% !important;
-          table-layout: auto !important;
-        }
-
         #chat_msg .profile_actions_cell {
-          width: 1% !important;
           white-space: nowrap !important;
-          vertical-align: top !important;
         }
 
         #history_block {
@@ -13481,23 +13446,24 @@ if (targetCW3.test(window.location.href)) {
 
         #tr_actions.uwu-tile-block,
         #tr_mouth.uwu-tile-block,
+        #tr_tos.uwu-tile-block,
         #parameter.uwu-tile-block,
         #history.uwu-tile-block,
         #family.uwu-tile-block {
           padding: 8px;
           height: auto !important;
           border-radius: var(--uwu-tile-rb, 8px);
+          background-color: var(--cw3-page-bg, rgba(var(--ds-info-rgb, 255, 255, 255), 0.55));
+        }
+
+        #app:not(.compact) #tr_tos.uwu-tile-block {
+          background-color: var(--cw3-page-bg, rgba(var(--ds-info-rgb, 255, 255, 255), 0.55));
+          padding: 6px 8px !important;
         }
 
         #tr_chat.uwu-tile-block,
         #tos {
           border-radius: var(--uwu-tile-rb, 8px);
-        }
-
-        #parameter.uwu-tile-block,
-        #history.uwu-tile-block,
-        #family.uwu-tile-block {
-          background-color: var(--cw3-page-bg, rgba(var(--ds-info-rgb, 255, 255, 255), 0.55));
         }
 
         #mix {
@@ -13515,12 +13481,6 @@ if (targetCW3.test(window.location.href)) {
           overflow: hidden !important;
           border-radius: var(--uwu-tile-rb, 8px);
           height: auto !important;
-        }
-
-        #tr_sky.uwu-tile-block > td {
-          padding: 0 !important;
-          width: 100% !important;
-          border-radius: inherit;
         }
 
         #tr_sky.uwu-tile-block #sky {
@@ -13640,12 +13600,12 @@ if (targetCW3.test(window.location.href)) {
     }
 
     /**
-     * Ensures Left, Center, and Right Dock Zones exist inside tbody.
+     * Ensures Left, Center, and Right Dock Zones exist inside #main_table.
      *
-     * @param {HTMLTableSectionElement} tbody - Target table body.
+     * @param {HTMLElement} mainTable - Root #main_table container element.
      * @returns {{ leftZone: HTMLElement, centerZone: HTMLElement, rightZone: HTMLElement }}
      */
-    function ensureDockZones(tbody) {
+    function ensureDockZones(mainTable) {
       let lz = document.getElementById("uwu-dock-left");
       let cz = document.getElementById("uwu-dock-center");
       let rz = document.getElementById("uwu-dock-right");
@@ -13675,8 +13635,8 @@ if (targetCW3.test(window.location.href)) {
         rz.className = "uwu-dock-zone";
       }
 
-      if (tbody.firstChild !== lz) {
-        tbody.prepend(lz);
+      if (mainTable.firstChild !== lz) {
+        mainTable.prepend(lz);
         lz.after(cz);
         cz.after(rz);
       }
@@ -13685,14 +13645,13 @@ if (targetCW3.test(window.location.href)) {
     }
 
     /**
-     * Reads the actual computed border-radius from a block or its main inner <td> element.
+     * Reads the computed border-radius from a tile block element.
      *
-     * @param {HTMLElement} el - Block element (typically <tr>).
+     * @param {HTMLElement} el - Tile block element.
      * @returns {string} Computed border-radius string (e.g., "10px" or "0px").
      */
     function getEffectiveBorderRadius(el) {
-      const target = el.querySelector("td") || el;
-      const radius = getComputedStyle(target).borderRadius;
+      const radius = getComputedStyle(el).borderRadius;
       return radius && radius !== "0px" ? radius : "0px";
     }
 
@@ -13716,13 +13675,13 @@ if (targetCW3.test(window.location.href)) {
       if (!settings.customLayout) return;
 
       uwuCustomLayoutCssManager.enable();
-      const tbody = document.querySelector("#main_table > tbody");
-      if (!tbody) return;
+      const mainTable = document.getElementById("main_table");
+      if (!mainTable) return;
 
       const layout = getLayout();
       uwuCustomLayoutCssManager.applyCompiled(layout);
 
-      const { leftZone, centerZone, rightZone } = ensureDockZones(tbody);
+      const { leftZone, rightZone } = ensureDockZones(mainTable);
 
       leftZone.classList.toggle("uwu-dock-zone--empty", layout.left.length === 0);
       rightZone.classList.toggle("uwu-dock-zone--empty", layout.right.length === 0);
@@ -14686,16 +14645,25 @@ if (targetCW3.test(window.location.href)) {
     uwuCustomLayoutCssManager.applyCompiled(window.uwuHudEditor.getLayout());
 
     setupMutationObserver(
-      "#main_table > tbody",
+      "#main_table",
       () => {
-        const tbody = document.querySelector("#main_table > tbody");
-        if (!tbody) return;
+        const mainTable = document.getElementById("main_table");
+        if (!mainTable) return;
 
-        const hasStrayRows = Array.from(tbody.children).some(
-          (child) => child.tagName === "TR" && child.id !== "tr_field"
+        const hasStrayBlocks = Array.from(mainTable.children).some(
+          (child) =>
+            child.id !== "tr_info" &&
+            !(child.id === "tr_sky" && settings.skyInHeader) &&
+            !child.classList.contains("uwu-dock-zone") &&
+            !child.classList.contains("uwu-dock-center") &&
+            !child.classList.contains("uwu-zone-splitter")
         );
 
-        if (hasStrayRows || !document.getElementById("uwu-dock-left")) {
+        if (
+          hasStrayBlocks ||
+          !document.getElementById("uwu-dock-left") ||
+          document.querySelector("#info_main > .infos")
+        ) {
           window.uwuHudEditor.applyLayout();
         }
       },
@@ -16799,8 +16767,8 @@ if (targetCW3.test(window.location.href)) {
     if (!settings.newChat) return;
 
     const chatForm = document.getElementById("chat_form");
-    const trChatTd = document.querySelector("#tr_chat > td");
-    if (!chatForm || !trChatTd) return;
+    const trChatContainer = document.getElementById("tr_chat");
+    if (!chatForm || !trChatContainer) return;
 
     ensureModernChatStyles();
 
@@ -16816,10 +16784,10 @@ if (targetCW3.test(window.location.href)) {
     chatContainer.style.flexDirection = settings.reverseChat ? "column-reverse" : "column";
 
     if (settings.reverseChat) {
-      trChatTd.appendChild(chatContainer);
-      trChatTd.appendChild(chatForm);
+      trChatContainer.appendChild(chatContainer);
+      trChatContainer.appendChild(chatForm);
     } else {
-      trChatTd.prepend(chatForm);
+      trChatContainer.prepend(chatForm);
       chatForm.after(chatContainer);
     }
 
