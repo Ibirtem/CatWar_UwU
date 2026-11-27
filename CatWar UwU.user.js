@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CatWar UwU
 // @namespace    http://tampermonkey.net/
-// @version      v2.1.0-09.26
+// @version      v2.1.0-11.26
 // @description  Визуальное обновление CatWar'а, и не только...
 // @author       Ibirtem / Затменная ( https://catwar.net/cat1477928 )
 // @copyright    2026, Ibirtem (https://openuserjs.org/users/Ibirtem)
@@ -2121,7 +2121,7 @@ const newsPanel =
           Исправились на новые реали. Редизайны снова работают.</p>
           <p>— Запах снова будет говорить, что "Дичь не найдена", вместо пустого молчания.</p>
           <hr class="uwu-hr" />
-          <p class="uwu-modal-date">Дата выпуска: ??.10.26</p>
+          <p class="uwu-modal-date">Дата выпуска: 27.11.26</p>
         </div>
       </div>
     </div>
