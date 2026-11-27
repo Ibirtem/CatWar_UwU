@@ -2112,7 +2112,8 @@ const newsPanel =
           <p>— Снова всё работает и починено.</p>
           <hr class="uwu-hr" />
           <h4>Внешний вид</h4>
-          <p>— </p>
+          <p>— Кнопка вызыва быстрных настроек UwU теперь более гармонично смотрится.</p>
+          <p>— Починены Свои кастомные цвета Параметров и Навыков.</p>
           <hr class="uwu-hr" />
           <h4>Изменения кода</h4>
           <p>— Возможно, теперь игровая не должна лагать от включённых Нумераций клеток.</p>
@@ -3186,10 +3187,12 @@ details {
 .new-update::before {
   content: "•";
   color: #78c8ff;
-  font-size: 2em;
+  font-size: 1.5em;
+  line-height: 1;
   position: absolute;
-  top: -20px;
-  right: -5px;
+  top: -4px;
+  right: 0;
+  pointer-events: none;
 }
 
 .random-phrase-block {
@@ -3699,34 +3702,18 @@ details {
 
 /* ===================== NAVBAR UWU BUTTON & DROPDOWN ===================== */
 /* ===================== PREMIUM GLASS NAVBAR MENU ===================== */
-.game-topbar-uwu-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: var(--ds-info-text, #ffffff);
-  cursor: pointer;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.25;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+.game-topbar-uwu-link {
+  position: relative;
+  gap: 5px;
   user-select: none;
-  backdrop-filter: blur(8px);
 }
 
-.game-topbar-uwu-btn:hover,
-.game-topbar-uwu-btn.active {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.35);
-  color: #83e5ff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+.game-topbar-uwu-link.active {
+  background: rgba(var(--ds-info-rgb, 255, 255, 255), 0.45);
+  color: var(--ds-primary, #D0B690);
 }
 
-.game-topbar-uwu-btn img {
+.game-topbar-uwu-link img {
   width: 16px;
   height: 16px;
   object-fit: contain;
@@ -8641,7 +8628,7 @@ if (targetCW3.test(window.location.href)) {
   //  . . . РАСШИРЕННЫЕ НАСТРОЙКИ . . .
   // ====================================================================================================================
   /**
-   * Injects the UwU dropdown trigger button into CatWar's top navbar.
+   * Injects the UwU dropdown trigger link into CatWar's top navbar.
    *
    * @returns {void}
    */
@@ -8649,10 +8636,10 @@ if (targetCW3.test(window.location.href)) {
     const nav = document.querySelector(".game-topbar-nav");
     if (!nav || document.getElementById("uwu-navbar-btn")) return;
 
-    const btn = document.createElement("button");
-    btn.type = "button";
+    const btn = document.createElement("a");
+    btn.href = "#";
     btn.id = "uwu-navbar-btn";
-    btn.className = "game-topbar-uwu-btn";
+    btn.className = "game-topbar-uwu-link";
     btn.title = "Меню CatWar UwU";
     btn.innerHTML = `
       <img src="https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/partly_sunny_rain.png" alt="UwU" />
@@ -8763,6 +8750,7 @@ if (targetCW3.test(window.location.href)) {
     });
 
     btn.addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
       const isHidden = popover.style.display === "none";
       popover.style.display = isHidden ? "flex" : "none";
@@ -8771,7 +8759,7 @@ if (targetCW3.test(window.location.href)) {
     });
 
     document.addEventListener("click", (e) => {
-      if (!popover.contains(e.target) && e.target !== btn) {
+      if (!popover.contains(e.target) && !btn.contains(e.target)) {
         popover.style.display = "none";
         btn.classList.remove("active");
       }
@@ -12611,38 +12599,77 @@ if (targetCW3.test(window.location.href)) {
     "https://raw.githubusercontent.com/Ibirtem/CatWar/main/images/parametersBackgroundImageURL.png";
 
   /**
-   * Generates CSS rules for parameter and skill bars.
-   * Disabling scaleX transformations to prevent texture distortion.
-   * catwar i hate ur scaleX styles. pls bring me back my simple width...
+   * Builds CSS background rule for CatWar's `--bar-pct` progress bars.
+   *
+   * @param {string} selector - Target CSS selector for the `.bar` element.
+   * @param {string[]} colors - Four-element array: [fillFrom, fillTo, trackFrom, trackTo].
+   * @param {boolean} useBackgroundImage - Whether to overlay a repeating texture image.
+   * @param {string} backgroundImageURL - Texture image URL.
+   * @returns {string} Compiled CSS rule block.
+   */
+  function buildParameterBarRule(
+    selector,
+    colors,
+    useBackgroundImage,
+    backgroundImageURL,
+  ) {
+    const fillFrom = colors?.[0] || "#008000";
+    const fillTo = colors?.[1] || "#008000";
+    const trackFrom = colors?.[2] || "#cccccc";
+    const trackTo = colors?.[3] || "#cccccc";
+
+    const fillGrad = `linear-gradient(to right, ${fillFrom}, ${fillTo})`;
+    const trackGrad = `linear-gradient(to right, ${trackFrom}, ${trackTo})`;
+
+    if (useBackgroundImage && backgroundImageURL) {
+      return `
+        ${selector} {
+          background-color: transparent !important;
+          background-image: url(${backgroundImageURL}), ${fillGrad}, ${trackGrad} !important;
+          background-repeat: repeat, no-repeat, no-repeat !important;
+          background-position: left top, left top, left top !important;
+          background-size: auto, calc(var(--bar-pct, 0) * 1%) 100%, 100% 100% !important;
+        }\n`;
+    }
+
+    return `
+      ${selector} {
+        background-color: transparent !important;
+        background-image: ${fillGrad}, ${trackGrad} !important;
+        background-repeat: no-repeat, no-repeat !important;
+        background-position: left top, left top !important;
+        background-size: calc(var(--bar-pct, 0) * 1%) 100%, 100% 100% !important;
+      }\n`;
+  }
+
+  /**
+   * Generates CSS rules for parameter and skill bars using CatWar's native `--bar-pct` variable.
    *
    * @returns {string} Compiled CSS stylesheet text.
    */
   function generateParameterStyles() {
     let cssStyles = "";
 
-    const otherColors = settings.parametersColors.other || [
-      "#cccccc",
-      "#cccccc",
-      "#cccccc",
-      "#cccccc",
-    ];
-    const otherFirstCellBackground = `linear-gradient(to right, ${otherColors[0]}, ${otherColors[1]})`;
-    const otherLastCellBackground = `linear-gradient(to right, ${otherColors[2]}, ${otherColors[3]})`;
-
-    cssStyles += `
-      #parameters_skills_block .bar-fill {
-        background: ${otherFirstCellBackground};
-        transform: none !important;
-        transition: width 0.2s ease !important;
-      }\n`;
-    cssStyles += `#parameters_skills_block .bar { background: ${otherLastCellBackground}; }\n`;
-
     const backgroundImageURL = settings.parametersUserBackgroundImage
       ? settings.parametersUserBackgroundImageURL
       : defaultBackgroundImageUrl;
-    const useBackgroundImage =
+    const useBackgroundImage = Boolean(
       settings.parametersBackgroundImage ||
-      settings.parametersUserBackgroundImage;
+        settings.parametersUserBackgroundImage,
+    );
+
+    const otherColors = settings.parametersColors.other || [
+      "#008000",
+      "#008000",
+      "#cccccc",
+      "#cccccc",
+    ];
+    cssStyles += buildParameterBarRule(
+      "#parameters_skills_block .bar",
+      otherColors,
+      useBackgroundImage,
+      backgroundImageURL,
+    );
 
     for (const paramId in settings.parametersColors) {
       if (paramId === "other") continue;
@@ -12654,15 +12681,12 @@ if (targetCW3.test(window.location.href)) {
         "#cccccc",
       ];
 
-      const firstCellBackground = useBackgroundImage
-        ? `url(${backgroundImageURL}), linear-gradient(to right, ${colors[0]}, ${colors[1]})`
-        : `linear-gradient(to right, ${colors[0]}, ${colors[1]})`;
-      const lastCellBackground = useBackgroundImage
-        ? `url(${backgroundImageURL}), linear-gradient(to right, ${colors[2]}, ${colors[3]})`
-        : `linear-gradient(to right, ${colors[2]}, ${colors[3]})`;
-
-      cssStyles += `#${paramId} .bar-fill { background: ${firstCellBackground} !important; }\n`;
-      cssStyles += `#${paramId} .bar { background: ${lastCellBackground} !important; }\n`;
+      cssStyles += buildParameterBarRule(
+        `#${paramId} .bar`,
+        colors,
+        useBackgroundImage,
+        backgroundImageURL,
+      );
     }
 
     return cssStyles;
@@ -12687,72 +12711,9 @@ if (targetCW3.test(window.location.href)) {
     document.head.appendChild(styleTag);
   }
 
-  /**
-   * Synchronizes parameter and skill progress bar widths directly with CatWar's Vue.
-   *
-   * @param {Record<string, { barWidth?: number }>} paramData - The reactive parameter data object from Vue.
-   * @returns {void}
-   */
-  function syncParameterBarWidths(paramData) {
-    if (!paramData || typeof paramData !== "object") return;
-
-    for (const [paramId, data] of Object.entries(paramData)) {
-      if (!data || typeof data.barWidth !== "number") continue;
-
-      const container = document.getElementById(paramId);
-      const barFill = container?.querySelector(".bar-fill");
-      if (barFill) {
-        const targetWidth = `${data.barWidth}%`;
-        if (barFill.style.width !== targetWidth) {
-          barFill.style.width = targetWidth;
-        }
-      }
-    }
-
-    document
-      .querySelectorAll("#parameters_skills_block .bar-fill")
-      .forEach((barFill) => {
-        if (!barFill.style.width && barFill.style.transform) {
-          const match = barFill.style.transform.match(/scaleX\(([\d.]+)\)/);
-          if (match) {
-            barFill.style.width = `${parseFloat(match[1]) * 100}%`;
-          }
-        }
-      });
-  }
-
-  /**
-   * Binds the reactive watcher to Vue's parameter.data once the UI container is mounted.
-   *
-   * @returns {void}
-   */
-  function initParameterBarsWidthSync() {
-    setupSingleCallback("#parameters_skills_block", () => {
-      watchVueData(
-        "parameter.data",
-        (newVal) => {
-          syncParameterBarWidths(newVal);
-        },
-        { deep: true, immediate: true }
-      );
-    });
-  }
-
   if (settings.userParametersTheme) {
     applyParameterColors();
-    initParameterBarsWidthSync();
   }
-
-  function applyParametersTextShadow() {
-    if (settings.parametersTextShadow) {
-      const styleTag = document.createElement("style");
-      styleTag.id = "uwu-parameters-text-shadow-style";
-      styleTag.innerHTML = `#parameters_skills_block .bar-data { text-shadow: 1px 1px 2px black; }\n`;
-      document.head.appendChild(styleTag);
-    }
-  }
-
-  applyParametersTextShadow();
 
   // ====================================================================================================================
   //   . . . ПОЛЬЗОВАТЕЛЬСКИЙ ШРИФТ . . .
