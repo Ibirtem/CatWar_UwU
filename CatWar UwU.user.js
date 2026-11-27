@@ -2119,6 +2119,7 @@ const newsPanel =
           <p>— Возможно, теперь игровая не должна лагать от включённых Нумераций клеток.</p>
           <p>— CatWar поменял table игровую на div, наконец-то. 
           Исправились на новые реали. Редизайны снова работают.</p>
+          <p>— Запах снова будет говорить, что "Дичь не найдена", вместо пустого молчания.</p>
           <hr class="uwu-hr" />
           <p class="uwu-modal-date">Дата выпуска: ??.10.26</p>
         </div>
@@ -18592,102 +18593,135 @@ if (targetCW3Hunt.test(window.location.href)) {
   //   . . . ПОДПИСЫВАТЬ ЗАПАХ . . .
   // ====================================================================================================================
   if (settings.describeHuntingSmell) {
-    const smellElement = document.getElementById("smell");
-    let smellText = null;
-    let smellTimer = null;
-    let previousRed = null;
-    let seconds = 0;
+    /**
+     * Initializes scent distance hints and timer on the #smell indicator.
+     *
+     * @returns {void}
+     */
+    function initHuntingSmellHint() {
+      const smellElement = document.getElementById("smell");
+      if (!smellElement || smellElement.dataset.uwuSmellBound) return;
+      smellElement.dataset.uwuSmellBound = "1";
 
-    function updateHintText(currentRed) {
-      if (currentRed === 0) {
-        smellText.textContent = "Потерян";
-      } else if (previousRed !== null) {
-        if (currentRed > previousRed) {
-          smellText.textContent = "Ближе";
-        } else if (currentRed < previousRed) {
-          smellText.textContent = "Дальше";
+      let smellText = null;
+      let smellTimer = null;
+      let previousRed = null;
+      let seconds = 0;
+      let intervalId = null;
+
+      function updateHintText(currentRed) {
+        if (currentRed === 0) {
+          smellText.textContent = previousRed > 0 ? "Потерян" : "Не учуяна";
+        } else if (previousRed !== null && previousRed !== 0) {
+          if (currentRed > previousRed) {
+            smellText.textContent = "Ближе";
+          } else if (currentRed < previousRed) {
+            smellText.textContent = "Дальше";
+          }
+        } else {
+          smellText.textContent = currentRed > 0 && previousRed === 0 ? "Ближе" : "Учуяна";
         }
-      } else {
-        smellText.textContent = " ";
+        previousRed = currentRed;
       }
-      previousRed = currentRed;
-    }
 
-    function updateTimer() {
-      const minutes = Math.floor(seconds / 60);
-      const remainingSeconds = seconds % 60;
-      smellTimer.textContent = `${String(minutes).padStart(2, "0")}:${String(
-        remainingSeconds
-      ).padStart(2, "0")}`;
-      seconds++;
-    }
+      function updateTimer() {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        smellTimer.textContent = `${String(minutes).padStart(2, "0")}:${String(
+          remainingSeconds
+        ).padStart(2, "0")}`;
+        seconds++;
+      }
 
-    function handleSmellChange() {
-      const style = window.getComputedStyle(smellElement);
-      const currentColor = style.backgroundColor;
+      function handleSmellChange() {
+        const style = window.getComputedStyle(smellElement);
+        const currentColor = style.backgroundColor;
 
-      if (
-        currentColor !== "rgba(0, 0, 0, 0)" &&
-        currentColor !== "transparent"
-      ) {
-        if (!smellText) {
-          smellText = document.createElement("div");
-          smellText.id = "smellText";
-          smellTimer = document.createElement("div");
-          smellTimer.id = "smellTimer";
-          document.body.appendChild(smellText);
-          document.body.appendChild(smellTimer);
+        if (
+          currentColor !== "rgba(0, 0, 0, 0)" &&
+          currentColor !== "transparent"
+        ) {
+          if (!smellText) {
+            smellText = document.createElement("div");
+            smellText.id = "smellText";
+            smellTimer = document.createElement("div");
+            smellTimer.id = "smellTimer";
+            document.body.appendChild(smellText);
+            document.body.appendChild(smellTimer);
 
-          intervalId = setInterval(updateTimer, 1000);
+            updateTimer();
+            intervalId = setInterval(updateTimer, 1000);
+          }
+
+          const currentRed = parseInt(
+            currentColor.slice(
+              currentColor.indexOf("(") + 1,
+              currentColor.indexOf(",")
+            ),
+            10
+          );
+          if (!isNaN(currentRed)) {
+            updateHintText(currentRed);
+          }
         }
-
-        const currentRed = parseInt(
-          currentColor.slice(
-            currentColor.indexOf("(") + 1,
-            currentColor.indexOf(",")
-          )
-        );
-        updateHintText(currentRed);
       }
-    }
 
-    new MutationObserver(handleSmellChange).observe(smellElement, {
-      attributes: true,
-      attributeFilter: ["style"],
-    });
+      new MutationObserver(handleSmellChange).observe(smellElement, {
+        attributes: true,
+        attributeFilter: ["style"],
+      });
+
+      handleSmellChange();
+    }
 
     const describeHuntingSmell = document.createElement("style");
     describeHuntingSmell.innerHTML = /* CSS */ `
-  #smellText {
-    font-size: 20px;
-    background: white;
-    color: black;
-    text-align: center;
-    width: 100px;
-    position: absolute;
-    z-index: 3;
-    bottom: 60px;
-  }
-  
-  #smellTimer {
-    font-size: 18px;
-    background: white;
-    color: black;
-    text-align: center;
-    width: 100px;
-    position: absolute;
-    z-index: 3;
-    bottom: 40px; 
-  }
-  `;
+      #smellText {
+        font-size: 20px;
+        background: white;
+        color: black;
+        text-align: center;
+        min-width: 100px;
+        padding: 0 4px;
+        box-sizing: border-box;
+        position: absolute;
+        z-index: 3;
+        bottom: 60px;
+      }
+
+      #smellTimer {
+        font-size: 18px;
+        background: white;
+        color: black;
+        text-align: center;
+        min-width: 100px;
+        padding: 0 4px;
+        box-sizing: border-box;
+        position: absolute;
+        z-index: 3;
+        bottom: 40px;
+      }
+    `;
     document.head.appendChild(describeHuntingSmell);
+
+    setupSingleCallback("#smell", initHuntingSmellHint);
   }
   // ====================================================================================================================
   //   . . . ВИРТУАЛЬНЫЙ ДЖОЙСТИК . . .
   // ====================================================================================================================
   // Работаем с сайтовым обработчиком нажатий: "//e.catwar.net/js/key.js?268881668"
   if (settings.huntingVirtualJoystick) {
+    /**
+     * Mounts the touch virtual joystick for hunting movement on mobile devices.
+     *
+     * @returns {void}
+     */
     function createJoystick() {
+      const uwuContainer = document.getElementById("uwu-main-container");
+      if (!uwuContainer || document.getElementById("joystick-container")) return;
+
+      const joystickSize = Math.max(60, parseInt(settings.sizeHuntingVirtualJoystick, 10) || 150);
+
       const joystickHTML = `
         <div id="joystick-container">
           <div id="joystick-base">
@@ -18696,7 +18730,6 @@ if (targetCW3Hunt.test(window.location.href)) {
         </div>
       `;
 
-      const uwuContainer = document.getElementById("uwu-main-container");
       uwuContainer.insertAdjacentHTML("beforeend", joystickHTML);
 
       const css =
@@ -18705,35 +18738,37 @@ if (targetCW3Hunt.test(window.location.href)) {
         #nav_buttons_wrapper {
           display: none;
         }
-  
+
         #joystick-container {
           pointer-events: auto;
+          touch-action: none;
           position: fixed;
           bottom: 20px;
           right: 20px;
-          width: ${settings.sizeHuntingVirtualJoystick}px; 
-          height: ${settings.sizeHuntingVirtualJoystick}px;
-          z-index: 10; 
+          width: ${joystickSize}px;
+          height: ${joystickSize}px;
+          z-index: 1000;
         }
-  
+
         #joystick-base {
           width: 100%;
           height: 100%;
           border-radius: 50%;
           background-color: rgba(128, 128, 128, 0.5);
           position: relative;
+          touch-action: none;
         }
-  
+
         #joystick-head {
           position: absolute;
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          width: ${settings.sizeHuntingVirtualJoystick / 2}px;
-          height: ${settings.sizeHuntingVirtualJoystick / 2}px;
+          width: ${joystickSize / 2}px;
+          height: ${joystickSize / 2}px;
           border-radius: 50%;
           background-color: #808080;
-          touch-action: none; 
+          touch-action: none;
         }
       `;
       const style = document.createElement("style");
@@ -18745,10 +18780,10 @@ if (targetCW3Hunt.test(window.location.href)) {
       const baseRadius = joystickContainer.offsetWidth / 2;
       let activeTouchId = null;
       let currentActiveKey = null;
-      let keys = {};
 
       function handleTouchStart(event) {
-        if (activeTouchId === null) {
+        if (activeTouchId === null && event.touches.length > 0) {
+          event.preventDefault();
           const touch = event.touches[0];
           activeTouchId = touch.identifier;
           updateJoystickPosition(touch.clientX, touch.clientY);
@@ -18767,6 +18802,11 @@ if (targetCW3Hunt.test(window.location.href)) {
       }
 
       function handleTouchEnd(event) {
+        const endedActive = Array.from(event.changedTouches || []).some(
+          (t) => t.identifier === activeTouchId
+        );
+        if (!endedActive && activeTouchId !== null) return;
+
         activeTouchId = null;
         resetJoystick();
         if (currentActiveKey) {
@@ -18825,17 +18865,8 @@ if (targetCW3Hunt.test(window.location.href)) {
         joystickHead.style.top = "50%";
       }
 
-      // Оставим на будущее, вдруг пригодится.
-      function releaseAllKeys() {
-        for (const key in keys) {
-          if (keys[key]) {
-            simulateKeyRelease(key);
-            keys[key] = false;
-          }
-        }
-      }
-
       function simulateKeyPress(key) {
+        if (typeof Key === "undefined" || !Key.dict) return;
         const keyCode = Key.dict[key];
         if (keyCode && !Key.keys.includes(keyCode)) {
           Key.push(keyCode);
@@ -18845,6 +18876,7 @@ if (targetCW3Hunt.test(window.location.href)) {
       }
 
       function simulateKeyRelease(key) {
+        if (typeof Key === "undefined" || !Key.dict) return;
         const keyCode = Key.dict[key];
         if (keyCode) {
           const mockEvent = createMockEvent(keyCode);
@@ -18867,8 +18899,8 @@ if (targetCW3Hunt.test(window.location.href)) {
         };
       }
 
-      joystickContainer.addEventListener("touchstart", handleTouchStart);
-      joystickContainer.addEventListener("touchmove", handleTouchMove);
+      joystickContainer.addEventListener("touchstart", handleTouchStart, { passive: false });
+      joystickContainer.addEventListener("touchmove", handleTouchMove, { passive: false });
       joystickContainer.addEventListener("touchend", handleTouchEnd);
       joystickContainer.addEventListener("touchcancel", handleTouchEnd);
 
@@ -18881,7 +18913,7 @@ if (targetCW3Hunt.test(window.location.href)) {
       });
     }
 
-    createJoystick();
+    setupSingleCallback("#uwu-main-container", createJoystick);
   }
   // ====================================================================================================================
 }
